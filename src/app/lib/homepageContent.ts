@@ -1,6 +1,6 @@
 import type { ComponentContent } from "./api";
 
-export type HomepageComponentKey = "home.hero" | "home.features" | "home.turnkeySolutions" | "home.globalPresence";
+export type HomepageComponentKey = "home.hero" | "home.wellnessSection" | "home.features" | "home.turnkeySolutions" | "home.globalPresence";
 
 export type HomeHeroSlide = {
   id: string;
@@ -33,8 +33,25 @@ export type HomeGlobalPresenceStat = {
   label: string;
 };
 
+export type HomeWellnessService = {
+  image: string;
+  title: string;
+  description: string;
+};
+
+export type HomeWellnessData = {
+  welcomeImage: string;
+  eyebrow: string;
+  heading: string;
+  description: string;
+  buttonText: string;
+  buttonHref: string;
+  services: HomeWellnessService[];
+};
+
 export type HomepageData =
   | { slides: HomeHeroSlide[] }
+  | HomeWellnessData
   | { features: HomeFeaturesFeature[] }
   | {
       eyebrow: string;
@@ -58,6 +75,11 @@ export const homepageKeys: { key: HomepageComponentKey; label: string; descripti
     key: "home.hero",
     label: "Home Hero",
     description: "Homepage hero slider with image, title, highlight, buttons, and list items.",
+  },
+  {
+    key: "home.wellnessSection",
+    label: "Wellness Section",
+    description: "Wellness section with welcome text, welcome image, and service cards.",
   },
   {
     key: "home.features",
@@ -98,6 +120,20 @@ export const defaultHomepageData: Record<HomepageComponentKey, HomepageData> = {
         showLutus: false,
         isCenter: false,
       },
+    ],
+  },
+  "home.wellnessSection": {
+    welcomeImage: "",
+    eyebrow: "",
+    heading: "",
+    description: "",
+    buttonText: "",
+    buttonHref: "",
+    services: [
+      { image: "", title: "", description: "" },
+      { image: "", title: "", description: "" },
+      { image: "", title: "", description: "" },
+      { image: "", title: "", description: "" },
     ],
   },
   "home.features": {
@@ -165,6 +201,23 @@ export const validateHomepageContent = (content: Omit<ComponentContent, "_id">) 
       slides.forEach((slide, index) => {
         if (!isNonEmptyString(slide.image)) errors.push(`Slide ${index + 1}: image is required.`);
         if (!isNonEmptyString(slide.title)) errors.push(`Slide ${index + 1}: title is required.`);
+      });
+      break;
+    }
+    case "home.wellnessSection": {
+      const wellness = data as HomeWellnessData;
+      if (!isNonEmptyString(wellness.welcomeImage)) errors.push("Welcome image is required.");
+      if (!isNonEmptyString(wellness.eyebrow)) errors.push("Eyebrow is required.");
+      if (!isNonEmptyString(wellness.heading)) errors.push("Heading is required.");
+      if (!isNonEmptyString(wellness.description)) errors.push("Description is required.");
+      if (!isNonEmptyString(wellness.buttonText)) errors.push("Button text is required.");
+      if (!isNonEmptyString(wellness.buttonHref)) errors.push("Button href is required.");
+      const services = wellness.services || [];
+      if (!services.length) errors.push("At least one service card is required.");
+      services.forEach((service, index) => {
+        if (!isNonEmptyString(service.image)) errors.push(`Service ${index + 1}: image is required.`);
+        if (!isNonEmptyString(service.title)) errors.push(`Service ${index + 1}: title is required.`);
+        if (!isNonEmptyString(service.description)) errors.push(`Service ${index + 1}: description is required.`);
       });
       break;
     }

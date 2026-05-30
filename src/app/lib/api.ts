@@ -1,11 +1,12 @@
 const BASE_API_URL = (
   process.env.NEXT_PUBLIC_API_URL ||
   process.env.NEXT_PUBLIC_API_BASE_URL ||
-  "http://localhost:5000"
+  "http://localhost:4000"
 ).replace(/\/$/, "");
 
 export const API_URL = BASE_API_URL.endsWith("/api/v1") ? BASE_API_URL : `${BASE_API_URL}/api/v1`;
 export const BACKEND_URL = API_URL.replace(/\/api\/v1$/, "");
+
 
 export type Category = {
   _id: string;

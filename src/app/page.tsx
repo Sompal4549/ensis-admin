@@ -178,6 +178,47 @@ const defaultComponentContents: ContentForm[] = [
     ),
   },
   {
+    key: "home.wellnessSection",
+    label: "Wellness Section",
+    page: "home",
+    description: "Wellness section welcome info, welcome image, and services list.",
+    isActive: true,
+    data: JSON.stringify(
+      {
+        welcomeImage: "/uploads/1780037261719-chatgpt-image-may-29-2026-10_39_53-am.png",
+        eyebrow: "Welcome To Ensis",
+        heading: "Where Tradition Meets Transformative Wellness.",
+        description: "At Ensis, we blend ancient Ayurvedic wisdom with exceptional craftsmanship to create timeless wellness solutions for modern lives.",
+        buttonText: "Know More",
+        buttonHref: "/about",
+        services: [
+          {
+            image: "",
+            title: "PANCHAKARMA TABLES",
+            description: "Experience authentic therapies with comfort and precision."
+          },
+          {
+            image: "",
+            title: "SHIRODHARA EQUIPMENTS",
+            description: "Precision-crafted for deep relaxation and mental clarity."
+          },
+          {
+            image: "",
+            title: "STEAM & SAUNA",
+            description: "Detoxify. Rejuvenate. Restore balance naturally."
+          },
+          {
+            image: "",
+            title: "WELLNESS ACCESSORIES",
+            description: "Thoughtful additions for a complete wellness journey."
+          }
+        ]
+      },
+      null,
+      2
+    ),
+  },
+  {
     key: "contact.details",
     label: "Contact Details",
     page: "contact",

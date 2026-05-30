@@ -1,27 +1,27 @@
-"use client"
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import {
-  LayoutDashboard,
-  Megaphone,
-  Zap,
-  Users,
-  Bot,
-  Plug2,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
-  Search,
-  Gift,
-  Bell,
-  Command,
+  Home,
+  ImageUp,
+  Layers,
+  LayoutDashboard,
+  UploadCloud,
 } from "lucide-react";
-
-// ─── Types ────────────────────────────────────────────────────────────────────
 
 interface NavItem {
   label: string;
   path: string;
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
+  children?: Array<{
+    label: string;
+    path: string;
+  }>;
 }
 
 interface SidebarProps {
@@ -42,137 +42,148 @@ interface LayoutProps {
   onNavigate?: (path: string) => void;
 }
 
-// ─── Nav Config ───────────────────────────────────────────────────────────────
-
 const NAV_ITEMS: NavItem[] = [
   {
-    label: "Overview",
-    path: "/overview",
+    label: "Dashboard",
+    path: "/",
     icon: <LayoutDashboard size={18} />,
   },
   {
-    label: "Create campaign",
-    path: "/create-campaign",
-    icon: <Megaphone size={18} />,
+    label: "Home Page",
+    path: "/homepage-content",
+    icon: <Home size={18} />,
+    children: [
+      { label: "Hero", path: "/homepage-content?component=home.hero" },
+      { label: "Wellness Section", path: "/homepage-content?component=home.wellnessSection" },
+      { label: "Full Width Features", path: "/homepage-content?component=home.fullWidthFeatures" },
+      { label: "Products Grid", path: "/homepage-content?component=home.productsGrid" },
+      { label: "Turnkey Solutions", path: "/homepage-content?component=home.turnkeySolutions" },
+      { label: "Room Setups", path: "/homepage-content?component=home.wellnessRoomSetups" },
+      { label: "Manufacturing Projects", path: "/homepage-content?component=home.manufacturingAndProjects" },
+      { label: "Global Presence", path: "/homepage-content?component=home.globalPresence" },
+      { label: "Testimonials", path: "/homepage-content?component=home.testimonials" },
+      { label: "Blog Insights", path: "/homepage-content?component=home.blogInsights" },
+    ],
   },
   {
-    label: "Automation",
-    path: "/automation",
-    icon: <Zap size={18} />,
-  },
-  {
-    label: "Subscriptions",
-    path: "/subscriptions",
-    icon: <Users size={18} />,
-  },
-  {
-    label: "AI Chatbot",
-    path: "/ai-chatbot",
-    icon: <Bot size={18} />,
-  },
-  {
-    label: "Integrations",
-    path: "/integrations",
-    icon: <Plug2 size={18} />,
+    label: "Home Images Upload",
+    path: "/bulk-image-upload?page=home",
+    icon: <ImageUp size={18} />,
+    children: [
+      { label: "Hero Images", path: "/bulk-image-upload?page=home&component=hero" },
+      { label: "Feature Images", path: "/bulk-image-upload?page=home&component=features" },
+      { label: "Turnkey Images", path: "/bulk-image-upload?page=home&component=turnkey" },
+      { label: "Global Presence Image", path: "/bulk-image-upload?page=home&component=globalPresence" },
+    ],
   },
 ];
 
-// ─── Sidebar ──────────────────────────────────────────────────────────────────
-
-export function Sidebar({ activePath = "/overview", onNavigate }: SidebarProps) {
+export function Sidebar({ activePath, onNavigate }: SidebarProps) {
+  const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({
+    "/homepage-content": true,
+  });
+
+  const currentPath = activePath || pathname || "/";
+
+  const handleNavigate = (path: string) => {
+    onNavigate?.(path);
+  };
 
   return (
-    <aside
-      className={`
-        relative flex flex-col min-h-screen bg-white border-r border-gray-100
-        transition-all duration-200 ease-in-out flex-shrink-0
-        ${collapsed ? "w-16" : "w-56"}
-      `}
-    >
-      {/* Logo + collapse toggle */}
-      <div className="flex items-center justify-between px-4 pt-5 pb-3">
+    <aside className={`relative flex min-h-screen flex-shrink-0 flex-col border-r border-gray-100 bg-white transition-all duration-200 ${collapsed ? "w-16" : "w-72"}`}>
+      <div className="flex items-center justify-between px-4 pb-3 pt-5">
         {!collapsed && (
-          <span className="text-[22px] font-bold tracking-tight text-gray-900">
-            emitly
-          </span>
+          <div>
+            <span className="text-[22px] font-bold tracking-tight text-gray-900">Ensis</span>
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-[#8d6a3a]">Admin Panel</p>
+          </div>
         )}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className={`
-            p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600
-            transition-colors cursor-pointer
-            ${collapsed ? "mx-auto" : ""}
-          `}
+          className={`rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 ${collapsed ? "mx-auto" : ""}`}
           aria-label="Toggle sidebar"
         >
           {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
         </button>
       </div>
 
-      {/* Workspace selector */}
       {!collapsed && (
         <div className="mx-3 mb-2">
-          <button className="w-full flex items-center gap-2.5 px-3 py-2.5 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors cursor-pointer">
-            <div className="w-8 h-8 rounded-lg bg-violet-100 flex items-center justify-center text-violet-600 flex-shrink-0">
-              <LayoutDashboard size={15} />
+          <div className="flex w-full items-center gap-2.5 rounded-xl bg-gray-50 px-3 py-2.5">
+            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-[#f3eee6] text-[#6f542f]">
+              <Layers size={15} />
             </div>
-            <div className="flex-1 text-left overflow-hidden">
-              <p className="text-[13px] font-semibold text-gray-900 truncate">
-                My Workspace
-              </p>
-              <span className="text-[10px] font-medium text-violet-500 bg-violet-50 rounded px-1.5 py-0.5 inline-block mt-0.5">
-                Free plan
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-[13px] font-semibold text-gray-900">Frontend Content</p>
+              <span className="mt-0.5 inline-block rounded bg-[#f3eee6] px-1.5 py-0.5 text-[10px] font-medium text-[#6f542f]">
+                Page components
               </span>
             </div>
-            <ChevronDown size={13} className="text-gray-400 flex-shrink-0" />
-          </button>
+          </div>
         </div>
       )}
 
-      {/* Nav items */}
-      <nav className="flex-1 px-2.5 py-2 space-y-0.5">
+      <nav className="flex-1 space-y-0.5 overflow-y-auto px-2.5 py-2">
         {NAV_ITEMS.map((item) => {
-          const isActive = activePath === item.path;
+          const isOpen = openMenus[item.path];
+          const hasChildren = Boolean(item.children?.length);
+          const isActive = currentPath === item.path || (item.path !== "/" && currentPath.startsWith(item.path.split("?")[0]));
+
           return (
-            <button
-              key={item.path}
-              onClick={() => onNavigate?.(item.path)}
-              title={collapsed ? item.label : undefined}
-              className={`
-                w-full flex items-center gap-2.5 rounded-xl text-[13.5px] font-medium
-                transition-colors cursor-pointer
-                ${collapsed ? "justify-center px-0 py-2.5" : "px-3 py-2.5"}
-                ${
-                  isActive
-                    ? "bg-violet-50 text-violet-600"
-                    : "text-gray-500 hover:bg-gray-50 hover:text-gray-800"
-                }
-              `}
-            >
-              <span className="flex-shrink-0">{item.icon}</span>
-              {!collapsed && <span>{item.label}</span>}
-            </button>
+            <div key={item.path}>
+              <div className="flex items-center gap-1">
+                <Link
+                  href={item.path}
+                  onClick={() => handleNavigate(item.path)}
+                  title={collapsed ? item.label : undefined}
+                  className={`flex min-h-10 flex-1 items-center gap-2.5 rounded-xl text-[13.5px] font-medium transition-colors ${
+                    collapsed ? "justify-center px-0 py-2.5" : "px-3 py-2.5"
+                  } ${isActive ? "bg-[#f3eee6] text-[#6f542f]" : "text-gray-500 hover:bg-gray-50 hover:text-gray-800"}`}
+                >
+                  <span className="flex-shrink-0">{item.icon}</span>
+                  {!collapsed && <span className="truncate">{item.label}</span>}
+                </Link>
+                {!collapsed && hasChildren && (
+                  <button
+                    type="button"
+                    onClick={() => setOpenMenus((current) => ({ ...current, [item.path]: !current[item.path] }))}
+                    className="flex h-10 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-50 hover:text-gray-700"
+                    aria-label={`Toggle ${item.label} submenu`}
+                  >
+                    <ChevronDown size={14} className={`transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                  </button>
+                )}
+              </div>
+              {!collapsed && hasChildren && isOpen && (
+                <div className="ml-7 mt-1 space-y-0.5 border-l border-gray-100 pl-2">
+                  {item.children?.map((child) => (
+                    <Link
+                      key={child.path}
+                      href={child.path}
+                      onClick={() => handleNavigate(child.path)}
+                      className="block rounded-lg px-3 py-2 text-[12.5px] font-medium text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-800"
+                    >
+                      {child.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
           );
         })}
       </nav>
 
-      {/* Bottom user */}
       <div className="border-t border-gray-100 px-3 py-3">
-        <div
-          className={`flex items-center gap-2.5 ${collapsed ? "justify-center" : ""}`}
-        >
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-violet-300 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-            JP
+        <div className={`flex items-center gap-2.5 ${collapsed ? "justify-center" : ""}`}>
+          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#6f542f] to-[#b08a52] text-xs font-bold text-white">
+            EA
           </div>
           {!collapsed && (
-            <div className="overflow-hidden">
-              <p className="text-[12.5px] font-semibold text-gray-900 truncate">
-                James Passaquindici
-              </p>
-              <p className="text-[11px] text-gray-400 truncate">
-                jamespass@emi.com
-              </p>
+            <div className="min-w-0">
+              <p className="truncate text-[12.5px] font-semibold text-gray-900">Ensis Admin</p>
+              <p className="truncate text-[11px] text-gray-400">content manager</p>
             </div>
           )}
         </div>
@@ -181,73 +192,36 @@ export function Sidebar({ activePath = "/overview", onNavigate }: SidebarProps) 
   );
 }
 
-// ─── Topbar ───────────────────────────────────────────────────────────────────
-
 export function Topbar({ title = "Dashboard", subtitle }: TopbarProps) {
   return (
-    <header className="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-7 flex-shrink-0">
-      {/* Page title */}
+    <header className="flex h-16 flex-shrink-0 items-center justify-between border-b border-gray-100 bg-white px-7">
       <div>
-        <h1 className="text-[19px] font-bold text-gray-900 leading-tight">
-          {title}
-        </h1>
-        {subtitle && (
-          <p className="text-[12.5px] text-gray-400 mt-0.5">{subtitle}</p>
-        )}
+        <h1 className="text-[19px] font-bold leading-tight text-gray-900">{title}</h1>
+        {subtitle && <p className="mt-0.5 text-[12.5px] text-gray-400">{subtitle}</p>}
       </div>
 
-      {/* Right section */}
       <div className="flex items-center gap-2.5">
-        {/* Search */}
-        <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2">
-          <Search size={14} className="text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search"
-            className="bg-transparent outline-none text-[13px] text-gray-700 placeholder:text-gray-400 w-36"
-          />
-          <div className="flex items-center gap-0.5 ml-1">
-            <kbd className="text-[10px] text-gray-400 bg-gray-200 rounded px-1 py-0.5 font-mono">
-              <Command size={9} className="inline" />
-            </kbd>
-            <kbd className="text-[10px] text-gray-400 bg-gray-200 rounded px-1 py-0.5 font-mono">
-              K
-            </kbd>
-          </div>
-        </div>
-
-        {/* Gift */}
-        <button className="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-500 hover:text-gray-700 transition-colors cursor-pointer">
-          <Gift size={16} />
-        </button>
-
-        {/* Bell */}
-        <button className="relative w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-500 hover:text-gray-700 transition-colors cursor-pointer">
-          <Bell size={16} />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-violet-500 rounded-full border-2 border-white" />
-        </button>
-
-        {/* User */}
-        <button className="flex items-center gap-2 pl-1 pr-3 py-1 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 transition-colors cursor-pointer">
-          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-violet-300 flex items-center justify-center text-white text-[11px] font-bold">
-            JP
+        <Link
+          href="/bulk-image-upload"
+          className="inline-flex h-9 items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 text-[12px] font-semibold text-gray-700 transition-colors hover:bg-gray-50"
+        >
+          <UploadCloud size={15} />
+          Upload Images
+        </Link>
+        <button className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white py-1 pl-1 pr-3 transition-colors hover:bg-gray-50">
+          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-[#6f542f] to-[#b08a52] text-[11px] font-bold text-white">
+            EA
           </div>
           <div className="text-left">
-            <p className="text-[12px] font-semibold text-gray-900 leading-tight">
-              James Passaquindici
-            </p>
-            <p className="text-[10.5px] text-gray-400 leading-tight">
-              ID: 4827682
-            </p>
+            <p className="text-[12px] font-semibold leading-tight text-gray-900">Ensis Admin</p>
+            <p className="text-[10.5px] leading-tight text-gray-400">Content</p>
           </div>
-          <ChevronDown size={13} className="text-gray-400 ml-1" />
+          <ChevronDown size={13} className="ml-1 text-gray-400" />
         </button>
       </div>
     </header>
   );
 }
-
-// ─── Layout ───────────────────────────────────────────────────────────────────
 
 export function CommonLayout({
   children,
@@ -259,27 +233,10 @@ export function CommonLayout({
   return (
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar activePath={activePath} onNavigate={onNavigate} />
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex flex-1 flex-col overflow-hidden">
         <Topbar title={pageTitle} subtitle={pageSubtitle} />
-        <main className="flex-1 p-7 overflow-y-auto">{children}</main>
+        <main className="flex-1 overflow-y-auto p-7">{children}</main>
       </div>
     </div>
   );
 }
-
-// ─── Usage example ────────────────────────────────────────────────────────────
-// Wrap any page like this:
-//
-// import { Layout } from "@/components/Layout";
-//
-// export default function OverviewPage() {
-//   return (
-//     <Layout
-//       activePath="/overview"
-//       pageTitle="Dashboard"
-//       pageSubtitle="Welcome, let's dive into your personalized setup guide."
-//     >
-//       {/* page content */}
-//     </Layout>
-//   );
-// }

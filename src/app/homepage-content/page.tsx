@@ -120,6 +120,7 @@ export default function HomepageContentAdminPage() {
     try {
       const list = await componentContentApi.list();
       setRecords(list);
+      return list;
     } catch (error) {
       setStatusMessage((error as Error).message);
     } finally {
@@ -129,7 +130,20 @@ export default function HomepageContentAdminPage() {
 
   useEffect(() => {
     queueMicrotask(() => {
-      void refresh();
+      void refresh().then((list) => {
+        if (typeof window !== "undefined") {
+          const params = new URLSearchParams(window.location.search);
+          const componentKey = params.get("component");
+          if (componentKey && list) {
+            const found = list.find((rec) => rec.key === componentKey);
+            if (found) {
+              handleSelectRecord(found);
+            } else if (knownKeys.includes(componentKey as any)) {
+              handleKeyChange(componentKey as any);
+            }
+          }
+        }
+      });
     });
   }, []);
 
@@ -340,6 +354,112 @@ export default function HomepageContentAdminPage() {
             </div>
           </div>
         ))}
+      </div>
+    );
+  };
+
+  const renderWellnessSectionEditor = () => {
+    const wellnessData = form.data as {
+      welcomeImage: string;
+      eyebrow: string;
+      heading: string;
+      description: string;
+      buttonText: string;
+      buttonHref: string;
+      services: { image: string; title: string; description: string }[];
+    };
+    return (
+      <div className={cardClass}>
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <div>
+            <div className="text-xs uppercase tracking-[0.24em] text-[#8d6a3a]">Wellness Section</div>
+            <p className="mt-1 text-sm text-[#5f5a50]">Manage welcome info, welcome image, and services list.</p>
+          </div>
+          <button type="button" onClick={() => setData({ ...wellnessData, services: [...(wellnessData.services || []), { image: "", title: "", description: "" }] })} className="inline-flex items-center gap-2 rounded-md bg-[#263016] px-3 py-2 text-xs font-semibold uppercase tracking-wide text-white">
+            <Plus size={14} /> Add Service
+          </button>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          <label className={labelClass}>
+            Eyebrow
+            <input className={`${fieldClass} mt-2`} type="text" value={wellnessData.eyebrow} onChange={(event) => setData({ ...wellnessData, eyebrow: event.target.value })} />
+          </label>
+          <label className={labelClass}>
+            Heading
+            <input className={`${fieldClass} mt-2`} type="text" value={wellnessData.heading} onChange={(event) => setData({ ...wellnessData, heading: event.target.value })} />
+          </label>
+        </div>
+        <label className={labelClass}>
+          Description
+          <textarea className={`${fieldClass} mt-2`} rows={3} value={wellnessData.description} onChange={(event) => setData({ ...wellnessData, description: event.target.value })} />
+        </label>
+        <div className="grid gap-4 md:grid-cols-2">
+          <label className={labelClass}>
+            Button Text
+            <input className={`${fieldClass} mt-2`} type="text" value={wellnessData.buttonText} onChange={(event) => setData({ ...wellnessData, buttonText: event.target.value })} />
+          </label>
+          <label className={labelClass}>
+            Button Href
+            <input className={`${fieldClass} mt-2`} type="text" value={wellnessData.buttonHref} onChange={(event) => setData({ ...wellnessData, buttonHref: event.target.value })} />
+          </label>
+        </div>
+        <ImageUploadField
+          label="Welcome Image"
+          value={wellnessData.welcomeImage}
+          fieldKey="wellness-welcome-image"
+          uploadingField={uploadingField}
+          onUploadingChange={setUploadingField}
+          onError={setStatusMessage}
+          onUpload={(url) => setData({ ...wellnessData, welcomeImage: url })}
+        />
+        
+        <div className="mt-6 border-t border-[#f0e7d8] pt-6">
+          <h3 className="text-sm font-bold uppercase tracking-wider text-[#263016] mb-4">Service Cards</h3>
+          {(wellnessData.services || []).map((service, index) => (
+            <div key={index} className="mb-4 rounded-lg border border-[#f0e7d8] bg-[#faf5ee] p-4">
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <div className="font-semibold text-[#1f261b]">Service Card {index + 1}</div>
+                <div className="flex items-center gap-2">
+                  <button type="button" disabled={index === 0} onClick={() => setData({ ...wellnessData, services: moveArrayItem(wellnessData.services, index, -1) })} className="rounded-md border border-[#d9cdbb] bg-white p-2 disabled:opacity-50">
+                    <ArrowUp size={16} />
+                  </button>
+                  <button type="button" disabled={index === wellnessData.services.length - 1} onClick={() => setData({ ...wellnessData, services: moveArrayItem(wellnessData.services, index, 1) })} className="rounded-md border border-[#d9cdbb] bg-white p-2 disabled:opacity-50">
+                    <ArrowDown size={16} />
+                  </button>
+                  <button type="button" onClick={() => setData({ ...wellnessData, services: wellnessData.services.filter((_, indexToRemove) => indexToRemove !== index) })} className="rounded-md border border-[#e0b4a0] bg-white px-3 py-2 text-sm text-[#9b2e2e]">
+                    Remove
+                  </button>
+                </div>
+              </div>
+              <ImageUploadField
+                label="Service Image"
+                value={service.image}
+                fieldKey={`wellness-service-image-${index}`}
+                uploadingField={uploadingField}
+                onUploadingChange={setUploadingField}
+                onError={setStatusMessage}
+                onUpload={(url) => setData({
+                  ...wellnessData,
+                  services: wellnessData.services.map((item, itemIndex) => (itemIndex === index ? { ...item, image: url } : item))
+                })}
+              />
+              <label className={labelClass}>
+                Title
+                <input className={`${fieldClass} mt-2 mb-3`} type="text" value={service.title} onChange={(event) => setData({
+                  ...wellnessData,
+                  services: wellnessData.services.map((item, itemIndex) => (itemIndex === index ? { ...item, title: event.target.value } : item))
+                })} />
+              </label>
+              <label className={labelClass}>
+                Description
+                <textarea className={`${fieldClass} mt-2`} rows={2} value={service.description} onChange={(event) => setData({
+                  ...wellnessData,
+                  services: wellnessData.services.map((item, itemIndex) => (itemIndex === index ? { ...item, description: event.target.value } : item))
+                })} />
+              </label>
+            </div>
+          ))}
+        </div>
       </div>
     );
   };
@@ -690,6 +810,7 @@ export default function HomepageContentAdminPage() {
                 </label>
 
                 {form.key === "home.hero" && renderHeroEditor()}
+                {form.key === "home.wellnessSection" && renderWellnessSectionEditor()}
                 {form.key === "home.features" && renderFeaturesEditor()}
                 {form.key === "home.turnkeySolutions" && renderTurnkeyEditor()}
                 {form.key === "home.globalPresence" && renderGlobalPresenceEditor()}
