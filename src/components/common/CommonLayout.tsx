@@ -59,43 +59,43 @@ const NAV_ITEMS: NavItem[] = [
         children: [
           {
             label: "Hero",
-            path: "/homepage-content?component=home.hero",
+            path: "/homepage-content/hero",
           },
           {
             label: "Wellness Section",
-            path: "/homepage-content?component=home.wellnessSection",
+            path: "/homepage-content/wellness-section",
           },
           {
             label: "Full Width Features",
-            path: "/homepage-content?component=home.fullWidthFeatures",
+            path: "/homepage-content/full-width-features",
           },
           {
             label: "Products Grid",
-            path: "/homepage-content?component=home.productsGrid",
+            path: "/homepage-content/products-grid",
           },
           {
             label: "Turnkey Solutions",
-            path: "/homepage-content?component=home.turnkeySolutions",
+            path: "/homepage-content/turnkey-solutions",
           },
           {
             label: "Room Setups",
-            path: "/homepage-content?component=home.wellnessRoomSetups",
+            path: "/homepage-content/room-setups",
           },
           {
             label: "Manufacturing Projects",
-            path: "/homepage-content?component=home.manufacturingAndProjects",
+            path: "/homepage-content/manufacturing-projects",
           },
           {
             label: "Global Presence",
-            path: "/homepage-content?component=home.globalPresence",
+            path: "/homepage-content/global-presence",
           },
           {
             label: "Testimonials",
-            path: "/homepage-content?component=home.testimonials",
+            path: "/homepage-content/testimonials",
           },
           {
             label: "Blog Insights",
-            path: "/homepage-content?component=home.blogInsights",
+            path: "/homepage-content/blog-insights",
           },
         ],
       },
@@ -121,7 +121,7 @@ const NAV_ITEMS: NavItem[] = [
     children: [
       {
         label: "Home Images",
-        path: "/bulk-image-upload?page=home",
+        path: "/bulk-image-upload/home",
       },
     ],
   },
