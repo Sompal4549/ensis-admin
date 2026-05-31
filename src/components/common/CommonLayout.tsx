@@ -11,6 +11,7 @@ import {
   ImageUp,
   Layers,
   LayoutDashboard,
+  Search,
   UploadCloud,
 } from "lucide-react";
 
@@ -18,10 +19,7 @@ interface NavItem {
   label: string;
   path: string;
   icon?: React.ReactNode;
-  children?: Array<{
-    label: string;
-    path: string;
-  }>;
+  children?: NavItem[];
 }
 
 interface SidebarProps {
@@ -48,36 +46,165 @@ const NAV_ITEMS: NavItem[] = [
     path: "/",
     icon: <LayoutDashboard size={18} />,
   },
+
   {
-    label: "Home Page",
-    path: "/homepage-content",
-    icon: <Home size={18} />,
+    label: "Pages",
+    path: "/pages",
+    icon: <Layers size={18} />,
     children: [
-      { label: "Hero", path: "/homepage-content?component=home.hero" },
-      { label: "Wellness Section", path: "/homepage-content?component=home.wellnessSection" },
-      { label: "Full Width Features", path: "/homepage-content?component=home.fullWidthFeatures" },
-      { label: "Products Grid", path: "/homepage-content?component=home.productsGrid" },
-      { label: "Turnkey Solutions", path: "/homepage-content?component=home.turnkeySolutions" },
-      { label: "Room Setups", path: "/homepage-content?component=home.wellnessRoomSetups" },
-      { label: "Manufacturing Projects", path: "/homepage-content?component=home.manufacturingAndProjects" },
-      { label: "Global Presence", path: "/homepage-content?component=home.globalPresence" },
-      { label: "Testimonials", path: "/homepage-content?component=home.testimonials" },
-      { label: "Blog Insights", path: "/homepage-content?component=home.blogInsights" },
+      {
+        label: "Home",
+        path: "/homepage-content",
+        icon: <Home size={16} />,
+        children: [
+          {
+            label: "Hero",
+            path: "/homepage-content?component=home.hero",
+          },
+          {
+            label: "Wellness Section",
+            path: "/homepage-content?component=home.wellnessSection",
+          },
+          {
+            label: "Full Width Features",
+            path: "/homepage-content?component=home.fullWidthFeatures",
+          },
+          {
+            label: "Products Grid",
+            path: "/homepage-content?component=home.productsGrid",
+          },
+          {
+            label: "Turnkey Solutions",
+            path: "/homepage-content?component=home.turnkeySolutions",
+          },
+          {
+            label: "Room Setups",
+            path: "/homepage-content?component=home.wellnessRoomSetups",
+          },
+          {
+            label: "Manufacturing Projects",
+            path: "/homepage-content?component=home.manufacturingAndProjects",
+          },
+          {
+            label: "Global Presence",
+            path: "/homepage-content?component=home.globalPresence",
+          },
+          {
+            label: "Testimonials",
+            path: "/homepage-content?component=home.testimonials",
+          },
+          {
+            label: "Blog Insights",
+            path: "/homepage-content?component=home.blogInsights",
+          },
+        ],
+      },
     ],
   },
+
   {
-    label: "Home Images Upload",
-    path: "/bulk-image-upload?page=home",
+    label: "SEO",
+    path: "/seo",
+    icon: <Search size={18} />,
+    children: [
+      {
+        label: "Home SEO",
+        path: "/seo/home",
+      },
+    ],
+  },
+
+  {
+    label: "Media",
+    path: "/media",
     icon: <ImageUp size={18} />,
     children: [
-      { label: "Hero Images", path: "/bulk-image-upload?page=home&component=hero" },
-      { label: "Feature Images", path: "/bulk-image-upload?page=home&component=features" },
-      { label: "Turnkey Images", path: "/bulk-image-upload?page=home&component=turnkey" },
-      { label: "Global Presence Image", path: "/bulk-image-upload?page=home&component=globalPresence" },
+      {
+        label: "Home Images",
+        path: "/bulk-image-upload?page=home",
+      },
     ],
   },
 ];
+function MenuItem({
+  item,
+  level = 0,
+  currentPath,
+  openMenus,
+  setOpenMenus,
+  handleNavigate,
+}: {
+  item: NavItem;
+  level?: number;
+  currentPath: string;
+  openMenus: Record<string, boolean>;
+  setOpenMenus: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
+  handleNavigate: (path: string) => void;
+}) {
+  const hasChildren = !!item.children?.length;
+  const isOpen = openMenus[item.path];
 
+  const isActive =
+    currentPath === item.path ||
+    (item.path !== "/" &&
+      currentPath.startsWith(item.path.split("?")[0]));
+
+  return (
+    <div>
+      <div className="flex items-center gap-1">
+        <Link
+          href={item.path}
+          onClick={() => handleNavigate(item.path)}
+          className={`flex min-h-10 flex-1 items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors ${
+            isActive
+              ? "bg-[#f3eee6] text-[#6f542f]"
+              : "text-gray-600 hover:bg-gray-50"
+          }`}
+          style={{ paddingLeft: `${12 + level * 16}px` }}
+        >
+          {item.icon && <span>{item.icon}</span>}
+          <span>{item.label}</span>
+        </Link>
+
+        {hasChildren && (
+          <button
+            type="button"
+            onClick={() =>
+              setOpenMenus((prev) => ({
+                ...prev,
+                [item.path]: !prev[item.path],
+              }))
+            }
+            className="p-2"
+          >
+            <ChevronDown
+              size={14}
+              className={`transition-transform ${
+                isOpen ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+        )}
+      </div>
+
+      {hasChildren && isOpen && (
+        <div className="ml-2 border-l border-gray-100">
+          {item.children!.map((child) => (
+            <MenuItem
+              key={child.path}
+              item={child}
+              level={level + 1}
+              currentPath={currentPath}
+              openMenus={openMenus}
+              setOpenMenus={setOpenMenus}
+              handleNavigate={handleNavigate}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 export function Sidebar({ activePath, onNavigate }: SidebarProps) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
@@ -126,53 +253,16 @@ export function Sidebar({ activePath, onNavigate }: SidebarProps) {
       )}
 
       <nav className="flex-1 space-y-0.5 overflow-y-auto px-2.5 py-2">
-        {NAV_ITEMS.map((item) => {
-          const isOpen = openMenus[item.path];
-          const hasChildren = Boolean(item.children?.length);
-          const isActive = currentPath === item.path || (item.path !== "/" && currentPath.startsWith(item.path.split("?")[0]));
-
-          return (
-            <div key={item.path}>
-              <div className="flex items-center gap-1">
-                <Link
-                  href={item.path}
-                  onClick={() => handleNavigate(item.path)}
-                  title={collapsed ? item.label : undefined}
-                  className={`flex min-h-10 flex-1 items-center gap-2.5 rounded-xl text-[13.5px] font-medium transition-colors ${
-                    collapsed ? "justify-center px-0 py-2.5" : "px-3 py-2.5"
-                  } ${isActive ? "bg-[#f3eee6] text-[#6f542f]" : "text-gray-500 hover:bg-gray-50 hover:text-gray-800"}`}
-                >
-                  <span className="flex-shrink-0">{item.icon}</span>
-                  {!collapsed && <span className="truncate">{item.label}</span>}
-                </Link>
-                {!collapsed && hasChildren && (
-                  <button
-                    type="button"
-                    onClick={() => setOpenMenus((current) => ({ ...current, [item.path]: !current[item.path] }))}
-                    className="flex h-10 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-50 hover:text-gray-700"
-                    aria-label={`Toggle ${item.label} submenu`}
-                  >
-                    <ChevronDown size={14} className={`transition-transform ${isOpen ? "rotate-180" : ""}`} />
-                  </button>
-                )}
-              </div>
-              {!collapsed && hasChildren && isOpen && (
-                <div className="ml-7 mt-1 space-y-0.5 border-l border-gray-100 pl-2">
-                  {item.children?.map((child) => (
-                    <Link
-                      key={child.path}
-                      href={child.path}
-                      onClick={() => handleNavigate(child.path)}
-                      className="block rounded-lg px-3 py-2 text-[12.5px] font-medium text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-800"
-                    >
-                      {child.label}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })}
+       {NAV_ITEMS.map((item) => (
+  <MenuItem
+    key={item.path}
+    item={item}
+    currentPath={currentPath}
+    openMenus={openMenus}
+    setOpenMenus={setOpenMenus}
+    handleNavigate={handleNavigate}
+  />
+))}
       </nav>
 
       <div className="border-t border-gray-100 px-3 py-3">
