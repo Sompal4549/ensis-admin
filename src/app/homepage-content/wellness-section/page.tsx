@@ -1,9 +1,5 @@
-import ComponentEditor from "@/components/common/ComponentEditor";
-export default function WellnessSectionPage() {
-  return (
-    <ComponentEditor
-      componentKey="home.wellnessSection"
-      title="Wellness Section"
-    />
-  );
+import WellnessEditor from "@/components/common/WellnessEditor";
+
+export default function WellnessPage() {
+  return <WellnessEditor />;
 }

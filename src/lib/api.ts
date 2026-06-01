@@ -131,6 +131,42 @@ export const componentContentApi = {
     request<ComponentContent>(`/component-content/${id}`, { method: 'PUT', body: JSON.stringify(payload) }),
   remove: (id: string) => request<null>(`/component-content/${id}`, { method: 'DELETE' }),
 };
+export type PageData = {
+  _id: string;
+  pageName: string;
+  slug: string;
+  seo: {
+    metaTitle: string;
+    metaDescription: string;
+    metaKeywords?: string;
+    h1: string;
+    canonical?: string;
+    ogTitle?: string;
+    ogDescription?: string;
+    ogImage?: string;
+  };
+  advanceSeo?: {
+    headCode?: string;
+    bodyCode?: string;
+  };
+  robots?: string;
+  faqs?: Array<{ question: string; answer: string }>;
+}
+
+export const pageApi = {
+    // Backend handles 'home' as '/'
+    get: (slug: string) => request<PageData>(`/pages/${slug}`),
+    
+    create: (payload: any) => request('/pages', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+    }),
+    
+    update: (id: string, payload: Partial<PageData>) => request(`/pages/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(payload)
+    })
+};
 
 export const apiClient = {
   get: <T>(path: string) => request<T>(path),

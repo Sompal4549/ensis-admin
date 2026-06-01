@@ -6,7 +6,7 @@ import RichTextEditor from "@/components/common/RichTextEditor";
 import {
   componentContentApi,
   type ComponentContent,
-} from "@/app/lib/api";
+} from "@/lib/api";
 
 interface ComponentEditorProps {
   componentKey: string;

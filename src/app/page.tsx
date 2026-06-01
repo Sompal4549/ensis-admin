@@ -14,7 +14,7 @@ import {
   type Category,
   type ComponentContent,
   type Product,
-} from "@/app/lib/api";
+} from "@/lib/api";
 
 type ProductForm = {
   id?: string;

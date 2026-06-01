@@ -1,9 +1,5 @@
-import ComponentEditor from "@/components/common/ComponentEditor";
+import HeroEditor from "@/components/common/HeroEditor";
+
 export default function HeroPage() {
-  return (
-    <ComponentEditor
-      componentKey="home.hero"
-      title="Hero Section"
-    />
-  );
+  return <HeroEditor />;
 }
