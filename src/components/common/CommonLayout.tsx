@@ -61,6 +61,10 @@ const NAV_ITEMS: NavItem[] = [
             label: "Hero",
             path: "/homepage-content/hero",
           },
+           {
+            label: "Features",
+            path: "/homepage-content/features",
+          },
           {
             label: "Wellness Section",
             path: "/homepage-content/wellness-section",
