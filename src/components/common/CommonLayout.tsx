@@ -111,6 +111,10 @@ const NAV_ITEMS: NavItem[] = [
         label: "Home SEO",
         path: "/seo/home",
       },
+        {
+        label: "About SEO",
+        path: "/seo/about",
+      },
     ],
   },
 
@@ -120,8 +124,16 @@ const NAV_ITEMS: NavItem[] = [
     icon: <ImageUp size={18} />,
     children: [
       {
+        label: "All Images",
+        path: "/all-media",
+      },
+      {
         label: "Home Images",
-        path: "/bulk-image-upload/home",
+        path: "/media/home",
+      },
+         {
+        label: "About Images",
+        path: "/media/about",
       },
     ],
   },

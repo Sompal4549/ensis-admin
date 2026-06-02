@@ -1,11 +1,13 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { Save } from "lucide-react";
-import { pageApi, type PageData } from "@/lib/api";
+import { Save, ImagePlus, Loader2 } from "lucide-react";
+// Correctly importing the exported member and function
+import { pageApi, type PageData, uploadImage, getImageUrl } from "@/lib/api";
 
 const fieldClass = "w-full rounded-md border border-[#d9cdbb] bg-white px-3 py-2 text-sm outline-none focus:border-[#8d6a3a]";
 const labelClass = "block text-xs font-bold uppercase tracking-wide text-[#5f5a50]";
+const optionalSeoFields = ["metaKeywords", "canonical", "ogTitle", "ogDescription", "ogImage"] as const;
 
 interface SEOEditorProps {
   slug: string;
@@ -16,6 +18,7 @@ export default function SEOEditor({ slug, title }: SEOEditorProps) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [pageData, setPageData] = useState<PageData | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   const [form, setForm] = useState({
     pageName: "",
@@ -37,7 +40,7 @@ export default function SEOEditor({ slug, title }: SEOEditorProps) {
       setLoading(true);
       // Slug 'home' is handled as '/' in your backend logic
       const data = await pageApi.get(slug);
-      if (data) {
+      if (data && Object.keys(data).length > 0) {
         setPageData(data);
         setForm({
           pageName: data.pageName || "",
@@ -54,8 +57,8 @@ export default function SEOEditor({ slug, title }: SEOEditorProps) {
           robots: data.robots || "index, follow",
         });
       }
-    } catch (error) {
-      setMessage((error as Error).message);
+    } catch (error: any) {
+      setMessage(error.message);
     } finally {
       setLoading(false);
     }
@@ -63,24 +66,64 @@ export default function SEOEditor({ slug, title }: SEOEditorProps) {
 
   useEffect(() => { loadData(); }, [slug]);
 
+  const handleOgImageUpload = async (file: File) => {
+    try {
+      setUploading(true);
+      const url = await uploadImage(file);
+      setForm({ ...form, seo: { ...form.seo, ogImage: url } });
+    } catch (error: any) {
+      setMessage(error.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
       setLoading(true);
-      setMessage("Saving...");
+      setMessage("");
+
+      const seoPayload: PageData["seo"] = {
+        metaTitle: form.seo.metaTitle.trim(),
+        metaDescription: form.seo.metaDescription.trim(),
+        h1: form.seo.h1.trim(),
+      };
+
+      optionalSeoFields.forEach((field) => {
+        const value = form.seo[field]?.trim();
+        if (value) {
+          seoPayload[field] = value;
+        }
+      });
+
+      const payload = {
+        ...form,
+        pageName: form.pageName.trim(),
+        seo: seoPayload,
+      };
+
+      if (payload.seo.metaTitle.length > 65) {
+        setMessage("Meta Title should not exceed 65 characters");
+        return;
+      }
+
+      if (payload.seo.metaDescription.length > 155) {
+        setMessage("Meta Description should not exceed 155 characters");
+        return;
+      }
       
       if (pageData) {
-        await pageApi.update(pageData._id, form);
+        await pageApi.update(pageData._id, payload);
         setMessage("SEO settings updated successfully!");
       } else {
         // Handle creation if it doesn't exist yet
-        const payload = { ...form, slug };
-        await pageApi.create(payload);
+        await pageApi.create({ ...payload, slug: slug === 'home' ? '/' : slug });
         setMessage("SEO page created and settings saved!");
         loadData();
       }
-    } catch (error) {
-      setMessage((error as Error).message);
+    } catch (error: any) {
+      setMessage(error.message);
     } finally {
       setLoading(false);
     }
@@ -118,7 +161,24 @@ export default function SEOEditor({ slug, title }: SEOEditorProps) {
           <h2 className="text-sm font-bold uppercase text-[#8d6a3a] mb-4 border-b pb-2">Open Graph (Social)</h2>
           <div className="grid gap-4 md:grid-cols-2">
             <label className={labelClass}>OG Title <input className={`${fieldClass} mt-2`} value={form.seo.ogTitle} onChange={(e) => setForm({...form, seo: {...form.seo, ogTitle: e.target.value}})} /></label>
-            <label className={labelClass}>OG Image URL <input className={`${fieldClass} mt-2`} value={form.seo.ogImage} onChange={(e) => setForm({...form, seo: {...form.seo, ogImage: e.target.value}})} /></label>
+            <div>
+              <label className={labelClass}>Social Sharing Image (OG Image)</label>
+              <div className="mt-2 flex items-center gap-4">
+                {form.seo.ogImage && (
+                  <img 
+                    src={getImageUrl(form.seo.ogImage)} 
+                    alt="OG Preview" 
+                    crossOrigin="anonymous"
+                    className="h-12 w-20 object-cover rounded border" 
+                  />
+                )}
+                <label className="cursor-pointer flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-md border border-dashed border-gray-300 text-sm">
+                  {uploading ? <Loader2 className="animate-spin" size={16} /> : <ImagePlus size={16} />}
+                  {form.seo.ogImage ? "Change" : "Upload"}
+                  <input type="file" className="hidden" accept="image/*" onChange={(e) => e.target.files?.[0] && handleOgImageUpload(e.target.files[0])} />
+                </label>
+              </div>
+            </div>
           </div>
           <label className={labelClass}>OG Description <textarea className={`${fieldClass} mt-2 h-20`} value={form.seo.ogDescription} onChange={(e) => setForm({...form, seo: {...form.seo, ogDescription: e.target.value}})} /></label>
         </section>

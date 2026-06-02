@@ -38,6 +38,11 @@ export type ComponentContent = {
   isActive: boolean;
 };
 
+export type MediaFile = {
+  name: string;
+  url: string;
+};
+
 export type AuthUser = {
   _id: string;
   name: string;
@@ -175,13 +180,21 @@ export const apiClient = {
   delete: <T>(path: string) => request<T>(path, { method: 'DELETE' }),
 };
 
-export const uploadImage = async (file: File) => {
+export const mediaApi = {
+  list: (subDir: string = "") => {
+    const query = subDir ? `?subDir=${encodeURIComponent(subDir)}` : "";
+    return request<MediaFile[]>(`/uploads/list${query}`);
+  }
+};
+
+export const uploadImage = async (file: File, subDir: string = "") => {
   const token = authStore.getToken();
   const headers = new Headers();
   if (token) headers.set('Authorization', `Bearer ${token}`);
 
   const formData = new FormData();
   formData.append('file', file);
+  formData.append('subDir', subDir);
 
   const response = await fetch(`${API_URL}/uploads`, {
     method: 'POST',
