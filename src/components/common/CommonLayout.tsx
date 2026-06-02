@@ -61,10 +61,6 @@ const NAV_ITEMS: NavItem[] = [
             label: "Hero",
             path: "/homepage-content/hero",
           },
-           {
-            label: "Features",
-            path: "/homepage-content/features",
-          },
           {
             label: "Wellness Section",
             path: "/homepage-content/wellness-section",
@@ -118,6 +114,22 @@ const NAV_ITEMS: NavItem[] = [
         {
         label: "About SEO",
         path: "/seo/about",
+      },
+         {
+        label: "Products SEO",
+        path: "/seo/products",
+      },
+         {
+        label: "Turnkey SEO",
+        path: "/seo/turnkey",
+      },
+   {
+        label: "Blog SEO",
+        path: "/seo/blog",
+      },
+       {
+        label: "Contact SEO",
+        path: "/seo/contact",
       },
     ],
   },

@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { ArrowDown, ArrowUp, ImagePlus, Loader2, Plus, RefreshCw, Save, Trash2 } from "lucide-react";
+import RichTextEditor from "@/components/common/RichTextEditor";
 import { getImageUrl, uploadImage } from "@/lib/api";
 import { type HomepageComponentKey, type HomepageData } from "@/lib/homepageContent";
 import { HomepageContentProvider, useHomepageContent } from "./HomepageContentContext";
@@ -72,7 +73,17 @@ const emptyFromSample = (sample: EditableValue): EditableValue => {
 
 const isImageField = (path: Array<string | number>) => {
   const name = String(path[path.length - 1] || "").toLowerCase();
-  return name === "image" || name === "imgurl" || name.includes("image");
+  return (
+    name === "image" || 
+    name === "imgurl" || 
+    /^mfgimage[1-3]$/i.test(name) || 
+    /^projimage[1-5]$/i.test(name)
+  );
+};
+
+const isRichTextField = (path: Array<string | number>) => {
+  const name = String(path[path.length - 1] || "").toLowerCase();
+  return ["description", "desc", "text"].includes(name);
 };
 
 function ImageField({
@@ -202,6 +213,21 @@ function StructuredField({
   }
 
   const stringValue = String(value ?? "");
+
+  if (isRichTextField(path)) {
+    return (
+      <div className="space-y-2">
+        <label className={labelClass}>{label}</label>
+        <RichTextEditor
+          value={stringValue}
+          onChange={setPathValue}
+          placeholder={`Enter ${label}...`}
+          minHeight="200px"
+        />
+      </div>
+    );
+  }
+
   const isLong = ["description", "desc", "text", "heading", "tagline", "address", "copyright"].includes(String(path[path.length - 1]).toLowerCase()) || stringValue.length > 90;
 
   return (
