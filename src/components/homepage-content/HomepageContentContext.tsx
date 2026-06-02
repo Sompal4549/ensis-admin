@@ -100,7 +100,13 @@ export function HomepageContentProvider({
       data: form.data,
     };
 
-    const nextErrors = validateHomepageContent(payload);
+    let nextErrors = validateHomepageContent(payload);
+    
+    // Remove "Heading is required" error for Full Width Features components as they don't use a top-level heading
+    if (componentKey === "home.fullWidthFeatures" || componentKey === "home.features") {
+      nextErrors = nextErrors.filter((err) => err !== "Heading is required.");
+    }
+
     if (nextErrors.length) {
       setErrors(nextErrors);
       setLoading(false);

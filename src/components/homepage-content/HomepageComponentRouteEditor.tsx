@@ -81,6 +81,9 @@ const isImageField = (path: Array<string | number>) => {
     return (
       normalized === "image" ||
       normalized === "imgurl" ||
+      normalized === "welcomeimage" ||
+      normalized === "backgroundimage" ||
+      normalized === "ctabgimage" ||
       normalized === "mfgimages" ||
       normalized === "projimages" ||
       /^mfgimage[1-3]$/.test(normalized) ||

@@ -197,7 +197,13 @@ export default function HomepageContentAdminPage() {
       data: form.data,
     };
 
-    const validationErrors = validateHomepageContent(payload);
+    let validationErrors = validateHomepageContent(payload);
+    
+    // Filter out Heading requirement for Features components
+    if (form.key === "home.fullWidthFeatures" || form.key === "home.features") {
+      validationErrors = validationErrors.filter((err) => err !== "Heading is required.");
+    }
+
     if (validationErrors.length) {
       setErrors(validationErrors);
       return;
