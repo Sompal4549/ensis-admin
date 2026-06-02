@@ -72,18 +72,43 @@ const emptyFromSample = (sample: EditableValue): EditableValue => {
 };
 
 const isImageField = (path: Array<string | number>) => {
-  const name = String(path[path.length - 1] || "").toLowerCase();
-  return (
-    name === "image" || 
-    name === "imgurl" || 
-    /^mfgimage[1-3]$/i.test(name) || 
-    /^projimage[1-5]$/i.test(name)
-  );
+  const last = path[path.length - 1];
+  const name = String(last || "").toLowerCase();
+  const parentName = path.length > 1 ? String(path[path.length - 2] || "").toLowerCase() : "";
+
+  const check = (key: string) => {
+    const normalized = key.replace(/[^a-z0-9]/g, "");
+    return (
+      normalized === "image" ||
+      normalized === "imgurl" ||
+      normalized === "mfgimages" ||
+      normalized === "projimages" ||
+      /^mfgimage[1-3]$/.test(normalized) ||
+      /^projimage[1-5]$/.test(normalized)
+    );
+  };
+
+  if (typeof last === "number") return check(parentName);
+  return check(name);
 };
 
 const isRichTextField = (path: Array<string | number>) => {
-  const name = String(path[path.length - 1] || "").toLowerCase();
-  return ["description", "desc", "text"].includes(name);
+  const last = path[path.length - 1];
+  const name = String(last || "").toLowerCase();
+  const parentName = path.length > 1 ? String(path[path.length - 2] || "").toLowerCase() : "";
+
+  const check = (key: string) => {
+    const normalized = key.replace(/[^a-z0-9]/g, "");
+    return (
+      normalized.includes("description") ||
+      normalized.includes("desc") ||
+      normalized.includes("text") ||
+      normalized.includes("content")
+    );
+  };
+
+  if (typeof last === "number") return check(parentName);
+  return check(name);
 };
 
 function ImageField({
@@ -228,7 +253,11 @@ function StructuredField({
     );
   }
 
-  const isLong = ["description", "desc", "text", "heading", "tagline", "address", "copyright"].includes(String(path[path.length - 1]).toLowerCase()) || stringValue.length > 90;
+  const lastKey = String(path[path.length - 1] || "").toLowerCase();
+  const isLong =
+    ["description", "desc", "text", "content", "heading", "tagline", "address", "copyright"].some((k) =>
+      lastKey.includes(k)
+    ) || stringValue.length > 90;
 
   return (
     <label className={labelClass}>
