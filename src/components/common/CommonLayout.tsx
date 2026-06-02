@@ -17,7 +17,7 @@ import {
 
 interface NavItem {
   label: string;
-  path: string;
+  path?: string;
   icon?: React.ReactNode;
   children?: NavItem[];
 }
@@ -49,7 +49,7 @@ const NAV_ITEMS: NavItem[] = [
 
   {
     label: "Pages",
-    path: "/pages",
+    // path: "/pages",
     icon: <Layers size={18} />,
     children: [
       {
@@ -170,29 +170,38 @@ function MenuItem({
   handleNavigate: (path: string) => void;
 }) {
   const hasChildren = !!item.children?.length;
-  const isOpen = openMenus[item.path];
+  const menuKey = item.path || item.label;
+  const isOpen = openMenus[menuKey];
 
   const isActive =
-    currentPath === item.path ||
-    (item.path !== "/" &&
-      currentPath.startsWith(item.path.split("?")[0]));
+    !!item.path &&
+    (currentPath === item.path ||
+      (item.path !== "/" && currentPath.startsWith(item.path.split("?")[0])));
 
   return (
     <div>
       <div className="flex items-center gap-1">
-        <Link
-          href={item.path}
-          onClick={() => handleNavigate(item.path)}
-          className={`flex min-h-10 flex-1 items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors ${
-            isActive
-              ? "bg-[#f3eee6] text-[#6f542f]"
-              : "text-gray-600 hover:bg-gray-50"
-          }`}
-          style={{ paddingLeft: `${12 + level * 16}px` }}
-        >
-          {item.icon && <span>{item.icon}</span>}
-          <span>{item.label}</span>
-        </Link>
+        {item.path ? (
+          <Link
+            href={item.path}
+            onClick={() => handleNavigate(item.path!)}
+            className={`flex min-h-10 flex-1 items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors ${
+              isActive ? "bg-[#f3eee6] text-[#6f542f]" : "text-gray-600 hover:bg-gray-50"
+            }`}
+            style={{ paddingLeft: `${12 + level * 16}px` }}
+          >
+            {item.icon && <span>{item.icon}</span>}
+            <span>{item.label}</span>
+          </Link>
+        ) : (
+          <div
+            className="flex min-h-10 flex-1 items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-600 cursor-default"
+            style={{ paddingLeft: `${12 + level * 16}px` }}
+          >
+            {item.icon && <span>{item.icon}</span>}
+            <span>{item.label}</span>
+          </div>
+        )}
 
         {hasChildren && (
           <button
@@ -200,7 +209,7 @@ function MenuItem({
             onClick={() =>
               setOpenMenus((prev) => ({
                 ...prev,
-                [item.path]: !prev[item.path],
+                [menuKey]: !prev[menuKey],
               }))
             }
             className="p-2"
@@ -219,7 +228,7 @@ function MenuItem({
         <div className="ml-2 border-l border-gray-100">
           {item.children!.map((child) => (
             <MenuItem
-              key={child.path}
+              key={child.label}
               item={child}
               level={level + 1}
               currentPath={currentPath}
@@ -283,7 +292,7 @@ export function Sidebar({ activePath, onNavigate }: SidebarProps) {
       <nav className="flex-1 space-y-0.5 overflow-y-auto px-2.5 py-2">
        {NAV_ITEMS.map((item) => (
   <MenuItem
-    key={item.path}
+    key={item.label}
     item={item}
     currentPath={currentPath}
     openMenus={openMenus}
