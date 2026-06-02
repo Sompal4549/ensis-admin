@@ -125,7 +125,7 @@ const NAV_ITEMS: NavItem[] = [
     children: [
       {
         label: "All Images",
-        path: "/all-media",
+        path: "/media/all-media",
       },
       {
         label: "Home Images",

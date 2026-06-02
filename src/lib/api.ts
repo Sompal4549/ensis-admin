@@ -1,3 +1,5 @@
+import axios, { AxiosRequestConfig, InternalAxiosRequestConfig } from "axios";
+
 const BASE_API_URL = (
   process.env.NEXT_PUBLIC_API_URL ||
   process.env.NEXT_PUBLIC_API_BASE_URL ||
@@ -83,29 +85,41 @@ export const getImageUrl = (image?: string) => {
   return `${BACKEND_URL}${image.startsWith("/") ? image : `/${image}`}`;
 };
 
-const request = async <T>(path: string, options: RequestInit = {}) => {
-  const token = authStore.getToken();
-  const headers = new Headers(options.headers);
-  if (!headers.has("Content-Type") && options.body) headers.set("Content-Type", "application/json");
-  if (token) headers.set("Authorization", `Bearer ${token}`);
+const apiClientInstance = axios.create({
+  baseURL: API_URL,
+  withCredentials: true,
+});
 
-  const response = await fetch(`${API_URL}${path}`, {
-    ...options,
-    headers,
-    credentials: "include",
-  });
-  const payload = (await response.json()) as ApiEnvelope<T>;
-  if (!response.ok || payload.status === "error") {
-    throw new Error(payload.message || "API request failed");
+apiClientInstance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+  const token = authStore.getToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
-  return payload.data;
+  return config;
+});
+
+const request = async <T>(path: string, options: AxiosRequestConfig = {}) => {
+  try {
+    const response = await apiClientInstance.request<ApiEnvelope<T>>({
+      url: path,
+      ...options,
+    });
+    const payload = response.data;
+    if (payload.status === "error") {
+      throw new Error(payload.message || "API request failed");
+    }
+    return payload.data;
+  } catch (error: any) {
+    const message = error.response?.data?.message || error.message || "API request failed";
+    throw new Error(message);
+  }
 };
 
 export const adminApi = {
   login: (email: string, password: string) =>
     request<{ user: AuthUser; accessToken: string }>("/admin/login", {
       method: "POST",
-      body: JSON.stringify({ email, password }),
+      data: { email, password },
     }),
   dashboard: () => request<Record<string, unknown>>("/admin/dashboard"),
 };
@@ -113,17 +127,17 @@ export const adminApi = {
 export const categoryApi = {
   list: () => request<Category[]>("/categories"),
   create: (payload: Pick<Category, "name" | "description">) =>
-    request<Category>("/categories", { method: "POST", body: JSON.stringify(payload) }),
+    request<Category>("/categories", { method: "POST", data: payload }),
   update: (id: string, payload: Pick<Category, "name" | "description">) =>
-    request<Category>(`/categories/${id}`, { method: "PUT", body: JSON.stringify(payload) }),
+    request<Category>(`/categories/${id}`, { method: "PUT", data: payload }),
   remove: (id: string) => request<null>(`/categories/${id}`, { method: "DELETE" }),
 };
 
 export const productApi = {
   list: () => request<{ products: Product[]; total: number; page: number; limit: number }>("/products?limit=100"),
-  create: (payload: Partial<Product>) => request<Product>("/products", { method: "POST", body: JSON.stringify(payload) }),
+  create: (payload: Partial<Product>) => request<Product>("/products", { method: "POST", data: payload }),
   update: (id: string, payload: Partial<Product>) =>
-    request<Product>(`/products/${id}`, { method: "PUT", body: JSON.stringify(payload) }),
+    request<Product>(`/products/${id}`, { method: "PUT", data: payload }),
   remove: (id: string) => request<null>(`/products/${id}`, { method: "DELETE" }),
 };
 
@@ -131,9 +145,9 @@ export const componentContentApi = {
   list: () => request<ComponentContent[]>('/component-content?includeInactive=true'),
   getByKey: (key: string) => request<ComponentContent>(`/component-content/${encodeURIComponent(key)}`),
   create: (payload: Omit<ComponentContent, '_id'>) =>
-    request<ComponentContent>('/component-content', { method: 'POST', body: JSON.stringify(payload) }),
+    request<ComponentContent>('/component-content', { method: 'POST', data: payload }),
   update: (id: string, payload: Partial<ComponentContent>) =>
-    request<ComponentContent>(`/component-content/${id}`, { method: 'PUT', body: JSON.stringify(payload) }),
+    request<ComponentContent>(`/component-content/${id}`, { method: 'PUT', data: payload }),
   remove: (id: string) => request<null>(`/component-content/${id}`, { method: 'DELETE' }),
 };
 export type PageData = {
@@ -164,19 +178,19 @@ export const pageApi = {
     
     create: (payload: any) => request('/pages', {
         method: 'POST',
-        body: JSON.stringify(payload)
+        data: payload
     }),
     
     update: (id: string, payload: Partial<PageData>) => request(`/pages/${id}`, {
         method: 'PUT',
-        body: JSON.stringify(payload)
+        data: payload
     })
 };
 
 export const apiClient = {
   get: <T>(path: string) => request<T>(path),
-  post: <T>(path: string, body: unknown) => request<T>(path, { method: 'POST', body: JSON.stringify(body) }),
-  put: <T>(path: string, body: unknown) => request<T>(path, { method: 'PUT', body: JSON.stringify(body) }),
+  post: <T>(path: string, data: unknown) => request<T>(path, { method: 'POST', data }),
+  put: <T>(path: string, data: unknown) => request<T>(path, { method: 'PUT', data }),
   delete: <T>(path: string) => request<T>(path, { method: 'DELETE' }),
 };
 
@@ -188,24 +202,13 @@ export const mediaApi = {
 };
 
 export const uploadImage = async (file: File, subDir: string = "") => {
-  const token = authStore.getToken();
-  const headers = new Headers();
-  if (token) headers.set('Authorization', `Bearer ${token}`);
-
   const formData = new FormData();
   formData.append('file', file);
   formData.append('subDir', subDir);
 
-  const response = await fetch(`${API_URL}/uploads`, {
-    method: 'POST',
-    headers,
-    body: formData,
-    credentials: 'include',
+  const data = await request<{ url: string }>("/uploads", {
+    method: "POST",
+    data: formData,
   });
-
-  const payload = (await response.json()) as ApiEnvelope<{ url: string }>;
-  if (!response.ok || payload.status === 'error') {
-    throw new Error(payload.message || 'Image upload failed');
-  }
-  return payload.data.url;
+  return data.url;
 };
