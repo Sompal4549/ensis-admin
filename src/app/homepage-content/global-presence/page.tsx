@@ -1,9 +1,5 @@
-import ComponentEditor from "@/components/common/ComponentEditor";
+import HomepageComponentRouteEditor from "@/components/homepage-content/HomepageComponentRouteEditor";
+
 export default function GlobalPresencePage() {
-  return (
-    <ComponentEditor
-      componentKey="home.globalPresence"
-      title="Global Presence"
-    />
-  );
+  return <HomepageComponentRouteEditor componentKey="home.globalPresence" title="Global Presence" />;
 }

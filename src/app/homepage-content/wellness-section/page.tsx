@@ -1,5 +1,5 @@
-import WellnessEditor from "@/components/common/WellnessEditor";
+import HomepageComponentRouteEditor from "@/components/homepage-content/HomepageComponentRouteEditor";
 
 export default function WellnessPage() {
-  return <WellnessEditor />;
+  return <HomepageComponentRouteEditor componentKey="home.wellnessSection" title="Wellness Section" />;
 }

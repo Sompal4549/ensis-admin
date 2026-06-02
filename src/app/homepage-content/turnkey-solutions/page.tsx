@@ -1,10 +1,5 @@
-import ComponentEditor from "@/components/common/ComponentEditor";
+import HomepageComponentRouteEditor from "@/components/homepage-content/HomepageComponentRouteEditor";
 
 export default function TurnkeySolutionsPage() {
-  return (
-    <ComponentEditor
-      componentKey="home.turnkeySolutions"
-      title="Turnkey Solutions"
-    />
-  );
+  return <HomepageComponentRouteEditor componentKey="home.turnkeySolutions" title="Turnkey Solutions" />;
 }

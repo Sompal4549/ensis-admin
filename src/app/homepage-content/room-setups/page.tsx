@@ -1,9 +1,5 @@
-import ComponentEditor from "@/components/common/ComponentEditor";
+import HomepageComponentRouteEditor from "@/components/homepage-content/HomepageComponentRouteEditor";
+
 export default function RoomSetupsPage() {
-  return (
-    <ComponentEditor
-      componentKey="home.wellnessRoomSetups"
-      title="Room Setups"
-    />
-  );
+  return <HomepageComponentRouteEditor componentKey="home.wellnessRoomSetups" title="Room Setups" />;
 }

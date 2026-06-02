@@ -1,5 +1,5 @@
-import HeroEditor from "@/components/common/HeroEditor";
+import HomepageComponentRouteEditor from "@/components/homepage-content/HomepageComponentRouteEditor";
 
 export default function HeroPage() {
-  return <HeroEditor />;
+  return <HomepageComponentRouteEditor componentKey="home.hero" title="Home Hero" />;
 }

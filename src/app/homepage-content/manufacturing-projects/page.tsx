@@ -1,9 +1,5 @@
-import ComponentEditor from "@/components/common/ComponentEditor";
+import HomepageComponentRouteEditor from "@/components/homepage-content/HomepageComponentRouteEditor";
+
 export default function ManufacturingProjectsPage() {
-  return (
-    <ComponentEditor
-      componentKey="home.manufacturingAndProjects"
-      title="Manufacturing Projects"
-    />
-  );
+  return <HomepageComponentRouteEditor componentKey="home.manufacturingAndProjects" title="Manufacturing Projects" />;
 }

@@ -25,6 +25,7 @@ type ProductForm = {
   stock: string;
   category: string;
   images: string;
+  slug:string;
 };
 
 type CategoryForm = {
@@ -51,6 +52,7 @@ const emptyProduct: ProductForm = {
   stock: "",
   category: "",
   images: "",
+  slug: "",
 };
 
 const emptyCategory: CategoryForm = {
@@ -240,13 +242,17 @@ const defaultComponentContents: ContentForm[] = [
   },
 ];
 
-const emptyContent: ContentForm = {
-  key: "",
-  label: "",
-  page: "",
-  description: "",
-  data: "{\n  \n}",
-  isActive: true,
+const componentRouteByKey: Record<string, string> = {
+  "home.hero": "/homepage-content/hero",
+  "home.wellnessSection": "/homepage-content/wellness-section",
+  "home.fullWidthFeatures": "/homepage-content/full-width-features",
+  "home.productsGrid": "/homepage-content/products-grid",
+  "home.turnkeySolutions": "/homepage-content/turnkey-solutions",
+  "home.wellnessRoomSetups": "/homepage-content/room-setups",
+  "home.manufacturingAndProjects": "/homepage-content/manufacturing-projects",
+  "home.globalPresence": "/homepage-content/global-presence",
+  "home.testimonials": "/homepage-content/testimonials",
+  "home.blogInsights": "/homepage-content/blog-insights",
 };
 
 const fieldClass = "w-full rounded-md border border-[#d9cdbb] bg-white px-3 py-2 text-sm outline-none focus:border-[#8d6a3a]";
@@ -264,7 +270,6 @@ export default function AdminHome() {
   const [contents, setContents] = useState<ComponentContent[]>([]);
   const [productForm, setProductForm] = useState<ProductForm>(emptyProduct);
   const [categoryForm, setCategoryForm] = useState<CategoryForm>(emptyCategory);
-  const [contentForm, setContentForm] = useState<ContentForm>(emptyContent);
 
   const frontendUrl = process.env.NEXT_PUBLIC_FRONTEND_URL || "http://localhost:3000";
 
@@ -331,6 +336,7 @@ export default function AdminHome() {
       stock: productForm.stock ? Number(productForm.stock) : 0,
       category: productForm.category,
       images: productForm.images.split(",").map((item) => item.trim()).filter(Boolean),
+      slug: productForm.slug.trim(),
     };
 
     try {
@@ -361,6 +367,7 @@ export default function AdminHome() {
       stock: String(product.stock || ""),
       category: categoryId,
       images: product.images?.join(", ") || "",
+      slug: product.slug || "",
     });
     setActiveTab("products");
   };
@@ -435,48 +442,6 @@ export default function AdminHome() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const submitContent = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setLoading(true);
-    setMessage("");
-    try {
-      const payload = {
-        key: contentForm.key.trim(),
-        label: contentForm.label.trim(),
-        page: contentForm.page.trim(),
-        description: contentForm.description.trim(),
-        isActive: contentForm.isActive,
-        data: JSON.parse(contentForm.data),
-      };
-      if (contentForm.id) {
-        await componentContentApi.update(contentForm.id, payload);
-        setMessage("Component content updated.");
-      } else {
-        await componentContentApi.create(payload);
-        setMessage("Component content added.");
-      }
-      setContentForm(emptyContent);
-      await refreshData();
-    } catch (error) {
-      setMessage((error as Error).message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const editContent = (content: ComponentContent) => {
-    setContentForm({
-      id: content._id,
-      key: content.key,
-      label: content.label,
-      page: content.page,
-      description: content.description || "",
-      isActive: content.isActive,
-      data: JSON.stringify(content.data || {}, null, 2),
-    });
-    setActiveTab("components");
   };
 
   const deleteContent = async (content: ComponentContent) => {
@@ -556,30 +521,15 @@ export default function AdminHome() {
         </div>
 
         {activeTab === "components" ? (
-          <section className="grid gap-6 lg:grid-cols-[0.95fr_1.4fr]">
-            <form onSubmit={submitContent} className="rounded-lg border border-[#ded3c4] bg-white p-5">
-              <div className="mb-5 flex items-center justify-between gap-3">
-                <h2 className="flex items-center gap-2 text-lg font-bold"><Code2 size={18} /> {contentForm.id ? "Edit Component Data" : "Add Component Data"}</h2>
+          <section className="grid gap-6">
+            <div className="overflow-hidden rounded-lg border border-[#ded3c4] bg-white">
+              <div className="flex flex-col gap-3 border-b border-[#ded3c4] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 className="text-lg font-bold">{contents.length} Editable Components</h2>
+                  <p className="mt-1 text-sm text-[#5f5a50]">Open each component route to update its form fields.</p>
+                </div>
                 <button type="button" onClick={seedDefaultContents} className="rounded-md border border-[#d9cdbb] px-3 py-2 text-xs font-bold" disabled={loading}>Add Defaults</button>
               </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <label className={labelClass}>Key<input className={`${fieldClass} mt-2`} value={contentForm.key} onChange={(event) => setContentForm({ ...contentForm, key: event.target.value })} placeholder="home.hero" required /></label>
-                <label className={labelClass}>Label<input className={`${fieldClass} mt-2`} value={contentForm.label} onChange={(event) => setContentForm({ ...contentForm, label: event.target.value })} placeholder="Home Hero" required /></label>
-              </div>
-              <div className="mt-4 grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
-                <label className={labelClass}>Page<input className={`${fieldClass} mt-2`} value={contentForm.page} onChange={(event) => setContentForm({ ...contentForm, page: event.target.value })} placeholder="home" required /></label>
-                <label className="flex items-center gap-2 text-sm font-bold text-[#263016]"><input type="checkbox" checked={contentForm.isActive} onChange={(event) => setContentForm({ ...contentForm, isActive: event.target.checked })} /> Active</label>
-              </div>
-              <label className={`${labelClass} mt-4`}>Description<textarea className={`${fieldClass} mt-2 min-h-20`} value={contentForm.description} onChange={(event) => setContentForm({ ...contentForm, description: event.target.value })} /></label>
-              <label className={`${labelClass} mt-4`}>JSON Data<textarea className={`${fieldClass} mt-2 min-h-80 font-mono text-xs`} value={contentForm.data} onChange={(event) => setContentForm({ ...contentForm, data: event.target.value })} required /></label>
-              <div className="mt-5 flex gap-3">
-                <button className="inline-flex items-center gap-2 rounded-md bg-[#6f542f] px-4 py-2 text-sm font-bold text-white" disabled={loading}><Save size={16} /> Save</button>
-                {contentForm.id && <button type="button" onClick={() => setContentForm(emptyContent)} className="rounded-md border border-[#d9cdbb] px-4 py-2 text-sm font-bold">Cancel</button>}
-              </div>
-            </form>
-
-            <div className="overflow-hidden rounded-lg border border-[#ded3c4] bg-white">
-              <div className="border-b border-[#ded3c4] px-5 py-4 text-sm font-bold">{contents.length} Editable Components</div>
               <div className="divide-y divide-[#eee5d9]">
                 {contents.map((content) => (
                   <article key={content._id} className="flex flex-col gap-4 p-4 md:flex-row md:items-center md:justify-between">
@@ -592,7 +542,13 @@ export default function AdminHome() {
                       <p className="mt-1 text-sm text-[#5f5a50]">{content.description || `Page: ${content.page}`}</p>
                     </div>
                     <div className="flex gap-2">
-                      <button onClick={() => editContent(content)} className="inline-flex size-10 items-center justify-center rounded-md border border-[#d9cdbb]" aria-label="Edit component content"><Pencil size={16} /></button>
+                      {componentRouteByKey[content.key] ? (
+                        <Link href={componentRouteByKey[content.key]} className="inline-flex items-center gap-2 rounded-md border border-[#d9cdbb] px-3 py-2 text-sm font-bold text-[#263016]" aria-label="Edit component content">
+                          <Pencil size={16} /> Edit Form
+                        </Link>
+                      ) : (
+                        <span className="rounded-md border border-[#eadfce] px-3 py-2 text-sm font-semibold text-[#8a8072]">No route</span>
+                      )}
                       <button onClick={() => deleteContent(content)} className="inline-flex size-10 items-center justify-center rounded-md border border-[#d9cdbb] text-[#9b2c2c]" aria-label="Delete component content"><Trash2 size={16} /></button>
                     </div>
                   </article>
@@ -610,6 +566,7 @@ export default function AdminHome() {
                 <label className={labelClass}>Price<input className={`${fieldClass} mt-2`} type="number" min="0" value={productForm.price} onChange={(event) => setProductForm({ ...productForm, price: event.target.value })} required /></label>
                 <label className={labelClass}>Discount<input className={`${fieldClass} mt-2`} type="number" min="0" value={productForm.discountPrice} onChange={(event) => setProductForm({ ...productForm, discountPrice: event.target.value })} /></label>
                 <label className={labelClass}>Stock<input className={`${fieldClass} mt-2`} type="number" min="0" value={productForm.stock} onChange={(event) => setProductForm({ ...productForm, stock: event.target.value })} /></label>
+                 <label className={labelClass}>Url<input className={`${fieldClass} mt-2`} min="0" value={productForm.slug} onChange={(event) => setProductForm({ ...productForm, slug: event.target.value })} /></label>
               </div>
               <label className={`${labelClass} mt-4`}>Category<select className={`${fieldClass} mt-2`} value={productForm.category} onChange={(event) => setProductForm({ ...productForm, category: event.target.value })} required><option value="">{selectedCategoryName}</option>{categories.map((category) => <option key={category._id} value={category._id}>{category.name}</option>)}</select></label>
               <label className={`${labelClass} mt-4`}>Images<input className={`${fieldClass} mt-2`} value={productForm.images} onChange={(event) => setProductForm({ ...productForm, images: event.target.value })} placeholder="/uploads/product.webp, https://..." /></label>

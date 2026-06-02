@@ -1,9 +1,5 @@
-import ComponentEditor from "@/components/common/ComponentEditor";
+import HomepageComponentRouteEditor from "@/components/homepage-content/HomepageComponentRouteEditor";
+
 export default function FullWidthFeaturesPage() {
-  return (
-    <ComponentEditor
-      componentKey="home.fullWidthFeatures"
-      title="Full Width Features"
-    />
-  );
+  return <HomepageComponentRouteEditor componentKey="home.fullWidthFeatures" title="Full Width Features" />;
 }

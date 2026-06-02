@@ -1,9 +1,5 @@
-import ComponentEditor from "@/components/common/ComponentEditor";
+import HomepageComponentRouteEditor from "@/components/homepage-content/HomepageComponentRouteEditor";
+
 export default function TestimonialsPage() {
-  return (
-    <ComponentEditor
-      componentKey="home.testimonials"
-      title="Testimonials"
-    />
-  );
+  return <HomepageComponentRouteEditor componentKey="home.testimonials" title="Testimonials" />;
 }

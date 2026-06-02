@@ -1,9 +1,5 @@
-import ComponentEditor from "@/components/common/ComponentEditor";
+import HomepageComponentRouteEditor from "@/components/homepage-content/HomepageComponentRouteEditor";
+
 export default function ProductsGridPage() {
-  return (
-    <ComponentEditor
-      componentKey="home.productsGrid"
-      title="Products Grid"
-    />
-  );
+  return <HomepageComponentRouteEditor componentKey="home.productsGrid" title="Products Grid" />;
 }

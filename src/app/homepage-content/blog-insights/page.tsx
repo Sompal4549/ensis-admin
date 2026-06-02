@@ -1,10 +1,5 @@
-import ComponentEditor from "@/components/common/ComponentEditor";
+import HomepageComponentRouteEditor from "@/components/homepage-content/HomepageComponentRouteEditor";
 
 export default function BlogInsightsPage() {
-  return (
-    <ComponentEditor
-      componentKey="home.blogInsights"
-      title="Blog Insights"
-    />
-  );
+  return <HomepageComponentRouteEditor componentKey="home.blogInsights" title="Blog Insights" />;
 }
