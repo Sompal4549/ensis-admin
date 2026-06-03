@@ -4,11 +4,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import {
+  AlignJustify,
+  ArrowDownToLine,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
   Home,
   ImageUp,
+  Info,
   Layers,
   LayoutDashboard,
   Search,
@@ -102,6 +105,26 @@ const NAV_ITEMS: NavItem[] = [
             path: "/homepage-content/blog-insights",
           },
         ],
+      },
+      {
+        label: "About",
+        path: "/about-page-content",
+        icon: <Info size={16} />,
+      },
+      {
+        label: "Site Header",
+        path: "/about-page-content?key=layout.header",
+        icon: <AlignJustify size={16} />,
+      },
+      {
+        label: "Site Footer",
+        path: "/about-page-content?key=layout.footer",
+        icon: <ArrowDownToLine size={16} />,
+      },
+      {
+        label: "Products",
+        path: "/products",
+        icon: <Home size={16} />,
       },
     ],
   },

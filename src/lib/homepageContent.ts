@@ -66,6 +66,7 @@ export type HomeWellnessData = {
 
 export type HeaderNavItem = { label: string; href: string };
 export type HeaderData = {
+  navLinks: never[];
   logoText: string;
   logoTagline: string;
   navItems: HeaderNavItem[];

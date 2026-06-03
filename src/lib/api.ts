@@ -79,7 +79,7 @@ export const authStore = {
 };
 
 export const getImageUrl = (image?: string) => {
-  if (!image) return "";
+  if (!image || typeof image !== "string") return "";
   if (image.startsWith("http")) return image;
   if (!image.startsWith("/uploads")) return image;
   return `${BACKEND_URL}${image.startsWith("/") ? image : `/${image}`}`;
