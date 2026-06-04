@@ -3,9 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { Save, Plus, Trash2 } from "lucide-react";
 import { componentContentApi, type ComponentContent } from "@/lib/api";
-
-const fieldClass = "w-full rounded-md border border-[#d9cdbb] bg-white px-3 py-2 text-sm outline-none focus:border-[#8d6a3a]";
-const labelClass = "block text-xs font-bold uppercase tracking-wide text-[#5f5a50]";
+import { fieldClass, labelClass } from "@/constants";
 
 export default function WellnessEditor() {
   const [loading, setLoading] = useState(false);

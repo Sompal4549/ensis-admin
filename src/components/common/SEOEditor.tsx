@@ -4,9 +4,9 @@ import { FormEvent, useEffect, useState } from "react";
 import { Save, ImagePlus, Loader2 } from "lucide-react";
 // Correctly importing the exported member and function
 import { pageApi, type PageData, uploadImage, getImageUrl } from "@/lib/api";
+import { fieldClass, labelClass } from "@/constants";
 
-const fieldClass = "w-full rounded-md border border-[#d9cdbb] bg-white px-3 py-2 text-sm outline-none focus:border-[#8d6a3a]";
-const labelClass = "block text-xs font-bold uppercase tracking-wide text-[#5f5a50]";
+
 const optionalSeoFields = ["metaKeywords", "canonical", "ogTitle", "ogDescription", "ogImage"] as const;
 
 interface SEOEditorProps {

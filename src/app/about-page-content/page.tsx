@@ -34,10 +34,8 @@ import {
   type HeaderData,
   type FooterData,
 } from "@/lib/about/aboutPageContent";
+import { fieldClass, labelClass, cardClass } from "@/constants";
 
-const fieldClass = "w-full rounded-md border border-[#d9cdbb] bg-white px-3 py-1.5 text-sm outline-none focus:border-[#8d6a3a]";
-const labelClass = "block text-[10px] font-bold uppercase tracking-wide text-[#5f5a50] mb-0.5";
-const cardClass = "rounded-lg border border-[#ded3c4] bg-white p-3 shadow-sm";
 
 type ContentForm = Omit<ComponentContent, "_id"> & { key: AboutPageContentKeys };
 
@@ -100,7 +98,7 @@ const ImageUploadField = ({
       />
       <input className={fieldClass} type="text" value={displayValue} readOnly placeholder="Uploaded path will appear here" />
       {imgUrl ? (
-        <img src={imgUrl} alt={label} className="mt-3 h-20 w-32 rounded-md object-cover border border-[#eee5d9]" />
+        <img src={imgUrl} alt={label} className="mt-3 h-20 w-32 rounded-md object-cover border border-[#eee5d9]"  crossOrigin="anonymous" />
       ) : null}
     </div>
   );
@@ -527,8 +525,29 @@ export default function AboutPageContentAdmin() {
           <h4 className="text-xs font-bold text-[#8d6a3a] uppercase">Company Information</h4>
           <label className={labelClass}>Company Name <input className={fieldClass} value={data.company?.name || ""} onChange={e => setData({ ...data, company: { ...data.company, name: e.target.value } })} /></label>
           <label className={labelClass}>Company Description <textarea className={fieldClass} rows={2} value={data.company?.description || ""} onChange={e => setData({ ...data, company: { ...data.company, description: e.target.value } })} /></label>
-          <ImageUploadField label="Design House Logo" value={data.company?.designHouselogo?.imageUrl} fieldKey="footer.company.designHouselogo" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={setStatusMessage} onUpload={url => setData({ ...data, company: { ...data.company, designHouselogo: { ...data.company.designHouselogo, imageUrl: url } } })} />
-          <ImageUploadField label="Ensis Logo" value={data.company?.ensisLogo?.imageUrl} fieldKey="footer.company.ensisLogo" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={setStatusMessage} onUpload={url => setData({ ...data, company: { ...data.company, ensisLogo: { ...data.company.ensisLogo, imageUrl: url } } })} />
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <ImageUploadField 
+                label="Design House Logo" 
+                value={typeof data.company?.designHouselogo === 'string' ? data.company.designHouselogo : data.company?.designHouselogo?.imageUrl} 
+                fieldKey="footer.company.designHouselogo" 
+                uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={setStatusMessage} 
+                onUpload={url => { const nc = structuredClone(data.company || {}); nc.designHouselogo = typeof nc.designHouselogo === 'object' ? { ...nc.designHouselogo, imageUrl: url } : { imageUrl: url, alt: '' }; setData({ ...data, company: nc }); }} 
+              />
+              <label className={labelClass}>Design Logo Alt <input className={fieldClass} value={data.company?.designHouselogo?.alt || ""} onChange={e => { const nc = structuredClone(data.company || {}); nc.designHouselogo = typeof nc.designHouselogo === 'object' ? { ...nc.designHouselogo, alt: e.target.value } : { imageUrl: '', alt: e.target.value }; setData({ ...data, company: nc }); }} /></label>
+            </div>
+            <div className="space-y-2">
+              <ImageUploadField 
+                label="Ensis Logo" 
+                value={typeof data.company?.ensisLogo === 'string' ? data.company.ensisLogo : data.company?.ensisLogo?.imageUrl} 
+                fieldKey="footer.company.ensisLogo" 
+                uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={setStatusMessage} 
+                onUpload={url => { const nc = structuredClone(data.company || {}); nc.ensisLogo = typeof nc.ensisLogo === 'object' ? { ...nc.ensisLogo, imageUrl: url } : { imageUrl: url, alt: '' }; setData({ ...data, company: nc }); }} 
+              />
+              <label className={labelClass}>Ensis Logo Alt <input className={fieldClass} value={data.company?.ensisLogo?.alt || ""} onChange={e => { const nc = structuredClone(data.company || {}); nc.ensisLogo = typeof nc.ensisLogo === 'object' ? { ...nc.ensisLogo, alt: e.target.value } : { imageUrl: '', alt: e.target.value }; setData({ ...data, company: nc }); }} /></label>
+            </div>
+          </div>
           
           <div className="pt-2">
             <div className="flex justify-between items-center mb-3">

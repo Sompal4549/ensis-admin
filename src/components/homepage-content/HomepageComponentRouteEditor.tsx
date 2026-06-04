@@ -6,10 +6,9 @@ import RichTextEditor from "@/components/common/RichTextEditor";
 import { getImageUrl, uploadImage } from "@/lib/api";
 import { type HomepageComponentKey, type HomepageData } from "@/lib/homepageContent";
 import { HomepageContentProvider, useHomepageContent } from "./HomepageContentContext";
+import { fieldClass, labelClass, cardClass } from "@/constants";
 
-const fieldClass = "w-full rounded-md border border-[#d9cdbb] bg-white px-3 py-2 text-sm outline-none focus:border-[#8d6a3a]";
-const labelClass = "block text-xs font-bold uppercase tracking-wide text-[#5f5a50]";
-const cardClass = "rounded-lg border border-[#ded3c4] bg-white p-5 shadow-sm";
+
 
 type EditableValue = string | number | boolean | null | EditableValue[] | { [key: string]: EditableValue };
 

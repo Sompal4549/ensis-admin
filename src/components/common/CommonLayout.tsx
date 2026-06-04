@@ -294,6 +294,7 @@ function MenuItem({
 
 export function Sidebar({ activePath, onNavigate, collapsed, setCollapsed }: SidebarProps) {
   const pathname = usePathname();
+  const { user } = useAuth();
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({
     "/homepage-content": true,
     "Pages": true,
@@ -328,8 +329,8 @@ export function Sidebar({ activePath, onNavigate, collapsed, setCollapsed }: Sid
               <User size={18} />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[13px] font-semibold text-white">Super Admin</p>
-              <p className="truncate text-[10px] text-slate-400">Full Access</p>
+              <p className="truncate text-[13px] font-semibold text-white">{user?.name || 'Admin User'}</p>
+              <p className="truncate text-[10px] text-slate-400 uppercase font-medium tracking-wider">{user?.role || 'Admin'}</p>
             </div>
           </div>
           <ChevronDown size={14} className="text-slate-400 flex-shrink-0" />
@@ -382,7 +383,7 @@ export function Sidebar({ activePath, onNavigate, collapsed, setCollapsed }: Sid
 
 export function Topbar({ title = "Dashboard", subtitle, collapsed, setCollapsed }: TopbarProps) {
   const pathname = usePathname();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   // Helper to generate dynamic breadcrumbs
@@ -422,6 +423,11 @@ export function Topbar({ title = "Dashboard", subtitle, collapsed, setCollapsed 
     }
     logout();
   };
+
+  // Generate initials for the avatar badge
+  const initials = user?.name 
+    ? user.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)
+    : "AD";
 
   return (
     <header className="flex h-16 flex-shrink-0 items-center justify-between border-b border-slate-100 bg-white px-6 z-30">
@@ -484,10 +490,10 @@ export function Topbar({ title = "Dashboard", subtitle, collapsed, setCollapsed 
             className="flex items-center gap-2.5 pl-2 pr-3 py-1 bg-slate-50 hover:bg-slate-100 border border-slate-100 rounded-full cursor-pointer transition-colors outline-none"
           >
             <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-600 font-bold text-white text-[11px]">
-              AS
+              {initials}
             </div>
             <div className="text-left hidden sm:block">
-              <p className="text-[11px] font-semibold text-slate-800 leading-tight">Admin</p>
+              <p className="text-[11px] font-semibold text-slate-800 leading-tight">{user?.name || 'Admin'}</p>
             </div>
             <ChevronDown size={12} className="text-slate-400 ml-0.5" />
           </button>
@@ -498,8 +504,8 @@ export function Topbar({ title = "Dashboard", subtitle, collapsed, setCollapsed 
               onMouseLeave={() => setShowProfileMenu(false)}
             >
               <div className="px-3 py-2 border-b border-slate-50">
-                <p className="text-[11px] font-bold text-slate-800">Super Admin</p>
-                <p className="text-[9px] text-slate-400 mt-0.5">admin@ensis.in</p>
+                <p className="text-[11px] font-bold text-slate-800">{user?.name || 'Super Admin'}</p>
+                <p className="text-[9px] text-slate-400 mt-0.5">{user?.email || 'admin@ensis.in'}</p>
               </div>
               <button
                 onClick={handleLogout}

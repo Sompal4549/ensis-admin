@@ -15,6 +15,7 @@ import {
   type AuthUser,
   type Category,
 } from "@/lib/api";
+import { fieldClass, labelClass } from "@/constants";
 
 type CategoryForm = {
   id?: string;
@@ -27,8 +28,6 @@ const emptyCategory: CategoryForm = {
   description: "",
 };
 
-const fieldClass = "w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10";
-const labelClass = "block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5";
 
 export default function CategoriesPage() {
   const [user, setUser] = useState<AuthUser | null>(null);
