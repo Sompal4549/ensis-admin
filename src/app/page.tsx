@@ -331,62 +331,62 @@ export default function AdminHome() {
       {/* Row 1: Stats Grid (5 Cards in 1 Row) */}
       <div className="grid shrink-0 grid-cols-5 gap-3">
         {/* Card 1 */}
-        <div className=" px-4 py-2.5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between h-full bg-center bg-cover bg-no-repeat" style={{backgroundImage:`url(${blue.src})`, }}>
+        <div className=" px-4 py-2.5 rounded-2xl border border-slate-100 shadow-sm flex justify-between h-full bg-center bg-cover bg-no-repeat" style={{backgroundImage:`url(${blue.src})`, }}>
           <div className="min-w-0">
             <span className="text-[10px] font-bold uppercase tracking-wider">Total Pages</span>
             <p className="text-xl font-bold leading-tight">28</p>
             <span className="text-[9px] text-blue-500 font-semibold leading-none">Published 24</span>
           </div>
-          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-            <FileText size={16} />
+          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600 mt-2">
+            <FileText size={24} />
           </div>
         </div>
 
         {/* Card 2 */}
-        <div className="bg-white px-4 py-2.5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between h-full bg-center bg-cover bg-no-repeat" style={{backgroundImage:`url(${orange.src})`}}>
+        <div className="bg-white px-4 py-2.5 rounded-2xl border border-slate-100 shadow-sm flex justify-between h-full bg-center bg-cover bg-no-repeat" style={{backgroundImage:`url(${orange.src})`}}>
           <div className="min-w-0">
             <span className="text-[10px] font-bold uppercase tracking-wider">Total Sections</span>
             <p className="text-xl font-bold leading-tight">62</p>
             <span className="text-[9px] text-amber-500 font-semibold leading-none">Active 58</span>
           </div>
-          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
-            <LayoutGrid size={16} />
+          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-amber-50 text-amber-600 mt-2">
+            <LayoutGrid size={24} />
           </div>
         </div>
 
         {/* Card 3 */}
-        <div className="bg-white px-4 py-2.5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between h-full bg-center bg-cover bg-no-repeat" style={{backgroundImage:`url(${purple.src})`}}>
+        <div className="bg-white px-4 py-2.5 rounded-2xl border border-slate-100 shadow-sm flex justify-between h-full bg-center bg-cover bg-no-repeat" style={{backgroundImage:`url(${purple.src})`}}>
           <div className="min-w-0">
             <span className="text-[10px] font-bold uppercase tracking-wider">Sliders / Banners</span>
             <p className="text-xl font-bold leading-tight">6</p>
             <span className="text-[9px] text-purple-500 font-semibold leading-none">Active 6</span>
           </div>
-          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-purple-50 text-purple-600">
-            <ImageIcon size={16} />
+          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-purple-50 text-purple-600 mt-2">
+            <ImageIcon size={24} />
           </div>
         </div>
 
         {/* Card 4 */}
-        <div className="bg-white px-4 py-2.5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between h-full bg-center bg-cover bg-no-repeat" style={{backgroundImage:`url(${green.src})`}}>
+        <div className="bg-white px-4 py-2.5 rounded-2xl border border-slate-100 shadow-sm flex justify-between h-full bg-center bg-cover bg-no-repeat" style={{backgroundImage:`url(${green.src})`}}>
           <div className="min-w-0">
             <span className="text-[10px] font-bold uppercase tracking-wider">Projects</span>
             <p className="text-xl font-bold leading-tight">35</p>
             <span className="text-[9px] text-emerald-500 font-semibold leading-none">Published 31</span>
           </div>
-          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
-            <Building2 size={16} />
+          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 mt-2">
+            <Building2 size={24} />
           </div>
         </div>
 
         {/* Card 5 */}
-        <div className="bg-white px-4 py-2.5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between h-full bg-center bg-cover bg-no-repeat" style={{backgroundImage:`url(${pink.src})`}}>
+        <div className="bg-white px-4 py-2.5 rounded-2xl border border-slate-100 shadow-sm flex justify-between h-full bg-center bg-cover bg-no-repeat" style={{backgroundImage:`url(${pink.src})`}}>
           <div className="min-w-0">
             <span className="text-[10px] font-bold uppercase tracking-wider">Inquiries</span>
             <p className="text-xl font-bold  leading-tight">186</p>
             <span className="text-[9px] text-emerald-500 font-semibold leading-none">↑ 18% This Month</span>
           </div>
-          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-amber-50 text-pink-600">
-            <MessageSquare size={16} />
+          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-amber-50 text-pink-600 mt-2">
+            <MessageSquare size={24} />
           </div>
         </div>
       </div>
@@ -401,9 +401,9 @@ export default function AdminHome() {
               <h3 className="text-xs font-bold ">Website Overview</h3>
               <p className="text-[9px]  mt-0.5">Track website page views and visitor metrics.</p>
             </div>
-            <select className="text-[10px] bg-slate-50 border border-slate-200 rounded-md px-2 py-0.5 text-slate-600 outline-none">
-              <option>Last 30 Days</option>
-              <option>Last 7 Days</option>
+            <select className="text-[8px] bg-slate-50 border border-slate-200 rounded-md px-2 outline-none">
+              <option className="text-[8px]">Last 30 Days</option>
+              <option className="text-[8px]">Last 7 Days</option>
             </select>
           </div>
 
@@ -478,24 +478,24 @@ export default function AdminHome() {
           <h3 className="text-xs font-bold  border-b border-slate-50 pb-2 flex-shrink-0">Quick Actions</h3>
 
           <div className="flex-1 overflow-y-auto scrollbar-none py-2 min-h-0">
-            <div className="grid grid-cols-2 gap-2 h-full">
+            <div className="grid grid-cols-3 gap-2 h-full">
               {[
-                { label: "New Page", icon: <FileText size={15} />, color: "bg-blue-50 text-blue-600", path: "/homepage-content" },
-                { label: "New Project", icon: <Building2 size={15} />, color: "bg-emerald-50 text-emerald-600", path: "/products" },
-                { label: "New Slider", icon: <ImageIcon size={15} />, color: "bg-purple-50 text-purple-600", path: "/homepage-content/hero" },
-                { label: "Manage Services", icon: <LayoutGrid size={15} />, color: "bg-amber-50 text-amber-600", path: "/products" },
-                { label: "Inquiries", icon: <MessageSquare size={15} />, color: "bg-sky-50 text-sky-600", path: "/homepage-content" },
-                { label: "Site Settings", icon: <Activity size={15} />, color: "bg-slate-100 text-slate-600", path: "/about-page-content" },
+                { label: "New Page", icon: <FileText size={28} />,bg:"bg-blue-50", color: "text-blue-600", path: "/homepage-content" },
+                { label: "New Project", icon: <Building2 size={28} />,bg:"bg-emerald-50", color: "text-emerald-600", path: "/products" },
+                { label: "New Slider", icon: <ImageIcon size={28} />,bg:"bg-purple-50", color: "text-purple-600", path: "/homepage-content/hero" },
+                { label: "Manage Services", icon: <LayoutGrid size={28} />,bg:"bg-amber-50", color: "text-amber-600", path: "/products" },
+                { label: "Inquiries", icon: <MessageSquare size={28} />,bg:"bg-sky-50", color: "text-sky-600", path: "/homepage-content" },
+                { label: "Site Settings", icon: <Activity size={28} />,bg:"bg-slate-100", color: "text-slate-600", path: "/about-page-content" },
               ].map((act, idx) => (
                 <Link
                   href={act.path}
                   key={idx}
-                  className="flex flex-col items-center justify-center p-2 rounded-xl border border-slate-50 hover:bg-slate-50/50 text-center transition-all group"
+                  className={"flex flex-col items-center justify-center p-2 rounded-xl border border-slate-50 hover:bg-slate-50/50 text-center transition-all group" +" "+act.bg}
                 >
-                  <div className={`h-7.5 w-7.5 rounded-lg flex items-center justify-center ${act.color} group-hover:scale-105 transition-transform`}>
+                  <div className={`h-7.5 w-7.5 flex items-center justify-center ${act.color} group-hover:scale-105 transition-transform`}>
                     {act.icon}
                   </div>
-                  <span className="text-[9px] font-semibold text-slate-600 mt-1.5 truncate w-full">{act.label}</span>
+                    <span className="text-[9px] font-semibold mt-1.5 truncate w-full">{act.label}</span>
                 </Link>
               ))}
             </div>
