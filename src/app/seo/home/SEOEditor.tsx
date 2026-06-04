@@ -132,7 +132,7 @@ export default function SEOEditor({ slug, title }: SEOEditorProps) {
   if (loading && !pageData) return <div className="p-10 text-center">Loading SEO Settings...</div>;
 
   return (
-    <div className="max-w-5xl mx-auto">
+    <div className="px-4">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-800">{title}</h1>
         <p className="text-sm text-gray-500">Update metadata and social sharing settings.</p>

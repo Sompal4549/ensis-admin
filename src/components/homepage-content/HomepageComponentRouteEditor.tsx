@@ -278,7 +278,7 @@ function EditorInner({ title }: { title: string }) {
   const { errors, form, loading, message, refresh, save, setData, setForm } = useHomepageContent();
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
+    <div className="px-4 space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#8d6a3a]">Homepage Component</p>
