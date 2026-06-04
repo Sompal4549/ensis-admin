@@ -4,19 +4,27 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import {
-  AlignJustify,
-  ArrowDownToLine,
+  Menu,
   ChevronDown,
   ChevronLeft,
-  ChevronRight,
   Home,
-  ImageUp,
   Info,
-  Layers,
+  AlignJustify,
+  ArrowDownToLine,
   LayoutDashboard,
+  Layers,
   Search,
-  UploadCloud,
+  ImageUp,
+  ExternalLink,
+  Bell,
+  User,
+  Headphones,
+  ArrowRight,
+  Boxes,
+  LayoutGrid,
+  LogOut
 } from "lucide-react";
+import { LoginForm, useAuth } from "@/components/auth/AuthContext";
 
 interface NavItem {
   label: string;
@@ -28,11 +36,15 @@ interface NavItem {
 interface SidebarProps {
   activePath?: string;
   onNavigate?: (path: string) => void;
+  collapsed: boolean;
+  setCollapsed: (collapsed: boolean) => void;
 }
 
 interface TopbarProps {
   title?: string;
   subtitle?: string;
+  collapsed: boolean;
+  setCollapsed: (collapsed: boolean) => void;
 }
 
 interface LayoutProps {
@@ -49,10 +61,8 @@ const NAV_ITEMS: NavItem[] = [
     path: "/",
     icon: <LayoutDashboard size={18} />,
   },
-
   {
     label: "Pages",
-    // path: "/pages",
     icon: <Layers size={18} />,
     children: [
       {
@@ -64,7 +74,7 @@ const NAV_ITEMS: NavItem[] = [
             label: "Hero",
             path: "/homepage-content/hero",
           },
-           {
+          {
             label: "Features",
             path: "/homepage-content/features",
           },
@@ -124,11 +134,15 @@ const NAV_ITEMS: NavItem[] = [
       {
         label: "Products",
         path: "/products",
-        icon: <Home size={16} />,
+        icon: <Boxes size={16} />,
+      },
+      {
+        label: "Categories",
+        path: "/categories",
+        icon: <LayoutGrid size={16} />,
       },
     ],
   },
-
   {
     label: "SEO",
     path: "/seo",
@@ -138,29 +152,28 @@ const NAV_ITEMS: NavItem[] = [
         label: "Home SEO",
         path: "/seo/home",
       },
-        {
+      {
         label: "About SEO",
         path: "/seo/about",
       },
-         {
+      {
         label: "Products SEO",
         path: "/seo/products",
       },
-         {
+      {
         label: "Turnkey SEO",
         path: "/seo/turnkey",
       },
-   {
+      {
         label: "Blog SEO",
         path: "/seo/blog",
       },
-       {
+      {
         label: "Contact SEO",
         path: "/seo/contact",
       },
     ],
   },
-
   {
     label: "Media",
     path: "/media",
@@ -174,13 +187,14 @@ const NAV_ITEMS: NavItem[] = [
         label: "Home Images",
         path: "/media/home",
       },
-         {
+      {
         label: "About Images",
         path: "/media/about",
       },
     ],
   },
 ];
+
 function MenuItem({
   item,
   level = 0,
@@ -203,29 +217,31 @@ function MenuItem({
   const isActive =
     !!item.path &&
     (currentPath === item.path ||
-      (item.path !== "/" && currentPath.startsWith(item.path.split("?")[0])));
+      (item.path !== "/" && currentPath.split("?")[0].startsWith(item.path.split("?")[0])));
 
   return (
-    <div>
-      <div className="flex items-center gap-1">
+    <div className="w-full">
+      <div className="flex items-center justify-between group">
         {item.path ? (
           <Link
             href={item.path}
             onClick={() => handleNavigate(item.path!)}
-            className={`flex min-h-10 flex-1 items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors ${
-              isActive ? "bg-[#f3eee6] text-[#6f542f]" : "text-gray-600 hover:bg-gray-50"
+            className={`flex min-h-8 flex-1 items-center gap-2.5 rounded-lg px-3 py-1.5 text-[13px] font-medium transition-all ${
+              isActive
+                ? "bg-[#1d5af2] text-white shadow-md shadow-blue-500/10"
+                : "text-slate-400 hover:text-white hover:bg-[#111e38]"
             }`}
-            style={{ paddingLeft: `${12 + level * 16}px` }}
+            style={{ marginLeft: `${level * 12}px` }}
           >
-            {item.icon && <span>{item.icon}</span>}
+            {item.icon && <span className={`${isActive ? "text-white" : "text-slate-400 group-hover:text-white"} transition-colors`}>{item.icon}</span>}
             <span>{item.label}</span>
           </Link>
         ) : (
           <div
-            className="flex min-h-10 flex-1 items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-600 cursor-default"
-            style={{ paddingLeft: `${12 + level * 16}px` }}
+            className="flex min-h-8 flex-1 cursor-default items-center gap-2.5 rounded-lg px-3 py-1.5 text-[13px] font-medium text-slate-400"
+            style={{ marginLeft: `${level * 12}px` }}
           >
-            {item.icon && <span>{item.icon}</span>}
+            {item.icon && <span className="text-slate-400">{item.icon}</span>}
             <span>{item.label}</span>
           </div>
         )}
@@ -239,12 +255,12 @@ function MenuItem({
                 [menuKey]: !prev[menuKey],
               }))
             }
-            className="p-2"
+            className="p-1.5 text-slate-500 hover:text-white"
           >
             <ChevronDown
               size={14}
-              className={`transition-transform ${
-                isOpen ? "rotate-180" : ""
+              className={`transition-transform duration-200 ${
+                isOpen ? "rotate-180" : "-rotate-90"
               }`}
             />
           </button>
@@ -252,7 +268,7 @@ function MenuItem({
       </div>
 
       {hasChildren && isOpen && (
-        <div className="ml-2 border-l border-gray-100">
+        <div className="ml-3 mt-0.5 space-y-0.5 border-l border-slate-800">
           {item.children!.map((child) => (
             <MenuItem
               key={child.label}
@@ -269,11 +285,12 @@ function MenuItem({
     </div>
   );
 }
-export function Sidebar({ activePath, onNavigate }: SidebarProps) {
+
+export function Sidebar({ activePath, onNavigate, collapsed, setCollapsed }: SidebarProps) {
   const pathname = usePathname();
-  const [collapsed, setCollapsed] = useState(false);
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({
     "/homepage-content": true,
+    "Pages": true,
   });
 
   const currentPath = activePath || pathname || "/";
@@ -283,95 +300,213 @@ export function Sidebar({ activePath, onNavigate }: SidebarProps) {
   };
 
   return (
-    <aside className={`relative flex min-h-screen flex-shrink-0 flex-col border-r border-gray-100 bg-white transition-all duration-200 ${collapsed ? "w-16" : "w-72"}`}>
-      <div className="flex items-center justify-between px-4 pb-3 pt-5">
-        {!collapsed && (
-          <div>
-            <span className="text-[22px] font-bold tracking-tight text-gray-900">Ensis</span>
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-[#8d6a3a]">Admin Panel</p>
+    <aside className={`relative flex h-screen flex-shrink-0 flex-col bg-[#081225] border-r border-[#162544] transition-all duration-300 ${collapsed ? "w-16" : "w-64"}`}>
+      {/* Logo Header */}
+      <div className="flex items-center justify-between border-b border-[#162544] px-5 py-4">
+        {!collapsed ? (
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-2">
+              <img src="/images/ensis-logo.png" alt="Ensis Logo" className="h-10 w-auto object-contain" />
+            </div>
           </div>
+        ) : (
+          <img src="/images/ensis-logo.png" alt="Ensis Logo" className="h-7 w-auto mx-auto object-contain" />
         )}
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className={`rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 ${collapsed ? "mx-auto" : ""}`}
-          aria-label="Toggle sidebar"
-        >
-          {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
-        </button>
+        {!collapsed && (
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            className="rounded-lg p-1.5 text-slate-400 hover:bg-[#111e38] hover:text-white transition-colors"
+            aria-label="Collapse sidebar"
+          >
+            <ChevronLeft size={16} />
+          </button>
+        )}
       </div>
 
+      {/* User Card */}
       {!collapsed && (
-        <div className="mx-3 mb-2">
-          <div className="flex w-full items-center gap-2.5 rounded-xl bg-gray-50 px-3 py-2.5">
-            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-[#f3eee6] text-[#6f542f]">
-              <Layers size={15} />
+        <div className="mx-3 my-3 flex items-center justify-between rounded-xl border border-[#162544] bg-[#111e38] p-2.5">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-blue-600 text-white">
+              <User size={18} />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[13px] font-semibold text-gray-900">Frontend Content</p>
-              <span className="mt-0.5 inline-block rounded bg-[#f3eee6] px-1.5 py-0.5 text-[10px] font-medium text-[#6f542f]">
-                Page components
-              </span>
+              <p className="truncate text-[13px] font-semibold text-white">Super Admin</p>
+              <p className="truncate text-[10px] text-slate-400">Full Access</p>
             </div>
           </div>
+          <ChevronDown size={14} className="text-slate-400 flex-shrink-0" />
         </div>
       )}
 
-      <nav className="flex-1 space-y-0.5 overflow-y-auto px-2.5 py-2">
-       {NAV_ITEMS.map((item) => (
-  <MenuItem
-    key={item.label}
-    item={item}
-    currentPath={currentPath}
-    openMenus={openMenus}
-    setOpenMenus={setOpenMenus}
-    handleNavigate={handleNavigate}
-  />
-))}
+      {/* Menu Sections */}
+      <nav className="scrollbar-none flex-1 space-y-2 overflow-y-auto px-3 py-2">
+        {/* Navigation Tree */}
+        <div className="space-y-0.5">
+          {!collapsed && (
+            <p className="mb-1.5 px-3 text-[10px] font-bold uppercase tracking-wider text-slate-500">Navigation</p>
+          )}
+          {NAV_ITEMS.map((item) => (
+            <MenuItem
+              key={item.label}
+              item={item}
+              currentPath={currentPath}
+              openMenus={openMenus}
+              setOpenMenus={setOpenMenus}
+              handleNavigate={handleNavigate}
+            />
+          ))}
+        </div>
       </nav>
 
-      <div className="border-t border-gray-100 px-3 py-3">
-        <div className={`flex items-center gap-2.5 ${collapsed ? "justify-center" : ""}`}>
-          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#6f542f] to-[#b08a52] text-xs font-bold text-white">
-            EA
-          </div>
-          {!collapsed && (
-            <div className="min-w-0">
-              <p className="truncate text-[12.5px] font-semibold text-gray-900">Ensis Admin</p>
-              <p className="truncate text-[11px] text-gray-400">content manager</p>
+      {/* Need Help Card */}
+      {!collapsed ? (
+        <div className="mx-3 mb-4 mt-auto flex items-center justify-between rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 p-3 text-white shadow-lg shadow-blue-900/10">
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/15 text-white">
+              <Headphones size={16} />
             </div>
-          )}
+            <div>
+              <p className="text-xs font-semibold text-white/90">Need Help?</p>
+              <p className="text-[10px] text-white/75">Contact Support</p>
+            </div>
+          </div>
+          <ArrowRight size={14} className="text-white/80" />
         </div>
-      </div>
+      ) : (
+        <div className="mx-auto mb-6 mt-auto flex h-9 w-9 items-center justify-center rounded-full bg-[#111e38] text-slate-400 hover:text-white cursor-pointer">
+          <Headphones size={16} />
+        </div>
+      )}
     </aside>
   );
 }
 
-export function Topbar({ title = "Dashboard", subtitle }: TopbarProps) {
+export function Topbar({ title = "Dashboard", subtitle, collapsed, setCollapsed }: TopbarProps) {
+  const pathname = usePathname();
+  const { logout } = useAuth();
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+
+  // Helper to generate dynamic breadcrumbs
+  const getBreadcrumbs = () => {
+    if (pathname === "/") return ["Home", "Dashboard"];
+    const segments = pathname.split("/").filter(Boolean);
+    const crumbs = ["Home"];
+    
+    segments.forEach((seg) => {
+      if (seg === "homepage-content") {
+        crumbs.push("Pages", "Home");
+      } else if (seg === "about-page-content") {
+        crumbs.push("Pages", "About");
+      } else if (seg === "seo") {
+        crumbs.push("SEO");
+      } else if (seg === "media") {
+        crumbs.push("Media");
+      } else {
+        crumbs.push(seg.charAt(0).toUpperCase() + seg.slice(1).replace(/-/g, " "));
+      }
+    });
+    return crumbs;
+  };
+
+  const breadcrumbs = getBreadcrumbs();
+  const frontendUrl = process.env.NEXT_PUBLIC_FRONTEND_URL || "http://localhost:3000";
+
+  const handleLogout = () => {
+    setShowProfileMenu(false);
+    logout();
+  };
+
   return (
-    <header className="flex h-16 flex-shrink-0 items-center justify-between border-b border-gray-100 bg-white px-7">
-      <div>
-        <h1 className="text-[19px] font-bold leading-tight text-gray-900">{title}</h1>
-        {subtitle && <p className="mt-0.5 text-[12.5px] text-gray-400">{subtitle}</p>}
+    <header className="flex h-16 flex-shrink-0 items-center justify-between border-b border-slate-100 bg-white px-6 z-30">
+      {/* Title & Breadcrumbs */}
+      <div className="flex items-center gap-4">
+        {collapsed && (
+          <button
+            onClick={() => setCollapsed(false)}
+            className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 transition-colors"
+            aria-label="Expand sidebar"
+          >
+            <Menu size={18} />
+          </button>
+        )}
+        <div className="flex flex-col">
+          <h1 className="text-base font-bold text-slate-800 leading-tight">{title}</h1>
+          <div className="flex items-center gap-1 mt-0.5 text-[11px] font-medium text-slate-400">
+            {breadcrumbs.map((crumb, idx) => (
+              <div key={crumb} className="flex items-center gap-1">
+                {idx > 0 && <span className="text-[9px] text-slate-300">/</span>}
+                <span className={idx === breadcrumbs.length - 1 ? "text-slate-500 font-semibold" : ""}>{crumb}</span>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
-      <div className="flex items-center gap-2.5">
+      {/* Right Hand Actions */}
+      <div className="flex items-center gap-4">
+        {/* Search Input */}
+        <div className="relative hidden md:block">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+          <input
+            type="text"
+            placeholder="Search anything..."
+            className="w-56 bg-slate-50 border border-slate-100 pl-9 pr-4 py-1.5 rounded-full text-xs outline-none transition-all focus:bg-white focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+          />
+        </div>
+
+        {/* Visit Website Button */}
         <Link
-          href="/bulk-image-upload"
-          className="inline-flex h-9 items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 text-[12px] font-semibold text-gray-700 transition-colors hover:bg-gray-50"
+          href={frontendUrl}
+          target="_blank"
+          className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-[#1d5af2] hover:bg-[#154dc8] px-3.5 text-xs font-semibold text-white shadow-sm shadow-blue-500/10 transition-colors"
         >
-          <UploadCloud size={15} />
-          Upload Images
+          <span>Visit Website</span>
+          <ExternalLink size={12} />
         </Link>
-        <button className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white py-1 pl-1 pr-3 transition-colors hover:bg-gray-50">
-          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-[#6f542f] to-[#b08a52] text-[11px] font-bold text-white">
-            EA
-          </div>
-          <div className="text-left">
-            <p className="text-[12px] font-semibold leading-tight text-gray-900">Ensis Admin</p>
-            <p className="text-[10.5px] leading-tight text-gray-400">Content</p>
-          </div>
-          <ChevronDown size={13} className="ml-1 text-gray-400" />
+
+        {/* Notification Bell */}
+        <button className="relative p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-colors">
+          <Bell size={16} />
+          <span className="absolute top-1.5 right-1.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-red-500 text-[8px] font-bold text-white">
+            8
+          </span>
         </button>
+
+        {/* Profile Dropdown */}
+        <div className="relative">
+          <button
+            onClick={() => setShowProfileMenu(!showProfileMenu)}
+            className="flex items-center gap-2.5 pl-2 pr-3 py-1 bg-slate-50 hover:bg-slate-100 border border-slate-100 rounded-full cursor-pointer transition-colors outline-none"
+          >
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-600 font-bold text-white text-[11px]">
+              AS
+            </div>
+            <div className="text-left hidden sm:block">
+              <p className="text-[11px] font-semibold text-slate-800 leading-tight">Admin</p>
+            </div>
+            <ChevronDown size={12} className="text-slate-400 ml-0.5" />
+          </button>
+
+          {showProfileMenu && (
+            <div
+              className="absolute right-0 mt-2 w-44 rounded-xl border border-slate-100 bg-white p-1 shadow-lg shadow-slate-200/50 z-50"
+              onMouseLeave={() => setShowProfileMenu(false)}
+            >
+              <div className="px-3 py-2 border-b border-slate-50">
+                <p className="text-[11px] font-bold text-slate-800">Super Admin</p>
+                <p className="text-[9px] text-slate-400 mt-0.5">admin@ensis.in</p>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center gap-2 px-3 py-2 text-left text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+              >
+                <LogOut size={13} />
+                <span>Logout</span>
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );
@@ -384,12 +519,35 @@ export function CommonLayout({
   pageSubtitle,
   onNavigate,
 }: LayoutProps) {
+  const { user, isReady } = useAuth();
+  const [collapsed, setCollapsed] = useState(false);
+
+  if (!isReady) {
+    return <main className="min-h-screen bg-slate-50" />;
+  }
+
+  if (!user) {
+    return <LoginForm />;
+  }
+
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <Sidebar activePath={activePath} onNavigate={onNavigate} />
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <Topbar title={pageTitle} subtitle={pageSubtitle} />
-        <main className="flex-1 overflow-y-auto p-7">{children}</main>
+    <div className="flex h-screen w-screen bg-[#f6f8fc]">
+      <Sidebar
+        activePath={activePath}
+        onNavigate={onNavigate}
+        collapsed={collapsed}
+        setCollapsed={setCollapsed}
+      />
+      <div className="flex flex-1 flex-col">
+        <Topbar
+          title={pageTitle}
+          subtitle={pageSubtitle}
+          collapsed={collapsed}
+          setCollapsed={setCollapsed}
+        />
+        <main className="flex-1 bg-[#f6f8fc] p-3">
+          {children}
+        </main>
       </div>
     </div>
   );

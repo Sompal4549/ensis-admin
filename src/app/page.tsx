@@ -1,20 +1,33 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import Link from "next/link";
-import { Boxes, Code2, ExternalLink, LayoutDashboard, LogOut, Pencil, Plus, Save, ShieldCheck, Trash2 } from "lucide-react";
+import {
+  Lock,
+  FileText,
+  LayoutGrid,
+  Image as ImageIcon,
+  Building2,
+  MessageSquare,
+  Activity,
+  CheckCircle,
+  Eye,
+  Pencil,
+  Trash,
+  RefreshCw,
+  HardDrive
+} from "lucide-react";
 import {
   adminApi,
   authStore,
   categoryApi,
   componentContentApi,
-  getImageUrl,
   productApi,
   type AuthUser,
   type Category,
   type ComponentContent,
   type Product,
 } from "@/lib/api";
+import Link from "next/link";
 
 type ProductForm = {
   id?: string;
@@ -25,23 +38,13 @@ type ProductForm = {
   stock: string;
   category: string;
   images: string;
-  slug:string;
+  slug: string;
 };
 
 type CategoryForm = {
   id?: string;
   name: string;
   description: string;
-};
-
-type ContentForm = {
-  id?: string;
-  key: string;
-  label: string;
-  page: string;
-  description: string;
-  data: string;
-  isActive: boolean;
 };
 
 const emptyProduct: ProductForm = {
@@ -60,203 +63,159 @@ const emptyCategory: CategoryForm = {
   description: "",
 };
 
-const defaultComponentContents: ContentForm[] = [
-  {
-    key: "layout.header",
-    label: "Header",
-    page: "layout",
-    description: "Navigation, contact details, social links, brochure URL, and login links.",
-    isActive: true,
-    data: JSON.stringify(
-      {
-        phone: "+91 9654900525",
-        email: "info@ensis.in",
-        brochureUrl: "https://ensis.in/pdf/e-broucher.pdf",
-        badges: ["Exporting Worldwide", "ISO 9001:2015 Certified", "Manufactured in India"],
-        navLinks: [
-          { label: "Home", href: "/" },
-          { label: "About Us", href: "/about" },
-          { label: "Furniture & Equipment", href: "/products" },
-          { label: "Turnkey Solutions", href: "/turnkey" },
-          { label: "Consultancy", href: "/projects" },
-          { label: "Projects And Clients", href: "/manufacturing" },
-          { label: "Blog", href: "/certifications" },
-          { label: "Enquiry", href: "/blog" },
-          { label: "Contact Us", href: "/contact" }
-        ],
-        socialLinks: []
-      },
-      null,
-      2
-    ),
-  },
-  {
-    key: "home.hero",
-    label: "Home Hero",
-    page: "home",
-    description: "Homepage slider text, button labels, and image paths.",
-    isActive: true,
-    data: JSON.stringify(
-      {
-        slides: [
-          {
-            title: "Rooted in Tradition",
-            highlight: "Crafted for Healing",
-            description: "Authentic Panchakarma. Timeless wellness",
-            image: "",
-            primaryBtn: "EXPLORE COLLECTION"
-          }
-        ]
-      },
-      null,
-      2
-    ),
-  },
-  {
-    key: "home.features",
-    label: "Home Feature Cards",
-    page: "home",
-    description: "Four feature cards shown below the home hero.",
-    isActive: true,
-    data: JSON.stringify(
-      {
-        features: [
-          { title: "In-house Manufacturing", desc: "Premium quality products crafted in our own facility", imgurl: "" },
-          { title: "Customized Solutions", desc: "Tailored equipment as per your space & requirement", imgurl: "" },
-          { title: "Export Quality Standards", desc: "International standards with strict quality control", imgurl: "" },
-          { title: "Turnkey Wellness Solutions", desc: "From concept to complete wellness setup", imgurl: "" }
-        ]
-      },
-      null,
-      2
-    ),
-  },
-  {
-    key: "home.turnkeySolutions",
-    label: "Home Turnkey Solutions",
-    page: "home",
-    description: "Turnkey solutions section heading, CTA, background, and service cards.",
-    isActive: true,
-    data: JSON.stringify(
-      {
-        eyebrow: "TURNKEY WELLNESS SOLUTIONS",
-        heading: "From Concept to\nComplete Wellness Setup",
-        description: "We provide end-to-end solutions for Panchkarma Clinics, Resorts, Hospitals & Wellness Centers.",
-        buttonText: "BOOK DESIGN CONSULTATION",
-        backgroundImage: "",
-        solutions: [
-          { title: "Panchkarma Clinic Setup", imgUrl: "" },
-          { title: "Resort & Spa Setup", imgUrl: "" },
-          { title: "Wellness Retreat Design", imgUrl: "" },
-          { title: "Ayurveda Hospital Equipment", imgUrl: "" },
-          { title: "Interior & Equipment Integration", imgUrl: "" }
-        ]
-      },
-      null,
-      2
-    ),
-  },
-  {
-    key: "home.globalPresence",
-    label: "Home Global Presence",
-    page: "home",
-    description: "Global presence section text, image, and statistics.",
-    isActive: true,
-    data: JSON.stringify(
-      {
-        eyebrow: "GLOBAL PRESENCE",
-        heading: "Trusted by Wellness\nProfessionals Worldwide",
-        description: "Exporting to 25+ countries and growing stronger every day",
-        image: "",
-        stats: [
-          { value: "25+", label: "Countries" },
-          { value: "500+", label: "Projects" },
-          { value: "10+", label: "Years of Excellence" },
-          { value: "100%", label: "Customer Satisfaction" }
-        ]
-      },
-      null,
-      2
-    ),
-  },
-  {
-    key: "home.wellnessSection",
-    label: "Wellness Section",
-    page: "home",
-    description: "Wellness section welcome info, welcome image, and services list.",
-    isActive: true,
-    data: JSON.stringify(
-      {
-        welcomeImage: "/uploads/1780037261719-chatgpt-image-may-29-2026-10_39_53-am.png",
-        eyebrow: "Welcome To Ensis",
-        heading: "Where Tradition Meets Transformative Wellness.",
-        description: "At Ensis, we blend ancient Ayurvedic wisdom with exceptional craftsmanship to create timeless wellness solutions for modern lives.",
-        buttonText: "Know More",
-        buttonHref: "/about",
-        services: [
-          {
-            image: "",
-            title: "PANCHAKARMA TABLES",
-            description: "Experience authentic therapies with comfort and precision."
-          },
-          {
-            image: "",
-            title: "SHIRODHARA EQUIPMENTS",
-            description: "Precision-crafted for deep relaxation and mental clarity."
-          },
-          {
-            image: "",
-            title: "STEAM & SAUNA",
-            description: "Detoxify. Rejuvenate. Restore balance naturally."
-          },
-          {
-            image: "",
-            title: "WELLNESS ACCESSORIES",
-            description: "Thoughtful additions for a complete wellness journey."
-          }
-        ]
-      },
-      null,
-      2
-    ),
-  },
-  {
-    key: "contact.details",
-    label: "Contact Details",
-    page: "contact",
-    description: "Address, phone, email, business hours, and social links on the contact page.",
-    isActive: true,
-    data: JSON.stringify(
-      {
-        heading: "Get In Touch",
-        intro: "Have a question or need assistance? We're here to help you on your wellness journey.",
-        address: "12/29, Site-II, Loni Road, Industrial Area, Mohan Nagar - 201007, Ghaziabad, Uttar Pradesh, India",
-        phone: "+91-9654900525",
-        email: "info@ensis.in",
-        hours: "Mon - Sat: 9:00 AM - 6:00 PM",
-        socialLinks: []
-      },
-      null,
-      2
-    ),
-  },
-];
+const fieldClass = "w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10";
+const labelClass = "block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5";
 
-const componentRouteByKey: Record<string, string> = {
-  "home.hero": "/homepage-content/hero",
-  "home.wellnessSection": "/homepage-content/wellness-section",
-  "home.fullWidthFeatures": "/homepage-content/full-width-features",
-  "home.productsGrid": "/homepage-content/products-grid",
-  "home.turnkeySolutions": "/homepage-content/turnkey-solutions",
-  "home.wellnessRoomSetups": "/homepage-content/room-setups",
-  "home.manufacturingAndProjects": "/homepage-content/manufacturing-projects",
-  "home.globalPresence": "/homepage-content/global-presence",
-  "home.testimonials": "/homepage-content/testimonials",
-  "home.blogInsights": "/homepage-content/blog-insights",
-};
+// Chart Data Point Schema
+interface ChartDataPoint {
+  date: string;
+  pageViews: number;
+  uniqueVisitors: number;
+}
 
-const fieldClass = "w-full rounded-md border border-[#d9cdbb] bg-white px-3 py-2 text-sm outline-none focus:border-[#8d6a3a]";
-const labelClass = "block text-xs font-bold uppercase tracking-wide text-[#5f5a50]";
+// Custom SVG Chart component to handle data rendering dynamically without third party library breaking changes under React 19
+function AnalyticsChart({ data }: { data?: ChartDataPoint[] }) {
+  const chartData = useMemo(() => {
+    if (data && data.length > 0) return data;
+    // Default static fallback data matching the image visual mockup
+    return [
+      { date: "20 Apr", pageViews: 4100, uniqueVisitors: 2200 },
+      { date: "22 Apr", pageViews: 4700, uniqueVisitors: 2800 },
+      { date: "24 Apr", pageViews: 7400, uniqueVisitors: 4900 },
+      { date: "26 Apr", pageViews: 5800, uniqueVisitors: 3800 },
+      { date: "28 Apr", pageViews: 5000, uniqueVisitors: 3300 },
+      { date: "2 May", pageViews: 6800, uniqueVisitors: 4400 },
+      { date: "4 May", pageViews: 6300, uniqueVisitors: 3600 },
+      { date: "6 May", pageViews: 7300, uniqueVisitors: 4700 },
+      { date: "8 May", pageViews: 6600, uniqueVisitors: 4000 },
+      { date: "10 May", pageViews: 7900, uniqueVisitors: 5100 },
+      { date: "12 May", pageViews: 6700, uniqueVisitors: 4200 },
+      { date: "14 May", pageViews: 7700, uniqueVisitors: 4800 },
+      { date: "16 May", pageViews: 7100, uniqueVisitors: 4500 },
+      { date: "18 May", pageViews: 9900, uniqueVisitors: 6900 },
+    ];
+  }, [data]);
+
+  const height = 135;
+  const width = 600;
+  const paddingLeft = 30;
+  const paddingRight = 10;
+  const paddingTop = 15;
+  const paddingBottom = 20;
+
+  const maxVal = useMemo(() => {
+    const vals = chartData.map((d) => Math.max(d.pageViews, d.uniqueVisitors));
+    return Math.max(...vals, 10000);
+  }, [chartData]);
+
+  // Generate X, Y coordinates
+  const points = useMemo(() => {
+    const totalPoints = chartData.length;
+    const chartWidth = width - paddingLeft - paddingRight;
+    const chartHeight = height - paddingTop - paddingBottom;
+
+    return chartData.map((d, index) => {
+      const x = paddingLeft + (index / (totalPoints - 1)) * chartWidth;
+      // invert Y coordinate for SVG
+      const yViews = height - paddingBottom - (d.pageViews / maxVal) * chartHeight;
+      const yVisitors = height - paddingBottom - (d.uniqueVisitors / maxVal) * chartHeight;
+      return { x, yViews, yVisitors, date: d.date };
+    });
+  }, [chartData, maxVal]);
+
+  const viewPath = useMemo(() => {
+    return "M " + points.map((p) => `${p.x.toFixed(1)},${p.yViews.toFixed(1)}`).join(" L ");
+  }, [points]);
+
+  const viewAreaPath = useMemo(() => {
+    const startX = points[0].x.toFixed(1);
+    const endX = points[points.length - 1].x.toFixed(1);
+    const bottomY = (height - paddingBottom).toFixed(1);
+    return `${viewPath} L ${endX},${bottomY} L ${startX},${bottomY} Z`;
+  }, [points, viewPath]);
+
+  const visitorPath = useMemo(() => {
+    return "M " + points.map((p) => `${p.x.toFixed(1)},${p.yVisitors.toFixed(1)}`).join(" L ");
+  }, [points]);
+
+  const visitorAreaPath = useMemo(() => {
+    const startX = points[0].x.toFixed(1);
+    const endX = points[points.length - 1].x.toFixed(1);
+    const bottomY = (height - paddingBottom).toFixed(1);
+    return `${visitorPath} L ${endX},${bottomY} L ${startX},${bottomY} Z`;
+  }, [points, visitorPath]);
+
+  return (
+    <div className="w-full">
+      <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto select-none overflow-visible">
+        <defs>
+          <linearGradient id="viewsGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#1d5af2" stopOpacity="0.2" />
+            <stop offset="100%" stopColor="#1d5af2" stopOpacity="0" />
+          </linearGradient>
+          <linearGradient id="visitorGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#f97316" stopOpacity="0.2" />
+            <stop offset="100%" stopColor="#f97316" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+
+        {/* Horizontal Grid lines */}
+        {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
+          const y = paddingTop + ratio * (height - paddingTop - paddingBottom);
+          const valLabel = Math.round((1 - ratio) * maxVal);
+          return (
+            <g key={ratio} className="opacity-30">
+              <line
+                x1={paddingLeft}
+                y1={y}
+                x2={width - paddingRight}
+                y2={y}
+                stroke="#cbd5e1"
+                strokeWidth="0.75"
+                strokeDasharray="4,4"
+              />
+              <text x={paddingLeft - 6} y={y + 3} fill="#94a3b8" fontSize="8" textAnchor="end">
+                {valLabel >= 1000 ? `${(valLabel / 1000).toFixed(0)}K` : valLabel}
+              </text>
+            </g>
+          );
+        })}
+
+        {/* Areas under paths */}
+        <path d={viewAreaPath} fill="url(#viewsGrad)" />
+        <path d={visitorAreaPath} fill="url(#visitorGrad)" />
+
+        {/* Stroke Lines */}
+        <path d={viewPath} fill="none" stroke="#1d5af2" strokeWidth="2" strokeLinecap="round" />
+        <path d={visitorPath} fill="none" stroke="#f97316" strokeWidth="2" strokeLinecap="round" />
+
+        {/* Dots on line intersections */}
+        {points.map((p, idx) => (
+          <g key={idx}>
+            <circle cx={p.x} cy={p.yViews} r="2.5" fill="#1d5af2" stroke="#fff" strokeWidth="1" />
+            <circle cx={p.x} cy={p.yVisitors} r="2.5" fill="#f97316" stroke="#fff" strokeWidth="1" />
+          </g>
+        ))}
+
+        {/* X axis labels */}
+        {points
+          .filter((_, i) => i % 2 === 0 || i === points.length - 1)
+          .map((p, i) => (
+            <text
+              key={i}
+              x={p.x}
+              y={height - paddingBottom + 12}
+              fill="#94a3b8"
+              fontSize="8"
+              textAnchor="middle"
+            >
+              {p.date}
+            </text>
+          ))}
+      </svg>
+    </div>
+  );
+}
 
 export default function AdminHome() {
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -264,28 +223,19 @@ export default function AdminHome() {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"components" | "products" | "categories">("components");
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [contents, setContents] = useState<ComponentContent[]>([]);
-  const [productForm, setProductForm] = useState<ProductForm>(emptyProduct);
-  const [categoryForm, setCategoryForm] = useState<CategoryForm>(emptyCategory);
-
-  const frontendUrl = process.env.NEXT_PUBLIC_FRONTEND_URL || "http://localhost:3000";
-
-  const selectedCategoryName = useMemo(() => {
-    const category = categories.find((item) => item._id === productForm.category);
-    return category?.name || "Select category";
-  }, [categories, productForm.category]);
 
   const refreshData = async () => {
-    const [productResult, categoryResult, contentResult] = await Promise.all([productApi.list(), categoryApi.list(), componentContentApi.list()]);
+    const [productResult, categoryResult, contentResult] = await Promise.all([
+      productApi.list(),
+      categoryApi.list(),
+      componentContentApi.list(),
+    ]);
     setProducts(productResult.products);
     setCategories(categoryResult);
     setContents(contentResult);
-    if (!productForm.category && categoryResult[0]) {
-      setProductForm((current) => ({ ...current, category: categoryResult[0]._id }));
-    }
   };
 
   useEffect(() => {
@@ -308,7 +258,6 @@ export default function AdminHome() {
       authStore.setSession(result.accessToken, result.user);
       setUser(result.user);
       await refreshData();
-      setMessage("Signed in successfully.");
     } catch (error) {
       setMessage((error as Error).message);
     } finally {
@@ -316,318 +265,387 @@ export default function AdminHome() {
     }
   };
 
-  const handleLogout = () => {
-    authStore.clear();
-    setUser(null);
-    setProducts([]);
-    setCategories([]);
-    setMessage("Signed out.");
-  };
-
-  const submitProduct = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setLoading(true);
-    setMessage("");
-    const payload = {
-      title: productForm.title,
-      description: productForm.description,
-      price: Number(productForm.price || 0),
-      discountPrice: productForm.discountPrice ? Number(productForm.discountPrice) : undefined,
-      stock: productForm.stock ? Number(productForm.stock) : 0,
-      category: productForm.category,
-      images: productForm.images.split(",").map((item) => item.trim()).filter(Boolean),
-      slug: productForm.slug.trim(),
-    };
-
-    try {
-      if (productForm.id) {
-        await productApi.update(productForm.id, payload);
-        setMessage("Product updated.");
-      } else {
-        await productApi.create(payload);
-        setMessage("Product added.");
-      }
-      setProductForm({ ...emptyProduct, category: categories[0]?._id || "" });
-      await refreshData();
-    } catch (error) {
-      setMessage((error as Error).message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const editProduct = (product: Product) => {
-    const categoryId = typeof product.category === "string" ? product.category : product.category?._id || "";
-    setProductForm({
-      id: product._id,
-      title: product.title,
-      description: product.description,
-      price: String(product.price || ""),
-      discountPrice: String(product.discountPrice || ""),
-      stock: String(product.stock || ""),
-      category: categoryId,
-      images: product.images?.join(", ") || "",
-      slug: product.slug || "",
-    });
-    setActiveTab("products");
-  };
-
-  const deleteProduct = async (product: Product) => {
-    if (!confirm(`Delete ${product.title}?`)) return;
-    setLoading(true);
-    try {
-      await productApi.remove(product._id);
-      await refreshData();
-      setMessage("Product deleted.");
-    } catch (error) {
-      setMessage((error as Error).message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const submitCategory = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setLoading(true);
-    setMessage("");
-    try {
-      if (categoryForm.id) {
-        await categoryApi.update(categoryForm.id, categoryForm);
-        setMessage("Category updated.");
-      } else {
-        await categoryApi.create(categoryForm);
-        setMessage("Category added.");
-      }
-      setCategoryForm(emptyCategory);
-      await refreshData();
-    } catch (error) {
-      setMessage((error as Error).message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const deleteCategory = async (category: Category) => {
-    if (!confirm(`Delete ${category.name}? Products using this category may need reassignment.`)) return;
-    setLoading(true);
-    try {
-      await categoryApi.remove(category._id);
-      await refreshData();
-      setMessage("Category deleted.");
-    } catch (error) {
-      setMessage((error as Error).message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const seedDefaultContents = async () => {
-    setLoading(true);
-    setMessage("");
-    try {
-      for (const item of defaultComponentContents) {
-        await componentContentApi.create({
-          key: item.key,
-          label: item.label,
-          page: item.page,
-          description: item.description,
-          isActive: item.isActive,
-          data: JSON.parse(item.data),
-        });
-      }
-      await refreshData();
-      setMessage("Default editable components added.");
-    } catch (error) {
-      setMessage((error as Error).message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const deleteContent = async (content: ComponentContent) => {
-    if (!confirm(`Delete ${content.label}?`)) return;
-    setLoading(true);
-    try {
-      await componentContentApi.remove(content._id);
-      await refreshData();
-      setMessage("Component content deleted.");
-    } catch (error) {
-      setMessage((error as Error).message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Sign In Render (styled premium matching navy elements)
   if (!user) {
     return (
-      <main className="grid min-h-screen place-items-center px-4 py-10">
-        <form onSubmit={handleLogin} className="w-full max-w-md rounded-lg border border-[#ded3c4] bg-white p-8 shadow-sm">
-          <div className="mb-6 inline-flex size-12 items-center justify-center rounded-full bg-[#f3eee6] text-[#6f542f]">
-            <ShieldCheck size={24} />
+      <main className="grid min-h-[70vh] place-items-center bg-slate-50 px-4 py-12">
+        <form
+          onSubmit={handleLogin}
+          className="w-full max-w-md rounded-2xl border border-slate-100 bg-white p-8 shadow-xl shadow-slate-200/50"
+        >
+          <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+            <Lock size={22} />
           </div>
-          <h1 className="font-serif text-3xl text-[#1f261b]">Ensis Admin</h1>
-          <p className="mt-2 text-sm leading-6 text-[#5f5a50]">Sign in with an admin account to manage frontend product and category data.</p>
-          <label className={`${labelClass} mt-6`}>
-            Email
-            <input className={`${fieldClass} mt-2`} type="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
-          </label>
-          <label className={`${labelClass} mt-4`}>
-            Password
-            <input className={`${fieldClass} mt-2`} type="password" value={password} onChange={(event) => setPassword(event.target.value)} required />
-          </label>
-          <button className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-md bg-[#6f542f] px-4 py-3 text-sm font-bold uppercase tracking-wide text-white disabled:opacity-70" disabled={loading}>
+          <h1 className="text-2xl font-bold text-slate-800">Ensis Admin</h1>
+          <p className="mt-1.5 text-xs text-slate-400">
+            Sign in with your credentials to access the admin control panel.
+          </p>
+
+          <div className="mt-6 space-y-4">
+            <div>
+              <label className={labelClass}>Email Address</label>
+              <input
+                className={fieldClass}
+                type="email"
+                placeholder="admin@ensis.in"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <label className={labelClass}>Password</label>
+              <input
+                className={fieldClass}
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                required
+              />
+            </div>
+          </div>
+
+          <button
+            className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#1d5af2] hover:bg-[#154dc8] py-3 text-sm font-bold text-white shadow-md shadow-blue-500/10 transition-colors disabled:opacity-75"
+            disabled={loading}
+          >
             {loading ? "Signing In..." : "Sign In"}
           </button>
-          {message && <p className="mt-4 text-sm font-semibold text-[#7a3f22]">{message}</p>}
+          {message && (
+            <p className="mt-4 text-xs font-semibold text-rose-600 bg-rose-50/50 p-2.5 rounded-lg border border-rose-100">
+              {message}
+            </p>
+          )}
         </form>
       </main>
     );
   }
 
+  // Dashboard Page Content: constrained to Calc layout and lock height
   return (
-    <main className="min-h-screen">
-      <header className="border-b border-[#ded3c4] bg-white">
-        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-4 md:flex-row md:items-center md:justify-between">
-          <div>
-            <span className="text-xs font-bold uppercase tracking-widest text-[#8d6a3a]">Ensis Admin</span>
-            <h1 className="font-serif text-3xl text-[#1f261b]">Content Manager</h1>
+    <div className="flex h-full min-h-0 flex-col gap-3 overflow-hidden">
+      
+      {/* Row 1: Stats Grid (5 Cards in 1 Row) */}
+      <div className="grid h-[72px] shrink-0 grid-cols-5 gap-3">
+        {/* Card 1 */}
+        <div className="bg-white px-4 py-2.5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between h-full">
+          <div className="min-w-0">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Pages</span>
+            <p className="text-xl font-bold text-slate-800 leading-tight">28</p>
+            <span className="text-[9px] text-blue-500 font-semibold leading-none">Published 24</span>
           </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <Link href={frontendUrl} target="_blank" className="inline-flex items-center gap-2 rounded-md border border-[#d9cdbb] bg-white px-4 py-2 text-sm font-bold text-[#263016]">
-              <ExternalLink size={16} /> View Site
-            </Link>
-            <Link href="/homepage-content" className="inline-flex items-center gap-2 rounded-md border border-[#d9cdbb] bg-white px-4 py-2 text-sm font-bold text-[#263016]">
-              <LayoutDashboard size={16} /> Homepage Content
-            </Link>
-            <button onClick={handleLogout} className="inline-flex items-center gap-2 rounded-md bg-[#263016] px-4 py-2 text-sm font-bold text-white">
-              <LogOut size={16} /> Logout
-            </button>
+          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+            <FileText size={16} />
           </div>
         </div>
-      </header>
 
-      <div className="mx-auto max-w-7xl px-5 py-6">
-        <div className="mb-5 flex flex-wrap items-center gap-3">
-          <button onClick={() => setActiveTab("components")} className={`inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-bold ${activeTab === "components" ? "bg-[#6f542f] text-white" : "border border-[#d9cdbb] bg-white text-[#263016]"}`}>
-            <Code2 size={16} /> Components
-          </button>
-          <button onClick={() => setActiveTab("products")} className={`inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-bold ${activeTab === "products" ? "bg-[#6f542f] text-white" : "border border-[#d9cdbb] bg-white text-[#263016]"}`}>
-            <Boxes size={16} /> Products
-          </button>
-          <button onClick={() => setActiveTab("categories")} className={`inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-bold ${activeTab === "categories" ? "bg-[#6f542f] text-white" : "border border-[#d9cdbb] bg-white text-[#263016]"}`}>
-            <LayoutDashboard size={16} /> Categories
-          </button>
-          {message && <p className="text-sm font-semibold text-[#7a3f22]">{message}</p>}
+        {/* Card 2 */}
+        <div className="bg-white px-4 py-2.5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between h-full">
+          <div className="min-w-0">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Sections</span>
+            <p className="text-xl font-bold text-slate-800 leading-tight">62</p>
+            <span className="text-[9px] text-amber-500 font-semibold leading-none">Active 58</span>
+          </div>
+          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+            <LayoutGrid size={16} />
+          </div>
         </div>
 
-        {activeTab === "components" ? (
-          <section className="grid gap-6">
-            <div className="overflow-hidden rounded-lg border border-[#ded3c4] bg-white">
-              <div className="flex flex-col gap-3 border-b border-[#ded3c4] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h2 className="text-lg font-bold">{contents.length} Editable Components</h2>
-                  <p className="mt-1 text-sm text-[#5f5a50]">Open each component route to update its form fields.</p>
-                </div>
-                <button type="button" onClick={seedDefaultContents} className="rounded-md border border-[#d9cdbb] px-3 py-2 text-xs font-bold" disabled={loading}>Add Defaults</button>
-              </div>
-              <div className="divide-y divide-[#eee5d9]">
-                {contents.map((content) => (
-                  <article key={content._id} className="flex flex-col gap-4 p-4 md:flex-row md:items-center md:justify-between">
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="font-bold text-[#1f261b]">{content.label}</h3>
-                        <span className="rounded-full bg-[#f3eee6] px-2 py-1 text-[11px] font-bold text-[#6f542f]">{content.key}</span>
-                        {!content.isActive && <span className="rounded-full bg-[#f8e7e7] px-2 py-1 text-[11px] font-bold text-[#9b2c2c]">Inactive</span>}
-                      </div>
-                      <p className="mt-1 text-sm text-[#5f5a50]">{content.description || `Page: ${content.page}`}</p>
-                    </div>
-                    <div className="flex gap-2">
-                      {componentRouteByKey[content.key] ? (
-                        <Link href={componentRouteByKey[content.key]} className="inline-flex items-center gap-2 rounded-md border border-[#d9cdbb] px-3 py-2 text-sm font-bold text-[#263016]" aria-label="Edit component content">
-                          <Pencil size={16} /> Edit Form
-                        </Link>
-                      ) : (
-                        <span className="rounded-md border border-[#eadfce] px-3 py-2 text-sm font-semibold text-[#8a8072]">No route</span>
-                      )}
-                      <button onClick={() => deleteContent(content)} className="inline-flex size-10 items-center justify-center rounded-md border border-[#d9cdbb] text-[#9b2c2c]" aria-label="Delete component content"><Trash2 size={16} /></button>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </div>
-          </section>
-        ) : activeTab === "products" ? (
-          <section className="grid gap-6 lg:grid-cols-[0.95fr_1.4fr]">
-            <form onSubmit={submitProduct} className="rounded-lg border border-[#ded3c4] bg-white p-5">
-              <h2 className="mb-5 flex items-center gap-2 text-lg font-bold"><Plus size={18} /> {productForm.id ? "Edit Product" : "Add Product"}</h2>
-              <label className={labelClass}>Title<input className={`${fieldClass} mt-2`} value={productForm.title} onChange={(event) => setProductForm({ ...productForm, title: event.target.value })} required /></label>
-              <label className={`${labelClass} mt-4`}>Description<textarea className={`${fieldClass} mt-2 min-h-28`} value={productForm.description} onChange={(event) => setProductForm({ ...productForm, description: event.target.value })} required /></label>
-              <div className="mt-4 grid gap-4 sm:grid-cols-3">
-                <label className={labelClass}>Price<input className={`${fieldClass} mt-2`} type="number" min="0" value={productForm.price} onChange={(event) => setProductForm({ ...productForm, price: event.target.value })} required /></label>
-                <label className={labelClass}>Discount<input className={`${fieldClass} mt-2`} type="number" min="0" value={productForm.discountPrice} onChange={(event) => setProductForm({ ...productForm, discountPrice: event.target.value })} /></label>
-                <label className={labelClass}>Stock<input className={`${fieldClass} mt-2`} type="number" min="0" value={productForm.stock} onChange={(event) => setProductForm({ ...productForm, stock: event.target.value })} /></label>
-                 <label className={labelClass}>Url<input className={`${fieldClass} mt-2`} min="0" value={productForm.slug} onChange={(event) => setProductForm({ ...productForm, slug: event.target.value })} /></label>
-              </div>
-              <label className={`${labelClass} mt-4`}>Category<select className={`${fieldClass} mt-2`} value={productForm.category} onChange={(event) => setProductForm({ ...productForm, category: event.target.value })} required><option value="">{selectedCategoryName}</option>{categories.map((category) => <option key={category._id} value={category._id}>{category.name}</option>)}</select></label>
-              <label className={`${labelClass} mt-4`}>Images<input className={`${fieldClass} mt-2`} value={productForm.images} onChange={(event) => setProductForm({ ...productForm, images: event.target.value })} placeholder="/uploads/product.webp, https://..." /></label>
-              <div className="mt-5 flex gap-3">
-                <button className="inline-flex items-center gap-2 rounded-md bg-[#6f542f] px-4 py-2 text-sm font-bold text-white" disabled={loading}><Save size={16} /> Save</button>
-                {productForm.id && <button type="button" onClick={() => setProductForm({ ...emptyProduct, category: categories[0]?._id || "" })} className="rounded-md border border-[#d9cdbb] px-4 py-2 text-sm font-bold">Cancel</button>}
-              </div>
-            </form>
+        {/* Card 3 */}
+        <div className="bg-white px-4 py-2.5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between h-full">
+          <div className="min-w-0">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Sliders / Banners</span>
+            <p className="text-xl font-bold text-slate-800 leading-tight">6</p>
+            <span className="text-[9px] text-purple-500 font-semibold leading-none">Active 6</span>
+          </div>
+          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-purple-50 text-purple-600">
+            <ImageIcon size={16} />
+          </div>
+        </div>
 
-            <div className="overflow-hidden rounded-lg border border-[#ded3c4] bg-white">
-              <div className="border-b border-[#ded3c4] px-5 py-4 text-sm font-bold">{products.length} Products</div>
-              <div className="divide-y divide-[#eee5d9]">
-                {products.map((product) => (
-                  <article key={product._id} className="grid gap-4 p-4 md:grid-cols-[96px_1fr_auto] md:items-center">
-                    <div className="h-20 overflow-hidden rounded-md bg-[#e5dccf]">{product.images?.[0] && <img src={getImageUrl(product.images[0])} alt={product.title} className="h-full w-full object-cover" />}</div>
-                    <div>
-                      <h3 className="font-bold text-[#1f261b]">{product.title}</h3>
-                      <p className="mt-1 line-clamp-2 text-sm text-[#5f5a50]">{product.description}</p>
-                      <p className="mt-2 text-sm font-bold text-[#334022]">Rs. {product.price?.toLocaleString("en-IN")} · {typeof product.category === "string" ? product.category : product.category?.name}</p>
-                    </div>
-                    <div className="flex gap-2">
-                      <button onClick={() => editProduct(product)} className="inline-flex size-10 items-center justify-center rounded-md border border-[#d9cdbb]" aria-label="Edit product"><Pencil size={16} /></button>
-                      <button onClick={() => deleteProduct(product)} className="inline-flex size-10 items-center justify-center rounded-md border border-[#d9cdbb] text-[#9b2c2c]" aria-label="Delete product"><Trash2 size={16} /></button>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </div>
-          </section>
-        ) : (
-          <section className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
-            <form onSubmit={submitCategory} className="rounded-lg border border-[#ded3c4] bg-white p-5">
-              <h2 className="mb-5 flex items-center gap-2 text-lg font-bold"><Plus size={18} /> {categoryForm.id ? "Edit Category" : "Add Category"}</h2>
-              <label className={labelClass}>Name<input className={`${fieldClass} mt-2`} value={categoryForm.name} onChange={(event) => setCategoryForm({ ...categoryForm, name: event.target.value })} required /></label>
-              <label className={`${labelClass} mt-4`}>Description<textarea className={`${fieldClass} mt-2 min-h-28`} value={categoryForm.description} onChange={(event) => setCategoryForm({ ...categoryForm, description: event.target.value })} /></label>
-              <div className="mt-5 flex gap-3">
-                <button className="inline-flex items-center gap-2 rounded-md bg-[#6f542f] px-4 py-2 text-sm font-bold text-white" disabled={loading}><Save size={16} /> Save</button>
-                {categoryForm.id && <button type="button" onClick={() => setCategoryForm(emptyCategory)} className="rounded-md border border-[#d9cdbb] px-4 py-2 text-sm font-bold">Cancel</button>}
-              </div>
-            </form>
+        {/* Card 4 */}
+        <div className="bg-white px-4 py-2.5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between h-full">
+          <div className="min-w-0">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Projects</span>
+            <p className="text-xl font-bold text-slate-800 leading-tight">35</p>
+            <span className="text-[9px] text-emerald-500 font-semibold leading-none">Published 31</span>
+          </div>
+          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+            <Building2 size={16} />
+          </div>
+        </div>
 
-            <div className="overflow-hidden rounded-lg border border-[#ded3c4] bg-white">
-              <div className="border-b border-[#ded3c4] px-5 py-4 text-sm font-bold">{categories.length} Categories</div>
-              <div className="divide-y divide-[#eee5d9]">
-                {categories.map((category) => (
-                  <article key={category._id} className="flex flex-col gap-4 p-4 md:flex-row md:items-center md:justify-between">
-                    <div>
-                      <h3 className="font-bold text-[#1f261b]">{category.name}</h3>
-                      <p className="mt-1 text-sm text-[#5f5a50]">{category.description || "No description"}</p>
-                    </div>
-                    <div className="flex gap-2">
-                      <button onClick={() => setCategoryForm({ id: category._id, name: category.name, description: category.description || "" })} className="inline-flex size-10 items-center justify-center rounded-md border border-[#d9cdbb]" aria-label="Edit category"><Pencil size={16} /></button>
-                      <button onClick={() => deleteCategory(category)} className="inline-flex size-10 items-center justify-center rounded-md border border-[#d9cdbb] text-[#9b2c2c]" aria-label="Delete category"><Trash2 size={16} /></button>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
+        {/* Card 5 */}
+        <div className="bg-white px-4 py-2.5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between h-full">
+          <div className="min-w-0">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Inquiries</span>
+            <p className="text-xl font-bold text-slate-800 leading-tight">186</p>
+            <span className="text-[9px] text-emerald-500 font-semibold leading-none">↑ 18% This Month</span>
+          </div>
+          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+            <MessageSquare size={16} />
+          </div>
+        </div>
       </div>
-    </main>
+
+      {/* Row 2: Website Overview Chart + Recent Inquiries + Quick Actions (Exactly 3 Cards in a Row) */}
+      <div className="grid min-h-0 flex-1 grid-cols-12 gap-3">
+        
+        {/* Card 1: Website Overview (Spans 6 cols) */}
+        <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm col-span-6 h-full flex flex-col overflow-hidden">
+          <div className="flex items-center justify-between border-b border-slate-50 pb-2 flex-shrink-0">
+            <div>
+              <h3 className="text-xs font-bold text-slate-800">Website Overview</h3>
+              <p className="text-[9px] text-slate-400 mt-0.5">Track website page views and visitor metrics.</p>
+            </div>
+            <select className="text-[10px] bg-slate-50 border border-slate-200 rounded-md px-2 py-0.5 text-slate-600 outline-none">
+              <option>Last 30 Days</option>
+              <option>Last 7 Days</option>
+            </select>
+          </div>
+
+          {/* Core chart numbers */}
+          <div className="grid grid-cols-4 gap-2 py-2 flex-shrink-0 border-b border-slate-50/50">
+            <div>
+              <p className="text-[9px] text-slate-400 font-medium">Page Views</p>
+              <p className="text-xs font-bold text-slate-800 leading-tight">12,540</p>
+              <span className="text-[8px] font-semibold text-emerald-500 leading-none">↑ 24.5%</span>
+            </div>
+            <div>
+              <p className="text-[9px] text-slate-400 font-medium">Unique Visitors</p>
+              <p className="text-xs font-bold text-slate-800 leading-tight">8,320</p>
+              <span className="text-[8px] font-semibold text-emerald-500 leading-none">↑ 18.7%</span>
+            </div>
+            <div>
+              <p className="text-[9px] text-slate-400 font-medium">Inquiries</p>
+              <p className="text-xs font-bold text-slate-800 leading-tight">186</p>
+              <span className="text-[8px] font-semibold text-emerald-500 leading-none">↑ 18%</span>
+            </div>
+            <div>
+              <p className="text-[9px] text-slate-400 font-medium">Subscribers</p>
+              <p className="text-xs font-bold text-slate-800 leading-tight">245</p>
+              <span className="text-[8px] font-semibold text-emerald-500 leading-none">↑ 12.6%</span>
+            </div>
+          </div>
+
+          {/* SVG Chart area */}
+          <div className="flex-1 min-h-0 flex items-center justify-center pt-2">
+            <AnalyticsChart />
+          </div>
+        </div>
+
+        {/* Card 2: Recent Inquiries (Spans 3 cols) */}
+        <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm col-span-3 h-full flex flex-col overflow-hidden">
+          <div className="flex items-center justify-between border-b border-slate-50 pb-2 flex-shrink-0">
+            <h3 className="text-xs font-bold text-slate-800">Recent Inquiries</h3>
+            <span className="text-[9px] font-bold text-blue-600">View All</span>
+          </div>
+
+          <div className="flex-1 overflow-y-auto scrollbar-none py-1.5 divide-y divide-slate-50 min-h-0">
+            {[
+              { name: "Rahul Sharma", company: "Wellness Resort, Rishikesh", tag: "New", tagColor: "text-green-600 bg-green-50", time: "10m ago", avatar: "RS" },
+              { name: "Ananya Verma", company: "Ayurveda Clinic, Pune", tag: "Contact", tagColor: "text-amber-600 bg-amber-50", time: "1h ago", avatar: "AV" },
+              { name: "Vikram Malhotra", company: "Spa Retreat, Jaipur", tag: "New", tagColor: "text-green-600 bg-green-50", time: "3h ago", avatar: "VM" },
+              { name: "Sneha Patel", company: "Health Retreat, Coorg", tag: "Contact", tagColor: "text-amber-600 bg-amber-50", time: "5h ago", avatar: "SP" },
+              { name: "Dr. Meera Iyer", company: "Panchakarma, Kochi", tag: "Discuss", tagColor: "text-blue-600 bg-blue-50", time: "1d ago", avatar: "MI" },
+            ].map((item, idx) => (
+              <div key={idx} className="flex items-center justify-between py-2 first:pt-0">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 text-[10px] font-bold text-slate-600">
+                    {item.avatar}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-semibold text-slate-800 truncate">{item.name}</p>
+                    <p className="text-[9px] text-slate-400 truncate">{item.company}</p>
+                  </div>
+                </div>
+                <div className="flex flex-col items-end gap-0.5">
+                  <span className={`text-[8px] px-1 py-0.2 rounded font-bold ${item.tagColor}`}>
+                    {item.tag}
+                  </span>
+                  <span className="text-[8px] text-slate-300">{item.time}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Card 3: Quick Actions (Spans 3 cols) */}
+        <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm col-span-3 h-full flex flex-col overflow-hidden">
+          <h3 className="text-xs font-bold text-slate-800 border-b border-slate-50 pb-2 flex-shrink-0">Quick Actions</h3>
+
+          <div className="flex-1 overflow-y-auto scrollbar-none py-2 min-h-0">
+            <div className="grid grid-cols-2 gap-2 h-full">
+              {[
+                { label: "New Page", icon: <FileText size={15} />, color: "bg-blue-50 text-blue-600", path: "/homepage-content" },
+                { label: "New Project", icon: <Building2 size={15} />, color: "bg-emerald-50 text-emerald-600", path: "/products" },
+                { label: "New Slider", icon: <ImageIcon size={15} />, color: "bg-purple-50 text-purple-600", path: "/homepage-content/hero" },
+                { label: "Manage Services", icon: <LayoutGrid size={15} />, color: "bg-amber-50 text-amber-600", path: "/products" },
+                { label: "Inquiries", icon: <MessageSquare size={15} />, color: "bg-sky-50 text-sky-600", path: "/homepage-content" },
+                { label: "Site Settings", icon: <Activity size={15} />, color: "bg-slate-100 text-slate-600", path: "/about-page-content" },
+              ].map((act, idx) => (
+                <Link
+                  href={act.path}
+                  key={idx}
+                  className="flex flex-col items-center justify-center p-2 rounded-xl border border-slate-50 hover:bg-slate-50/50 text-center transition-all group"
+                >
+                  <div className={`h-7.5 w-7.5 rounded-lg flex items-center justify-center ${act.color} group-hover:scale-105 transition-transform`}>
+                    {act.icon}
+                  </div>
+                  <span className="text-[9px] font-semibold text-slate-600 mt-1.5 truncate w-full">{act.label}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      {/* Row 3: Recent Pages + Recent Sliders + System Status (Exactly 3 Cards in a Row) */}
+      <div className="grid min-h-0 flex-1 grid-cols-12 gap-3">
+        
+        {/* Card 1: Recent Pages (Spans 6 cols) */}
+        <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm col-span-6 h-full flex flex-col overflow-hidden">
+          <div className="flex items-center justify-between border-b border-slate-50 pb-2 flex-shrink-0">
+            <h3 className="text-xs font-bold text-slate-800">Recent Pages</h3>
+            <span className="text-[9px] font-bold text-blue-600">View All</span>
+          </div>
+
+          <div className="flex-1 overflow-y-auto scrollbar-none py-1.5 min-h-0">
+            <table className="w-full text-left text-[11px] border-collapse">
+              <thead>
+                <tr className="border-b border-slate-50 text-[8px] font-bold uppercase tracking-wider text-slate-400">
+                  <th className="py-1.5">Page Title</th>
+                  <th className="py-1.5">Template</th>
+                  <th className="py-1.5">Status</th>
+                  <th className="py-1.5">Last Updated</th>
+                  <th className="py-1.5 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50/80">
+                {[
+                  { title: "Home", temp: "Home Page", status: "Published", updated: "18 May, 11:30 AM" },
+                  { title: "About Us", temp: "Default", status: "Published", updated: "16 May, 04:15 PM" },
+                  { title: "Our Solutions", temp: "Default", status: "Published", updated: "15 May, 02:40 PM" },
+                  { title: "Wellness Resort", temp: "Services", status: "Published", updated: "14 May, 01:20 PM" },
+                  { title: "Projects", temp: "Projects", status: "Published", updated: "13 May, 10:10 AM" },
+                ].map((row, idx) => (
+                  <tr key={idx} className="group">
+                    <td className="py-2 font-bold text-slate-700">{row.title}</td>
+                    <td className="py-2 text-slate-500">{row.temp}</td>
+                    <td className="py-2">
+                      <span className="inline-block bg-green-50 text-green-600 px-1.5 py-0.1 rounded text-[8px] font-bold border border-green-100">
+                        {row.status}
+                      </span>
+                    </td>
+                    <td className="py-2 text-slate-400">{row.updated}</td>
+                    <td className="py-2 text-right">
+                      <div className="inline-flex items-center gap-1">
+                        <button className="p-0.5 text-slate-400 hover:text-blue-600 cursor-pointer">
+                          <Eye size={11} />
+                        </button>
+                        <button className="p-0.5 text-slate-400 hover:text-amber-600 cursor-pointer">
+                          <Pencil size={11} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Card 2: Recent Sliders / Banners (Spans 3 cols) */}
+        <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm col-span-3 h-full flex flex-col overflow-hidden">
+          <div className="flex items-center justify-between border-b border-slate-50 pb-2 flex-shrink-0">
+            <h3 className="text-xs font-bold text-slate-800">Recent Sliders / Banners</h3>
+            <span className="text-[9px] font-bold text-blue-600">View All</span>
+          </div>
+
+          <div className="flex-1 overflow-y-auto scrollbar-none py-1.5 space-y-2 min-h-0">
+            {[
+              {
+                title: "Luxury Wellness Retreats",
+                desc: "Home Slider",
+                status: "Active",
+                img: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=120&q=80",
+              },
+              {
+                title: "Ayurveda & Healing",
+                desc: "Home Slider",
+                status: "Active",
+                img: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=120&q=80",
+              },
+              {
+                title: "Design. Build. Launch.",
+                desc: "Home Slider",
+                status: "Active",
+                img: "https://images.unsplash.com/photo-1519710164239-da123dc03ef4?auto=format&fit=crop&w=120&q=80",
+              },
+            ].map((slider, idx) => (
+              <div key={idx} className="flex items-center justify-between p-1.5 rounded-xl border border-slate-50 hover:bg-slate-50/50 transition-colors">
+                <div className="flex items-center gap-2 min-w-0">
+                  <img
+                    src={slider.img}
+                    alt={slider.title}
+                    className="h-8 w-12 object-cover rounded-lg bg-slate-50 flex-shrink-0"
+                  />
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-bold text-slate-800 truncate">{slider.title}</p>
+                    <p className="text-[8px] text-slate-400 truncate mt-0.5">{slider.desc}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5 flex-shrink-0">
+                  <span className="bg-green-50 text-green-600 px-1 py-0.2 rounded text-[7px] font-bold border border-green-100">
+                    {slider.status}
+                  </span>
+                  <button className="p-0.5 text-slate-400 hover:text-rose-600 cursor-pointer">
+                    <Trash size={10} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Card 3: System Status (Spans 3 cols) */}
+        <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm col-span-3 h-full flex flex-col overflow-hidden">
+          <h3 className="text-xs font-bold text-slate-800 border-b border-slate-50 pb-2 flex-shrink-0">System Status</h3>
+
+          <div className="flex-1 overflow-y-auto scrollbar-none py-1.5 space-y-3 text-[11px] text-slate-600 min-h-0">
+            <div className="flex items-center justify-between">
+              <span>Website Status</span>
+              <span className="bg-green-500 text-white px-1.5 py-0.2 rounded font-bold text-[8px]">Live</span>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <span>SSL Certificate</span>
+              <span className="bg-green-500 text-white px-1.5 py-0.2 rounded font-bold text-[8px]">Active</span>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <span>Last Backup</span>
+              <span className="font-semibold text-[10px] text-slate-500">19 May, 02:30 AM</span>
+            </div>
+
+            <div className="pt-2 border-t border-slate-100">
+              <div className="flex items-center justify-between mb-1">
+                <span>Storage Usage</span>
+                <span className="font-semibold text-slate-500">2.45 GB / 10 GB</span>
+              </div>
+              {/* Progress Bar */}
+              <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                <div className="bg-emerald-500 h-full rounded-full" style={{ width: "24.5%" }} />
+              </div>
+              <span className="text-[8px] text-slate-400 mt-1 inline-block">24% space used</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
   );
 }

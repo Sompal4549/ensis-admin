@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { AuthProvider } from "@/components/auth/AuthContext";
 import { CommonLayout } from "@/components/common/CommonLayout";
 
 export const metadata: Metadata = {
@@ -11,9 +12,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
-        <CommonLayout>
-          {children}
-        </CommonLayout>
+        <AuthProvider>
+          <CommonLayout>
+            {children}
+          </CommonLayout>
+        </AuthProvider>
       </body>
     </html>
   );
