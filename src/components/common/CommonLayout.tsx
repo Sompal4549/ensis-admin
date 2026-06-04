@@ -202,10 +202,12 @@ function MenuItem({
   openMenus,
   setOpenMenus,
   handleNavigate,
+  collapsed,
 }: {
   item: NavItem;
   level?: number;
   currentPath: string;
+  collapsed: boolean;
   openMenus: Record<string, boolean>;
   setOpenMenus: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
   handleNavigate: (path: string) => void;
@@ -230,23 +232,25 @@ function MenuItem({
               isActive
                 ? "bg-[#1d5af2] text-white shadow-md shadow-blue-500/10"
                 : "text-slate-400 hover:text-white hover:bg-[#111e38]"
-            }`}
-            style={{ marginLeft: `${level * 12}px` }}
+            } ${collapsed ? "justify-center px-0" : "px-3"}`}
+            style={{ marginLeft: collapsed ? 0 : `${level * 12}px` }}
           >
             {item.icon && <span className={`${isActive ? "text-white" : "text-slate-400 group-hover:text-white"} transition-colors`}>{item.icon}</span>}
-            <span>{item.label}</span>
+            {!collapsed && <span>{item.label}</span>}
           </Link>
         ) : (
           <div
-            className="flex min-h-8 flex-1 cursor-default items-center gap-2.5 rounded-lg px-3 py-1.5 text-[13px] font-medium text-slate-400"
-            style={{ marginLeft: `${level * 12}px` }}
+            className={`flex min-h-8 flex-1 cursor-default items-center gap-2.5 rounded-lg py-1.5 text-[13px] font-medium text-slate-400 ${
+              collapsed ? "justify-center px-0" : "px-3"
+            }`}
+            style={{ marginLeft: collapsed ? 0 : `${level * 12}px` }}
           >
             {item.icon && <span className="text-slate-400">{item.icon}</span>}
-            <span>{item.label}</span>
+            {!collapsed && <span>{item.label}</span>}
           </div>
         )}
 
-        {hasChildren && (
+        {hasChildren && !collapsed && (
           <button
             type="button"
             onClick={() =>
@@ -267,7 +271,7 @@ function MenuItem({
         )}
       </div>
 
-      {hasChildren && isOpen && (
+      {hasChildren && isOpen && !collapsed && (
         <div className="ml-3 mt-0.5 space-y-0.5 border-l border-slate-800">
           {item.children!.map((child) => (
             <MenuItem
@@ -278,6 +282,7 @@ function MenuItem({
               openMenus={openMenus}
               setOpenMenus={setOpenMenus}
               handleNavigate={handleNavigate}
+              collapsed={collapsed}
             />
           ))}
         </div>
@@ -300,9 +305,9 @@ export function Sidebar({ activePath, onNavigate, collapsed, setCollapsed }: Sid
   };
 
   return (
-    <aside className={`relative flex h-screen flex-shrink-0 flex-col bg-[#081225] border-r border-[#162544] transition-all duration-300 ${collapsed ? "w-16" : "w-64"}`}>
+    <aside className={`fixed top-0 left-0 z-40 flex h-screen flex-shrink-0 flex-col bg-[#081225] border-r border-[#162544] transition-all duration-300 ${collapsed ? "w-16" : "w-64"}`}>
       {/* Logo Header */}
-      <div className="flex items-center justify-between border-b border-[#162544] px-5 py-4">
+      <div className="flex items-center border-b border-[#162544] px-5 py-4">
         {!collapsed ? (
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-2">
@@ -311,15 +316,6 @@ export function Sidebar({ activePath, onNavigate, collapsed, setCollapsed }: Sid
           </div>
         ) : (
           <img src="/images/ensis-logo.png" alt="Ensis Logo" className="h-7 w-auto mx-auto object-contain" />
-        )}
-        {!collapsed && (
-          <button
-            onClick={() => setCollapsed(!collapsed)}
-            className="rounded-lg p-1.5 text-slate-400 hover:bg-[#111e38] hover:text-white transition-colors"
-            aria-label="Collapse sidebar"
-          >
-            <ChevronLeft size={16} />
-          </button>
         )}
       </div>
 
@@ -354,6 +350,7 @@ export function Sidebar({ activePath, onNavigate, collapsed, setCollapsed }: Sid
               openMenus={openMenus}
               setOpenMenus={setOpenMenus}
               handleNavigate={handleNavigate}
+              collapsed={collapsed}
             />
           ))}
         </div>
@@ -412,8 +409,16 @@ export function Topbar({ title = "Dashboard", subtitle, collapsed, setCollapsed 
   const breadcrumbs = getBreadcrumbs();
   const frontendUrl = process.env.NEXT_PUBLIC_FRONTEND_URL || "http://localhost:3000";
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setShowProfileMenu(false);
+    try {
+      // Call the logout API as requested
+      await fetch("/api/v1/admin/logout", {
+        method: "POST",
+      });
+    } catch (error) {
+      console.error("Logout API call failed:", error);
+    }
     logout();
   };
 
@@ -421,20 +426,18 @@ export function Topbar({ title = "Dashboard", subtitle, collapsed, setCollapsed 
     <header className="flex h-16 flex-shrink-0 items-center justify-between border-b border-slate-100 bg-white px-6 z-30">
       {/* Title & Breadcrumbs */}
       <div className="flex items-center gap-4">
-        {collapsed && (
-          <button
-            onClick={() => setCollapsed(false)}
-            className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 transition-colors"
-            aria-label="Expand sidebar"
-          >
-            <Menu size={18} />
-          </button>
-        )}
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 transition-colors"
+          aria-label="Toggle sidebar"
+        >
+          <Menu size={18} />
+        </button>
         <div className="flex flex-col">
           <h1 className="text-base font-bold text-slate-800 leading-tight">{title}</h1>
           <div className="flex items-center gap-1 mt-0.5 text-[11px] font-medium text-slate-400">
             {breadcrumbs.map((crumb, idx) => (
-              <div key={crumb} className="flex items-center gap-1">
+              <div key={`${crumb}-${idx}`} className="flex items-center gap-1">
                 {idx > 0 && <span className="text-[9px] text-slate-300">/</span>}
                 <span className={idx === breadcrumbs.length - 1 ? "text-slate-500 font-semibold" : ""}>{crumb}</span>
               </div>
@@ -531,21 +534,21 @@ export function CommonLayout({
   }
 
   return (
-    <div className="flex h-screen w-screen bg-[#f6f8fc]">
+    <div className="h-screen bg-[#f6f8fc]">
       <Sidebar
         activePath={activePath}
         onNavigate={onNavigate}
         collapsed={collapsed}
         setCollapsed={setCollapsed}
       />
-      <div className="flex flex-1 flex-col">
+      <div className={`flex h-full flex-col transition-all duration-300 ${collapsed ? "ml-16" : "ml-64"}`}>
         <Topbar
           title={pageTitle}
           subtitle={pageSubtitle}
           collapsed={collapsed}
           setCollapsed={setCollapsed}
         />
-        <main className="flex-1 bg-[#f6f8fc] p-3">
+        <main className="flex-1 overflow-y-auto bg-[#f6f8fc] p-3">
           {children}
         </main>
       </div>
