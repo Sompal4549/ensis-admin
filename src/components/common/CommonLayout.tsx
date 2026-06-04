@@ -25,6 +25,7 @@ import {
   LogOut
 } from "lucide-react";
 import { LoginForm, useAuth } from "@/components/auth/AuthContext";
+import sidebarBg from "@/assets/sidebarbg.webp"
 
 interface NavItem {
   label: string;
@@ -305,7 +306,7 @@ export function Sidebar({ activePath, onNavigate, collapsed, setCollapsed }: Sid
   };
 
   return (
-    <aside className={`fixed top-0 left-0 z-40 flex h-screen flex-shrink-0 flex-col bg-[#081225] border-r border-[#162544] transition-all duration-300 ${collapsed ? "w-16" : "w-64"}`}>
+    <aside className={`fixed top-0 left-0 z-40 flex h-screen flex-shrink-0 flex-col transition-all duration-300 ${collapsed ? "w-16" : "w-64"} `} style={{backgroundImage:`url(${sidebarBg.src})`, backgroundSize: '100% 100%', backgroundRepeat: 'no-repeat'}}>
       {/* Logo Header */}
       <div className="flex items-center border-b border-[#162544] px-5 py-4">
         {!collapsed ? (

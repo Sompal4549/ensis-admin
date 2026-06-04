@@ -28,7 +28,11 @@ import {
   type Product,
 } from "@/lib/api";
 import Link from "next/link";
-
+import pink from "@/assets/lightpink.webp";
+import blue from "@/assets/blue_wave.webp";
+import orange from "@/assets/orange.webp"
+import purple from "@/assets/purple.webp"
+import green from "@/assets/green.webp"
 type ProductForm = {
   id?: string;
   title: string;
@@ -276,8 +280,8 @@ export default function AdminHome() {
           <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
             <Lock size={22} />
           </div>
-          <h1 className="text-2xl font-bold text-slate-800">Ensis Admin</h1>
-          <p className="mt-1.5 text-xs text-slate-400">
+          <h1 className="text-2xl font-bold ">Ensis Admin</h1>
+          <p className="mt-1.5 text-xs ">
             Sign in with your credentials to access the admin control panel.
           </p>
 
@@ -327,12 +331,12 @@ export default function AdminHome() {
     <div className="flex h-full min-h-0 flex-col gap-3 overflow-hidden">
       
       {/* Row 1: Stats Grid (5 Cards in 1 Row) */}
-      <div className="grid h-[72px] shrink-0 grid-cols-5 gap-3">
+      <div className="grid shrink-0 grid-cols-5 gap-3">
         {/* Card 1 */}
-        <div className="bg-white px-4 py-2.5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between h-full">
+        <div className=" px-4 py-2.5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between h-full bg-center bg-cover bg-no-repeat" style={{backgroundImage:`url(${blue.src})`, }}>
           <div className="min-w-0">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Pages</span>
-            <p className="text-xl font-bold text-slate-800 leading-tight">28</p>
+            <span className="text-[10px] font-bold uppercase tracking-wider">Total Pages</span>
+            <p className="text-xl font-bold leading-tight">28</p>
             <span className="text-[9px] text-blue-500 font-semibold leading-none">Published 24</span>
           </div>
           <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
@@ -341,10 +345,10 @@ export default function AdminHome() {
         </div>
 
         {/* Card 2 */}
-        <div className="bg-white px-4 py-2.5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between h-full">
+        <div className="bg-white px-4 py-2.5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between h-full bg-center bg-cover bg-no-repeat" style={{backgroundImage:`url(${orange.src})`}}>
           <div className="min-w-0">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Sections</span>
-            <p className="text-xl font-bold text-slate-800 leading-tight">62</p>
+            <span className="text-[10px] font-bold uppercase tracking-wider">Total Sections</span>
+            <p className="text-xl font-bold leading-tight">62</p>
             <span className="text-[9px] text-amber-500 font-semibold leading-none">Active 58</span>
           </div>
           <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
@@ -353,10 +357,10 @@ export default function AdminHome() {
         </div>
 
         {/* Card 3 */}
-        <div className="bg-white px-4 py-2.5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between h-full">
+        <div className="bg-white px-4 py-2.5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between h-full bg-center bg-cover bg-no-repeat" style={{backgroundImage:`url(${purple.src})`}}>
           <div className="min-w-0">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Sliders / Banners</span>
-            <p className="text-xl font-bold text-slate-800 leading-tight">6</p>
+            <span className="text-[10px] font-bold uppercase tracking-wider">Sliders / Banners</span>
+            <p className="text-xl font-bold leading-tight">6</p>
             <span className="text-[9px] text-purple-500 font-semibold leading-none">Active 6</span>
           </div>
           <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-purple-50 text-purple-600">
@@ -365,10 +369,10 @@ export default function AdminHome() {
         </div>
 
         {/* Card 4 */}
-        <div className="bg-white px-4 py-2.5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between h-full">
+        <div className="bg-white px-4 py-2.5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between h-full bg-center bg-cover bg-no-repeat" style={{backgroundImage:`url(${green.src})`}}>
           <div className="min-w-0">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Projects</span>
-            <p className="text-xl font-bold text-slate-800 leading-tight">35</p>
+            <span className="text-[10px] font-bold uppercase tracking-wider">Projects</span>
+            <p className="text-xl font-bold leading-tight">35</p>
             <span className="text-[9px] text-emerald-500 font-semibold leading-none">Published 31</span>
           </div>
           <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
@@ -377,13 +381,13 @@ export default function AdminHome() {
         </div>
 
         {/* Card 5 */}
-        <div className="bg-white px-4 py-2.5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between h-full">
+        <div className="bg-white px-4 py-2.5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between h-full bg-center bg-cover bg-no-repeat" style={{backgroundImage:`url(${pink.src})`}}>
           <div className="min-w-0">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Inquiries</span>
-            <p className="text-xl font-bold text-slate-800 leading-tight">186</p>
+            <span className="text-[10px] font-bold uppercase tracking-wider">Inquiries</span>
+            <p className="text-xl font-bold  leading-tight">186</p>
             <span className="text-[9px] text-emerald-500 font-semibold leading-none">↑ 18% This Month</span>
           </div>
-          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-amber-50 text-pink-600">
             <MessageSquare size={16} />
           </div>
         </div>
@@ -396,8 +400,8 @@ export default function AdminHome() {
         <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm col-span-6 h-full flex flex-col overflow-hidden">
           <div className="flex items-center justify-between border-b border-slate-50 pb-2 flex-shrink-0">
             <div>
-              <h3 className="text-xs font-bold text-slate-800">Website Overview</h3>
-              <p className="text-[9px] text-slate-400 mt-0.5">Track website page views and visitor metrics.</p>
+              <h3 className="text-xs font-bold ">Website Overview</h3>
+              <p className="text-[9px]  mt-0.5">Track website page views and visitor metrics.</p>
             </div>
             <select className="text-[10px] bg-slate-50 border border-slate-200 rounded-md px-2 py-0.5 text-slate-600 outline-none">
               <option>Last 30 Days</option>
@@ -408,23 +412,23 @@ export default function AdminHome() {
           {/* Core chart numbers */}
           <div className="grid grid-cols-4 gap-2 py-2 flex-shrink-0 border-b border-slate-50/50">
             <div>
-              <p className="text-[9px] text-slate-400 font-medium">Page Views</p>
-              <p className="text-xs font-bold text-slate-800 leading-tight">12,540</p>
+              <p className="text-[9px]  font-medium">Page Views</p>
+              <p className="text-xs font-bold leading-tight">12,540</p>
               <span className="text-[8px] font-semibold text-emerald-500 leading-none">↑ 24.5%</span>
             </div>
             <div>
-              <p className="text-[9px] text-slate-400 font-medium">Unique Visitors</p>
-              <p className="text-xs font-bold text-slate-800 leading-tight">8,320</p>
+              <p className="text-[9px]  font-medium">Unique Visitors</p>
+              <p className="text-xs font-bold leading-tight">8,320</p>
               <span className="text-[8px] font-semibold text-emerald-500 leading-none">↑ 18.7%</span>
             </div>
             <div>
-              <p className="text-[9px] text-slate-400 font-medium">Inquiries</p>
-              <p className="text-xs font-bold text-slate-800 leading-tight">186</p>
+              <p className="text-[9px]  font-medium">Inquiries</p>
+              <p className="text-xs font-bold leading-tight">186</p>
               <span className="text-[8px] font-semibold text-emerald-500 leading-none">↑ 18%</span>
             </div>
             <div>
-              <p className="text-[9px] text-slate-400 font-medium">Subscribers</p>
-              <p className="text-xs font-bold text-slate-800 leading-tight">245</p>
+              <p className="text-[9px]  font-medium">Subscribers</p>
+              <p className="text-xs font-bold leading-tight">245</p>
               <span className="text-[8px] font-semibold text-emerald-500 leading-none">↑ 12.6%</span>
             </div>
           </div>
@@ -438,7 +442,7 @@ export default function AdminHome() {
         {/* Card 2: Recent Inquiries (Spans 3 cols) */}
         <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm col-span-3 h-full flex flex-col overflow-hidden">
           <div className="flex items-center justify-between border-b border-slate-50 pb-2 flex-shrink-0">
-            <h3 className="text-xs font-bold text-slate-800">Recent Inquiries</h3>
+            <h3 className="text-xs font-bold ">Recent Inquiries</h3>
             <span className="text-[9px] font-bold text-blue-600">View All</span>
           </div>
 
@@ -456,8 +460,8 @@ export default function AdminHome() {
                     {item.avatar}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[11px] font-semibold text-slate-800 truncate">{item.name}</p>
-                    <p className="text-[9px] text-slate-400 truncate">{item.company}</p>
+                    <p className="text-[11px] font-semibold  truncate">{item.name}</p>
+                    <p className="text-[9px]  truncate">{item.company}</p>
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-0.5">
@@ -473,7 +477,7 @@ export default function AdminHome() {
 
         {/* Card 3: Quick Actions (Spans 3 cols) */}
         <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm col-span-3 h-full flex flex-col overflow-hidden">
-          <h3 className="text-xs font-bold text-slate-800 border-b border-slate-50 pb-2 flex-shrink-0">Quick Actions</h3>
+          <h3 className="text-xs font-bold  border-b border-slate-50 pb-2 flex-shrink-0">Quick Actions</h3>
 
           <div className="flex-1 overflow-y-auto scrollbar-none py-2 min-h-0">
             <div className="grid grid-cols-2 gap-2 h-full">
@@ -508,14 +512,14 @@ export default function AdminHome() {
         {/* Card 1: Recent Pages (Spans 6 cols) */}
         <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm col-span-6 h-full flex flex-col overflow-hidden">
           <div className="flex items-center justify-between border-b border-slate-50 pb-2 flex-shrink-0">
-            <h3 className="text-xs font-bold text-slate-800">Recent Pages</h3>
+            <h3 className="text-xs font-bold ">Recent Pages</h3>
             <span className="text-[9px] font-bold text-blue-600">View All</span>
           </div>
 
           <div className="flex-1 overflow-y-auto scrollbar-none py-1.5 min-h-0">
             <table className="w-full text-left text-[11px] border-collapse">
               <thead>
-                <tr className="border-b border-slate-50 text-[8px] font-bold uppercase tracking-wider text-slate-400">
+                <tr className="border-b border-slate-50 text-[8px] font-bold uppercase tracking-wider ">
                   <th className="py-1.5">Page Title</th>
                   <th className="py-1.5">Template</th>
                   <th className="py-1.5">Status</th>
@@ -539,13 +543,13 @@ export default function AdminHome() {
                         {row.status}
                       </span>
                     </td>
-                    <td className="py-2 text-slate-400">{row.updated}</td>
+                    <td className="py-2 ">{row.updated}</td>
                     <td className="py-2 text-right">
                       <div className="inline-flex items-center gap-1">
-                        <button className="p-0.5 text-slate-400 hover:text-blue-600 cursor-pointer">
+                        <button className="p-0.5  hover:text-blue-600 cursor-pointer">
                           <Eye size={11} />
                         </button>
-                        <button className="p-0.5 text-slate-400 hover:text-amber-600 cursor-pointer">
+                        <button className="p-0.5  hover:text-amber-600 cursor-pointer">
                           <Pencil size={11} />
                         </button>
                       </div>
@@ -560,7 +564,7 @@ export default function AdminHome() {
         {/* Card 2: Recent Sliders / Banners (Spans 3 cols) */}
         <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm col-span-3 h-full flex flex-col overflow-hidden">
           <div className="flex items-center justify-between border-b border-slate-50 pb-2 flex-shrink-0">
-            <h3 className="text-xs font-bold text-slate-800">Recent Sliders / Banners</h3>
+            <h3 className="text-xs font-bold ">Recent Sliders / Banners</h3>
             <span className="text-[9px] font-bold text-blue-600">View All</span>
           </div>
 
@@ -593,15 +597,15 @@ export default function AdminHome() {
                     className="h-8 w-12 object-cover rounded-lg bg-slate-50 flex-shrink-0"
                   />
                   <div className="min-w-0">
-                    <p className="text-[10px] font-bold text-slate-800 truncate">{slider.title}</p>
-                    <p className="text-[8px] text-slate-400 truncate mt-0.5">{slider.desc}</p>
+                    <p className="text-[10px] font-bold  truncate">{slider.title}</p>
+                    <p className="text-[8px]  truncate mt-0.5">{slider.desc}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-1.5 flex-shrink-0">
                   <span className="bg-green-50 text-green-600 px-1 py-0.2 rounded text-[7px] font-bold border border-green-100">
                     {slider.status}
                   </span>
-                  <button className="p-0.5 text-slate-400 hover:text-rose-600 cursor-pointer">
+                  <button className="p-0.5  hover:text-rose-600 cursor-pointer">
                     <Trash size={10} />
                   </button>
                 </div>
@@ -612,7 +616,7 @@ export default function AdminHome() {
 
         {/* Card 3: System Status (Spans 3 cols) */}
         <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm col-span-3 h-full flex flex-col overflow-hidden">
-          <h3 className="text-xs font-bold text-slate-800 border-b border-slate-50 pb-2 flex-shrink-0">System Status</h3>
+          <h3 className="text-xs font-bold  border-b border-slate-50 pb-2 flex-shrink-0">System Status</h3>
 
           <div className="flex-1 overflow-y-auto scrollbar-none py-1.5 space-y-3 text-[11px] text-slate-600 min-h-0">
             <div className="flex items-center justify-between">
@@ -639,7 +643,7 @@ export default function AdminHome() {
               <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
                 <div className="bg-emerald-500 h-full rounded-full" style={{ width: "24.5%" }} />
               </div>
-              <span className="text-[8px] text-slate-400 mt-1 inline-block">24% space used</span>
+              <span className="text-[8px]  mt-1 inline-block">24% space used</span>
             </div>
           </div>
         </div>

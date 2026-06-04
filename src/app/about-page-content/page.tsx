@@ -35,9 +35,9 @@ import {
   type FooterData,
 } from "@/lib/about/aboutPageContent";
 
-const fieldClass = "w-full rounded-md border border-[#d9cdbb] bg-white px-3 py-2 text-sm outline-none focus:border-[#8d6a3a]";
-const labelClass = "block text-xs font-bold uppercase tracking-wide text-[#5f5a50] mb-1";
-const cardClass = "rounded-lg border border-[#ded3c4] bg-white p-4 shadow-sm";
+const fieldClass = "w-full rounded-md border border-[#d9cdbb] bg-white px-3 py-1.5 text-sm outline-none focus:border-[#8d6a3a]";
+const labelClass = "block text-[10px] font-bold uppercase tracking-wide text-[#5f5a50] mb-0.5";
+const cardClass = "rounded-lg border border-[#ded3c4] bg-white p-3 shadow-sm";
 
 type ContentForm = Omit<ComponentContent, "_id"> & { key: AboutPageContentKeys };
 
@@ -65,13 +65,13 @@ const ImageUploadField = ({
   const imgUrl = getImageUrl(displayValue);
 
   return (
-    <div className="mb-4">
-      <div className="mb-2 flex items-center justify-between gap-3">
+    <div className="mb-3">
+      <div className="mb-1 flex items-center justify-between gap-3">
         <label className={labelClass}>{label}</label>
         <button
           type="button"
           onClick={() => fileRef.current?.click()}
-          className="inline-flex items-center gap-2 rounded-md border border-[#d9cdbb] bg-white px-3 py-2 text-xs font-bold text-[#263016] hover:bg-[#fcfaf7]"
+          className="inline-flex items-center gap-2 rounded-md border border-[#d9cdbb] bg-white px-2 py-1 text-[10px] font-bold text-[#263016] hover:bg-[#fcfaf7]"
         >
           {uploadingField === fieldKey ? <Loader2 className="h-3 w-3 animate-spin" /> : <ImagePlus className="h-3 w-3" />}
           Upload Image
@@ -209,26 +209,30 @@ export default function AboutPageContentAdmin() {
   const renderHeroForm = () => {
     const data = form.data as AboutHero;
     return (
-      <div className="space-y-4">
-        <ImageUploadField label="Background Image" value={data.image?.imageUrl} fieldKey="hero.image" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={setStatusMessage} onUpload={url => setData({ ...data, image: { ...data.image, imageUrl: url } })} />
-        <label className={labelClass}>Image Alt Text 
-          <input className={fieldClass} value={data.image?.alt || ""} onChange={e => setData({ ...data, image: { ...data.image, alt: e.target.value } })} />
-        </label>
-        <div className="grid grid-cols-2 gap-4">
+      <div className="space-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 items-end">
+          <ImageUploadField label="Background Image" value={data.image?.imageUrl} fieldKey="hero.image" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={setStatusMessage} onUpload={url => setData({ ...data, image: { ...data.image, imageUrl: url } })} />
+          <label className={labelClass}>Image Alt Text <input className={fieldClass} value={data.image?.alt || ""} onChange={e => setData({ ...data, image: { ...data.image, alt: e.target.value } })} /></label>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
           <label className={labelClass}>Title <input className={fieldClass} value={data.title || ""} onChange={e => setData({ ...data, title: e.target.value })} /></label>
           <label className={labelClass}>Highlight <input className={fieldClass} value={data.highlight || ""} onChange={e => setData({ ...data, highlight: e.target.value })} /></label>
         </div>
         <label className={labelClass}>Description <textarea className={fieldClass} rows={3} value={data.description || ""} onChange={e => setData({ ...data, description: e.target.value })} /></label>
-        <div className="grid grid-cols-2 gap-4 p-4 border rounded bg-gray-50">
-          <div className="space-y-4">
+        <div className="grid grid-cols-2 gap-3 p-3 border rounded bg-gray-50">
+          <div className="space-y-2">
             <h4 className="text-[10px] font-bold text-[#8d6a3a]">PRIMARY ACTION</h4>
-            <input className={fieldClass} placeholder="Label" value={data.primaryAction?.label || ""} onChange={e => setData({ ...data, primaryAction: { ...data.primaryAction, label: e.target.value } })} />
-            <input className={fieldClass} placeholder="URL" value={data.primaryAction?.url || ""} onChange={e => setData({ ...data, primaryAction: { ...data.primaryAction, url: e.target.value } })} />
+            <div className="grid grid-cols-2 gap-2">
+              <input className={fieldClass} placeholder="Label" value={data.primaryAction?.label || ""} onChange={e => setData({ ...data, primaryAction: { ...data.primaryAction, label: e.target.value } })} />
+              <input className={fieldClass} placeholder="URL" value={data.primaryAction?.url || ""} onChange={e => setData({ ...data, primaryAction: { ...data.primaryAction, url: e.target.value } })} />
+            </div>
           </div>
-          <div className="space-y-4">
+          <div className="space-y-2">
             <h4 className="text-[10px] font-bold text-[#8d6a3a]">SECONDARY ACTION</h4>
-            <input className={fieldClass} placeholder="Label" value={data.secondaryAction?.label || ""} onChange={e => setData({ ...data, secondaryAction: { ...data.secondaryAction, label: e.target.value } })} />
-            <input className={fieldClass} placeholder="URL" value={data.secondaryAction?.url || ""} onChange={e => setData({ ...data, secondaryAction: { ...data.secondaryAction, url: e.target.value } })} />
+            <div className="grid grid-cols-2 gap-2">
+              <input className={fieldClass} placeholder="Label" value={data.secondaryAction?.label || ""} onChange={e => setData({ ...data, secondaryAction: { ...data.secondaryAction, label: e.target.value } })} />
+              <input className={fieldClass} placeholder="URL" value={data.secondaryAction?.url || ""} onChange={e => setData({ ...data, secondaryAction: { ...data.secondaryAction, url: e.target.value } })} />
+            </div>
           </div>
         </div>
       </div>
@@ -238,23 +242,27 @@ export default function AboutPageContentAdmin() {
   const renderOurStoryForm = () => {
     const data = form.data as AboutOurStory;
     return (
-      <div className="space-y-4">
-        <label className={labelClass}>Heading <input className={fieldClass} value={data.heading || ""} onChange={e => setData({ ...data, heading: e.target.value })} /></label>
-        <label className={labelClass}>Title <input className={fieldClass} value={data.title || ""} onChange={e => setData({ ...data, title: e.target.value })} /></label>
+      <div className="space-y-3">
+        <div className="grid grid-cols-2 gap-3">
+          <label className={labelClass}>Heading <input className={fieldClass} value={data.heading || ""} onChange={e => setData({ ...data, heading: e.target.value })} /></label>
+          <label className={labelClass}>Title <input className={fieldClass} value={data.title || ""} onChange={e => setData({ ...data, title: e.target.value })} /></label>
+        </div>
         <label className={labelClass}>Description <textarea className={fieldClass} rows={4} value={data.description || ""} onChange={e => setData({ ...data, description: e.target.value })} /></label>
         <ImageUploadField label="Side Image" value={data.imageurl?.imageUrl} fieldKey="story.image" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={setStatusMessage} onUpload={url => setData({ ...data, imageurl: { ...data.imageurl, imageUrl: url } })} />
         
-        <div className="pt-4 border-t">
-          <div className="flex justify-between items-center mb-4">
+        <div className="pt-3 border-t">
+          <div className="flex justify-between items-center mb-3">
             <h4 className="text-xs font-bold text-[#8d6a3a]">STORY STATS</h4>
             <button type="button" className="text-xs bg-[#263016] text-white px-2 py-1 rounded" onClick={() => setData({ ...data, stats: [...data.stats, { id: randomId(), title: '', subtitle: '', imageurl: { imageUrl: '', alt: '' } }] })}>Add Stat</button>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             {data.stats.map((s, idx) => (
-              <div key={s.id} className="p-3 border rounded bg-gray-50 space-y-2 relative">
+              <div key={s.id} className="p-2 border rounded bg-gray-50 space-y-1.5 relative">
                 <button type="button" onClick={() => setData({ ...data, stats: data.stats.filter((_, i) => i !== idx) })} className="absolute top-2 right-2 text-red-500"><Trash2 size={14} /></button>
-                <input className={fieldClass} placeholder="Stat Title" value={s.title || ""} onChange={e => { const ns = [...data.stats]; ns[idx].title = e.target.value; setData({ ...data, stats: ns }); }} />
-                <input className={fieldClass} placeholder="Subtitle" value={s.subtitle || ""} onChange={e => { const ns = [...data.stats]; ns[idx].subtitle = e.target.value; setData({ ...data, stats: ns }); }} />
+                <div className="grid grid-cols-2 gap-2">
+                  <input className={fieldClass} placeholder="Stat Title" value={s.title || ""} onChange={e => { const ns = [...data.stats]; ns[idx].title = e.target.value; setData({ ...data, stats: ns }); }} />
+                  <input className={fieldClass} placeholder="Subtitle" value={s.subtitle || ""} onChange={e => { const ns = [...data.stats]; ns[idx].subtitle = e.target.value; setData({ ...data, stats: ns }); }} />
+                </div>
                 <ImageUploadField label="Icon" value={s.imageurl?.imageUrl} fieldKey={`story.stat.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={setStatusMessage} onUpload={url => {
                   const ns = [...data.stats]; ns[idx].imageurl = { ...ns[idx].imageurl, imageUrl: url }; setData({ ...data, stats: ns });
                 }} />
@@ -263,12 +271,12 @@ export default function AboutPageContentAdmin() {
           </div>
         </div>
 
-        <div className="pt-4 border-t">
-          <div className="flex justify-between items-center mb-4">
+        <div className="pt-3 border-t">
+          <div className="flex justify-between items-center mb-3">
             <h4 className="text-xs font-bold text-[#8d6a3a]">CORE VALUES</h4>
             <button type="button" className="text-xs bg-[#263016] text-white px-2 py-1 rounded" onClick={() => setData({ ...data, ourCoreValues: [...data.ourCoreValues, { id: randomId(), title: '', imageurl: { imageUrl: '', alt: '' } }] })}>Add Value</button>
           </div>
-          <div className="grid gap-2">
+          <div className="grid grid-cols-2 gap-2">
             {data.ourCoreValues.map((v, idx) => (
               <div key={v.id} className="flex gap-2 items-center bg-gray-50 p-2 rounded">
                 <input className={fieldClass} placeholder="Value Title" value={v.title || ""} onChange={e => {
@@ -286,22 +294,21 @@ export default function AboutPageContentAdmin() {
   const renderExpertiseForm = () => {
     const data = form.data as AboutOurExpertise;
     return (
-      <div className="space-y-4">
+      <div className="space-y-3">
         <label className={labelClass}>Section Title <input className={fieldClass} value={data.title} onChange={e => setData({ ...data, title: e.target.value })} /></label>
         <div className="flex justify-between items-center">
           <h4 className="text-xs font-bold text-[#8d6a3a]">EXPERTISE ITEMS</h4>
           <button type="button" className="text-xs bg-[#263016] text-white px-2 py-1 rounded" onClick={() => setData({ ...data, items: [...(data.items || []), { id: randomId(), title: '', description: '', imageurl: { imageUrl: '', alt: '' }, linkUrl: '' }] })}>Add Item</button>
         </div>
         {(data.items || []).map((item, idx) => (
-          <div key={item.id} className="p-4 border rounded bg-gray-50 space-y-2 relative">
+          <div key={item.id} className="p-3 border rounded bg-gray-50 space-y-2 relative">
             <button type="button" onClick={() => setData({ ...data, items: data.items.filter((_, i) => i !== idx) })} className="absolute top-2 right-2 text-red-500"><Trash2 size={14} /></button>
-            <input className={fieldClass} placeholder="Title" value={item.title || ""} onChange={e => { const ni = data.items.map((it, i) => i === idx ? { ...it, title: e.target.value } : it); setData({ ...data, items: ni }); }} />
-            <textarea className={fieldClass} placeholder="Description" rows={2} value={item.description || ""} onChange={e => { const ni = data.items.map((it, i) => i === idx ? { ...it, description: e.target.value } : it); setData({ ...data, items: ni }); }} />
-            <input className={fieldClass} placeholder="Link URL" value={item.linkUrl || ""} onChange={e => { const ni = data.items.map((it, i) => i === idx ? { ...it, linkUrl: e.target.value } : it); setData({ ...data, items: ni }); }} />
             <div className="grid grid-cols-2 gap-2">
-              <ImageUploadField label="Thumbnail" value={item.imageurl?.imageUrl} fieldKey={`exp.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={setStatusMessage} onUpload={url => { const ni = data.items.map((it, i) => i === idx ? { ...it, imageurl: { ...it.imageurl, imageUrl: url } } : it); setData({ ...data, items: ni }); }} />
-              <input className={fieldClass} placeholder="Alt Text" value={item.imageurl?.alt || ""} onChange={e => { const ni = data.items.map((it, i) => i === idx ? { ...it, imageurl: { ...it.imageurl, alt: e.target.value } } : it); setData({ ...data, items: ni }); }} />
+              <input className={fieldClass} placeholder="Title" value={item.title || ""} onChange={e => { const ni = data.items.map((it, i) => i === idx ? { ...it, title: e.target.value } : it); setData({ ...data, items: ni }); }} />
+              <input className={fieldClass} placeholder="Link URL" value={item.linkUrl || ""} onChange={e => { const ni = data.items.map((it, i) => i === idx ? { ...it, linkUrl: e.target.value } : it); setData({ ...data, items: ni }); }} />
             </div>
+            <textarea className={fieldClass} placeholder="Description" rows={2} value={item.description || ""} onChange={e => { const ni = data.items.map((it, i) => i === idx ? { ...it, description: e.target.value } : it); setData({ ...data, items: ni }); }} />
+            <ImageUploadField label="Thumbnail" value={item.imageurl?.imageUrl} fieldKey={`exp.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={setStatusMessage} onUpload={url => { const ni = data.items.map((it, i) => i === idx ? { ...it, imageurl: { ...it.imageurl, imageUrl: url } } : it); setData({ ...data, items: ni }); }} />
           </div>
         ))}
       </div>
@@ -311,24 +318,21 @@ export default function AboutPageContentAdmin() {
   const renderStatsStripForm = () => {
     const data = form.data as AboutStatsStrip;
     return (
-      <div className="space-y-4">
+      <div className="space-y-3">
         <div className="flex justify-between items-center">
           <h4 className="text-xs font-bold text-[#8d6a3a]">STAT ITEMS</h4>
           <button type="button" className="text-xs bg-[#263016] text-white px-2 py-1 rounded" onClick={() => setData({ ...data, stats: [...(data.stats || []), { id: randomId(), label: '', imageurl: { imageUrl: '', alt: '' }, subtitle: '' }] })}>Add Stat</button>
         </div>
+        <div className="grid grid-cols-2 gap-3">
         {(data.stats || []).map((stat, idx) => (
-          <div key={stat.id} className="p-4 border rounded bg-gray-50 space-y-2 relative">
+          <div key={stat.id} className="p-3 border rounded bg-gray-50 space-y-1 relative">
             <button type="button" onClick={() => setData({ ...data, stats: data.stats.filter((_, i) => i !== idx) })} className="absolute top-2 right-2 text-red-500"><Trash2 size={14} /></button>
-            <div className="grid grid-cols-2 gap-2">
-              <label className={labelClass}>Value Label <input className={fieldClass} value={stat.label || ""} onChange={e => { const ns = data.stats.map((s, i) => i === idx ? { ...s, label: e.target.value } : s); setData({ ...data, stats: ns }); }} /></label>
-              <label className={labelClass}>Subtitle <input className={fieldClass} value={stat.subtitle || ""} onChange={e => { const ns = data.stats.map((s, i) => i === idx ? { ...s, subtitle: e.target.value } : s); setData({ ...data, stats: ns }); }} /></label>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-               <ImageUploadField label="Icon" value={stat.imageurl?.imageUrl} fieldKey={`stat.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={setStatusMessage} onUpload={url => { const ns = data.stats.map((s, i) => i === idx ? { ...s, imageurl: { ...s.imageurl, imageUrl: url } } : s); setData({ ...data, stats: ns }); }} />
-               <input className={fieldClass} placeholder="Alt" value={stat.imageurl?.alt || ""} onChange={e => { const ns = data.stats.map((s, i) => i === idx ? { ...s, imageurl: { ...s.imageurl, alt: e.target.value } } : s); setData({ ...data, stats: ns }); }} />
-            </div>
+            <label className={labelClass}>Value Label <input className={fieldClass} value={stat.label || ""} onChange={e => { const ns = data.stats.map((s, i) => i === idx ? { ...s, label: e.target.value } : s); setData({ ...data, stats: ns }); }} /></label>
+            <label className={labelClass}>Subtitle <input className={fieldClass} value={stat.subtitle || ""} onChange={e => { const ns = data.stats.map((s, i) => i === idx ? { ...s, subtitle: e.target.value } : s); setData({ ...data, stats: ns }); }} /></label>
+            <ImageUploadField label="Icon" value={stat.imageurl?.imageUrl} fieldKey={`stat.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={setStatusMessage} onUpload={url => { const ns = data.stats.map((s, i) => i === idx ? { ...s, imageurl: { ...s.imageurl, imageUrl: url } } : s); setData({ ...data, stats: ns }); }} />
           </div>
         ))}
+        </div>
       </div>
     );
   };
@@ -336,24 +340,24 @@ export default function AboutPageContentAdmin() {
   const renderWhyChooseEnsisForm = () => {
     const data = form.data as AboutWhyChooseEnsis;
     return (
-      <div className="space-y-4">
-        <label className={labelClass}>Title <input className={fieldClass} value={data.title || ""} onChange={e => setData({ ...data, title: e.target.value })} /></label>
+      <div className="space-y-3">
+        <div className="grid grid-cols-2 gap-3 items-end">
+          <label className={labelClass}>Title <input className={fieldClass} value={data.title || ""} onChange={e => setData({ ...data, title: e.target.value })} /></label>
+          <label className={labelClass}>Main Image Alt <input className={fieldClass} placeholder="Image Alt" value={data.imageurl?.alt || ""} onChange={e => setData({ ...data, imageurl: { ...data.imageurl, alt: e.target.value } })} /></label>
+        </div>
         <label className={labelClass}>Description <textarea className={fieldClass} rows={3} value={data.description || ""} onChange={e => setData({ ...data, description: e.target.value })} /></label>
         <ImageUploadField label="Main Image" value={data.imageurl?.imageUrl} fieldKey="why.main" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={setStatusMessage} onUpload={url => setData({ ...data, imageurl: { ...data.imageurl, imageUrl: url } })} />
-        <input className={fieldClass} placeholder="Image Alt" value={data.imageurl?.alt || ""} onChange={e => setData({ ...data, imageurl: { ...data.imageurl, alt: e.target.value } })} />
+        
         <div className="flex justify-between items-center">
           <h4 className="text-xs font-bold text-[#8d6a3a]">EXPERIENCE CARDS</h4>
           <button type="button" className="text-xs bg-[#263016] text-white px-2 py-1 rounded" onClick={() => setData({ ...data, experience: [...(data.experience || []), { id: randomId(), title: '', description: '', imageurl: { imageUrl: '', alt: '' } }] })}>Add Card</button>
         </div>
         {(data.experience || []).map((item, idx) => (
-          <div key={item.id} className="p-4 border rounded bg-gray-50 space-y-2 relative">
+          <div key={item.id} className="p-3 border rounded bg-gray-50 space-y-2 relative">
             <button type="button" onClick={() => setData({ ...data, experience: data.experience.filter((_, i) => i !== idx) })} className="absolute top-2 right-2 text-red-500"><Trash2 size={14} /></button>
             <input className={fieldClass} placeholder="Title" value={item.title || ""} onChange={e => { const ne = data.experience.map((ex, i) => i === idx ? { ...ex, title: e.target.value } : ex); setData({ ...data, experience: ne }); }} />
             <textarea className={fieldClass} placeholder="Description" rows={2} value={item.description || ""} onChange={e => { const ne = data.experience.map((ex, i) => i === idx ? { ...ex, description: e.target.value } : ex); setData({ ...data, experience: ne }); }} />
-            <div className="grid grid-cols-2 gap-2">
-              <ImageUploadField label="Icon" value={item.imageurl?.imageUrl} fieldKey={`why.item.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={setStatusMessage} onUpload={url => { const ne = data.experience.map((ex, i) => i === idx ? { ...ex, imageurl: { ...ex.imageurl, imageUrl: url } } : ex); setData({ ...data, experience: ne }); }} />
-              <input className={fieldClass} placeholder="Icon Alt" value={item.imageurl?.alt || ""} onChange={e => { const ne = data.experience.map((ex, i) => i === idx ? { ...ex, imageurl: { ...ex.imageurl, alt: e.target.value } } : ex); setData({ ...data, experience: ne }); }} />
-            </div>
+            <ImageUploadField label="Icon" value={item.imageurl?.imageUrl} fieldKey={`why.item.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={setStatusMessage} onUpload={url => { const ne = data.experience.map((ex, i) => i === idx ? { ...ex, imageurl: { ...ex.imageurl, imageUrl: url } } : ex); setData({ ...data, experience: ne }); }} />
           </div>
         ))}
       </div>
@@ -363,23 +367,21 @@ export default function AboutPageContentAdmin() {
   const renderTurnkeyProcessForm = () => {
     const data = form.data as AboutOurTurnkeyProcess;
     return (
-      <div className="space-y-4">
-        <label className={labelClass}>Title <input className={fieldClass} value={data.title || ""} onChange={e => setData({ ...data, title: e.target.value })} /></label>
+      <div className="space-y-3">
+        <div className="grid grid-cols-2 gap-3 items-end">
+          <label className={labelClass}>Title <input className={fieldClass} value={data.title || ""} onChange={e => setData({ ...data, title: e.target.value })} /></label>
+          <label className={labelClass}>Diagram Alt <input className={fieldClass} placeholder="Diagram Alt" value={data.imageurl?.alt || ""} onChange={e => setData({ ...data, imageurl: { ...data.imageurl, alt: e.target.value } })} /></label>
+        </div>
         <ImageUploadField label="Process Diagram" value={data.imageurl?.imageUrl} fieldKey="process.img" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={setStatusMessage} onUpload={url => setData({ ...data, imageurl: { ...data.imageurl, imageUrl: url } })} />
-        <input className={fieldClass} placeholder="Diagram Alt" value={data.imageurl?.alt || ""} onChange={e => setData({ ...data, imageurl: { ...data.imageurl, alt: e.target.value } })} />
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center mt-2">
           <h4 className="text-xs font-bold text-[#8d6a3a]">PROCESS STEPS</h4>
           <button type="button" className="text-xs bg-[#263016] text-white px-2 py-1 rounded" onClick={() => setData({ ...data, steps: [...(data.steps || []), { id: randomId(), title: '', description: '', imageurl: { imageUrl: '', alt: '' } }] })}>Add Step</button>
         </div>
         {(data.steps || []).map((step, idx) => (
-          <div key={step.id} className="p-4 border rounded bg-gray-50 space-y-2 relative">
+          <div key={step.id} className="p-3 border rounded bg-gray-50 space-y-2 relative">
             <button type="button" onClick={() => setData({ ...data, steps: data.steps.filter((_, i) => i !== idx) })} className="absolute top-2 right-2 text-red-500"><Trash2 size={14} /></button>
             <input className={fieldClass} placeholder="Step Title" value={step.title || ""} onChange={e => { const ns = data.steps.map((s, i) => i === idx ? { ...s, title: e.target.value } : s); setData({ ...data, steps: ns }); }} />
             <textarea className={fieldClass} placeholder="Step Description" rows={2} value={step.description || ""} onChange={e => { const ns = data.steps.map((s, i) => i === idx ? { ...s, description: e.target.value } : s); setData({ ...data, steps: ns }); }} />
-            <div className="grid grid-cols-2 gap-2">
-               <ImageUploadField label="Step Icon" value={step.imageurl?.imageUrl} fieldKey={`step.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={setStatusMessage} onUpload={url => { const ns = data.steps.map((s, i) => i === idx ? { ...s, imageurl: { ...s.imageurl, imageUrl: url } } : s); setData({ ...data, steps: ns }); }} />
-               <input className={fieldClass} placeholder="Icon Alt" value={step.imageurl?.alt || ""} onChange={e => { const ns = data.steps.map((s, i) => i === idx ? { ...s, imageurl: { ...s.imageurl, alt: e.target.value } } : s); setData({ ...data, steps: ns }); }} />
-            </div>
           </div>
         ))}
       </div>
@@ -389,22 +391,18 @@ export default function AboutPageContentAdmin() {
   const renderIndustriesWeServeForm = () => {
     const data = form.data as AboutIndustriesWeServe;
     return (
-      <div className="space-y-4">
+      <div className="space-y-3">
         <label className={labelClass}>Section Title <input className={fieldClass} value={data.title} onChange={e => setData({ ...data, title: e.target.value })} /></label>
         <div className="flex justify-between items-center">
           <h4 className="text-xs font-bold text-[#8d6a3a]">INDUSTRIES</h4>
           <button type="button" className="text-xs bg-[#263016] text-white px-2 py-1 rounded" onClick={() => setData({ ...data, industries: [...(data.industries || []), { id: randomId(), title: '', imageurl: { imageUrl: '', alt: '' }, linkUrl: '' }] })}>Add Industry</button>
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3">
           {(data.industries || []).map((ind, idx) => (
-            <div key={ind.id} className="p-4 border rounded bg-gray-50 space-y-2 relative">
+            <div key={ind.id} className="p-3 border rounded bg-gray-50 space-y-2 relative">
               <button type="button" onClick={() => setData({ ...data, industries: data.industries.filter((_, i) => i !== idx) })} className="absolute top-2 right-2 text-red-500"><Trash2 size={14} /></button>
-              <input className={fieldClass} placeholder="Industry Name" value={ind.title || ""} onChange={e => { const ni = data.industries.map((it, i) => i === idx ? { ...it, title: e.target.value } : it); setData({ ...data, industries: ni }); }} />
+              <input className={fieldClass} placeholder="Name" value={ind.title || ""} onChange={e => { const ni = data.industries.map((it, i) => i === idx ? { ...it, title: e.target.value } : it); setData({ ...data, industries: ni }); }} />
               <input className={fieldClass} placeholder="Link URL" value={ind.linkUrl || ""} onChange={e => { const ni = data.industries.map((it, i) => i === idx ? { ...it, linkUrl: e.target.value } : it); setData({ ...data, industries: ni }); }} />
-              <div className="grid grid-cols-2 gap-2">
-                 <ImageUploadField label="Cover Image" value={ind.imageurl?.imageUrl} fieldKey={`ind.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={setStatusMessage} onUpload={url => { const ni = data.industries.map((it, i) => i === idx ? { ...it, imageurl: { ...it.imageurl, imageUrl: url } } : it); setData({ ...data, industries: ni }); }} />
-                 <input className={fieldClass} placeholder="Cover Alt" value={ind.imageurl?.alt || ""} onChange={e => { const ni = data.industries.map((it, i) => i === idx ? { ...it, imageurl: { ...it.imageurl, alt: e.target.value } } : it); setData({ ...data, industries: ni }); }} />
-              </div>
             </div>
           ))}
         </div>
@@ -415,18 +413,18 @@ export default function AboutPageContentAdmin() {
   const renderLetsBuildForm = () => {
     const data = form.data as AboutLetsBuild;
     return (
-      <div className="space-y-4">
+      <div className="space-y-3">
         <label className={labelClass}>Title <input className={fieldClass} value={data.title || ""} onChange={e => setData({ ...data, title: e.target.value })} /></label>
         <label className={labelClass}>Description <textarea className={fieldClass} rows={3} value={data.description || ""} onChange={e => setData({ ...data, description: e.target.value })} /></label>
         <ImageUploadField label="CTA Background" value={data.imageurl?.imageUrl} fieldKey="cta.bg" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={setStatusMessage} onUpload={url => setData({ ...data, imageurl: { ...data.imageurl, imageUrl: url } })} />
         <input className={fieldClass} placeholder="Background Alt" value={data.imageurl?.alt || ""} onChange={e => setData({ ...data, imageurl: { ...data.imageurl, alt: e.target.value } })} />
-        <div className="grid grid-cols-2 gap-4 p-4 border rounded bg-gray-50">
-          <div className="space-y-4">
+        <div className="grid grid-cols-2 gap-3 p-3 border rounded bg-gray-50">
+          <div className="space-y-2">
             <h4 className="text-[10px] font-bold text-[#8d6a3a]">PRIMARY ACTION</h4>
             <input className={fieldClass} placeholder="Label" value={data.primaryAction?.label || ""} onChange={e => setData({ ...data, primaryAction: { ...data.primaryAction, label: e.target.value } })} />
             <input className={fieldClass} placeholder="URL" value={data.primaryAction?.url || ""} onChange={e => setData({ ...data, primaryAction: { ...data.primaryAction, url: e.target.value } })} />
           </div>
-          <div className="space-y-4">
+          <div className="space-y-2">
             <h4 className="text-[10px] font-bold text-[#8d6a3a]">SECONDARY ACTION</h4>
             <input className={fieldClass} placeholder="Label" value={data.secondaryAction?.label || ""} onChange={e => setData({ ...data, secondaryAction: { ...data.secondaryAction, label: e.target.value } })} />
             <input className={fieldClass} placeholder="URL" value={data.secondaryAction?.url || ""} onChange={e => setData({ ...data, secondaryAction: { ...data.secondaryAction, url: e.target.value } })} />
@@ -439,12 +437,12 @@ export default function AboutPageContentAdmin() {
   const renderHeaderForm = () => {
     const data = form.data as HeaderData;
     return (
-      <div className="space-y-4">
+      <div className="space-y-3">
         {/* Logo Section */}
-        <div className="p-4 border rounded bg-gray-50 space-y-3">
+        <div className="p-3 border rounded bg-gray-50 space-y-2">
           <h4 className="text-xs font-bold text-[#8d6a3a] uppercase">Logo Configuration</h4>
           <ImageUploadField label="Logo Image" value={data.logo?.imageUrl} fieldKey="header.logo.src" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={setStatusMessage} onUpload={url => setData({ ...data, logo: { ...data.logo, imageUrl: url } })} />
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             <label className={labelClass}>Alt Text <input className={fieldClass} value={data.logo?.alt || ""} onChange={e => setData({ ...data, logo: { ...data.logo, alt: e.target.value } })} /></label>
             <label className={labelClass}>Link URL <input className={fieldClass} value={data.logo?.href || ""} onChange={e => setData({ ...data, logo: { ...data.logo, href: e.target.value } })} /></label>
           </div>
@@ -452,13 +450,13 @@ export default function AboutPageContentAdmin() {
 
         {/* Contact Info Section */}
         <div className="pt-4 border-t">
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex justify-between items-center mb-3">
             <h4 className="text-xs font-bold text-[#8d6a3a] uppercase">Contact Info Items</h4>
             <button type="button" className="text-xs bg-[#263016] text-white px-2 py-1 rounded" onClick={() => setData({ ...data, contactInfo: [...(data.contactInfo || []), { image: { imageUrl: '', alt: '' }, text: '', href: '' }] })}>Add Contact Item</button>
           </div>
-          <div className="grid gap-2">
+          <div className="grid grid-cols-2 gap-2">
             {(data.contactInfo || []).map((item, idx) => (
-              <div key={idx} className="p-3 border rounded bg-white relative space-y-2">
+              <div key={idx} className="p-2 border rounded bg-white relative space-y-1">
                 <button type="button" onClick={() => { const nci = [...data.contactInfo]; nci.splice(idx, 1); setData({ ...data, contactInfo: nci }); }} className="absolute top-2 right-2 text-red-500"><Trash2 size={14} /></button>
                 <ImageUploadField 
                   label="Icon Image" 
@@ -480,7 +478,7 @@ export default function AboutPageContentAdmin() {
 
         {/* Navigation Section */}
         <div className="pt-4 border-t">
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex justify-between items-center mb-3">
             <h4 className="text-xs font-bold text-[#8d6a3a] uppercase">Navigation Links</h4>
             <button type="button" className="text-xs bg-[#263016] text-white px-2 py-1 rounded" onClick={() => setData({ ...data, navigation: [...(data.navigation || []), { title: '', slug: '' }] })}>Add Link</button>
           </div>
@@ -496,7 +494,7 @@ export default function AboutPageContentAdmin() {
         </div>
 
         {/* Actions Section */}
-        <div className="p-4 border rounded bg-gray-50 space-y-3">
+        <div className="p-3 border rounded bg-gray-50 space-y-2">
           <h4 className="text-xs font-bold text-[#8d6a3a] uppercase">Action Buttons & Toggles</h4>
           <div className="flex gap-6">
             <label className="flex items-center gap-2 cursor-pointer">
@@ -510,7 +508,7 @@ export default function AboutPageContentAdmin() {
           </div>
           <div className="pt-2">
              <h5 className="text-[10px] font-bold text-[#5f5a50] mb-2">BROCHURE BUTTON</h5>
-             <div className="grid grid-cols-2 gap-4">
+             <div className="grid grid-cols-2 gap-3">
                 <label className={labelClass}>Button Label <input className={fieldClass} value={data.actions?.brochureButton?.text || ""} onChange={e => setData({ ...data, actions: { ...data.actions, brochureButton: { ...data.actions.brochureButton, text: e.target.value } } })} /></label>
                 <label className={labelClass}>Button Href <input className={fieldClass} value={data.actions?.brochureButton?.href || ""} onChange={e => setData({ ...data, actions: { ...data.actions, brochureButton: { ...data.actions.brochureButton, href: e.target.value } } })} /></label>
              </div>
@@ -523,9 +521,9 @@ export default function AboutPageContentAdmin() {
   const renderFooterForm = () => {
     const data = form.data as FooterData;
     return (
-      <div className="space-y-4">
+      <div className="space-y-3">
         {/* Company Info */}
-        <div className="p-4 border rounded bg-gray-50 space-y-3">
+        <div className="p-3 border rounded bg-gray-50 space-y-2">
           <h4 className="text-xs font-bold text-[#8d6a3a] uppercase">Company Information</h4>
           <label className={labelClass}>Company Name <input className={fieldClass} value={data.company?.name || ""} onChange={e => setData({ ...data, company: { ...data.company, name: e.target.value } })} /></label>
           <label className={labelClass}>Company Description <textarea className={fieldClass} rows={2} value={data.company?.description || ""} onChange={e => setData({ ...data, company: { ...data.company, description: e.target.value } })} /></label>
@@ -533,12 +531,13 @@ export default function AboutPageContentAdmin() {
           <ImageUploadField label="Ensis Logo" value={data.company?.ensisLogo?.imageUrl} fieldKey="footer.company.ensisLogo" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={setStatusMessage} onUpload={url => setData({ ...data, company: { ...data.company, ensisLogo: { ...data.company.ensisLogo, imageUrl: url } } })} />
           
           <div className="pt-2">
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex justify-between items-center mb-3">
               <span className="text-[10px] font-bold text-[#5f5a50]">SOCIAL LINKS</span>
               <button type="button" className="text-xs bg-[#263016] text-white px-3 py-1 rounded font-bold" onClick={() => { const ns = structuredClone(data.company); ns.socialLinks = [...(ns.socialLinks || []), { image: { imageUrl: '', alt: '' }, url: '' }]; setData({ ...data, company: ns }); }}>+ Add Social Link</button>
             </div>
+            <div className="grid grid-cols-2 gap-2">
             {(data.company?.socialLinks || []).map((s, idx) => (
-              <div key={idx} className="bg-white p-3 border rounded space-y-3 mb-3 relative group">
+              <div key={idx} className="bg-white p-2 border rounded space-y-2 relative group">
                 <button type="button" onClick={() => { const ns = structuredClone(data.company); ns.socialLinks.splice(idx, 1); setData({ ...data, company: ns }); }} className="absolute top-2 right-2 text-red-400 hover:text-red-600 transition-colors"><Trash2 size={16} /></button>
                 
                 <ImageUploadField 
@@ -557,18 +556,19 @@ export default function AboutPageContentAdmin() {
                 <input className={fieldClass} placeholder="Profile URL" value={s.url || ""} onChange={e => { const ns = structuredClone(data.company); ns.socialLinks[idx].url = e.target.value; setData({ ...data, company: ns }); }} />
               </div>
             ))}
+            </div>
           </div>
         </div>
 
         {/* Navigation columns */}
         <div className="pt-4 border-t">
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex justify-between items-center mb-3">
             <h4 className="text-xs font-bold text-[#8d6a3a] uppercase">Navigation Columns</h4>
             <button type="button" className="text-xs bg-[#263016] text-white px-2 py-1 rounded" onClick={() => setData({ ...data, navigation: [...(data.navigation || []), { title: '', links: [] }] })}>Add Column</button>
           </div>
-          <div className="grid gap-4">
+          <div className="grid grid-cols-2 gap-3">
             {(data.navigation || []).map((col, cIdx) => (
-              <div key={cIdx} className="p-4 border rounded bg-gray-50 space-y-3">
+              <div key={cIdx} className="p-3 border rounded bg-gray-50 space-y-2">
                 <div className="flex justify-between items-center">
                   <input className={`${fieldClass} font-bold`} placeholder="Column Title" value={col.title || ""} onChange={e => { const nn = structuredClone(data.navigation); nn[cIdx].title = e.target.value; setData({ ...data, navigation: nn }); }} />
                   <button type="button" onClick={() => setData({ ...data, navigation: data.navigation.filter((_, i) => i !== cIdx) })} className="text-red-500 ml-2"><Trash2 size={16} /></button>
@@ -577,7 +577,6 @@ export default function AboutPageContentAdmin() {
                    {(col.links || []).map((link, lIdx) => (
                      <div key={lIdx} className="flex gap-2">
                        <input className={fieldClass} placeholder="Label" value={link.label || ""} onChange={e => { const nn = structuredClone(data.navigation); nn[cIdx].links[lIdx].label = e.target.value; setData({ ...data, navigation: nn }); }} />
-                       <input className={fieldClass} placeholder="URL" value={link.href || ""} onChange={e => { const nn = structuredClone(data.navigation); nn[cIdx].links[lIdx].href = e.target.value; setData({ ...data, navigation: nn }); }} />
                        <button type="button" onClick={() => { const nn = structuredClone(data.navigation); nn[cIdx].links.splice(lIdx, 1); setData({ ...data, navigation: nn }); }} className="text-red-400"><Trash2 size={14} /></button>
                      </div>
                    ))}
@@ -589,9 +588,9 @@ export default function AboutPageContentAdmin() {
         </div>
 
         {/* Contact Info */}
-        <div className="p-4 border rounded bg-gray-50 space-y-3">
+        <div className="p-3 border rounded bg-gray-50 space-y-2">
           <h4 className="text-xs font-bold text-[#8d6a3a] uppercase">Contact & Support</h4>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             <label className={labelClass}>Phone <input className={fieldClass} value={data.contact?.phone || ""} onChange={e => setData({ ...data, contact: { ...data.contact, phone: e.target.value } })} /></label>
             <label className={labelClass}>Email <input className={fieldClass} value={data.contact?.email || ""} onChange={e => setData({ ...data, contact: { ...data.contact, email: e.target.value } })} /></label>
           </div>
@@ -600,11 +599,11 @@ export default function AboutPageContentAdmin() {
         </div>
 
         {/* Copyright */}
-        <div className="p-4 border rounded bg-gray-50 space-y-3">
+        <div className="p-3 border rounded bg-gray-50 space-y-2">
           <h4 className="text-xs font-bold text-[#8d6a3a] uppercase">Copyright</h4>
           <label className={labelClass}>Copyright Text <input className={fieldClass} value={data.copyright?.text || ""} onChange={e => setData({ ...data, copyright: { ...data.copyright, text: e.target.value } })} /></label>
           <div className="pt-2">
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex justify-between items-center mb-3">
               <span className="text-[10px] font-bold text-[#5f5a50]">COPYRIGHT LINKS</span>
               <button type="button" className="text-xs bg-[#263016] text-white px-3 py-1 rounded font-bold" onClick={() => { const nc = structuredClone(data.copyright); nc.links = [...(nc.links || []), { label: '', href: '' }]; setData({ ...data, copyright: nc }); }}>+ Add Link</button>
             </div>
@@ -625,14 +624,14 @@ export default function AboutPageContentAdmin() {
   const renderTestimonialsForm = () => {
     const data = form.data as TestimonialsData;
     return (
-      <div className="space-y-4">
+      <div className="space-y-3">
         <label className={labelClass}>Subtitle <input className={fieldClass} value={data.subtitle || ""} onChange={e => setData({ ...data, subtitle: e.target.value })} /></label>
         <div className="flex justify-between items-center">
           <h4 className="text-xs font-bold text-[#8d6a3a]">TESTIMONIALS</h4>
           <button type="button" className="text-xs bg-[#263016] text-white px-2 py-1 rounded" onClick={() => setData({ ...data, testimonials: [...(data.testimonials || []), { text: '', name: '', role: '', image: { imageUrl: '', alt: '' } }] })}>Add Testimonial</button>
         </div>
         {(data.testimonials || []).map((t, idx) => (
-          <div key={idx} className="p-4 border rounded bg-gray-50 space-y-2 relative">
+          <div key={idx} className="p-3 border rounded bg-gray-50 space-y-1.5 relative">
             <button type="button" onClick={() => setData({ ...data, testimonials: data.testimonials.filter((_, i) => i !== idx) })} className="absolute top-2 right-2 text-red-500"><Trash2 size={14} /></button>
             <textarea className={fieldClass} placeholder="Review Text" rows={3} value={t.text || ""} onChange={e => { const nt = data.testimonials.map((test, i) => i === idx ? { ...test, text: e.target.value } : test); setData({ ...data, testimonials: nt }); }} />
             <div className="grid grid-cols-2 gap-2">
@@ -652,25 +651,27 @@ export default function AboutPageContentAdmin() {
   const renderFounderVisionForm = () => {
     const data = form.data as AboutFounderVision;
     return (
-      <div className="space-y-4">
-        <label className={labelClass}>Heading <input className={fieldClass} value={data.heading || ""} onChange={e => setData({ ...data, heading: e.target.value })} /></label>
-        <label className={labelClass}>Title <input className={fieldClass} value={data.title || ""} onChange={e => setData({ ...data, title: e.target.value })} /></label>
+      <div className="space-y-3">
+        <div className="grid grid-cols-2 gap-3">
+          <label className={labelClass}>Heading <input className={fieldClass} value={data.heading || ""} onChange={e => setData({ ...data, heading: e.target.value })} /></label>
+          <label className={labelClass}>Title <input className={fieldClass} value={data.title || ""} onChange={e => setData({ ...data, title: e.target.value })} /></label>
+        </div>
         <label className={labelClass}>Description <textarea className={fieldClass} rows={4} value={data.description || ""} onChange={e => setData({ ...data, description: e.target.value })} /></label>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1.5">
             <ImageUploadField label="Founder Image" value={data.founderImageurl?.imageUrl} fieldKey="f.img" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={setStatusMessage} onUpload={url => setData({ ...data, founderImageurl: { ...data.founderImageurl, imageUrl: url } })} />
-            <input className={fieldClass} placeholder="Founder Alt" value={data.founderImageurl?.alt || ""} onChange={e => setData({ ...data, founderImageurl: { ...data.founderImageurl, alt: e.target.value } })} />
           </div>
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <ImageUploadField label="Signature" value={data.signatureImageurl?.imageUrl} fieldKey="f.sig" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={setStatusMessage} onUpload={url => setData({ ...data, signatureImageurl: { ...data.signatureImageurl, imageUrl: url } })} />
-            <input className={fieldClass} placeholder="Signature Alt" value={data.signatureImageurl?.alt || ""} onChange={e => setData({ ...data, signatureImageurl: { ...data.signatureImageurl, alt: e.target.value } })} />
           </div>
         </div>
         <div className="p-4 border rounded bg-white space-y-2">
-          <h4 className="text-[10px] font-bold text-[#8d6a3a] mb-2">FOUNDER DETAILS</h4>
+          <h4 className="text-[10px] font-bold text-[#8d6a3a] mb-1">FOUNDER DETAILS</h4>
           <input className={fieldClass} placeholder="Name/Title" value={data.aboutFounder.title || ""} onChange={e => setData({ ...data, aboutFounder: { ...data.aboutFounder, title: e.target.value } })} />
-          <input className={fieldClass} placeholder="Company" value={data.aboutFounder.company || ""} onChange={e => setData({ ...data, aboutFounder: { ...data.aboutFounder, company: e.target.value } })} />
-          <input className={fieldClass} placeholder="Division" value={data.aboutFounder.division || ""} onChange={e => setData({ ...data, aboutFounder: { ...data.aboutFounder, division: e.target.value } })} />
+          <div className="grid grid-cols-2 gap-2">
+            <input className={fieldClass} placeholder="Company" value={data.aboutFounder.company || ""} onChange={e => setData({ ...data, aboutFounder: { ...data.aboutFounder, company: e.target.value } })} />
+            <input className={fieldClass} placeholder="Division" value={data.aboutFounder.division || ""} onChange={e => setData({ ...data, aboutFounder: { ...data.aboutFounder, division: e.target.value } })} />
+          </div>
         </div>
       </div>
     );
