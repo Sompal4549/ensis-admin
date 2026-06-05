@@ -1,5 +1,6 @@
 "use client";
 
+import axios from "axios";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -20,12 +21,18 @@ import {
   User,
   Headphones,
   ArrowRight,
+  MessageSquare,
+  Activity,
+  CheckCircle,
   Boxes,
   LayoutGrid,
-  LogOut
+  LogOut,
+  FolderOpen,
+  UserPlus
 } from "lucide-react";
 import { LoginForm, useAuth } from "@/components/auth/AuthContext";
 import sidebarBg from "@/assets/sidebarbg.webp"
+import UserManagementModal from "./UserManagementModal";
 
 interface NavItem {
   label: string;
@@ -141,6 +148,16 @@ const NAV_ITEMS: NavItem[] = [
         label: "Categories",
         path: "/categories",
         icon: <LayoutGrid size={16} />,
+      },
+      {
+        label: "Projects",
+        path: "/projects-management",
+        icon: <FolderOpen size={16} />,
+      },
+      {
+        label: "Careers",
+        path: "/careers-management",
+        icon: <FolderOpen size={16} />,
       },
     ],
   },
@@ -385,6 +402,8 @@ export function Topbar({ title = "Dashboard", subtitle, collapsed, setCollapsed 
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showUserModal, setShowUserModal] = useState(false);
 
   // Helper to generate dynamic breadcrumbs
   const getBreadcrumbs = () => {
@@ -409,14 +428,17 @@ export function Topbar({ title = "Dashboard", subtitle, collapsed, setCollapsed 
   };
 
   const breadcrumbs = getBreadcrumbs();
-  const frontendUrl = process.env.NEXT_PUBLIC_FRONTEND_URL || "http://localhost:3000";
+  const frontendUrl = process.env.NEXT_PUBLIC_FRONTEND_URL || "http://localhost:5000";
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
   const handleLogout = async () => {
     setShowProfileMenu(false);
     try {
-      // Call the logout API as requested
-      await fetch("/api/v1/admin/logout", {
-        method: "POST",
+      const token = localStorage.getItem("token");
+      await axios.post(`${API_BASE_URL}/api/v1/admin/logout`, {}, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
       });
     } catch (error) {
       console.error("Logout API call failed:", error);
@@ -428,6 +450,8 @@ export function Topbar({ title = "Dashboard", subtitle, collapsed, setCollapsed 
   const initials = user?.name 
     ? user.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)
     : "AD";
+
+  const isSuperAdmin = user?.role?.toLowerCase() === "superadmin";
 
   return (
     <header className="flex h-16 flex-shrink-0 items-center justify-between border-b border-slate-100 bg-white px-6 z-30">
@@ -475,13 +499,62 @@ export function Topbar({ title = "Dashboard", subtitle, collapsed, setCollapsed 
           <ExternalLink size={12} />
         </Link>
 
+        {/* User Management (SuperAdmin Only) */}
+        {isSuperAdmin && (
+          <button
+            onClick={() => setShowUserModal(true)}
+            className="p-2 text-slate-400 hover:text-blue-600 hover:bg-slate-50 rounded-lg transition-colors cursor-pointer outline-none"
+            title="Manage Users"
+          >
+            <UserPlus size={18} />
+          </button>
+        )}
+
         {/* Notification Bell */}
-        <button className="relative p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-colors">
-          <Bell size={16} />
-          <span className="absolute top-1.5 right-1.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-red-500 text-[8px] font-bold text-white">
-            8
-          </span>
-        </button>
+        <div className="relative">
+          <button 
+            onClick={() => setShowNotifications(!showNotifications)}
+            className="relative p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-colors cursor-pointer outline-none"
+          >
+            <Bell size={16} />
+            <span className="absolute top-1.5 right-1.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-red-500 text-[8px] font-bold text-white">
+              8
+            </span>
+          </button>
+
+          {showNotifications && (
+            <div
+              className="absolute right-0 mt-2 w-72 rounded-xl border border-slate-100 bg-white shadow-lg shadow-slate-200/50 z-50 overflow-hidden"
+              onMouseLeave={() => setShowNotifications(false)}
+            >
+              <div className="px-4 py-3 border-b border-slate-50 bg-slate-50/50 flex justify-between items-center">
+                <p className="text-xs font-bold text-slate-800">Notifications</p>
+                <button className="text-[10px] font-medium text-blue-600 cursor-pointer hover:underline border-none bg-transparent p-0">Mark all as read</button>
+              </div>
+              <div className="max-h-80 overflow-y-auto scrollbar-none">
+                {[
+                  { title: "New Inquiry", desc: "Rahul Sharma sent a new inquiry for Wellness Resort.", time: "10m ago", icon: <MessageSquare size={14} className="text-blue-500" />, bg: "bg-blue-50" },
+                  { title: "Stock Alert", desc: "Panchkarma Bed (Teak Wood) is low in stock.", time: "1h ago", icon: <Activity size={14} className="text-amber-500" />, bg: "bg-amber-50" },
+                  { title: "System Update", desc: "Server maintenance scheduled for 2 AM tonight.", time: "3h ago", icon: <CheckCircle size={14} className="text-emerald-500" />, bg: "bg-emerald-50" },
+                ].map((n, i) => (
+                  <div key={i} className="p-3 border-b border-slate-50 hover:bg-slate-50/50 transition-colors cursor-pointer flex gap-3 text-left">
+                    <div className={`h-8 w-8 rounded-full ${n.bg} flex items-center justify-center shrink-0`}>
+                      {n.icon}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[11px] font-bold text-slate-800 leading-none">{n.title}</p>
+                      <p className="text-[10px] text-slate-500 mt-1 line-clamp-2 leading-relaxed">{n.desc}</p>
+                      <p className="text-[9px] text-slate-400 mt-1">{n.time}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="p-2 border-t border-slate-50 text-center">
+                <button className="text-[10px] font-bold text-slate-400 hover:text-slate-600 transition-colors border-none bg-transparent p-0">Clear all notifications</button>
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* Profile Dropdown */}
         <div className="relative">
@@ -518,6 +591,12 @@ export function Topbar({ title = "Dashboard", subtitle, collapsed, setCollapsed 
           )}
         </div>
       </div>
+
+      {/* Modal for User Management */}
+      <UserManagementModal 
+        isOpen={showUserModal} 
+        onClose={() => setShowUserModal(false)} 
+      />
     </header>
   );
 }

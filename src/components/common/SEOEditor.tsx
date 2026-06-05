@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { FormEvent, useEffect, useState } from "react";
 import { Save, ImagePlus, Loader2 } from "lucide-react";
 // Correctly importing the exported member and function
@@ -165,9 +166,12 @@ export default function SEOEditor({ slug, title }: SEOEditorProps) {
               <label className={labelClass}>Social Sharing Image (OG Image)</label>
               <div className="mt-2 flex items-center gap-4">
                 {form.seo.ogImage && (
-                  <img 
+                  <Image 
                     src={getImageUrl(form.seo.ogImage)} 
                     alt="OG Preview" 
+                    width={80}
+                    height={48}
+                    unoptimized
                     crossOrigin="anonymous"
                     className="h-12 w-20 object-cover rounded border" 
                   />

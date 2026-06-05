@@ -176,7 +176,7 @@ function AnalyticsChart({ data }: { data?: ChartDataPoint[] }) {
                 strokeWidth="0.75"
                 strokeDasharray="4,4"
               />
-              <text x={paddingLeft - 6} y={y + 3} fill="#94a3b8" fontSize="8" textAnchor="end">
+              <text x={paddingLeft - 6} y={y + 3} fill="#000000" fontSize="8" textAnchor="end">
                 {valLabel >= 1000 ? `${(valLabel / 1000).toFixed(0)}K` : valLabel}
               </text>
             </g>
@@ -207,7 +207,7 @@ function AnalyticsChart({ data }: { data?: ChartDataPoint[] }) {
               key={i}
               x={p.x}
               y={height - paddingBottom + 12}
-              fill="#94a3b8"
+              fill="#000000"
               fontSize="8"
               textAnchor="middle"
             >
@@ -466,7 +466,7 @@ export default function AdminHome() {
                   <span className={`text-[8px] px-1 py-0.2 rounded font-bold ${item.tagColor}`}>
                     {item.tag}
                   </span>
-                  <span className="text-[8px] text-slate-300">{item.time}</span>
+                  <span className="text-[8px]">{item.time}</span>
                 </div>
               </div>
             ))}
