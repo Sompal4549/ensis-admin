@@ -1,7 +1,8 @@
 "use client";
 
-import axios from "axios";
 import Link from "next/link";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import {
@@ -24,6 +25,7 @@ import {
   MessageSquare,
   Activity,
   CheckCircle,
+  Users,
   Boxes,
   LayoutGrid,
   LogOut,
@@ -159,7 +161,17 @@ const NAV_ITEMS: NavItem[] = [
         path: "/careers-management",
         icon: <FolderOpen size={16} />,
       },
+        {
+        label: "User Management",
+        path: "/users-management",
+        icon: <FolderOpen size={16} />,
+      },
     ],
+  },
+  {
+    label: "Users",
+    path: "/users-management",
+    icon: <Users size={18} />,
   },
   {
     label: "SEO",
@@ -319,6 +331,13 @@ export function Sidebar({ activePath, onNavigate, collapsed, setCollapsed }: Sid
 
   const currentPath = activePath || pathname || "/";
 
+  const filteredNavItems = NAV_ITEMS.filter(item => {
+    if (item.path === "/users-management") {
+      return user?.role?.toLowerCase() === "superadmin";
+    }
+    return true;
+  });
+
   const handleNavigate = (path: string) => {
     onNavigate?.(path);
   };
@@ -361,7 +380,7 @@ export function Sidebar({ activePath, onNavigate, collapsed, setCollapsed }: Sid
           {!collapsed && (
             <p className="mb-1.5 px-3 text-[10px] font-bold uppercase tracking-wider text-slate-500">Navigation</p>
           )}
-          {NAV_ITEMS.map((item) => (
+          {filteredNavItems.map((item) => (
             <MenuItem
               key={item.label}
               item={item}
@@ -434,12 +453,7 @@ export function Topbar({ title = "Dashboard", subtitle, collapsed, setCollapsed 
   const handleLogout = async () => {
     setShowProfileMenu(false);
     try {
-      const token = localStorage.getItem("token");
-      await axios.post(`${API_BASE_URL}/api/v1/admin/logout`, {}, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      await api.post("/admin/logout");
     } catch (error) {
       console.error("Logout API call failed:", error);
     }
@@ -638,6 +652,7 @@ export function CommonLayout({
           {children}
         </main>
       </div>
+      <ToastContainer position="top-center" autoClose={4000} hideProgressBar={false} theme="light" />
     </div>
   );
 }

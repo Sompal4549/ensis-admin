@@ -1,6 +1,7 @@
 "use client";
 
 import axios from "axios";
+import { toast } from "react-toastify";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { 
@@ -17,7 +18,7 @@ import {
   ChevronRight
 } from "lucide-react";
 import { fieldClass, labelClass } from "@/constants";
-import { authStore, categoryApi, type Category, getImageUrl, API_URL } from "@/lib/api";
+import { api, categoryApi, type Category, getImageUrl } from "@/lib/api";
 
 interface Project {
   _id: string;
@@ -51,7 +52,6 @@ export default function ProjectManagementPage() {
   };
 
   const [form, setForm] = useState(initialForm);
-  const [message, setMessage] = useState({ text: "", isError: false });
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
@@ -75,15 +75,12 @@ export default function ProjectManagementPage() {
   const fetchProjects = async () => {
     setLoading(true);
     try {
-      const token = authStore.getToken();
-      const res = await axios.get(`${API_URL}/projects`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await api.get("/projects");
       setProjects(res.data.data || []);
       setSelectedIds([]);
     } catch (error) {
       console.error("Failed to fetch projects:", error);
-      setMessage({ text: "Failed to load projects", isError: true });
+      toast.error("Failed to load projects");
     } finally {
       setLoading(false);
     }
@@ -98,17 +95,13 @@ export default function ProjectManagementPage() {
     formData.append("file", file);
 
     try {
-      const token = authStore.getToken();
-      const res = await axios.post(`${API_URL}/uploads`, formData, {
-        headers: { 
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data"
-        }
+      const res = await api.post("/uploads", formData, {
+        headers: { "Content-Type": "multipart/form-data" }
       });
       setForm({ ...form, image: res.data.data.url });
     } catch (error) {
       console.error("Upload failed:", error);
-      setMessage({ text: "Image upload failed", isError: true });
+      toast.error("Image upload failed");
     } finally {
       setImageUploading(false);
     }
@@ -117,35 +110,23 @@ export default function ProjectManagementPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormLoading(true);
-    setMessage({ text: "", isError: false });
 
     try {
-      const url = isEditing 
-        ? `${API_URL}/projects/${currentId}` 
-        : `${API_URL}/projects`;
-      
-      const token = authStore.getToken();
-      const config = {
-        headers: { Authorization: `Bearer ${token}` }
-      };
-
       if (isEditing) {
-        await axios.put(url, form, config);
+        await api.put(`/projects/${currentId}`, form);
       } else {
-        await axios.post(url, form, config);
+        await api.post("/projects", form);
       }
 
-      setMessage({ 
-        text: `Project ${isEditing ? "updated" : "created"} successfully!`, 
-        isError: false 
-      });
+      toast.success(`Project ${isEditing ? "updated" : "created"} successfully!`);
       resetForm();
       fetchProjects();
     } catch (error) {
+      console.error("Submit failed:", error);
       const errMsg = axios.isAxiosError(error) 
         ? error.response?.data?.message 
         : "An unexpected error occurred";
-      setMessage({ text: errMsg || "Operation failed", isError: true });
+      toast.error(errMsg || "Operation failed");
     } finally {
       setFormLoading(false);
     }
@@ -170,19 +151,16 @@ export default function ProjectManagementPage() {
     if (!confirm(`Delete ${selectedIds.length} projects?`)) return;
 
     try {
-      const token = authStore.getToken();
       await Promise.all(
         selectedIds.map(id => 
-          axios.delete(`${API_URL}/projects/${id}`, {
-            headers: { Authorization: `Bearer ${token}` }
-          })
+          api.delete(`/projects/${id}`)
         )
       );
       setSelectedIds([]);
       fetchProjects();
-      setMessage({ text: "Projects deleted successfully", isError: false });
+      toast.success("Projects deleted successfully");
     } catch (error) {
-      setMessage({ text: "Bulk delete failed", isError: true });
+      toast.error("Bulk delete failed");
     }
   };
 
@@ -319,12 +297,6 @@ console.log(form)
                 <span className="text-xs font-bold text-slate-700">Feature this project</span>
               </label>
             </div>
-
-            {message.text && (
-              <div className={`p-3 rounded-lg text-xs font-semibold ${message.isError ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}`}>
-                {message.text}
-              </div>
-            )}
 
             <button type="submit" disabled={formLoading || imageUploading} className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm shadow-lg disabled:opacity-50 transition-all flex items-center justify-center gap-2">
               {formLoading ? <Loader2 className="animate-spin" size={18} /> : <><Save size={18} /> {isEditing ? "Update Project" : "Save Project"}</>}

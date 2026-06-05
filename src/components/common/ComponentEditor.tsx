@@ -1,5 +1,6 @@
 "use client";
 
+import { toast } from "react-toastify";
 import { FormEvent, useEffect, useState } from "react";
 import { Save } from "lucide-react";
 import RichTextEditor from "@/components/common/RichTextEditor";
@@ -20,7 +21,6 @@ export default function ComponentEditor({
   title,
 }: ComponentEditorProps) {
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
   const [content, setContent] = useState<ComponentContent | null>(null);
 
   const [form, setForm] = useState({
@@ -42,7 +42,7 @@ export default function ComponentEditor({
       );
 
       if (!item) {
-        setMessage(`Component "${componentKey}" not found`);
+        toast.error(`Component "${componentKey}" not found`);
         return;
       }
 
@@ -56,7 +56,7 @@ export default function ComponentEditor({
         data: JSON.stringify(item.data || {}, null, 2),
       });
     } catch (error) {
-      setMessage((error as Error).message);
+      toast.error((error as Error).message || "Failed to load component");
     } finally {
       setLoading(false);
     }
@@ -75,7 +75,6 @@ export default function ComponentEditor({
 
     try {
       setLoading(true);
-      setMessage("");
 
       await componentContentApi.update(content._id, {
         label: form.label,
@@ -85,9 +84,9 @@ export default function ComponentEditor({
         data: JSON.parse(form.data),
       });
 
-      setMessage("Component updated successfully");
+      toast.success("Component updated successfully");
     } catch (error) {
-      setMessage((error as Error).message);
+      toast.error((error as Error).message || "Update failed");
     } finally {
       setLoading(false);
     }

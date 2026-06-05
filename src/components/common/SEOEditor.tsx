@@ -1,12 +1,12 @@
 "use client";
 
 import Image from "next/image";
+import { toast } from "react-toastify";
 import { FormEvent, useEffect, useState } from "react";
 import { Save, ImagePlus, Loader2 } from "lucide-react";
 // Correctly importing the exported member and function
 import { pageApi, type PageData, uploadImage, getImageUrl } from "@/lib/api";
 import { fieldClass, labelClass } from "@/constants";
-
 
 const optionalSeoFields = ["metaKeywords", "canonical", "ogTitle", "ogDescription", "ogImage"] as const;
 
@@ -17,7 +17,6 @@ interface SEOEditorProps {
 
 export default function SEOEditor({ slug, title }: SEOEditorProps) {
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
   const [pageData, setPageData] = useState<PageData | null>(null);
   const [uploading, setUploading] = useState(false);
 
@@ -59,7 +58,7 @@ export default function SEOEditor({ slug, title }: SEOEditorProps) {
         });
       }
     } catch (error: any) {
-      setMessage(error.message);
+      toast.error(error.message || "Failed to load SEO data");
     } finally {
       setLoading(false);
     }
@@ -73,7 +72,7 @@ export default function SEOEditor({ slug, title }: SEOEditorProps) {
       const url = await uploadImage(file);
       setForm({ ...form, seo: { ...form.seo, ogImage: url } });
     } catch (error: any) {
-      setMessage(error.message);
+      toast.error(error.message || "Image upload failed");
     } finally {
       setUploading(false);
     }
@@ -83,7 +82,6 @@ export default function SEOEditor({ slug, title }: SEOEditorProps) {
     e.preventDefault();
     try {
       setLoading(true);
-      setMessage("");
 
       const seoPayload: PageData["seo"] = {
         metaTitle: form.seo.metaTitle.trim(),
@@ -105,26 +103,26 @@ export default function SEOEditor({ slug, title }: SEOEditorProps) {
       };
 
       if (payload.seo.metaTitle.length > 65) {
-        setMessage("Meta Title should not exceed 65 characters");
+        toast.warn("Meta Title should not exceed 65 characters");
         return;
       }
 
       if (payload.seo.metaDescription.length > 155) {
-        setMessage("Meta Description should not exceed 155 characters");
+        toast.warn("Meta Description should not exceed 155 characters");
         return;
       }
       
       if (pageData) {
         await pageApi.update(pageData._id, payload);
-        setMessage("SEO settings updated successfully!");
+        toast.success("SEO settings updated successfully!");
       } else {
         // Handle creation if it doesn't exist yet
         await pageApi.create({ ...payload, slug: slug === 'home' ? '/' : slug });
-        setMessage("SEO page created and settings saved!");
+        toast.success("SEO page created and settings saved!");
         loadData();
       }
     } catch (error: any) {
-      setMessage(error.message);
+      toast.error(error.message || "Failed to save SEO updates");
     } finally {
       setLoading(false);
     }
@@ -191,7 +189,6 @@ export default function SEOEditor({ slug, title }: SEOEditorProps) {
           <button type="submit" disabled={loading} className="bg-[#6f542f] text-white px-10 py-3 rounded-lg font-bold flex items-center gap-2 hover:shadow-lg transition-all disabled:opacity-50">
             <Save size={20} /> {loading ? "Saving..." : "Publish SEO Updates"}
           </button>
-          {message && <span className={`text-sm font-bold ${message.includes('success') ? 'text-green-600' : 'text-red-500'}`}>{message}</span>}
         </div>
       </form>
     </div>

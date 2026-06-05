@@ -1,5 +1,6 @@
 "use client";
 
+import { toast } from "react-toastify";
 import { FormEvent, useEffect, useState } from "react";
 import { Save, Plus, Trash2, Layout } from "lucide-react";
 import RichTextEditor from "@/components/common/RichTextEditor";
@@ -10,7 +11,6 @@ import { fieldClass, labelClass } from "@/constants";
 
 export default function HeroEditor() {
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
   const [content, setContent] = useState<ComponentContent | null>(null);
 
   // State management for the specialized form
@@ -30,7 +30,7 @@ export default function HeroEditor() {
       // Direct fetch by key for efficiency
       const item = await componentContentApi.getByKey("home.hero");
       if (!item) {
-        setMessage(`Component "home.hero" not found. Please seed default data.`);
+        toast.error(`Component "home.hero" not found.`);
         return;
       }
       setContent(item);
@@ -42,7 +42,7 @@ export default function HeroEditor() {
         data: { ...form.data, ...(item.data || {}) },
       });
     } catch (error) {
-      setMessage((error as Error).message);
+      toast.error((error as Error).message || "Failed to load hero content");
     } finally {
       setLoading(false);
     }
@@ -58,7 +58,6 @@ export default function HeroEditor() {
 
     try {
       setLoading(true);
-      setMessage("");
 
       // Sending structured data directly to the backend
       await componentContentApi.update(content._id, {
@@ -69,9 +68,9 @@ export default function HeroEditor() {
         data: form.data, 
       });
 
-      setMessage("Hero section updated successfully!");
+      toast.success("Hero section updated successfully!");
     } catch (error) {
-      setMessage((error as Error).message);
+      toast.error((error as Error).message || "Update failed");
     } finally {
       setLoading(false);
     }

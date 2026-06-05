@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { toast } from "react-toastify";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -117,7 +118,6 @@ export default function AboutPageContentAdmin() {
     data: defaultAboutpageData["about.hero"],
   });
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [statusMessage, setStatusMessage] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [uploadingField, setUploadingField] = useState<string | null>(null);
 
@@ -142,7 +142,7 @@ export default function AboutPageContentAdmin() {
         }
       }
     } catch (error) {
-      setStatusMessage("Failed to load components.");
+      toast.error("Failed to load components.");
     } finally {
       setLoading(false);
     }
@@ -182,23 +182,27 @@ export default function AboutPageContentAdmin() {
     try {
       if (editingId) {
         await componentContentApi.update(editingId, form);
-        setStatusMessage("Updated successfully!");
+        toast.success("Updated successfully!");
       } else {
         await componentContentApi.create(form);
-        setStatusMessage("Created successfully!");
+        toast.success("Created successfully!");
       }
       await refresh();
     } catch (err) {
-      setStatusMessage("Save failed.");
+      toast.error("Save failed.");
     } finally {
       setLoading(false);
-      setTimeout(() => setStatusMessage(""), 3000);
     }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure?")) return;
-    await componentContentApi.remove(id);
+    try {
+      await componentContentApi.remove(id);
+      toast.success("Component deleted");
+    } catch (err) {
+      toast.error("Delete failed");
+    }
     setEditingId(null);
     refresh();
   };
@@ -209,7 +213,7 @@ export default function AboutPageContentAdmin() {
     return (
       <div className="space-y-3">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 items-end">
-          <ImageUploadField label="Background Image" value={data.image?.imageUrl} fieldKey="hero.image" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={setStatusMessage} onUpload={url => setData({ ...data, image: { ...data.image, imageUrl: url } })} />
+          <ImageUploadField label="Background Image" value={data.image?.imageUrl} fieldKey="hero.image" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={(m) => toast.error(m)} onUpload={url => setData({ ...data, image: { ...data.image, imageUrl: url } })} />
           <label className={labelClass}>Image Alt Text <input className={fieldClass} value={data.image?.alt || ""} onChange={e => setData({ ...data, image: { ...data.image, alt: e.target.value } })} /></label>
         </div>
         <div className="grid grid-cols-2 gap-3">
@@ -246,7 +250,7 @@ export default function AboutPageContentAdmin() {
           <label className={labelClass}>Title <input className={fieldClass} value={data.title || ""} onChange={e => setData({ ...data, title: e.target.value })} /></label>
         </div>
         <label className={labelClass}>Description <textarea className={fieldClass} rows={4} value={data.description || ""} onChange={e => setData({ ...data, description: e.target.value })} /></label>
-        <ImageUploadField label="Side Image" value={data.imageurl?.imageUrl} fieldKey="story.image" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={setStatusMessage} onUpload={url => setData({ ...data, imageurl: { ...data.imageurl, imageUrl: url } })} />
+        <ImageUploadField label="Side Image" value={data.imageurl?.imageUrl} fieldKey="story.image" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={(m) => toast.error(m)} onUpload={url => setData({ ...data, imageurl: { ...data.imageurl, imageUrl: url } })} />
         
         <div className="pt-3 border-t">
           <div className="flex justify-between items-center mb-3">
@@ -261,7 +265,7 @@ export default function AboutPageContentAdmin() {
                   <input className={fieldClass} placeholder="Stat Title" value={s.title || ""} onChange={e => { const ns = [...data.stats]; ns[idx].title = e.target.value; setData({ ...data, stats: ns }); }} />
                   <input className={fieldClass} placeholder="Subtitle" value={s.subtitle || ""} onChange={e => { const ns = [...data.stats]; ns[idx].subtitle = e.target.value; setData({ ...data, stats: ns }); }} />
                 </div>
-                <ImageUploadField label="Icon" value={s.imageurl?.imageUrl} fieldKey={`story.stat.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={setStatusMessage} onUpload={url => {
+                <ImageUploadField label="Icon" value={s.imageurl?.imageUrl} fieldKey={`story.stat.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={(m) => toast.error(m)} onUpload={url => {
                   const ns = [...data.stats]; ns[idx].imageurl = { ...ns[idx].imageurl, imageUrl: url }; setData({ ...data, stats: ns });
                 }} />
               </div>
@@ -306,7 +310,7 @@ export default function AboutPageContentAdmin() {
               <input className={fieldClass} placeholder="Link URL" value={item.linkUrl || ""} onChange={e => { const ni = data.items.map((it, i) => i === idx ? { ...it, linkUrl: e.target.value } : it); setData({ ...data, items: ni }); }} />
             </div>
             <textarea className={fieldClass} placeholder="Description" rows={2} value={item.description || ""} onChange={e => { const ni = data.items.map((it, i) => i === idx ? { ...it, description: e.target.value } : it); setData({ ...data, items: ni }); }} />
-            <ImageUploadField label="Thumbnail" value={item.imageurl?.imageUrl} fieldKey={`exp.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={setStatusMessage} onUpload={url => { const ni = data.items.map((it, i) => i === idx ? { ...it, imageurl: { ...it.imageurl, imageUrl: url } } : it); setData({ ...data, items: ni }); }} />
+            <ImageUploadField label="Thumbnail" value={item.imageurl?.imageUrl} fieldKey={`exp.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={(m) => toast.error(m)} onUpload={url => { const ni = data.items.map((it, i) => i === idx ? { ...it, imageurl: { ...it.imageurl, imageUrl: url } } : it); setData({ ...data, items: ni }); }} />
           </div>
         ))}
       </div>
@@ -327,7 +331,7 @@ export default function AboutPageContentAdmin() {
             <button type="button" onClick={() => setData({ ...data, stats: data.stats.filter((_, i) => i !== idx) })} className="absolute top-2 right-2 text-red-500"><Trash2 size={14} /></button>
             <label className={labelClass}>Value Label <input className={fieldClass} value={stat.label || ""} onChange={e => { const ns = data.stats.map((s, i) => i === idx ? { ...s, label: e.target.value } : s); setData({ ...data, stats: ns }); }} /></label>
             <label className={labelClass}>Subtitle <input className={fieldClass} value={stat.subtitle || ""} onChange={e => { const ns = data.stats.map((s, i) => i === idx ? { ...s, subtitle: e.target.value } : s); setData({ ...data, stats: ns }); }} /></label>
-            <ImageUploadField label="Icon" value={stat.imageurl?.imageUrl} fieldKey={`stat.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={setStatusMessage} onUpload={url => { const ns = data.stats.map((s, i) => i === idx ? { ...s, imageurl: { ...s.imageurl, imageUrl: url } } : s); setData({ ...data, stats: ns }); }} />
+            <ImageUploadField label="Icon" value={stat.imageurl?.imageUrl} fieldKey={`stat.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={(m) => toast.error(m)} onUpload={url => { const ns = data.stats.map((s, i) => i === idx ? { ...s, imageurl: { ...s.imageurl, imageUrl: url } } : s); setData({ ...data, stats: ns }); }} />
           </div>
         ))}
         </div>
@@ -344,7 +348,7 @@ export default function AboutPageContentAdmin() {
           <label className={labelClass}>Main Image Alt <input className={fieldClass} placeholder="Image Alt" value={data.imageurl?.alt || ""} onChange={e => setData({ ...data, imageurl: { ...data.imageurl, alt: e.target.value } })} /></label>
         </div>
         <label className={labelClass}>Description <textarea className={fieldClass} rows={3} value={data.description || ""} onChange={e => setData({ ...data, description: e.target.value })} /></label>
-        <ImageUploadField label="Main Image" value={data.imageurl?.imageUrl} fieldKey="why.main" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={setStatusMessage} onUpload={url => setData({ ...data, imageurl: { ...data.imageurl, imageUrl: url } })} />
+        <ImageUploadField label="Main Image" value={data.imageurl?.imageUrl} fieldKey="why.main" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={(m) => toast.error(m)} onUpload={url => setData({ ...data, imageurl: { ...data.imageurl, imageUrl: url } })} />
         
         <div className="flex justify-between items-center">
           <h4 className="text-xs font-bold text-[#8d6a3a]">EXPERIENCE CARDS</h4>
@@ -355,7 +359,7 @@ export default function AboutPageContentAdmin() {
             <button type="button" onClick={() => setData({ ...data, experience: data.experience.filter((_, i) => i !== idx) })} className="absolute top-2 right-2 text-red-500"><Trash2 size={14} /></button>
             <input className={fieldClass} placeholder="Title" value={item.title || ""} onChange={e => { const ne = data.experience.map((ex, i) => i === idx ? { ...ex, title: e.target.value } : ex); setData({ ...data, experience: ne }); }} />
             <textarea className={fieldClass} placeholder="Description" rows={2} value={item.description || ""} onChange={e => { const ne = data.experience.map((ex, i) => i === idx ? { ...ex, description: e.target.value } : ex); setData({ ...data, experience: ne }); }} />
-            <ImageUploadField label="Icon" value={item.imageurl?.imageUrl} fieldKey={`why.item.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={setStatusMessage} onUpload={url => { const ne = data.experience.map((ex, i) => i === idx ? { ...ex, imageurl: { ...ex.imageurl, imageUrl: url } } : ex); setData({ ...data, experience: ne }); }} />
+            <ImageUploadField label="Icon" value={item.imageurl?.imageUrl} fieldKey={`why.item.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={(m) => toast.error(m)} onUpload={url => { const ne = data.experience.map((ex, i) => i === idx ? { ...ex, imageurl: { ...ex.imageurl, imageUrl: url } } : ex); setData({ ...data, experience: ne }); }} />
           </div>
         ))}
       </div>
@@ -370,7 +374,7 @@ export default function AboutPageContentAdmin() {
           <label className={labelClass}>Title <input className={fieldClass} value={data.title || ""} onChange={e => setData({ ...data, title: e.target.value })} /></label>
           <label className={labelClass}>Diagram Alt <input className={fieldClass} placeholder="Diagram Alt" value={data.imageurl?.alt || ""} onChange={e => setData({ ...data, imageurl: { ...data.imageurl, alt: e.target.value } })} /></label>
         </div>
-        <ImageUploadField label="Process Diagram" value={data.imageurl?.imageUrl} fieldKey="process.img" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={setStatusMessage} onUpload={url => setData({ ...data, imageurl: { ...data.imageurl, imageUrl: url } })} />
+        <ImageUploadField label="Process Diagram" value={data.imageurl?.imageUrl} fieldKey="process.img" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={(m) => toast.error(m)} onUpload={url => setData({ ...data, imageurl: { ...data.imageurl, imageUrl: url } })} />
         <div className="flex justify-between items-center mt-2">
           <h4 className="text-xs font-bold text-[#8d6a3a]">PROCESS STEPS</h4>
           <button type="button" className="text-xs bg-[#263016] text-white px-2 py-1 rounded" onClick={() => setData({ ...data, steps: [...(data.steps || []), { id: randomId(), title: '', description: '', imageurl: { imageUrl: '', alt: '' } }] })}>Add Step</button>
@@ -414,7 +418,7 @@ export default function AboutPageContentAdmin() {
       <div className="space-y-3">
         <label className={labelClass}>Title <input className={fieldClass} value={data.title || ""} onChange={e => setData({ ...data, title: e.target.value })} /></label>
         <label className={labelClass}>Description <textarea className={fieldClass} rows={3} value={data.description || ""} onChange={e => setData({ ...data, description: e.target.value })} /></label>
-        <ImageUploadField label="CTA Background" value={data.imageurl?.imageUrl} fieldKey="cta.bg" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={setStatusMessage} onUpload={url => setData({ ...data, imageurl: { ...data.imageurl, imageUrl: url } })} />
+        <ImageUploadField label="CTA Background" value={data.imageurl?.imageUrl} fieldKey="cta.bg" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={(m) => toast.error(m)} onUpload={url => setData({ ...data, imageurl: { ...data.imageurl, imageUrl: url } })} />
         <input className={fieldClass} placeholder="Background Alt" value={data.imageurl?.alt || ""} onChange={e => setData({ ...data, imageurl: { ...data.imageurl, alt: e.target.value } })} />
         <div className="grid grid-cols-2 gap-3 p-3 border rounded bg-gray-50">
           <div className="space-y-2">
@@ -439,7 +443,7 @@ export default function AboutPageContentAdmin() {
         {/* Logo Section */}
         <div className="p-3 border rounded bg-gray-50 space-y-2">
           <h4 className="text-xs font-bold text-[#8d6a3a] uppercase">Logo Configuration</h4>
-          <ImageUploadField label="Logo Image" value={data.logo?.imageUrl} fieldKey="header.logo.src" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={setStatusMessage} onUpload={url => setData({ ...data, logo: { ...data.logo, imageUrl: url } })} />
+          <ImageUploadField label="Logo Image" value={data.logo?.imageUrl} fieldKey="header.logo.src" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={(m) => toast.error(m)} onUpload={url => setData({ ...data, logo: { ...data.logo, imageUrl: url } })} />
           <div className="grid grid-cols-2 gap-3">
             <label className={labelClass}>Alt Text <input className={fieldClass} value={data.logo?.alt || ""} onChange={e => setData({ ...data, logo: { ...data.logo, alt: e.target.value } })} /></label>
             <label className={labelClass}>Link URL <input className={fieldClass} value={data.logo?.href || ""} onChange={e => setData({ ...data, logo: { ...data.logo, href: e.target.value } })} /></label>
@@ -462,7 +466,7 @@ export default function AboutPageContentAdmin() {
                   fieldKey={`header.contact.${idx}`} 
                   uploadingField={uploadingField} 
                   onUploadingChange={setUploadingField} 
-                  onError={setStatusMessage} 
+                  onError={(m) => toast.error(m)} 
                   onUpload={url => { const nci = [...data.contactInfo]; nci[idx].image = { ...nci[idx].image, imageUrl: url }; setData({ ...data, contactInfo: nci }); }} 
                 />
                 <div className="grid grid-cols-2 gap-2">
@@ -532,7 +536,7 @@ export default function AboutPageContentAdmin() {
                 label="Design House Logo" 
                 value={typeof data.company?.designHouselogo === 'string' ? data.company.designHouselogo : data.company?.designHouselogo?.imageUrl} 
                 fieldKey="footer.company.designHouselogo" 
-                uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={setStatusMessage} 
+                uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={(m) => toast.error(m)} 
                 onUpload={url => { const nc = structuredClone(data.company || {}); nc.designHouselogo = typeof nc.designHouselogo === 'object' ? { ...nc.designHouselogo, imageUrl: url } : { imageUrl: url, alt: '' }; setData({ ...data, company: nc }); }} 
               />
               <label className={labelClass}>Design Logo Alt <input className={fieldClass} value={data.company?.designHouselogo?.alt || ""} onChange={e => { const nc = structuredClone(data.company || {}); nc.designHouselogo = typeof nc.designHouselogo === 'object' ? { ...nc.designHouselogo, alt: e.target.value } : { imageUrl: '', alt: e.target.value }; setData({ ...data, company: nc }); }} /></label>
@@ -542,7 +546,7 @@ export default function AboutPageContentAdmin() {
                 label="Ensis Logo" 
                 value={typeof data.company?.ensisLogo === 'string' ? data.company.ensisLogo : data.company?.ensisLogo?.imageUrl} 
                 fieldKey="footer.company.ensisLogo" 
-                uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={setStatusMessage} 
+                uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={(m) => toast.error(m)} 
                 onUpload={url => { const nc = structuredClone(data.company || {}); nc.ensisLogo = typeof nc.ensisLogo === 'object' ? { ...nc.ensisLogo, imageUrl: url } : { imageUrl: url, alt: '' }; setData({ ...data, company: nc }); }} 
               />
               <label className={labelClass}>Ensis Logo Alt <input className={fieldClass} value={data.company?.ensisLogo?.alt || ""} onChange={e => { const nc = structuredClone(data.company || {}); nc.ensisLogo = typeof nc.ensisLogo === 'object' ? { ...nc.ensisLogo, alt: e.target.value } : { imageUrl: '', alt: e.target.value }; setData({ ...data, company: nc }); }} /></label>
@@ -565,7 +569,7 @@ export default function AboutPageContentAdmin() {
                   fieldKey={`footer.social.${idx}`} 
                   uploadingField={uploadingField} 
                   onUploadingChange={setUploadingField} 
-                  onError={setStatusMessage} 
+                  onError={(m) => toast.error(m)} 
                   onUpload={url => { 
                     const ns = structuredClone(data.company); 
                     ns.socialLinks[idx].image = { ...ns.socialLinks[idx].image, imageUrl: url }; 
@@ -658,7 +662,7 @@ export default function AboutPageContentAdmin() {
               <input className={fieldClass} placeholder="Role" value={t.role || ""} onChange={e => { const nt = data.testimonials.map((test, i) => i === idx ? { ...test, role: e.target.value } : test); setData({ ...data, testimonials: nt }); }} />
             </div>
             <div className="grid grid-cols-2 gap-2">
-               <ImageUploadField label="Avatar" value={t.image?.imageUrl} fieldKey={`testi.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={setStatusMessage} onUpload={url => { const nt = data.testimonials.map((test, i) => i === idx ? { ...test, image: { ...test.image, imageUrl: url } } : test); setData({ ...data, testimonials: nt }); }} />
+               <ImageUploadField label="Avatar" value={t.image?.imageUrl} fieldKey={`testi.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={(m) => toast.error(m)} onUpload={url => { const nt = data.testimonials.map((test, i) => i === idx ? { ...test, image: { ...test.image, imageUrl: url } } : test); setData({ ...data, testimonials: nt }); }} />
                <input className={fieldClass} placeholder="Avatar Alt" value={t.image?.alt || ""} onChange={e => { const nt = data.testimonials.map((test, i) => i === idx ? { ...test, image: { ...test.image, alt: e.target.value } } : test); setData({ ...data, testimonials: nt }); }} />
             </div>
           </div>
@@ -678,10 +682,10 @@ export default function AboutPageContentAdmin() {
         <label className={labelClass}>Description <textarea className={fieldClass} rows={4} value={data.description || ""} onChange={e => setData({ ...data, description: e.target.value })} /></label>
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
-            <ImageUploadField label="Founder Image" value={data.founderImageurl?.imageUrl} fieldKey="f.img" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={setStatusMessage} onUpload={url => setData({ ...data, founderImageurl: { ...data.founderImageurl, imageUrl: url } })} />
+            <ImageUploadField label="Founder Image" value={data.founderImageurl?.imageUrl} fieldKey="f.img" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={(m) => toast.error(m)} onUpload={url => setData({ ...data, founderImageurl: { ...data.founderImageurl, imageUrl: url } })} />
           </div>
           <div className="space-y-1.5">
-            <ImageUploadField label="Signature" value={data.signatureImageurl?.imageUrl} fieldKey="f.sig" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={setStatusMessage} onUpload={url => setData({ ...data, signatureImageurl: { ...data.signatureImageurl, imageUrl: url } })} />
+            <ImageUploadField label="Signature" value={data.signatureImageurl?.imageUrl} fieldKey="f.sig" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={(m) => toast.error(m)} onUpload={url => setData({ ...data, signatureImageurl: { ...data.signatureImageurl, imageUrl: url } })} />
           </div>
         </div>
         <div className="p-4 border rounded bg-white space-y-2">
@@ -826,13 +830,6 @@ export default function AboutPageContentAdmin() {
                    </div>
                 )}
               </div>
-
-              {statusMessage && (
-                <div className={`flex items-center gap-2 p-4 rounded-xl text-sm font-bold ${statusMessage.includes("fail") ? "bg-red-50 text-red-700 border border-red-100" : "bg-green-50 text-green-700 border border-green-100"}`}>
-                  {statusMessage.includes("success") ? <CheckCircle size={18} /> : null}
-                  {statusMessage}
-                </div>
-              )}
             </div>
           </form>
         </section>

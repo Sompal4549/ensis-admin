@@ -1,5 +1,6 @@
 "use client";
 
+import { toast } from "react-toastify";
 import { FormEvent, useEffect, useState } from "react";
 import { Save, Plus, Trash2 } from "lucide-react";
 import RichTextEditor from "@/components/common/RichTextEditor";
@@ -8,7 +9,6 @@ import { fieldClass, labelClass } from "@/constants";
 
 export default function WellnessEditor() {
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
   const [content, setContent] = useState<ComponentContent | null>(null);
 
   const [form, setForm] = useState({
@@ -41,7 +41,7 @@ export default function WellnessEditor() {
         data: { ...form.data, ...(item.data || {}) },
       });
     } catch (error) {
-      setMessage((error as Error).message);
+      toast.error((error as Error).message || "Failed to load wellness data");
     } finally {
       setLoading(false);
     }
@@ -55,9 +55,9 @@ export default function WellnessEditor() {
     try {
       setLoading(true);
       await componentContentApi.update(content._id, { ...form });
-      setMessage("Wellness section updated!");
+      toast.success("Wellness section updated!");
     } catch (error) {
-      setMessage((error as Error).message);
+      toast.error((error as Error).message || "Update failed");
     } finally {
       setLoading(false);
     }

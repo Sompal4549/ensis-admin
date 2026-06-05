@@ -1,10 +1,10 @@
 "use client";
 
-import axios from "axios";
+import { toast } from "react-toastify";
 import { useState } from "react";
 import { X, Loader2, ShieldCheck } from "lucide-react";
 import { fieldClass, labelClass } from "@/constants";
-import { authStore } from "@/lib/api";
+import { api } from "@/lib/api";
 
 interface UserManagementModalProps {
   isOpen: boolean;
@@ -14,36 +14,24 @@ interface UserManagementModalProps {
 export default function UserManagementModal({ isOpen, onClose }: UserManagementModalProps) {
   const [form, setForm] = useState({ name: "", email: "", password: "", role: "admin" });
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState({ text: "", isError: false });
-
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setMessage({ text: "", isError: false });
 
     try {
-      const token = authStore.getToken();
-      await axios.post(`${API_BASE_URL}/api/v1/admin/users`, form, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      await api.post("/admin/users", form);
       
-      setMessage({ text: "User created successfully!", isError: false });
+      toast.success("User created successfully!");
       setTimeout(() => {
         onClose();
         setForm({ name: "", email: "", password: "", role: "admin" });
-        setMessage({ text: "", isError: false });
       }, 1500);
     } catch (error) {
-      const errMsg = axios.isAxiosError(error) 
-        ? error.response?.data?.message 
-        : "An unexpected error occurred";
-      setMessage({ text: errMsg || "Failed to create user", isError: true });
+      const errMsg = error.response?.data?.message || "Failed to create user";
+      toast.error(errMsg);
     } finally {
       setLoading(false);
     }
@@ -114,12 +102,6 @@ export default function UserManagementModal({ isOpen, onClose }: UserManagementM
               <option value="editor">Editor</option>
             </select>
           </div>
-
-          {message.text && (
-            <div className={`p-3 rounded-lg text-xs font-semibold ${message.isError ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}`}>
-              {message.text}
-            </div>
-          )}
 
           <div className="pt-2">
             <button

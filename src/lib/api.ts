@@ -85,12 +85,12 @@ export const getImageUrl = (image?: string) => {
   return `${BACKEND_URL}${image.startsWith("/") ? image : `/${image}`}`;
 };
 
-const apiClientInstance = axios.create({
+export const api = axios.create({
   baseURL: API_URL,
   withCredentials: true,
 });
 
-apiClientInstance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token = authStore.getToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -100,7 +100,7 @@ apiClientInstance.interceptors.request.use((config: InternalAxiosRequestConfig) 
 
 const request = async <T>(path: string, options: AxiosRequestConfig = {}) => {
   try {
-    const response = await apiClientInstance.request<ApiEnvelope<T>>({
+    const response = await api.request<ApiEnvelope<T>>({
       url: path,
       ...options,
     });
@@ -122,6 +122,11 @@ export const adminApi = {
       data: { email, password },
     }),
   dashboard: () => request<Record<string, unknown>>("/admin/dashboard"),
+  listUsers: () => request<AuthUser[]>("/admin/users"),
+  createUser: (payload: any) => request<AuthUser>("/admin/users", { method: "POST", data: payload }),
+  updateUser: (id: string, payload: any) =>
+    request<AuthUser>(`/admin/users/${id}`, { method: "PUT", data: payload }),
+  deleteUser: (id: string) => request<null>(`/admin/users/${id}`, { method: "DELETE" }),
 };
 
 export const categoryApi = {
