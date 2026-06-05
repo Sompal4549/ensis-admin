@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import PageStatsCards from "@/components/common/PageStatsCards";
 import {
   Lock,
   FileText,
@@ -328,68 +329,8 @@ export default function AdminHome() {
   return (
     <div className="flex h-full min-h-0 flex-col gap-3 overflow-hidden">
       
-      {/* Row 1: Stats Grid (5 Cards in 1 Row) */}
-      <div className="grid shrink-0 grid-cols-5 gap-3">
-        {/* Card 1 */}
-        <div className=" px-4 py-2.5 rounded-2xl border border-slate-100 shadow-sm flex justify-between h-full bg-center bg-cover bg-no-repeat" style={{backgroundImage:`url(${blue.src})`, }}>
-          <div className="min-w-0">
-            <span className="text-[10px] font-bold uppercase tracking-wider">Total Pages</span>
-            <p className="text-xl font-bold leading-tight">28</p>
-            <span className="text-[9px] text-blue-500 font-semibold leading-none">Published 24</span>
-          </div>
-          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600 mt-2">
-            <FileText size={24} />
-          </div>
-        </div>
-
-        {/* Card 2 */}
-        <div className="bg-white px-4 py-2.5 rounded-2xl border border-slate-100 shadow-sm flex justify-between h-full bg-center bg-cover bg-no-repeat" style={{backgroundImage:`url(${orange.src})`}}>
-          <div className="min-w-0">
-            <span className="text-[10px] font-bold uppercase tracking-wider">Total Sections</span>
-            <p className="text-xl font-bold leading-tight">62</p>
-            <span className="text-[9px] text-amber-500 font-semibold leading-none">Active 58</span>
-          </div>
-          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-amber-50 text-amber-600 mt-2">
-            <LayoutGrid size={24} />
-          </div>
-        </div>
-
-        {/* Card 3 */}
-        <div className="bg-white px-4 py-2.5 rounded-2xl border border-slate-100 shadow-sm flex justify-between h-full bg-center bg-cover bg-no-repeat" style={{backgroundImage:`url(${purple.src})`}}>
-          <div className="min-w-0">
-            <span className="text-[10px] font-bold uppercase tracking-wider">Sliders / Banners</span>
-            <p className="text-xl font-bold leading-tight">6</p>
-            <span className="text-[9px] text-purple-500 font-semibold leading-none">Active 6</span>
-          </div>
-          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-purple-50 text-purple-600 mt-2">
-            <ImageIcon size={24} />
-          </div>
-        </div>
-
-        {/* Card 4 */}
-        <div className="bg-white px-4 py-2.5 rounded-2xl border border-slate-100 shadow-sm flex justify-between h-full bg-center bg-cover bg-no-repeat" style={{backgroundImage:`url(${green.src})`}}>
-          <div className="min-w-0">
-            <span className="text-[10px] font-bold uppercase tracking-wider">Projects</span>
-            <p className="text-xl font-bold leading-tight">35</p>
-            <span className="text-[9px] text-emerald-500 font-semibold leading-none">Published 31</span>
-          </div>
-          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 mt-2">
-            <Building2 size={24} />
-          </div>
-        </div>
-
-        {/* Card 5 */}
-        <div className="bg-white px-4 py-2.5 rounded-2xl border border-slate-100 shadow-sm flex justify-between h-full bg-center bg-cover bg-no-repeat" style={{backgroundImage:`url(${pink.src})`}}>
-          <div className="min-w-0">
-            <span className="text-[10px] font-bold uppercase tracking-wider">Inquiries</span>
-            <p className="text-xl font-bold  leading-tight">186</p>
-            <span className="text-[9px] text-emerald-500 font-semibold leading-none">↑ 18% This Month</span>
-          </div>
-          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-amber-50 text-pink-600 mt-2">
-            <MessageSquare size={24} />
-          </div>
-        </div>
-      </div>
+      {/* Row 1: Stats Grid */}
+      <PageStatsCards pageName="dashboard" />
 
       {/* Row 2: Website Overview Chart + Recent Inquiries + Quick Actions (Exactly 3 Cards in a Row) */}
       <div className="grid min-h-0 flex-1 grid-cols-12 gap-3">

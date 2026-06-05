@@ -149,6 +149,7 @@ export const productApi = {
 export const componentContentApi = {
   list: () => request<ComponentContent[]>('/component-content?includeInactive=true'),
   getByKey: (key: string) => request<ComponentContent>(`/component-content/${encodeURIComponent(key)}`),
+  getByPage: (page: string) => request<ComponentContent[]>(`/component-content?page=${encodeURIComponent(page)}&includeInactive=true`),
   create: (payload: Omit<ComponentContent, '_id'>) =>
     request<ComponentContent>('/component-content', { method: 'POST', data: payload }),
   update: (id: string, payload: Partial<ComponentContent>) =>

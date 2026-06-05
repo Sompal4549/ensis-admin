@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import PageStatsCards from "@/components/common/PageStatsCards";
 import Link from "next/link";
 import {
   ArrowDown,
@@ -680,7 +681,7 @@ export default function HomepageContentAdminPage() {
 
   return (
     <main className="min-h-screen bg-[#f6f1e8] text-[#1f261b]">
-      <header className="border-b border-[#ded3c4] bg-white shadow-sm">
+      {/* <header className="border-b border-[#ded3c4] bg-white shadow-sm">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-5">
           <div>
             <p className="text-xs uppercase tracking-[0.3em] text-[#8d6a3a]">Homepage Content Admin</p>
@@ -695,13 +696,16 @@ export default function HomepageContentAdminPage() {
             </button>
           </div>
         </div>
-      </header>
+      </header> */}
 
       <div className="mx-auto max-w-7xl px-5 py-8">
+        <div className="mb-2">
+          <PageStatsCards pageName="home" />
+        </div>
         <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
-          <div className="max-w-3xl">
+          {/* <div className="max-w-3xl">
             <p className="text-sm leading-7 text-[#4a473f]">Create and update structured homepage component content records for known keys. Use the list on the left to edit an existing entry or create a new one with the button above.</p>
-          </div>
+          </div> */}
           <div className="flex flex-wrap gap-3">
             {statusMessage ? (
               <div className="inline-flex items-center gap-2 rounded-md bg-[#eef7e8] px-4 py-3 text-sm text-[#2f5f31]">
