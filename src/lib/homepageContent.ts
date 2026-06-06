@@ -28,6 +28,7 @@ export type HomeHeroSlide = {
   listItems?: string[];
   showLutus?: boolean;
   isCenter?: boolean;
+  features?: { imgUrl: string; title: string }[];
 };
 
 export type HomeFeaturesFeature = {
@@ -161,7 +162,7 @@ export type HomepageData =
 // ---------- KEY REGISTRY ----------
 
 export const homepageKeys: { key: HomepageComponentKey; label: string; description: string }[] = [
-  { key: "home.hero", label: "Home Hero", description: "Homepage hero slider with image, title, highlight, buttons, and list items." },
+  { key: "home.hero", label: "Home Hero", description: "Homepage hero slider with image, title, highlight, buttons, features, and list items." },
   { key: "home.wellnessSection", label: "Wellness Section", description: "Wellness section with welcome text, welcome image, and service cards." },
   { key: "home.features", label: "Home Features", description: "Feature cards with image, title, and description." },
   { key: "home.turnkeySolutions", label: "Home Turnkey Solutions", description: "Turnkey solutions section with heading, background image, and solution cards." },
@@ -185,7 +186,7 @@ const randomId = () =>
 
 export const defaultHomepageData: Record<HomepageComponentKey, HomepageData> = {
   "home.hero": {
-    slides: [{ id: "", image: "", title: "", highlight: "", description: "", primaryButtonText: "", primaryButtonHref: "", secondaryButtonText: "", secondaryButtonHref: "", listItems: [""], showLutus: false, isCenter: false }],
+    slides: [{ id: "", image: "", title: "", highlight: "", description: "", primaryButtonText: "", primaryButtonHref: "", secondaryButtonText: "", secondaryButtonHref: "", listItems: [""], showLutus: false, isCenter: false, features: [{ imgUrl: "", title: "" }] }],
   },
   "home.wellnessSection": {
     welcomeImage: "", eyebrow: "", heading: "", description: "", buttonText: "", buttonHref: "",

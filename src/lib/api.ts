@@ -52,6 +52,23 @@ export type AuthUser = {
   role: string;
 };
 
+export type Order = {
+  _id: string;
+  orderNumber: string;
+  user: string | AuthUser;
+  items: Array<{
+    product: string | Product;
+    quantity: number;
+    price: number;
+  }>;
+  totalAmount: number;
+  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled" | "returned";
+  paymentStatus: "pending" | "paid" | "failed" | "refunded";
+  shippingAddress: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 type ApiEnvelope<T> = {
   status: "success" | "error";
   message: string;
@@ -144,6 +161,13 @@ export const productApi = {
   update: (id: string, payload: Partial<Product>) =>
     request<Product>(`/products/${id}`, { method: "PUT", data: payload }),
   remove: (id: string) => request<null>(`/products/${id}`, { method: "DELETE" }),
+};
+
+export const orderApi = {
+  list: () => request<Order[]>("/orders"),
+  get: (id: string) => request<Order>(`/orders/${id}`),
+  update: (id: string, payload: Partial<Order>) =>
+    request<Order>(`/orders/${id}`, { method: "PUT", data: payload }),
 };
 
 export const componentContentApi = {

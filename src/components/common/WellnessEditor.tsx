@@ -147,7 +147,6 @@ export default function WellnessEditor() {
           <button type="submit" disabled={loading} className="bg-[#6f542f] text-white px-10 py-3 rounded-lg font-bold hover:shadow-lg transition-all">
             Save Changes
           </button>
-          {message && <span className="text-sm font-semibold text-[#6f542f]">{message}</span>}
         </div>
       </form>
     </div>

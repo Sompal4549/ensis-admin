@@ -1,9 +1,10 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { Save, Plus, Trash2 } from "lucide-react";
-import { componentContentApi, type ComponentContent } from "@/lib/api";
+import { Save, Plus, Trash2, Loader2 } from "lucide-react";
+import { componentContentApi, type ComponentContent, uploadImage, getImageUrl } from "@/lib/api";
 import { fieldClass, labelClass } from "@/constants";
+import { ImageUploadField } from "@/components/common/ImageUploadField";
 
 
 
@@ -11,6 +12,7 @@ export default function HeroEditor() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [content, setContent] = useState<ComponentContent | null>(null);
+  const [uploadingField, setUploadingField] = useState<string | null>(null);
 
   // State management for the specialized form
   const [form, setForm] = useState({
@@ -19,7 +21,7 @@ export default function HeroEditor() {
     description: "",
     isActive: true,
     data: {
-      slides: [{ title: "", highlight: "", description: "", image: "", primaryBtn: "" }]
+      slides: [{ title: "", highlight: "", description: "", image: "", primaryBtn: "", features: [] }]
     },
   });
 
@@ -84,7 +86,7 @@ export default function HeroEditor() {
       ...form,
       data: {
         ...form.data,
-        slides: [...form.data.slides, { title: "", highlight: "", description: "", image: "", primaryBtn: "" }]
+        slides: [...form.data.slides, { title: "", highlight: "", description: "", image: "", primaryBtn: "", features: [] }]
       }
     });
   };
@@ -104,6 +106,22 @@ export default function HeroEditor() {
   const updateSlide = (index: number, field: string, value: string) => {
     const newSlides = [...form.data.slides];
     newSlides[index] = { ...newSlides[index], [field]: value };
+    setForm({ ...form, data: { ...form.data, slides: newSlides } });
+  };
+
+  const addFeature = (slideIndex: number) => {
+    const newSlides = [...form.data.slides];
+    const features = [...(newSlides[slideIndex].features || [])];
+    features.push({ imgUrl: "", title: "" });
+    newSlides[slideIndex] = { ...newSlides[slideIndex], features };
+    setForm({ ...form, data: { ...form.data, slides: newSlides } });
+  };
+
+  const updateFeature = (slideIndex: number, featureIndex: number, field: string, value: string) => {
+    const newSlides = [...form.data.slides];
+    const features = [...(newSlides[slideIndex].features || [])];
+    features[featureIndex] = { ...features[featureIndex], [field]: value };
+    newSlides[slideIndex] = { ...newSlides[slideIndex], features };
     setForm({ ...form, data: { ...form.data, slides: newSlides } });
   };
 
@@ -150,6 +168,30 @@ export default function HeroEditor() {
               <div className="mt-4">
                 <label className={labelClass}>Slide Description</label>
                 <textarea className={`${fieldClass} mt-1 h-24`} value={slide.description} onChange={(e) => updateSlide(index, "description", e.target.value)} />
+              </div>
+              
+              <div className="mt-4 border-t pt-4">
+                <div className="flex justify-between items-center mb-4">
+                  <p className="text-sm font-bold text-gray-600">Slide Features</p>
+                  <button type="button" onClick={() => addFeature(index)} className="text-xs bg-gray-100 px-2 py-1 rounded border hover:bg-gray-200">
+                    Add Feature
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {(slide.features || []).map((feature: any, fIdx: number) => (
+                    <div key={fIdx} className="bg-gray-50 p-3 rounded border relative group">
+                      <button type="button" onClick={() => {
+                        const newSlides = [...form.data.slides];
+                        newSlides[index].features = slide.features?.filter((_: any, i: number) => i !== fIdx);
+                        setForm({ ...form, data: { ...form.data, slides: newSlides } });
+                      }} className="absolute top-1 right-1 text-red-400 opacity-0 group-hover:opacity-100">
+                        <Trash2 size={14} />
+                      </button>
+                      <label className={labelClass}>Icon URL <input className={`${fieldClass} mt-1`} value={feature.imgUrl} onChange={(e) => updateFeature(index, fIdx, "imgUrl", e.target.value)} /></label>
+                      <label className={labelClass}><span className="mt-2 block">Label</span> <input className={`${fieldClass} mt-1`} value={feature.title} onChange={(e) => updateFeature(index, fIdx, "title", e.target.value)} /></label>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           ))}

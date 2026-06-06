@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { DropResult } from "@hello-pangea/dnd";
+import { toast } from "react-toastify";
 import PageStatsCards from "@/components/common/PageStatsCards";
 import Link from "next/link";
 import {
@@ -13,8 +15,13 @@ import {
   Plus,
   Save,
   Trash2,
+  GripVertical,
+  Edit2,
+  Eye,
+  MoreVertical,
 } from "lucide-react";
 import { componentContentApi, getImageUrl, uploadImage, type ComponentContent } from "@/lib/api";
+import ComponentList from "@/components/common/ComponentList";
 import {
   buildEmptyHomepageContent,
   createHomepageData,
@@ -27,7 +34,8 @@ import {
   type HomeTurnkeySolution,
   validateHomepageContent,
 } from "@/lib/homepageContent";
-import { labelClass, fieldClass, cardClass } from "@/constants";
+import { labelClass, fieldClass, cardClass, frontendUrl } from "@/constants";
+import LivePreviewIframe from "@/components/common/LivePreviewIframe";
 
 type ContentForm = Omit<ComponentContent, "_id"> & { key: HomepageComponentKey };
 
@@ -144,6 +152,30 @@ export default function HomepageContentAdminPage() {
       });
     });
   }, []);
+
+  const onDragEnd = async (result: DropResult) => {
+    if (!result.destination) return;
+    
+    const items = Array.from(records);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+    
+    // Optimistically update the UI order
+    setRecords(items);
+
+    try {
+      // Persist the new index for all items in the list to ensure sync
+      await Promise.all(
+        items.map((item, index) => 
+          componentContentApi.update(item._id, { index })
+        )
+      );
+      toast.success("Component order saved successfully");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to save new order");
+      refresh(); // Revert to server state if the API call fails
+    }
+  };
 
   const setData = (nextData: HomepageData) => setForm((current) => ({ ...current, data: nextData }));
 
@@ -353,6 +385,58 @@ export default function HomepageContentAdminPage() {
                   >
                     Remove
                   </button>
+                </div>
+              ))}
+            </div>
+            <div className="mt-4 rounded-xl bg-white p-3">
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <p className="text-sm font-semibold text-[#1f261b]">Features</p>
+                <button type="button" onClick={() => setData({ slides: heroData.slides.map((item, itemIndex) => itemIndex === index ? { ...item, features: [...(item.features || []), { imgUrl: "", title: "" }] } : item) })} className="inline-flex items-center gap-2 rounded-md border border-[#d9cdbb] bg-white px-3 py-2 text-xs font-semibold uppercase tracking-wide text-[#263016]">
+                  <Plus size={14} /> Add feature
+                </button>
+              </div>
+              {(slide.features || []).map((feature, featureIndex) => (
+                <div key={featureIndex} className="mb-4 rounded-lg border border-[#e5dfd5] bg-[#fbf8f3] p-3">
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <p className="text-sm font-semibold text-[#1f261b]">Feature {featureIndex + 1}</p>
+                    <button
+                      type="button"
+                      onClick={() => setData({ slides: heroData.slides.map((item, itemIndex) => {
+                        if (itemIndex !== index) return item;
+                        const nextFeatures = [...(item.features || [])];
+                        nextFeatures.splice(featureIndex, 1);
+                        return { ...item, features: nextFeatures };
+                      }) })}
+                      className="rounded-md border border-[#e0b4a0] bg-white px-3 py-2 text-sm text-[#9b2e2e]"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <ImageUploadField
+                      label="Feature image"
+                      value={feature.imgUrl}
+                      fieldKey={`hero-slide-${slide.id}-feature-img-${featureIndex}`}
+                      uploadingField={uploadingField}
+                      onUploadingChange={setUploadingField}
+                      onError={setStatusMessage}
+                      onUpload={(url) => setData({ slides: heroData.slides.map((item, itemIndex) => {
+                        if (itemIndex !== index) return item;
+                        const nextFeatures = [...(item.features || [])];
+                        nextFeatures[featureIndex] = { ...nextFeatures[featureIndex], imgUrl: url };
+                        return { ...item, features: nextFeatures };
+                      }) })}
+                    />
+                    <label className={labelClass}>
+                      Feature title
+                      <input className={`${fieldClass} mt-2`} type="text" value={feature.title} onChange={(event) => setData({ slides: heroData.slides.map((item, itemIndex) => {
+                        if (itemIndex !== index) return item;
+                        const nextFeatures = [...(item.features || [])];
+                        nextFeatures[featureIndex] = { ...nextFeatures[featureIndex], title: event.target.value };
+                        return { ...item, features: nextFeatures };
+                      }) })} />
+                    </label>
+                  </div>
                 </div>
               ))}
             </div>
@@ -730,38 +814,15 @@ export default function HomepageContentAdminPage() {
                   Refresh
                 </button>
               </div>
-              <div className="overflow-hidden rounded-lg border border-[#e2d7c3]">
-                <table className="min-w-full border-collapse text-left text-sm">
-                  <thead className="bg-[#f7f2e8] text-[#5f5a50]">
-                    <tr>
-                      <th className="px-4 py-3">Label</th>
-                      <th className="px-4 py-3">Key</th>
-                      <th className="px-4 py-3">Page</th>
-                      <th className="px-4 py-3">Active</th>
-                      <th className="px-4 py-3">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {records.map((record) => (
-                      <tr key={record._id} className="border-t border-[#e8dfcc]">
-                        <td className="px-4 py-3 font-semibold text-[#1f261b]">{record.label}</td>
-                        <td className="px-4 py-3 text-[#5f5a50]">{record.key}</td>
-                        <td className="px-4 py-3 text-[#5f5a50]">{record.page}</td>
-                        <td className="px-4 py-3 text-[#5f5a50]">{record.isActive ? "Yes" : "No"}</td>
-                        <td className="px-4 py-3">
-                          <div className="flex flex-wrap gap-2">
-                            <button type="button" disabled={!knownKeys.includes(record.key as HomepageComponentKey)} onClick={() => handleSelectRecord(record)} className="inline-flex items-center gap-2 rounded-md border border-[#d9cdbb] bg-white px-3 py-2 text-xs font-semibold text-[#263016] disabled:cursor-not-allowed disabled:opacity-50">
-                              <Save size={14} /> Edit
-                            </button>
-                            <button type="button" onClick={() => handleDelete(record._id)} className="inline-flex items-center gap-2 rounded-md border border-[#e0b4a0] bg-white px-3 py-2 text-xs font-semibold text-[#9b2e2e]">
-                              <Trash2 size={14} /> Delete
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="p-0">
+                <ComponentList 
+                  records={records} 
+                  onEdit={handleSelectRecord} 
+                  onDelete={handleDelete} 
+                  onReorder={onDragEnd}
+                  editingId={editingId}
+                  knownKeys={knownKeys}
+                />
               </div>
             </div>
           </section>
@@ -843,6 +904,13 @@ export default function HomepageContentAdminPage() {
                 </div>
               </form>
             </div>
+          </section>
+          <section>
+              <LivePreviewIframe 
+                        iframeSrc={`${frontendUrl}`} 
+                        ctaHref={`${frontendUrl}`}
+                        pageName="home"
+                      />
           </section>
         </div>
       </div>

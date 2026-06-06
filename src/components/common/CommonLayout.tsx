@@ -16,6 +16,7 @@ import {
   LayoutDashboard,
   Layers,
   Search,
+  Briefcase,
   ImageUp,
   ExternalLink,
   Bell,
@@ -35,6 +36,7 @@ import {
 import { LoginForm, useAuth } from "@/components/auth/AuthContext";
 import sidebarBg from "@/assets/sidebarbg.webp"
 import UserManagementModal from "./UserManagementModal";
+import { api } from "@/lib/api";
 
 interface NavItem {
   label: string;
@@ -143,14 +145,25 @@ const NAV_ITEMS: NavItem[] = [
           { label: "Lets Build", path: "/about-page-content/lets-build" },
         ],
       },
+        {
+        label: "Turnkey",
+        path: "/turnkey-page-content",
+        icon: <Briefcase size={16} />,
+      },
       {
         label: "Site Header",
         path: "/header",
         icon: <AlignJustify size={16} />,
       },
+    
       {
         label: "Site Footer",
         path: "/footer",
+        icon: <ArrowDownToLine size={16} />,
+      },
+        {
+        label: "Orders",
+        path: "/orders-list-management",
         icon: <ArrowDownToLine size={16} />,
       },
       {

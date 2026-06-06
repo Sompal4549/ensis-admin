@@ -213,12 +213,6 @@ export default function ComponentEditor({
             <Save size={16} />
             {loading ? "Saving..." : "Save Changes"}
           </button>
-
-          {message && (
-            <span className="text-sm font-medium text-[#6f542f]">
-              {message}
-            </span>
-          )}
         </div>
       </form>
     </div>

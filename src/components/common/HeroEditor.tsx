@@ -6,11 +6,13 @@ import { Save, Plus, Trash2, Layout } from "lucide-react";
 import RichTextEditor from "@/components/common/RichTextEditor";
 import { componentContentApi, type ComponentContent } from "@/lib/api";
 import { fieldClass, labelClass } from "@/constants";
+import { ImageUploadField } from "./ImageUploadField";
 
 
 
 export default function HeroEditor() {
   const [loading, setLoading] = useState(false);
+  const [uploadingField, setUploadingField] = useState<string | null>(null);
   const [content, setContent] = useState<ComponentContent | null>(null);
 
   // State management for the specialized form
@@ -20,7 +22,7 @@ export default function HeroEditor() {
     description: "",
     isActive: true,
     data: {
-      slides: [{ title: "", highlight: "", description: "", image: "", primaryBtn: "" }]
+      slides: [{ title: "", highlight: "", description: "", image: "", primaryBtn: "", features: [] as { imgUrl: string; title: string }[] }]
     },
   });
 
@@ -82,7 +84,7 @@ export default function HeroEditor() {
       ...form,
       data: {
         ...form.data,
-        slides: [...form.data.slides, { title: "", highlight: "", description: "", image: "", primaryBtn: "" }]
+        slides: [...form.data.slides, { title: "", highlight: "", description: "", image: "", primaryBtn: "", features: [] as { imgUrl: string; title: string }[] }]
       }
     });
   };
@@ -96,6 +98,22 @@ export default function HeroEditor() {
   const updateSlide = (index: number, field: string, value: string) => {
     const newSlides = [...form.data.slides];
     newSlides[index] = { ...newSlides[index], [field]: value };
+    setForm({ ...form, data: { ...form.data, slides: newSlides } });
+  };
+
+  const addFeature = (slideIndex: number) => {
+    const newSlides = [...form.data.slides];
+    const features = [...(newSlides[slideIndex].features || [])];
+    features.push({ imgUrl: "", title: "" });
+    newSlides[slideIndex] = { ...newSlides[slideIndex], features };
+    setForm({ ...form, data: { ...form.data, slides: newSlides } });
+  };
+
+  const updateFeature = (slideIndex: number, featureIndex: number, field: string, value: string) => {
+    const newSlides = [...form.data.slides];
+    const features = [...(newSlides[slideIndex].features || [])];
+    features[featureIndex] = { ...features[featureIndex], [field]: value };
+    newSlides[slideIndex] = { ...newSlides[slideIndex], features };
     setForm({ ...form, data: { ...form.data, slides: newSlides } });
   };
 
@@ -136,7 +154,15 @@ export default function HeroEditor() {
               <div className="grid gap-4 md:grid-cols-2">
                 <label className={labelClass}>Main Title <input className={`${fieldClass} mt-1`} value={slide.title} onChange={(e) => updateSlide(index, "title", e.target.value)} /></label>
                 <label className={labelClass}>Highlight Text <input className={`${fieldClass} mt-1`} value={slide.highlight} onChange={(e) => updateSlide(index, "highlight", e.target.value)} /></label>
-                <label className={labelClass}>Background Image URL <input className={`${fieldClass} mt-1`} value={slide.image} onChange={(e) => updateSlide(index, "image", e.target.value)} /></label>
+                <ImageUploadField 
+                  label="Background Image" 
+                  value={slide.image} 
+                  fieldKey={`hero-slide-bg-${index}`} 
+                  uploadingField={uploadingField} 
+                  onUploadingChange={setUploadingField} 
+                  onError={(m) => toast.error(m)} 
+                  onUpload={(url) => updateSlide(index, "image", url)} 
+                />
                 <label className={labelClass}>Button Text <input className={`${fieldClass} mt-1`} value={slide.primaryBtn} onChange={(e) => updateSlide(index, "primaryBtn", e.target.value)} /></label>
               </div>
               <div className="mt-4">
@@ -148,6 +174,40 @@ export default function HeroEditor() {
                   minHeight="120px"
                 />
               </div>
+
+              <div className="mt-6 pt-4 border-t border-gray-100">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-sm font-bold text-gray-600 uppercase tracking-wider">Slide Features</h3>
+                  <button type="button" onClick={() => addFeature(index)} className="flex items-center gap-1 bg-gray-100 text-[#8d6a3a] px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-gray-200 transition-all">
+                    <Plus size={14} /> Add Feature
+                  </button>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {(slide.features || []).map((feature: any, fIdx: number) => (
+                    <div key={fIdx} className="bg-gray-50 p-4 rounded-xl border border-gray-100 relative group">
+                      <button type="button" onClick={() => {
+                        const newSlides = [...form.data.slides];
+                        newSlides[index].features = slide.features?.filter((_: any, i: number) => i !== fIdx);
+                        setForm({ ...form, data: { ...form.data, slides: newSlides } });
+                      }} className="absolute -top-2 -right-2 bg-white text-red-400 p-1.5 rounded-full border border-red-50 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm">
+                        <Trash2 size={12} />
+                      </button>
+                      <div className="space-y-3">
+                        <ImageUploadField 
+                          label="Icon" 
+                          value={feature.imgUrl} 
+                          fieldKey={`feat-icon-${index}-${fIdx}`} 
+                          uploadingField={uploadingField} 
+                          onUploadingChange={setUploadingField} 
+                          onError={(m) => toast.error(m)} 
+                          onUpload={(url) => updateFeature(index, fIdx, "imgUrl", url)} 
+                        />
+                        <label className={labelClass}>Label <input className={`${fieldClass} mt-1`} value={feature.title} onChange={(e) => updateFeature(index, fIdx, "title", e.target.value)} /></label>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           ))}
         </section>
@@ -158,11 +218,6 @@ export default function HeroEditor() {
             <Save size={20} />
             {loading ? "Saving Changes..." : "Publish Updates"}
           </button>
-          {message && (
-            <span className={`text-sm font-bold ${message.includes('success') ? 'text-green-600' : 'text-red-500'}`}>
-              {message}
-            </span>
-          )}
         </div>
       </form>
     </div>
