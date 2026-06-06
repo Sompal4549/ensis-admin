@@ -84,7 +84,7 @@ export default function AboutpageComponentRouteEditor({ componentKey, title }: {
           key: componentKey as any,
           label: keyInfo?.label || title,
           description: keyInfo?.description || "",
-          data: defaultAboutpageData[componentKey as any] || {}
+          data: (defaultAboutpageData[componentKey as AboutPageContentKeys] || {}) as AboutPageData,
         }));
       }
     } catch (error) {
