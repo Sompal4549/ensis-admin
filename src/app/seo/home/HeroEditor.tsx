@@ -6,7 +6,31 @@ import { componentContentApi, type ComponentContent, uploadImage, getImageUrl } 
 import { fieldClass, labelClass } from "@/constants";
 import { ImageUploadField } from "@/components/common/ImageUploadField";
 
+type HeroSlide = {
+  title: string;
+  highlight: string;
+  description: string;
+  image: string;
+  primaryBtn: string;
+  features: Array<{ imgUrl: string; title: string }>;
+};
 
+type HeroData = {
+  slides: HeroSlide[];
+};
+
+const defaultHeroData: HeroData = {
+  slides: [{ title: "", highlight: "", description: "", image: "", primaryBtn: "", features: [] }],
+};
+
+const isHeroData = (value: unknown): value is HeroData => {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "slides" in value &&
+    Array.isArray((value as any).slides)
+  );
+};
 
 export default function HeroEditor() {
   const [loading, setLoading] = useState(false);
@@ -15,13 +39,19 @@ export default function HeroEditor() {
   const [uploadingField, setUploadingField] = useState<string | null>(null);
 
   // State management for the specialized form
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<{
+    label: string;
+    page: string;
+    description: string;
+    isActive: boolean;
+    data: HeroData;
+  }>({
     label: "",
     page: "",
     description: "",
     isActive: true,
     data: {
-      slides: [{ title: "", highlight: "", description: "", image: "", primaryBtn: "", features: [] }]
+      slides: [{ title: "", highlight: "", description: "", image: "", primaryBtn: "", features: [] as Array<{ imgUrl: string; title: string }> }]
     },
   });
 
@@ -40,7 +70,7 @@ export default function HeroEditor() {
         page: item.page || "",
         description: item.description || "",
         isActive: item.isActive,
-        data: item.data || { slides: [] },
+        data: isHeroData(item.data) ? item.data : defaultHeroData,
       });
     } catch (error) {
       setMessage((error as Error).message);

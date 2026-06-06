@@ -53,7 +53,7 @@ export default function AboutpageComponentRouteEditor({ componentKey, title }: {
     page: "about",
     description: "",
     isActive: true,
-    data: defaultAboutpageData[componentKey as any] || {},
+    data: (defaultAboutpageData[componentKey as AboutPageContentKeys] || {}) as AboutPageData,
   });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);

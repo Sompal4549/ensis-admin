@@ -5,25 +5,54 @@ import { Save, Plus, Trash2 } from "lucide-react";
 import { componentContentApi, type ComponentContent } from "@/lib/api";
 import { fieldClass, labelClass } from "@/constants";
 
+type WellnessService = { title: string; image: string; description: string };
+
+type WellnessData = {
+  welcomeImage: string;
+  eyebrow: string;
+  heading: string;
+  description: string;
+  buttonText: string;
+  buttonHref: string;
+  services: WellnessService[];
+};
+
+const defaultWellnessData: WellnessData = {
+  welcomeImage: "",
+  eyebrow: "",
+  heading: "",
+  description: "",
+  buttonText: "",
+  buttonHref: "",
+  services: [],
+};
+
+const isWellnessData = (value: unknown): value is WellnessData => {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "services" in value &&
+    Array.isArray((value as any).services)
+  );
+};
+
 export default function WellnessEditor() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [content, setContent] = useState<ComponentContent | null>(null);
 
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<{
+    label: string;
+    page: string;
+    description: string;
+    isActive: boolean;
+    data: WellnessData;
+  }>({
     label: "",
     page: "",
     description: "",
     isActive: true,
-    data: {
-      welcomeImage: "",
-      eyebrow: "",
-      heading: "",
-      description: "",
-      buttonText: "",
-      buttonHref: "",
-      services: [] as any[]
-    },
+    data: defaultWellnessData,
   });
 
   const loadContent = async () => {
@@ -37,7 +66,7 @@ export default function WellnessEditor() {
         page: item.page || "",
         description: item.description || "",
         isActive: item.isActive,
-        data: item.data || { services: [] },
+        data: isWellnessData(item.data) ? item.data : defaultWellnessData,
       });
     } catch (error) {
       setMessage((error as Error).message);
