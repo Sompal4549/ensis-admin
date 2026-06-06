@@ -14,8 +14,8 @@ export default function OrdersPage() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [updating, setUpdating] = useState(false);
 
-  const [formStatus, setFormStatus] = useState<Order["status"]>("pending");
-  const [formPaymentStatus, setFormPaymentStatus] = useState<Order["paymentStatus"]>("pending");
+  const [formName, setFormName] = useState("");
+  const [formStatus, setFormStatus] = useState<string>("pending");
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -33,8 +33,8 @@ export default function OrdersPage() {
 
   useEffect(() => {
     if (selectedOrder) {
+      setFormName(typeof selectedOrder.user === "object" ? selectedOrder.user.name : "Guest User");
       setFormStatus(selectedOrder.status);
-      setFormPaymentStatus(selectedOrder.paymentStatus);
     }
   }, [selectedOrder]);
 
@@ -43,9 +43,9 @@ export default function OrdersPage() {
     setUpdating(true);
     try {
       const updated = await orderApi.update(selectedOrder._id, {
-        status: formStatus,
-        paymentStatus: formPaymentStatus
-      });
+        status: formStatus as any,
+        name: formName, // Assuming the backend accepts a top-level name update for the order/customer
+      } as any);
       setOrders(prev => prev.map(o => o._id === updated._id ? updated : o));
       setSelectedOrder(null);
       toast.success(`Order #${updated.orderNumber} updated!`);
@@ -166,10 +166,21 @@ export default function OrdersPage() {
             <div className="p-6 space-y-6">
               <div className="space-y-4">
                 <div>
+                  <label className={labelClass}>Customer Name</label>
+                  <input
+                    type="text"
+                    value={formName}
+                    onChange={(e) => setFormName(e.target.value)}
+                    className={`${fieldClass} mt-1.5`}
+                    placeholder="Enter customer name"
+                  />
+                </div>
+
+                <div>
                   <label className={labelClass}>Order Status</label>
                   <select
                     value={formStatus}
-                    onChange={(e) => setFormStatus(e.target.value as Order["status"])}
+                    onChange={(e) => setFormStatus(e.target.value)}
                     className={`${fieldClass} mt-1.5`}
                   >
                     <option value="pending">Pending</option>
@@ -178,20 +189,6 @@ export default function OrdersPage() {
                     <option value="delivered">Delivered</option>
                     <option value="cancelled">Cancelled</option>
                     <option value="returned">Returned</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className={labelClass}>Payment Status</label>
-                  <select
-                    value={formPaymentStatus}
-                    onChange={(e) => setFormPaymentStatus(e.target.value as Order["paymentStatus"])}
-                    className={`${fieldClass} mt-1.5`}
-                  >
-                    <option value="pending">Pending</option>
-                    <option value="paid">Paid</option>
-                    <option value="failed">Failed</option>
-                    <option value="refunded">Refunded</option>
                   </select>
                 </div>
               </div>

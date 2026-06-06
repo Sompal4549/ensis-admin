@@ -38,6 +38,7 @@ export type ComponentContent = {
   description?: string;
   data: Record<string, unknown>;
   isActive: boolean;
+  index?: number;
 };
 
 export type MediaFile = {
