@@ -36,13 +36,13 @@ export default function HeroEditor() {
         return;
       }
       setContent(item);
-      setForm({
+      setForm(prev => ({
         label: item.label || "",
         page: item.page || "",
         description: item.description || "",
         isActive: item.isActive,
-        data: { ...form.data, ...(item.data || {}) },
-      });
+        data: { ...prev.data, ...(item.data || {}) },
+      }));
     } catch (error) {
       toast.error((error as Error).message || "Failed to load hero content");
     } finally {

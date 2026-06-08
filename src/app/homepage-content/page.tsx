@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DropResult } from "@hello-pangea/dnd";
 import { toast } from "react-toastify";
-import PageStatsCards from "@/components/common/PageStatsCards";
 import {
   ArrowDown,
   ArrowUp,
@@ -28,8 +27,7 @@ import {
   type HomeTurnkeySolution,
   validateHomepageContent,
 } from "@/lib/homepageContent";
-import { labelClass, fieldClass, cardClass, frontendUrl } from "@/constants";
-import LivePreviewIframe from "@/components/common/LivePreviewIframe";
+import { labelClass, fieldClass, cardClass } from "@/constants";
 import Image from "next/image";
 
 type ContentForm = Omit<ComponentContent, "_id"> & { key: HomepageComponentKey };
@@ -779,9 +777,6 @@ export default function HomepageContentAdminPage() {
       </header> */}
 
       <div className="mx-auto max-w-7xl px-5 py-8">
-        <div className="mb-2">
-          <PageStatsCards pageName="home" />
-        </div>
         <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
           {/* <div className="max-w-3xl">
             <p className="text-sm leading-7 text-[#4a473f]">Create and update structured homepage component content records for known keys. Use the list on the left to edit an existing entry or create a new one with the button above.</p>
@@ -900,13 +895,6 @@ export default function HomepageContentAdminPage() {
                 </div>
               </form>
             </div>
-          </section>
-          <section>
-              <LivePreviewIframe 
-                        iframeSrc={`${frontendUrl}`} 
-                        ctaHref={`${frontendUrl}`}
-                        pageName="home"
-                      />
           </section>
         </div>
       </div>

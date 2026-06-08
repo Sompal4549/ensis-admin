@@ -11,7 +11,7 @@ interface LivePreviewIframeProps {
   subtitle?: string;
   ctaLabel?: string;
   ctaHref?: string;
-  pageName?: "dashboard" | "home" | "about";
+  pageName?: string;
   lastUpdated?: string;
   publishedBy?: string;
   navLinks?: string[];

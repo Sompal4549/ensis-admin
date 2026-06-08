@@ -26,7 +26,7 @@ type StatsData = {
   card5: { title: string; count: number | string; subText: string; icon: React.ReactNode; bg: string; colorClass: string; bgClass: string };
 };
 
-export default function PageStatsCards({ pageName }: { pageName: "dashboard" | "home" | "about" }) {
+export default function PageStatsCards({ pageName }: { pageName: string }) {
   const [stats, setStats] = useState<StatsData | null>(null);
 
   useEffect(() => {

@@ -35,7 +35,10 @@ import {
 import { LoginForm, useAuth } from "@/components/auth/AuthContext";
 import sidebarBg from "@/assets/sidebarbg.webp"
 import UserManagementModal from "./UserManagementModal";
+import PageStatsCards from "./PageStatsCards";
+import LivePreviewIframe from "./LivePreviewIframe";
 import { api } from "@/lib/api";
+import { frontendUrl } from "@/constants";
 import Image from "next/image";
 
 interface NavItem {
@@ -149,6 +152,21 @@ const NAV_ITEMS: NavItem[] = [
         label: "Turnkey",
         path: "/turnkey-page-content",
         icon: <Briefcase size={16} />,
+      },
+      {
+        label: "Consultancy",
+        path: "/consultancy-page-management",
+        icon: <Briefcase size={16} />,
+      },
+      {
+        label: "Blogs",
+        path: "/blogs-page-management",
+        icon: <MessageSquare size={16} />,
+      },
+      {
+        label: "Contact Us",
+        path: "/contact-page-management",
+        icon: <Headphones size={16} />,
       },
       {
         label: "Site Header",
@@ -374,7 +392,7 @@ export function Sidebar({ activePath, onNavigate, collapsed, setCollapsed }: Sid
         {!collapsed ? (
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-2">
-              <img src="/images/ensis-logo.png" alt="Ensis Logo" className="h-10 w-auto object-contain" />
+              <Image width={150} height={28}src="/images/ensis-logo.png" alt="Ensis Logo" className="h-10 w-auto object-contain" />
             </div>
           </div>
         ) : (
@@ -649,6 +667,31 @@ export function CommonLayout({
 }: LayoutProps) {
   const { user, isReady } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
+  const pathname = usePathname();
+
+  // Centralized page detection logic
+  const getPageConfig = () => {
+    const fUrl = frontendUrl || "";
+    const configMap: Record<string, { name: string; path: string }> = {
+      "homepage-content": { name: "home", path: "" },
+      "about-page-content": { name: "about", path: "/about" },
+      "turnkey-page-content": { name: "turnkey", path: "/turnkey-solutions" },
+      "consultancy-page-management": { name: "consultancy", path: "/consultancy" },
+      "blogs-page-management": { name: "blog", path: "/blog" },
+      "contact-page-management": { name: "contact", path: "/contact" },
+    };
+
+    const match = Object.keys(configMap).find((key) => pathname.includes(key));
+    if (match) {
+      const { name, path } = configMap[match];
+      return { name, url: `${fUrl}${path}` };
+    }
+
+    return { name: "dashboard", url: fUrl };
+  };
+
+  const pageConfig = getPageConfig();
+  const isManagementPage = pathname.includes("-content") || pathname.includes("-management");
 
   if (!isReady) {
     return <main className="min-h-screen bg-slate-50" />;
@@ -674,7 +717,24 @@ export function CommonLayout({
           setCollapsed={setCollapsed}
         />
         <main className="flex-1 overflow-y-auto bg-[#f6f8fc] p-3">
+          <div className="mb-4">
+            <PageStatsCards pageName={pageConfig.name} />
+          </div>
           {children}
+
+          {isManagementPage && (
+            <div className="mt-8 max-w-7xl mx-auto">
+              <div className="mb-4">
+                <h3 className="text-lg font-bold text-slate-800">Live Preview</h3>
+                <p className="text-xs text-slate-500 italic">Visualizing: {pageConfig.url}</p>
+              </div>
+              <LivePreviewIframe 
+                iframeSrc={pageConfig.url}
+                ctaHref={pageConfig.url}
+                pageName={pageConfig.name}
+              />
+            </div>
+          )}
         </main>
       </div>
       <ToastContainer position="top-center" autoClose={4000} hideProgressBar={false} theme="light" />
