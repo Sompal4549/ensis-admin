@@ -1,13 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useState } from "react"; // Removed Suspense from import
+import { useSearchParams } from "next/navigation"; // Keep useSearchParams
 import { toast } from "react-toastify";
 import { Loader2, Plus, Save, Trash2 } from "lucide-react";
 import { componentContentApi, type ComponentContent } from "@/lib/api";
 import { fieldClass, labelClass } from "@/constants";
 import { ImageUploadField } from "@/components/common/ImageUploadField";
 import { BlogPageContentKeys, blogPageKeys, buildEmptyBlogContent } from "./blogPageContent";
+import RichTextEditor from "@/components/common/RichTextEditor";
 
 
 const randomId = () => Math.random().toString(36).slice(2, 9);
@@ -71,7 +72,15 @@ export default function BlogPageManager() {
       <div className="space-y-4">
         <label className={labelClass}>Title <input className={fieldClass} value={data.title} onChange={e => setForm({...form, data: {...data, title: e.target.value}})} /></label>
         <label className={labelClass}>Heading <input className={fieldClass} value={data.heading} onChange={e => setForm({...form, data: {...data, heading: e.target.value}})} /></label>
-        <label className={labelClass}>Description <textarea className={fieldClass} rows={2} value={data.description} onChange={e => setForm({...form, data: {...data, description: e.target.value}})} /></label>
+        <div className="mt-2">
+          <label className={labelClass}>Description</label>
+          <RichTextEditor 
+            value={data.description || ""} 
+            onChange={val => setForm({...form, data: {...data, description: val}})} 
+            placeholder="Enter hero description..."
+            minHeight="120px" 
+          />
+        </div>
         <ImageUploadField label="Background Image" value={data.bgImage} fieldKey="blog.hero.bg" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => setForm({...form, data: {...data, bgImage: url}})} />
       </div>
     );
@@ -105,7 +114,15 @@ export default function BlogPageManager() {
               <input className={fieldClass} placeholder="Expert Name" value={exp.name} onChange={e => { const ne = [...data.experts]; ne[idx].name = e.target.value; setForm({...form, data: {...data, experts: ne}}) }} />
               <input className={fieldClass} placeholder="Designation" value={exp.designation} onChange={e => { const ne = [...data.experts]; ne[idx].designation = e.target.value; setForm({...form, data: {...data, experts: ne}}) }} />
             </div>
-            <textarea className={fieldClass} placeholder="Description" value={exp.description} onChange={e => { const ne = [...data.experts]; ne[idx].description = e.target.value; setForm({...form, data: {...data, experts: ne}}) }} />
+            <div className="mt-1">
+              <label className="text-[10px] font-bold text-gray-400 uppercase">Description</label>
+              <RichTextEditor 
+                value={exp.description || ""} 
+                onChange={val => { const ne = [...data.experts]; ne[idx].description = val; setForm({...form, data: {...data, experts: ne}}); }} 
+                placeholder="Enter expert description..."
+                minHeight="100px" 
+              />
+            </div>
             <ImageUploadField label="Expert Photo" value={exp.image} fieldKey={`exp.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => { const ne = [...data.experts]; ne[idx].image = url; setForm({...form, data: {...data, experts: ne}}) }} />
           </div>
         ))}
@@ -130,7 +147,15 @@ export default function BlogPageManager() {
                 <input className={fieldClass} placeholder="Blog Title" value={blog.title} onChange={e => { const nb = [...data.blogs]; nb[idx].title = e.target.value; setForm({...form, data: {...data, blogs: nb}}) }} />
                 <input className={fieldClass} type="date" value={blog.date} onChange={e => { const nb = [...data.blogs]; nb[idx].date = e.target.value; setForm({...form, data: {...data, blogs: nb}}) }} />
               </div>
-              <textarea className={fieldClass} placeholder="Short Description" value={blog.description} onChange={e => { const nb = [...data.blogs]; nb[idx].description = e.target.value; setForm({...form, data: {...data, blogs: nb}}) }} />
+              <div className="mt-1">
+                <label className="text-[10px] font-bold text-gray-400 uppercase">Short Description</label>
+                <RichTextEditor 
+                  value={blog.description || ""} 
+                  onChange={val => { const nb = [...data.blogs]; nb[idx].description = val; setForm({...form, data: {...data, blogs: nb}}); }} 
+                  placeholder="Enter short description..."
+                  minHeight="100px" 
+                />
+              </div>
               <input className={fieldClass} placeholder="Post Link" value={blog.link} onChange={e => { const nb = [...data.blogs]; nb[idx].link = e.target.value; setForm({...form, data: {...data, blogs: nb}}) }} />
               <ImageUploadField label="Cover Image" value={blog.image} fieldKey={`blog.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => { const nb = [...data.blogs]; nb[idx].image = url; setForm({...form, data: {...data, blogs: nb}}) }} />
             </div>
@@ -149,7 +174,15 @@ export default function BlogPageManager() {
           {data.blogsMedia.map((m: any, idx: number) => (
             <div key={m.id} className="p-4 border rounded-lg space-y-2 bg-slate-50">
               <input className={fieldClass} placeholder="Media Title" value={m.title} onChange={e => { const nm = [...data.blogsMedia]; nm[idx].title = e.target.value; setForm({...form, data: {...data, blogsMedia: nm}}) }} />
-              <textarea className={fieldClass} placeholder="Description" value={m.description} onChange={e => { const nm = [...data.blogsMedia]; nm[idx].description = e.target.value; setForm({...form, data: {...data, blogsMedia: nm}}) }} />
+              <div className="mt-1">
+                <label className="text-[10px] font-bold text-gray-400 uppercase">Description</label>
+                <RichTextEditor 
+                  value={m.description || ""} 
+                  onChange={val => { const nm = [...data.blogsMedia]; nm[idx].description = val; setForm({...form, data: {...data, blogsMedia: nm}}); }} 
+                  placeholder="Enter media description..."
+                  minHeight="100px" 
+                />
+              </div>
               <ImageUploadField label="Image" value={m.image} fieldKey={`media.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => { const nm = [...data.blogsMedia]; nm[idx].image = url; setForm({...form, data: {...data, blogsMedia: nm}}) }} />
             </div>
           ))}
@@ -157,7 +190,15 @@ export default function BlogPageManager() {
         <div className="p-4 border-2 border-amber-200 bg-amber-50 rounded-2xl space-y-4">
           <h4 className="font-bold text-amber-900">Report Resource</h4>
           <input className={fieldClass} placeholder="Report Title" value={data.reportResource.title} onChange={e => setForm({...form, data: {...data, reportResource: {...data.reportResource, title: e.target.value}}})} />
-          <textarea className={fieldClass} placeholder="Report Description" value={data.reportResource.description} onChange={e => setForm({...form, data: {...data, reportResource: {...data.reportResource, description: e.target.value}}})} />
+          <div className="mt-1">
+            <label className="text-[10px] font-bold text-gray-400 uppercase">Report Description</label>
+            <RichTextEditor 
+              value={data.reportResource.description || ""} 
+              onChange={val => setForm({...form, data: {...data, reportResource: {...data.reportResource, description: val}}})} 
+              placeholder="Enter report description..."
+              minHeight="100px" 
+            />
+          </div>
           <input className={fieldClass} placeholder="Download Link" value={data.reportResource.link} onChange={e => setForm({...form, data: {...data, reportResource: {...data.reportResource, link: e.target.value}}})} />
           <ImageUploadField label="Cover" value={data.reportResource.image} fieldKey="media.rep" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => setForm({...form, data: {...data, reportResource: {...data.reportResource, image: url}}})} />
         </div>
@@ -170,7 +211,15 @@ export default function BlogPageManager() {
     return (
       <div className="space-y-4">
         <input className={fieldClass} placeholder="Title" value={data.title} onChange={e => setForm({...form, data: {...data, title: e.target.value}})} />
-        <textarea className={fieldClass} placeholder="Description" value={data.description} onChange={e => setForm({...form, data: {...data, description: e.target.value}})} />
+        <div className="mt-1">
+          <label className="text-[10px] font-bold text-gray-400 uppercase">Description</label>
+          <RichTextEditor 
+            value={data.description || ""} 
+            onChange={val => setForm({...form, data: {...data, description: val}})} 
+            placeholder="Enter inspiration description..."
+            minHeight="120px" 
+          />
+        </div>
         <input className={fieldClass} placeholder="Subscription Link" value={data.subscribeLink} onChange={e => setForm({...form, data: {...data, subscribeLink: e.target.value}})} />
       </div>
     );
@@ -185,7 +234,15 @@ export default function BlogPageManager() {
           <ImageUploadField label="BG Image" value={data.bgImage} fieldKey="supp.bg" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => setForm({...form, data: {...data, bgImage: url}})} />
         </div>
         <input className={fieldClass} placeholder="Title" value={data.title} onChange={e => setForm({...form, data: {...data, title: e.target.value}})} />
-        <textarea className={fieldClass} placeholder="Description" value={data.description} onChange={e => setForm({...form, data: {...data, description: e.target.value}})} />
+        <div className="mt-1">
+          <label className="text-[10px] font-bold text-gray-400 uppercase">Description</label>
+          <RichTextEditor 
+            value={data.description || ""} 
+            onChange={val => setForm({...form, data: {...data, description: val}})} 
+            placeholder="Enter wellness description..."
+            minHeight="120px" 
+          />
+        </div>
         <div className="grid grid-cols-2 gap-4">
           <input className={fieldClass} placeholder="Button Label" value={data.primaryButton.label} onChange={e => setForm({...form, data: {...data, primaryButton: {...data.primaryButton, label: e.target.value}}})} />
           <input className={fieldClass} placeholder="Button Href" value={data.primaryButton.href} onChange={e => setForm({...form, data: {...data, primaryButton: {...data.primaryButton, href: e.target.value}}})} />

@@ -28,6 +28,7 @@ import {
 } from "@/lib/homepageContent";
 import { labelClass, fieldClass, cardClass } from "@/constants";
 import Image from "next/image";
+import RichTextEditor from "@/components/common/RichTextEditor";
 
 type ContentForm = Omit<ComponentContent, "_id"> & { key: HomepageComponentKey };
 
@@ -125,7 +126,7 @@ export default function HomepageContentAdminPage() {
       setLoading(false);
     }
   }, []);
-
+ 
   const setData = (nextData: HomepageData) => setForm((current) => ({ ...current, data: nextData }));
 
   const resetForm = (key: HomepageComponentKey = "home.hero") => {
@@ -182,30 +183,7 @@ export default function HomepageContentAdminPage() {
     });
   }, [refresh, handleSelectRecord, handleKeyChange, knownKeys]);
 
-  const onDragEnd = async (result: DropResult) => {
-    if (!result.destination) return;
-    
-    const items = Array.from(records);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
-    
-    // Optimistically update the UI order
-    setRecords(items);
-
-    try {
-      // Persist the new index for all items in the list to ensure sync
-      await Promise.all(
-        items.map((item, index) => 
-          componentContentApi.update(item._id, { index })
-        )
-      );
-      toast.success("Component order saved successfully");
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Failed to save new order";
-      toast.error(message);
-      refresh(); // Revert to server state if the API call fails
-    }
-  };
+ 
 
   const handleSave = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -793,6 +771,7 @@ export default function HomepageContentAdminPage() {
         </div>
 
         <div className="grid gap-6 xl:grid-cols-[380px_1fr]">
+
           <section className="space-y-4">
             <div className={cardClass}>
               <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -840,7 +819,14 @@ export default function HomepageContentAdminPage() {
                 </div>
                 <label className={labelClass}>
                   Description
-                  <textarea className={`${fieldClass} mt-2`} rows={3} value={form.description} onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))} />
+                  <div className="mt-2">
+                    <RichTextEditor 
+                      value={form.description || ""} 
+                      onChange={val => setForm((current) => ({ ...current, description: val }))} 
+                      placeholder="Enter component description..."
+                      minHeight="120px" 
+                    />
+                  </div>
                 </label>
 
                 {form.key === "home.hero" && renderHeroEditor()}

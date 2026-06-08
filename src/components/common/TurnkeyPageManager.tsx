@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { toast } from "react-toastify";
+import { toast } from "react-toastify"; // Ensure toast is imported
 import { DropResult } from "@hello-pangea/dnd";
 import { useSearchParams } from "next/navigation";
 import { Loader2, Plus, Save, Trash2 } from "lucide-react";

@@ -137,7 +137,15 @@ export default function WellnessEditor() {
                 </button>
                 <label className={labelClass}>Title <input className={`${fieldClass} mt-1`} value={service.title} onChange={(e) => updateService(index, "title", e.target.value)} /></label>
                 <label className={`${labelClass} mt-3`}>Icon/Image <input className={`${fieldClass} mt-1`} value={service.image} onChange={(e) => updateService(index, "image", e.target.value)} /></label>
-                <label className={`${labelClass} mt-3`}>Description <textarea className={`${fieldClass} mt-1 h-16`} value={service.description} onChange={(e) => updateService(index, "description", e.target.value)} /></label>
+                <div className="mt-3">
+                  <label className={labelClass}>Description</label>
+                  <RichTextEditor 
+                    value={service.description || ""} 
+                    onChange={val => updateService(index, "description", val)} 
+                    placeholder="Enter card description..."
+                    minHeight="100px" 
+                  />
+                </div>
               </div>
             ))}
           </div>

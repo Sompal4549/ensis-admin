@@ -7,15 +7,15 @@ import { Loader2, Plus, Save, Trash2 } from "lucide-react";
 import { componentContentApi, type ComponentContent } from "@/lib/api";
 import { fieldClass, labelClass } from "@/constants";
 import { ImageUploadField } from "@/components/common/ImageUploadField";
-import ComponentList from "./ComponentList";
+import RichTextEditor from "@/components/common/RichTextEditor";
 import { buildEmptyConsultancyContent, ConsultancyPageContentKeys, consultancyPageKeys } from "./consultancyPageContent";
+
 
 
 
 const randomId = () => Math.random().toString(36).slice(2, 9);
 
 export default function ConsultancyPageManager() {
-  const [records, setRecords] = useState<ComponentContent[]>([]);
   const [form, setForm] = useState<Partial<ComponentContent>>(buildEmptyConsultancyContent("consultancy.hero"));
   const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -23,29 +23,32 @@ export default function ConsultancyPageManager() {
   const searchParams = useSearchParams();
 
   const refresh = useCallback(async () => {
+    const key = searchParams.get("component");
+    if (!key) {
+      setEditingId(null);
+      setForm(buildEmptyConsultancyContent("consultancy.hero"));
+      return;
+    }
+
     setLoading(true);
     try {
-      const list = await componentContentApi.list();
-      setRecords(list.filter(item => item.page === "consultancy" || item.key.startsWith("consultancy.")));
+      const existing = await componentContentApi.getByKey(key);
+      if (existing) {
+        setEditingId(existing._id);
+        setForm(existing);
+      } else {
+        setEditingId(null);
+        setForm(buildEmptyConsultancyContent(key as ConsultancyPageContentKeys));
+      }
     } catch (error: unknown) {
-      toast.error("Failed to load consultancy components.");
+      toast.error("Failed to load component data.");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [searchParams]);
 
   useEffect(() => { void refresh(); }, [refresh]);
 
-  useEffect(() => {
-    const key = searchParams.get("component");
-    if (key && records.length > 0) {
-      const found = records.find(r => r.key === key);
-      if (found) {
-        setEditingId(found._id);
-        setForm(found);
-      }
-    }
-  }, [searchParams, records]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,7 +78,15 @@ export default function ConsultancyPageManager() {
           <label className={labelClass}>Heading <input className={fieldClass} value={data.heading} onChange={e => setForm({...form, data: {...data, heading: e.target.value}})} /></label>
           <label className={labelClass}>Title <input className={fieldClass} value={data.title} onChange={e => setForm({...form, data: {...data, title: e.target.value}})} /></label>
         </div>
-        <label className={labelClass}>Description <textarea className={fieldClass} rows={2} value={data.description} onChange={e => setForm({...form, data: {...data, description: e.target.value}})} /></label>
+        <div>
+          <label className={labelClass}>Description</label>
+          <RichTextEditor 
+            value={data.description || ""} 
+            onChange={val => setForm({...form, data: {...data, description: val}})} 
+            placeholder="Enter hero description..."
+            minHeight="120px" 
+          />
+        </div>
         <ImageUploadField label="Background Image" value={data.bgImage} fieldKey="hero.bg" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => setForm({...form, data: {...data, bgImage: url}})} />
         
         <div className="pt-4 border-t">
@@ -87,7 +98,15 @@ export default function ConsultancyPageManager() {
                 <input className={fieldClass} placeholder="Feature Title" value={feat.title} onChange={e => { const nf = [...data.features]; nf[idx].title = e.target.value; setForm({...form, data: {...data, features: nf}}) }} />
                 <ImageUploadField label="Feature Image" value={feat.image} fieldKey={`hero.feat.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => { const nf = [...data.features]; nf[idx].image = url; setForm({...form, data: {...data, features: nf}}) }} />
               </div>
-              <textarea className={fieldClass} placeholder="Description" rows={2} value={feat.description} onChange={e => { const nf = [...data.features]; nf[idx].description = e.target.value; setForm({...form, data: {...data, features: nf}}) }} />
+              <div>
+                <label className="text-[10px] font-bold text-gray-400 uppercase">Feature Description</label>
+                <RichTextEditor 
+                  value={feat.description || ""} 
+                  onChange={val => { const nf = [...data.features]; nf[idx].description = val; setForm({...form, data: {...data, features: nf}}); }} 
+                  placeholder="Short feature description..."
+                  minHeight="100px" 
+                />
+              </div>
             </div>
           ))}
         </div>
@@ -106,7 +125,15 @@ export default function ConsultancyPageManager() {
                 <label className={labelClass}>Title <input className={fieldClass} value={item.title} onChange={e => { const ni = [...data.items]; ni[idx].title = e.target.value; setForm({...form, data: {...data, items: ni}}) }} /></label>
                 <label className={labelClass}>Heading <input className={fieldClass} value={item.heading} onChange={e => { const ni = [...data.items]; ni[idx].heading = e.target.value; setForm({...form, data: {...data, items: ni}}) }} /></label>
             </div>
-            <textarea className={fieldClass} placeholder="Description" value={item.description} onChange={e => { const ni = [...data.items]; ni[idx].description = e.target.value; setForm({...form, data: {...data, items: ni}}) }} />
+            <div>
+              <label className="text-[10px] font-bold text-gray-400 uppercase">Description</label>
+              <RichTextEditor 
+                value={item.description || ""} 
+                onChange={val => { const ni = [...data.items]; ni[idx].description = val; setForm({...form, data: {...data, items: ni}}); }} 
+                placeholder="Detail description..."
+                minHeight="100px" 
+              />
+            </div>
             <ImageUploadField label="Image" value={item.image} fieldKey={`feat.item.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => { const ni = [...data.items]; ni[idx].image = url; setForm({...form, data: {...data, items: ni}}) }} />
           </div>
         ))}
@@ -121,13 +148,29 @@ export default function ConsultancyPageManager() {
       <div className="space-y-4">
         <label className={labelClass}>Subheading <input className={fieldClass} value={data.subheading} onChange={e => setForm({...form, data: {...data, subheading: e.target.value}})} /></label>
         <label className={labelClass}>Main Title <input className={fieldClass} value={data.title} onChange={e => setForm({...form, data: {...data, title: e.target.value}})} /></label>
-        <label className={labelClass}>Description <textarea className={fieldClass} rows={2} value={data.description} onChange={e => setForm({...form, data: {...data, description: e.target.value}})} /></label>
+        <div>
+          <label className={labelClass}>Description</label>
+          <RichTextEditor 
+            value={data.description || ""} 
+            onChange={val => setForm({...form, data: {...data, description: val}})} 
+            placeholder="Service overview description..."
+            minHeight="120px" 
+          />
+        </div>
         <div className="pt-4 border-t space-y-4">
             <h4 className="text-sm font-bold">Service Cards</h4>
             {data.serviceCards.map((card: any, idx: number) => (
                 <div key={card.id} className="p-4 border rounded-lg bg-slate-50 space-y-2">
                     <input className={fieldClass} placeholder="Card Title" value={card.title} onChange={e => { const nc = [...data.serviceCards]; nc[idx].title = e.target.value; setForm({...form, data: {...data, serviceCards: nc}}) }} />
-                    <textarea className={fieldClass} placeholder="Description" value={card.description} onChange={e => { const nc = [...data.serviceCards]; nc[idx].description = e.target.value; setForm({...form, data: {...data, serviceCards: nc}}) }} />
+                    <div>
+                      <label className="text-[10px] font-bold text-gray-400 uppercase">Card Description</label>
+                      <RichTextEditor 
+                        value={card.description || ""} 
+                        onChange={val => { const nc = [...data.serviceCards]; nc[idx].description = val; setForm({...form, data: {...data, serviceCards: nc}}); }} 
+                        placeholder="Card description..."
+                        minHeight="100px" 
+                      />
+                    </div>
                     <input className={fieldClass} placeholder="Learn More Link (e.g. /services/wellness)" value={card.learnMoreLink} onChange={e => { const nc = [...data.serviceCards]; nc[idx].learnMoreLink = e.target.value; setForm({...form, data: {...data, serviceCards: nc}}) }} />
                 </div>
             ))}
@@ -139,22 +182,42 @@ export default function ConsultancyPageManager() {
 
   const renderProcessForm = () => {
     const data = form.data as any;
+    if (!data.whyChoose || !data.ourProcess) return <div className="p-4 italic text-slate-400">Loading Process Structure...</div>;
+
     return (
       <div className="space-y-6">
         <div className="p-4 bg-amber-50 rounded-2xl space-y-4">
           <h4 className="font-bold text-amber-800">Why Choose Us</h4>
           <input className={fieldClass} placeholder="Heading" value={data.whyChoose.heading} onChange={e => setForm({...form, data: {...data, whyChoose: {...data.whyChoose, heading: e.target.value}}})} />
           <input className={fieldClass} placeholder="Title" value={data.whyChoose.title} onChange={e => setForm({...form, data: {...data, whyChoose: {...data.whyChoose, title: e.target.value}}})} />
-          <textarea className={fieldClass} placeholder="Description" value={data.whyChoose.description} onChange={e => setForm({...form, data: {...data, whyChoose: {...data.whyChoose, description: e.target.value}}})} />
+          <div>
+            <label className={labelClass}>Why Choose Description</label>
+            <RichTextEditor 
+              value={data.whyChoose.description || ""} 
+              onChange={val => setForm({...form, data: {...data, whyChoose: {...data.whyChoose, description: val}}})} 
+              placeholder="Why choose us details..."
+              minHeight="120px" 
+            />
+          </div>
           <ImageUploadField label="Background Image" value={data.whyChoose.bgImage} fieldKey="process.wc.bg" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => setForm({...form, data: {...data, whyChoose: {...data.whyChoose, bgImage: url}}})} />
         </div>
         <div className="p-4 bg-blue-50 rounded-2xl space-y-4">
           <h4 className="font-bold text-blue-800">Our Process</h4>
           <input className={fieldClass} placeholder="Heading" value={data.ourProcess.heading} onChange={e => setForm({...form, data: {...data, ourProcess: {...data.ourProcess, heading: e.target.value}}})} />
+          <input className={fieldClass} placeholder="Title" value={data.ourProcess.title} onChange={e => setForm({...form, data: {...data, ourProcess: {...data.ourProcess, title: e.target.value}}})} />
           {data.ourProcess.processList.map((proc: any, idx: number) => (
              <div key={proc.id} className="p-3 border bg-white rounded-lg space-y-2">
                 <input className={fieldClass} placeholder="Step Title" value={proc.title} onChange={e => { const nl = [...data.ourProcess.processList]; nl[idx].title = e.target.value; setForm({...form, data: {...data, ourProcess: {...data.ourProcess, processList: nl}}}) }} />
-                <textarea className={fieldClass} placeholder="Step Description" value={proc.description} onChange={e => { const nl = [...data.ourProcess.processList]; nl[idx].description = e.target.value; setForm({...form, data: {...data, ourProcess: {...data.ourProcess, processList: nl}}}) }} />
+                <div>
+                  <label className="text-[10px] font-bold text-gray-400 uppercase">Step Description</label>
+                  <RichTextEditor 
+                    value={proc.description || ""} 
+                    onChange={val => { const nl = [...data.ourProcess.processList]; nl[idx].description = val; setForm({...form, data: {...data, ourProcess: {...data.ourProcess, processList: nl}}}); }} 
+                    placeholder="Describe this step..."
+                    minHeight="100px" 
+                  />
+                </div>
+                <ImageUploadField label="Step Icon" value={proc.image} fieldKey={`proc.step.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => { const nl = [...data.ourProcess.processList]; nl[idx].image = url; setForm({...form, data: {...data, ourProcess: {...data.ourProcess, processList: nl}}}) }} />
              </div>
           ))}
         </div>
@@ -168,7 +231,15 @@ export default function ConsultancyPageManager() {
       <div className="space-y-4">
         <input className={fieldClass} placeholder="Title" value={data.title} onChange={e => setForm({...form, data: {...data, title: e.target.value}})} />
         <input className={fieldClass} placeholder="Heading" value={data.heading} onChange={e => setForm({...form, data: {...data, heading: e.target.value}})} />
-        <textarea className={fieldClass} placeholder="Description" value={data.description} onChange={e => setForm({...form, data: {...data, description: e.target.value}})} />
+        <div>
+          <label className={labelClass}>CTA Description</label>
+          <RichTextEditor 
+            value={data.description || ""} 
+            onChange={val => setForm({...form, data: {...data, description: val}})} 
+            placeholder="Final call to action description..."
+            minHeight="120px" 
+          />
+        </div>
         <div className="grid grid-cols-2 gap-4">
             <input className={fieldClass} placeholder="Button Label" value={data.primaryButton.label} onChange={e => setForm({...form, data: {...data, primaryButton: {...data.primaryButton, label: e.target.value}}})} />
             <input className={fieldClass} placeholder="Button Href" value={data.primaryButton.href} onChange={e => setForm({...form, data: {...data, primaryButton: {...data.primaryButton, href: e.target.value}}})} />
