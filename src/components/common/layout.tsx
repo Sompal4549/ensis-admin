@@ -1,22 +1,21 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
-import { CommonLayout } from "@/components/common/CommonLayout";
 import { Suspense } from "react"; // Import Suspense
-import {Outfit} from "next/font/google";
+import { CommonLayout } from "@/components/common/CommonLayout";
 import { AuthProvider } from "@/components/auth/AuthContext";
+
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Ensis Admin",
-  description: "Admin console for Ensis products and categories",
+  description: "Admin panel for Ensis Wellness Equipment",
 };
 
-const outfit = Outfit({ subsets: ["latin"], weight: "400", preload: true, variable: "--font-outfit" });
-
-
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning className={outfit.variable}>
-      <body>
+    <html lang="en">
+      <body className={inter.className}>
         <AuthProvider>
           <Suspense> {/* Wrap CommonLayout with Suspense */}
             <CommonLayout>

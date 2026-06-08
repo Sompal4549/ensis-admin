@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
 import { Loader2, Plus, Save, Trash2 } from "lucide-react";
 import { componentContentApi, type ComponentContent } from "@/lib/api";
@@ -19,6 +20,7 @@ export default function ConsultancyPageManager() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [uploadingField, setUploadingField] = useState<string | null>(null);
+  const searchParams = useSearchParams();
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -33,6 +35,17 @@ export default function ConsultancyPageManager() {
   }, []);
 
   useEffect(() => { void refresh(); }, [refresh]);
+
+  useEffect(() => {
+    const key = searchParams.get("component");
+    if (key && records.length > 0) {
+      const found = records.find(r => r.key === key);
+      if (found) {
+        setEditingId(found._id);
+        setForm(found);
+      }
+    }
+  }, [searchParams, records]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -166,28 +179,9 @@ export default function ConsultancyPageManager() {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-      <aside className="lg:col-span-4">
-        <div className="bg-white border rounded-2xl p-6 shadow-sm">
-          <h2 className="text-sm font-bold uppercase tracking-widest mb-6">Existing Sections</h2>
-          <ComponentList
-            records={records} 
-            onEdit={(r) => { setEditingId(r._id); setForm(r); }} 
-            onDelete={async (id) => { if(confirm('Delete?')) { await componentContentApi.remove(id); refresh(); }}} 
-            onReorder={async (res) => {
-                if (!res.destination) return;
-                const items = Array.from(records);
-                const [reorderedItem] = items.splice(res.source.index, 1);
-                items.splice(res.destination.index, 0, reorderedItem);
-                setRecords(items);
-                await Promise.all(items.map((item, index) => componentContentApi.update(item._id, { index })));
-            }}
-            editingId={editingId}
-          />
-        </div>
-      </aside>
-
-      <section className="lg:col-span-8">
+    <Suspense fallback={<div className="flex justify-center p-20"><Loader2 className="animate-spin text-[#8d6a3a]" size={40} /></div>}>
+    <div className="w-full">
+      <section className="w-full">
         <form onSubmit={handleSave} className="bg-white border rounded-2xl shadow-sm overflow-hidden">
           <div className="bg-slate-50 border-b p-6 flex items-center justify-between">
             <h2 className="text-xl font-bold">Consultancy Manager</h2>
@@ -223,5 +217,6 @@ export default function ConsultancyPageManager() {
         </form>
       </section>
     </div>
+    </Suspense>
   );
 }

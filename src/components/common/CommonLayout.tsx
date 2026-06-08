@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { ToastContainer } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useState, useCallback, useEffect } from "react";
 import {
   Menu,
   ChevronDown,
@@ -30,16 +30,20 @@ import {
   LayoutGrid,
   LogOut,
   FolderOpen,
-  UserPlus
+  UserPlus,
+  PanelBottom,
+  UserRoundPlus,
+  UserRoundCog
 } from "lucide-react";
 import { LoginForm, useAuth } from "@/components/auth/AuthContext";
 import sidebarBg from "@/assets/sidebarbg.webp"
 import UserManagementModal from "./UserManagementModal";
 import PageStatsCards from "./PageStatsCards";
 import LivePreviewIframe from "./LivePreviewIframe";
-import { api } from "@/lib/api";
-import { frontendUrl } from "@/constants";
+import { api, ComponentContent, componentContentApi } from "@/lib/api";
+import { cardClass, frontendUrl } from "@/constants";
 import Image from "next/image";
+import ComponentList from "./ComponentList";
 
 interface NavItem {
   label: string;
@@ -156,7 +160,7 @@ const NAV_ITEMS: NavItem[] = [
       {
         label: "Consultancy",
         path: "/consultancy-page-management",
-        icon: <Briefcase size={16} />,
+        icon: <Users size={16} />,
       },
       {
         label: "Blogs",
@@ -168,23 +172,19 @@ const NAV_ITEMS: NavItem[] = [
         path: "/contact-page-management",
         icon: <Headphones size={16} />,
       },
-      {
-        label: "Site Header",
-        path: "/header",
-        icon: <AlignJustify size={16} />,
-      },
+    
+    
+   
     
       {
-        label: "Site Footer",
-        path: "/footer",
-        icon: <ArrowDownToLine size={16} />,
+        label: "Careers",
+        path: "/careers-management",
+        icon: <UserRoundPlus size={16} />,
       },
-        {
-        label: "Orders",
-        path: "/orders-list-management",
-        icon: <ArrowDownToLine size={16} />,
-      },
-      {
+  
+    ],
+  },
+     {
         label: "Products",
         path: "/products",
         icon: <Boxes size={16} />,
@@ -194,28 +194,32 @@ const NAV_ITEMS: NavItem[] = [
         path: "/categories",
         icon: <LayoutGrid size={16} />,
       },
+    {
+        label: "Site Header",
+        path: "/header",
+        icon: <AlignJustify size={16} />,
+      },
+    
       {
+        label: "Site Footer",
+        path: "/footer",
+        icon: <PanelBottom size={16} />,
+      },
+      {
+        label: "Orders",
+        path: "/orders-list-management",
+        icon: <ArrowDownToLine size={16} />,
+      },
+    {
         label: "Projects",
         path: "/projects-management",
         icon: <FolderOpen size={16} />,
       },
       {
-        label: "Careers",
-        path: "/careers-management",
-        icon: <FolderOpen size={16} />,
-      },
-        {
         label: "User Management",
         path: "/users-management",
-        icon: <FolderOpen size={16} />,
+        icon: < UserRoundCog size={16} />,
       },
-    ],
-  },
-  {
-    label: "Users",
-    path: "/users-management",
-    icon: <Users size={18} />,
-  },
   {
     label: "SEO",
     path: "/seo",
@@ -668,8 +672,12 @@ export function CommonLayout({
   const { user, isReady } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
-  // Centralized page detection logic
+  const [records, setRecords] = useState<ComponentContent[]>([]);
+  const editingKey = searchParams.get("component");
+
   const getPageConfig = () => {
     const fUrl = frontendUrl || "";
     const configMap: Record<string, { name: string; path: string }> = {
@@ -691,7 +699,49 @@ export function CommonLayout({
   };
 
   const pageConfig = getPageConfig();
-  const isManagementPage = pathname.includes("-content") || pathname.includes("-management");
+
+  const refreshComponents = useCallback(async () => {
+    if (pageConfig.name === "dashboard") {
+      setRecords([]);
+      return;
+    }
+    try {
+      const list = await componentContentApi.getByPage(pageConfig.name);
+      setRecords(list);
+    } catch (error) {
+      console.error("Failed to fetch page components:", error);
+    }
+  }, [pageConfig.name]);
+
+  useEffect(() => {
+    refreshComponents();
+  }, [refreshComponents]);
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm("Delete this component?")) return;
+    try {
+      await componentContentApi.remove(id);
+      toast.success("Component deleted");
+      refreshComponents();
+    } catch (e) {
+      toast.error("Delete failed");
+    }
+  };
+
+  const onReorder = async (result: any) => {
+    if (!result.destination) return;
+    const items = Array.from(records);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+    setRecords(items);
+    try {
+      await Promise.all(items.map((item, index) => componentContentApi.update(item._id, { index })));
+      toast.success("Order updated");
+    } catch (e) {
+      toast.error("Reorder sync failed");
+      refreshComponents();
+    }
+  };
 
   if (!isReady) {
     return <main className="min-h-screen bg-slate-50" />;
@@ -717,24 +767,68 @@ export function CommonLayout({
           setCollapsed={setCollapsed}
         />
         <main className="flex-1 overflow-y-auto bg-[#f6f8fc] p-3">
-          <div className="mb-4">
-            <PageStatsCards pageName={pageConfig.name} />
-          </div>
-          {children}
-
-          {isManagementPage && (
-            <div className="mt-8 max-w-7xl mx-auto">
-              <div className="mb-4">
-                <h3 className="text-lg font-bold text-slate-800">Live Preview</h3>
-                <p className="text-xs text-slate-500 italic">Visualizing: {pageConfig.url}</p>
-              </div>
-              <LivePreviewIframe 
-                iframeSrc={pageConfig.url}
-                ctaHref={pageConfig.url}
-                pageName={pageConfig.name}
-              />
+          {!editingKey && (
+            <div className="mb-4">
+              <PageStatsCards pageName={pageConfig.name} />
             </div>
           )}
+
+          <div className={`grid gap-6 ${
+            !editingKey 
+              ? (pageConfig.name !== "dashboard" ? "xl:grid-cols-[320px_1fr_420px]" : "xl:grid-cols-[1fr_420px]") 
+              : "grid-cols-1"
+          }`}>
+            {pageConfig.name !== "dashboard" && !editingKey && (
+              <aside className="space-y-4">
+                <section className="space-y-4">
+                  <div className={cardClass}>
+                    <div className="mb-4 flex items-center justify-between gap-3">
+                      <div>
+                        <h2 className="text-lg font-semibold">Components</h2>
+                        <p className="text-sm text-[#5f5a50]">List of {pageConfig.name} component content records.</p>
+                      </div>
+                      <button 
+                        type="button" 
+                        onClick={refreshComponents} 
+                        className="rounded-md border border-[#d9cdbb] bg-white px-3 py-2 text-sm font-semibold text-[#263016]"
+                      >
+                        Refresh
+                      </button>
+                    </div>
+                    <div className="p-0">
+                      <ComponentList 
+                        records={records} 
+                        onEdit={(r) => router.push(`?component=${r.key}`)} 
+                        onDelete={handleDelete} 
+                        onReorder={onReorder}
+                        editingId={records.find(r => r.key === editingKey)?._id || null}
+                        knownKeys={records.map(r => r.key)}
+                      />
+                    </div>
+                  </div>
+                </section>
+              </aside>
+            )}
+            <div className="space-y-4 min-w-0">
+              {children}
+            </div>
+
+            {!editingKey && (
+              <aside className="hidden xl:block space-y-4">
+                <div className="sticky top-4">
+                  <div className="mb-4">
+                    <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Live Preview</h3>
+                    <p className="text-[10px] text-slate-500 italic truncate">Visualizing: {pageConfig.url}</p>
+                  </div>
+                  <LivePreviewIframe 
+                    iframeSrc={pageConfig.url}
+                    ctaHref={pageConfig.url}
+                    pageName={pageConfig.name}
+                  />
+                </div>
+              </aside>
+            )}
+          </div>
         </main>
       </div>
       <ToastContainer position="top-center" autoClose={4000} hideProgressBar={false} theme="light" />

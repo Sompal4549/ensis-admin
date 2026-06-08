@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { Suspense, useRef, useState } from "react";
 import { ArrowDown, ArrowUp, ImagePlus, Loader2, Plus, RefreshCw, Save, Trash2 } from "lucide-react";
 import RichTextEditor from "@/components/common/RichTextEditor";
 import { getImageUrl, uploadImage } from "@/lib/api";
@@ -339,8 +339,10 @@ export default function HomepageComponentRouteEditor({
   title: string;
 }) {
   return (
+    <Suspense fallback={<div className="flex justify-center p-20"><Loader2 className="animate-spin text-[#8d6a3a]" size={40} /></div>}>
     <HomepageContentProvider componentKey={componentKey}>
       <EditorInner title={title} />
     </HomepageContentProvider>
+    </Suspense>
   );
 }

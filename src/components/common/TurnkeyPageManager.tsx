@@ -316,21 +316,8 @@ export default function TurnkeyPageManager() {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-      <aside className="lg:col-span-4 space-y-4">
-        <div className="bg-white border rounded-2xl p-6 shadow-sm">
-          <h2 className="text-sm font-bold uppercase tracking-widest mb-6">Existing Components</h2>
-          <ComponentList
-            records={records} 
-            onEdit={handleSelectRecord} 
-            onDelete={async (id) => { if(confirm('Delete?')) { await componentContentApi.remove(id); refresh(); }}} 
-            onReorder={onReorder}
-            editingId={editingId}
-          />
-        </div>
-      </aside>
-
-      <section className="lg:col-span-8">
+    <div className="w-full">
+      <section className="w-full">
         <form onSubmit={handleSave} className="bg-white border rounded-2xl shadow-sm overflow-hidden">
           <div className="bg-[#fcfaf7] border-b p-6 flex items-center justify-between">
             <h2 className="font-serif text-2xl">{editingId ? "Edit Component" : "Create Component"}</h2>

@@ -34,12 +34,7 @@ export default function ComponentEditor({
   const loadContent = useCallback(async () => {
     try {
       setLoading(true);
-
-      const contents = await componentContentApi.list();
-
-      const item = contents.find(
-        (content) => content.key === componentKey
-      );
+      const item = await componentContentApi.getByKey(componentKey);
 
       if (!item) {
         toast.error(`Component "${componentKey}" not found`);
