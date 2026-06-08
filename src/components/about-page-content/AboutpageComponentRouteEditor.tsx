@@ -667,7 +667,7 @@ export default function AboutpageComponentRouteEditor({ componentKey, title }: {
         </aside> */}
 
         {/* Editor Form */}
-        <section className="lg:col-span-8">
+        <section className="lg:col-span-12">
           <form onSubmit={handleSave} className="bg-white border border-[#ded3c4] rounded-2xl shadow-sm overflow-hidden">
             <div className="bg-[#fcfaf7] border-b border-[#eee5d9] p-6 flex items-center justify-between">
               <div>

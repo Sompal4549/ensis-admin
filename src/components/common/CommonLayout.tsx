@@ -672,6 +672,9 @@ export function CommonLayout({
   const { user, isReady } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
+  const isComponentPage =
+    pathname.startsWith("/homepage-content/") ||
+    pathname.startsWith("/about-page-content/");
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -683,7 +686,7 @@ export function CommonLayout({
     const configMap: Record<string, { name: string; path: string }> = {
       "homepage-content": { name: "home", path: "" },
       "about-page-content": { name: "about", path: "/about" },
-      "turnkey-page-content": { name: "turnkey", path: "/turnkey-solutions" },
+      "turnkey-page-content": { name: "turnkey", path: "/turnkey" },
       "consultancy-page-management": { name: "consultancy", path: "/consultancy" },
       "blogs-page-management": { name: "blog", path: "/blog" },
       "contact-page-management": { name: "contact", path: "/contact" },
@@ -767,18 +770,18 @@ export function CommonLayout({
           setCollapsed={setCollapsed}
         />
         <main className="flex-1 overflow-y-auto bg-[#f6f8fc] p-3">
-          {!editingKey && (
+          {!editingKey && !isComponentPage && (
             <div className="mb-4">
               <PageStatsCards pageName={pageConfig.name} />
             </div>
           )}
 
           <div className={`grid gap-6 ${
-            !editingKey 
+            !editingKey && !isComponentPage
               ? (pageConfig.name !== "dashboard" ? "xl:grid-cols-[320px_1fr_420px]" : "xl:grid-cols-[1fr_420px]") 
               : "grid-cols-1"
           }`}>
-            {pageConfig.name !== "dashboard" && !editingKey && (
+            {pageConfig.name !== "dashboard" && !editingKey && !isComponentPage && (
               <aside className="space-y-4">
                 <section className="space-y-4">
                   <div className={cardClass}>
@@ -813,7 +816,7 @@ export function CommonLayout({
               {children}
             </div>
 
-            {!editingKey && (
+            {!editingKey && !isComponentPage && (
               <aside className="hidden xl:block space-y-4">
                 <div className="sticky top-4">
                   <div className="mb-4">

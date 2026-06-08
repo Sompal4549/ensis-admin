@@ -282,8 +282,6 @@ export default function AdminHome() {
   return (
     <div className="flex h-full min-h-0 flex-col gap-3 overflow-hidden">
       
-      {/* Row 1: Stats Grid */}
-      <PageStatsCards pageName="dashboard" />
 
       {/* Row 2: Website Overview Chart + Recent Inquiries + Quick Actions (Exactly 3 Cards in a Row) */}
       <div className="grid min-h-0 flex-1 grid-cols-12 gap-3">

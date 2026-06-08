@@ -359,7 +359,7 @@ export const defaultAboutpageData :Record<AboutPageContentKeys, AboutPageData> =
           { title: "Home", slug: "/" },
           { title: "About Us", slug: "/about-us" },
           { title: "Products", slug: "/products" },
-          { title: "Turnkey Solutions", slug: "/turnkey-solutions" },
+          { title: "Turnkey Solutions", slug: "/turnkey" },
           { title: "Consultancy", slug: "/consultancy" },
           { title: "Projects and Clients", slug: "/projects-and-clients" },
           { title: "Blog", slug: "/blog" },

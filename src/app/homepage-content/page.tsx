@@ -14,7 +14,6 @@ import {
   Trash2,
 } from "lucide-react";
 import { componentContentApi, getImageUrl, uploadImage, type ComponentContent } from "@/lib/api";
-import ComponentList from "@/components/common/ComponentList";
 import {
   buildEmptyHomepageContent,
   createHomepageData,
@@ -794,30 +793,6 @@ export default function HomepageContentAdminPage() {
         </div>
 
         <div className="grid gap-6 xl:grid-cols-[380px_1fr]">
-          <section className="space-y-4">
-            <div className={cardClass}>
-              <div className="mb-4 flex items-center justify-between gap-3">
-                <div>
-                  <h2 className="text-lg font-semibold">Components</h2>
-                  <p className="text-sm text-[#5f5a50]">List of homepage component content records.</p>
-                </div>
-                <button type="button" onClick={refresh} className="rounded-md border border-[#d9cdbb] bg-white px-3 py-2 text-sm font-semibold text-[#263016]">
-                  Refresh
-                </button>
-              </div>
-              <div className="p-0">
-                <ComponentList 
-                  records={records} 
-                  onEdit={handleSelectRecord} 
-                  onDelete={handleDelete} 
-                  onReorder={onDragEnd}
-                  editingId={editingId}
-                  knownKeys={knownKeys}
-                />
-              </div>
-            </div>
-          </section>
-
           <section className="space-y-4">
             <div className={cardClass}>
               <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
