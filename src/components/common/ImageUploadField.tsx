@@ -3,6 +3,7 @@ import { useRef } from "react";
 import { ImagePlus, Loader2 } from "lucide-react";
 import { getImageUrl, uploadImage } from "@/lib/api";
 import { fieldClass, labelClass } from "@/constants";
+import Image from "next/image";
 
 export const ImageUploadField = ({
   label,
@@ -60,7 +61,7 @@ export const ImageUploadField = ({
       />
       <input className={fieldClass} type="text" value={displayValue} readOnly placeholder="Uploaded path will appear here" />
       {imgUrl ? (
-        <img src={imgUrl} alt={label} className="mt-3 h-20 w-32 rounded-md object-cover border border-[#eee5d9]"  crossOrigin="anonymous" />
+        <Image height={80} width={128} src={imgUrl} alt={label} className="mt-3 h-20 w-32 rounded-md object-cover border border-[#eee5d9]"  crossOrigin="anonymous" />
       ) : null}
     </div>
   );

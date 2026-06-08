@@ -5,14 +5,12 @@ import { toast } from "react-toastify";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { 
-  Plus, 
   Edit, 
   Trash2, 
   Save, 
   X, 
   Loader2, 
   Briefcase,
-  CheckCircle2,
   ImagePlus,
   ChevronLeft,
   ChevronRight
@@ -160,7 +158,7 @@ export default function ProjectManagementPage() {
       fetchProjects();
       toast.success("Projects deleted successfully");
     } catch (error) {
-      toast.error("Bulk delete failed");
+      toast.error("Bulk delete failed"+" "+error);
     }
   };
 

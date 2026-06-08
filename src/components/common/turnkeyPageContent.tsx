@@ -1,4 +1,4 @@
-import { ImageData } from "../about/aboutPageContent";
+import { ImageData } from "@/lib/about/aboutPageContent";
 
 export type TurnkeyPageContentKeys =
   | "turnkey.banner"
@@ -58,7 +58,7 @@ export const turnkeyPageKeys: { key: TurnkeyPageContentKeys; label: string; desc
 
 const randomId = () => Math.random().toString(36).slice(2, 9);
 
-export const defaultTurnkeyData: Record<TurnkeyPageContentKeys, any> = {
+export const defaultTurnkeyData: Record<TurnkeyPageContentKeys, unknown> = {
   "turnkey.banner": {
     subheading: "END-TO-END SOLUTIONS",
     title: "Comprehensive Turnkey Projects",

@@ -6,8 +6,6 @@ export type HomepageComponentKey =
   | "home.features"
   | "home.turnkeySolutions"
   | "home.globalPresence"
-  | "layout.header"
-  | "layout.footer"
   | "home.fullWidthFeatures"
   | "home.productsGrid"
   | "home.wellnessRoomSetups"
@@ -64,29 +62,6 @@ export type HomeWellnessData = {
 };
 
 // ---------- NEW TYPES ----------
-
-export type HeaderNavItem = { label: string; href: string };
-export type HeaderData = {
-  navLinks: never[];
-  logoText: string;
-  logoTagline: string;
-  navItems: HeaderNavItem[];
-  ctaText: string;
-  ctaHref: string;
-  phone: string;
-};
-
-export type FooterColumn = { heading: string; links: { label: string; href: string }[] };
-export type FooterData = {
-  logoText: string;
-  tagline: string;
-  address: string;
-  phone: string;
-  email: string;
-  columns: FooterColumn[];
-  copyright: string;
-  socialLinks: { platform: string; href: string }[];
-};
 
 export type FullWidthFeatureItem = { image: string; title: string; description: string; tag?: string };
 export type FullWidthFeaturesData = {
@@ -150,8 +125,6 @@ export type HomepageData =
   | { features: HomeFeaturesFeature[] }
   | { eyebrow: string; heading: string; description: string; buttonText: string; buttonHref?: string; backgroundImage: string; solutions: HomeTurnkeySolution[] }
   | { eyebrow: string; heading: string; description: string; image: string; stats: HomeGlobalPresenceStat[] }
-  | HeaderData
-  | FooterData
   | FullWidthFeaturesData
   | ProductsGridData
   | WellnessRoomSetupsData
@@ -167,8 +140,6 @@ export const homepageKeys: { key: HomepageComponentKey; label: string; descripti
   { key: "home.features", label: "Home Features", description: "Feature cards with image, title, and description." },
   { key: "home.turnkeySolutions", label: "Home Turnkey Solutions", description: "Turnkey solutions section with heading, background image, and solution cards." },
   { key: "home.globalPresence", label: "Home Global Presence", description: "Global presence section with image and stat cards." },
-  { key: "layout.header", label: "Header", description: "Site header: logo, nav links, CTA button, and phone number." },
-  { key: "layout.footer", label: "Footer", description: "Site footer: logo, address, columns, social links, and copyright." },
   { key: "home.fullWidthFeatures", label: "Full Width Features", description: "Full-width feature cards with image, title, description, and tag." },
   { key: "home.productsGrid", label: "Products Grid", description: "Products section headings, description, and CTA button." },
   { key: "home.wellnessRoomSetups", label: "Wellness Room Setups", description: "Room setup grid cards with title, image, and tag." },
@@ -195,17 +166,6 @@ export const defaultHomepageData: Record<HomepageComponentKey, HomepageData> = {
   "home.features": { features: [{ imgUrl: "", title: "", desc: "" }] },
   "home.turnkeySolutions": { eyebrow: "", heading: "", description: "", buttonText: "", buttonHref: "", backgroundImage: "", solutions: [{ imgUrl: "", title: "" }] },
   "home.globalPresence": { eyebrow: "", heading: "", description: "", image: "", stats: [{ value: "", label: "" }] },
-  "layout.header": {
-    logoText: "ENSIS", logoTagline: "Wellness Equipment",
-    navItems: [{ label: "Home", href: "/" }, { label: "Products", href: "/products" }, { label: "About", href: "/about" }, { label: "Contact", href: "/contact" }],
-    ctaText: "Get Quote", ctaHref: "/contact", phone: "",
-  },
-  "layout.footer": {
-    logoText: "ENSIS", tagline: "", address: "", phone: "", email: "",
-    columns: [{ heading: "Quick Links", links: [{ label: "Home", href: "/" }] }],
-    copyright: `© ${new Date().getFullYear()} Ensis. All rights reserved.`,
-    socialLinks: [{ platform: "facebook", href: "" }],
-  },
   "home.fullWidthFeatures": {
     subtitle: "", heading: "", description: "", buttonText: "", buttonPath: "/products",
     features: [{ image: "", title: "", description: "", tag: "" }],
@@ -239,7 +199,7 @@ export const createHomepageData = (key: HomepageComponentKey): HomepageData => {
 export const buildEmptyHomepageContent = (key: HomepageComponentKey): Omit<ComponentContent, "_id"> & { key: HomepageComponentKey } => ({
   key,
   label: "",
-  page: key.startsWith("layout.") ? "layout" : "home",
+  page: "home",
   description: "",
   isActive: true,
   data: createHomepageData(key),
@@ -313,18 +273,6 @@ export const validateHomepageContent = (content: Omit<ComponentContent, "_id">) 
         if (!isNonEmptyString(s.value)) errors.push(`Stat ${i + 1}: value is required.`);
         if (!isNonEmptyString(s.label)) errors.push(`Stat ${i + 1}: label is required.`);
       });
-      break;
-    }
-    case "layout.header": {
-      const h = data as HeaderData;
-      if (!isNonEmptyString(h.logoText)) errors.push("Logo text is required.");
-      if (!h.navItems?.length) errors.push("At least one nav item is required.");
-      break;
-    }
-    case "layout.footer": {
-      const f = data as FooterData;
-      if (!isNonEmptyString(f.logoText)) errors.push("Logo text is required.");
-      if (!isNonEmptyString(f.copyright)) errors.push("Copyright text is required.");
       break;
     }
     case "home.fullWidthFeatures": {

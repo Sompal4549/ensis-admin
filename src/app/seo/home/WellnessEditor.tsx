@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { Save, Plus, Trash2 } from "lucide-react";
+import {  Trash2 } from "lucide-react";
 import { componentContentApi, type ComponentContent } from "@/lib/api";
 import { fieldClass, labelClass } from "@/constants";
 
@@ -32,7 +32,7 @@ const isWellnessData = (value: unknown): value is WellnessData => {
     typeof value === "object" &&
     value !== null &&
     "services" in value &&
-    Array.isArray((value as any).services)
+    Array.isArray((value as Record<string, unknown>).services)
   );
 };
 
@@ -92,7 +92,7 @@ export default function WellnessEditor() {
   };
 
   // Helper to update root data fields
-  const updateData = (field: string, value: any) => {
+  const updateData = (field: string, value: unknown) => {
     setForm({ ...form, data: { ...form.data, [field]: value } });
   };
 

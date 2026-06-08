@@ -1,10 +1,9 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { Save, Plus, Trash2, Loader2 } from "lucide-react";
-import { componentContentApi, type ComponentContent, uploadImage, getImageUrl } from "@/lib/api";
+import { Save, Plus, Trash2} from "lucide-react";
+import { componentContentApi, type ComponentContent } from "@/lib/api";
 import { fieldClass, labelClass } from "@/constants";
-import { ImageUploadField } from "@/components/common/ImageUploadField";
 
 type HeroSlide = {
   title: string;
@@ -36,7 +35,6 @@ export default function HeroEditor() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [content, setContent] = useState<ComponentContent | null>(null);
-  const [uploadingField, setUploadingField] = useState<string | null>(null);
 
   // State management for the specialized form
   const [form, setForm] = useState<{

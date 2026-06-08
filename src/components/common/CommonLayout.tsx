@@ -8,7 +8,6 @@ import { useState } from "react";
 import {
   Menu,
   ChevronDown,
-  ChevronLeft,
   Home,
   Info,
   AlignJustify,
@@ -37,6 +36,7 @@ import { LoginForm, useAuth } from "@/components/auth/AuthContext";
 import sidebarBg from "@/assets/sidebarbg.webp"
 import UserManagementModal from "./UserManagementModal";
 import { api } from "@/lib/api";
+import Image from "next/image";
 
 interface NavItem {
   label: string;
@@ -378,7 +378,7 @@ export function Sidebar({ activePath, onNavigate, collapsed, setCollapsed }: Sid
             </div>
           </div>
         ) : (
-          <img src="/images/ensis-logo.png" alt="Ensis Logo" className="h-7 w-auto mx-auto object-contain" />
+          <Image width={150} height={28} src="/images/ensis-logo.png" alt="Ensis Logo" className="h-7 w-auto mx-auto object-contain" />
         )}
       </div>
 
@@ -442,7 +442,7 @@ export function Sidebar({ activePath, onNavigate, collapsed, setCollapsed }: Sid
   );
 }
 
-export function Topbar({ title = "Dashboard", subtitle, collapsed, setCollapsed }: TopbarProps) {
+export function Topbar({ title = "Dashboard", collapsed, setCollapsed }: TopbarProps) {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -473,7 +473,7 @@ export function Topbar({ title = "Dashboard", subtitle, collapsed, setCollapsed 
 
   const breadcrumbs = getBreadcrumbs();
   const frontendUrl = process.env.NEXT_PUBLIC_FRONTEND_URL || "http://localhost:5000";
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+  // const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
   const handleLogout = async () => {
     setShowProfileMenu(false);

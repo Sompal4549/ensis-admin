@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { DropResult } from "@hello-pangea/dnd";
 import { useSearchParams } from "next/navigation";
@@ -20,7 +20,7 @@ import {
 } from "@/lib/turnkey/turnkeyPageContent";
 import { fieldClass, labelClass } from "@/constants";
 import { ImageUploadField } from "@/components/common/ImageUploadField";
-import ComponentList from "@/components/common/ComponentList";
+import ComponentList from "./ComponentList";
 
 const randomId = () => Math.random().toString(36).slice(2, 9);
 
@@ -28,18 +28,35 @@ export default function TurnkeyPageManager() {
   const searchParams = useSearchParams();
   const queryKey = searchParams.get("key") as TurnkeyPageContentKeys;
   const [records, setRecords] = useState<ComponentContent[]>([]);
-  const [form, setForm] = useState<any>({
+  const [form, setForm] = useState<Partial<ComponentContent>>({
     key: "turnkey.banner",
     label: "Turnkey Banner",
     page: "turnkey",
     isActive: true,
-    data: defaultTurnkeyData["turnkey.banner"],
+    data: defaultTurnkeyData["turnkey.banner"] as Record<string, unknown>,
   });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [uploadingField, setUploadingField] = useState<string | null>(null);
 
-  const refresh = async () => {
+  const handleSelectRecord = useCallback((record: ComponentContent) => {
+    setEditingId(record._id);
+    setForm({ ...record });
+  }, []);
+
+  const handleKeyChange = useCallback((key: TurnkeyPageContentKeys) => {
+    const keyInfo = turnkeyPageKeys.find(k => k.key === key);
+    setEditingId(null);
+    setForm({
+      key,
+      label: keyInfo?.label || "",
+      page: "turnkey",
+      isActive: true,
+      data: defaultTurnkeyData[key] as Record<string, unknown>
+    });
+  }, []);
+
+  const refresh = useCallback(async () => {
     setLoading(true);
     try {
       const list = await componentContentApi.list();
@@ -49,41 +66,33 @@ export default function TurnkeyPageManager() {
         const existing = filtered.find(r => r.key === queryKey);
         if (existing) handleSelectRecord(existing);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       toast.error("Failed to load components.");
     } finally {
       setLoading(false);
     }
-  };
+  }, [queryKey, handleSelectRecord]);
 
-  useEffect(() => { refresh(); }, [queryKey]);
-
-  const handleSelectRecord = (record: ComponentContent) => {
-    setEditingId(record._id);
-    setForm({ ...record });
-  };
-
-  const handleKeyChange = (key: TurnkeyPageContentKeys) => {
-    const keyInfo = turnkeyPageKeys.find(k => k.key === key);
-    setEditingId(null);
-    setForm({
-      key,
-      label: keyInfo?.label || "",
-      page: "turnkey",
-      isActive: true,
-      data: defaultTurnkeyData[key]
-    });
-  };
+  useEffect(() => { void refresh(); }, [refresh]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    try {
-      if (editingId) await componentContentApi.update(editingId, form);
-      else await componentContentApi.create(form);
-      toast.success("Saved successfully!");
-      refresh();
-    } catch (err) {
+ try {
+  if (editingId) {
+    await componentContentApi.update(editingId, form);
+  } else {
+    // Ensure 'data' is at least an empty object if it's undefined in the form state
+    const payload = {
+      ...form,
+      data: form.data || {}, 
+    } as Omit<ComponentContent, "_id">;
+    
+    await componentContentApi.create(payload);
+  }
+  toast.success("Saved successfully!");
+  refresh();
+} catch {
       toast.error("Save failed.");
     } finally {
       setLoading(false);
@@ -311,7 +320,7 @@ export default function TurnkeyPageManager() {
       <aside className="lg:col-span-4 space-y-4">
         <div className="bg-white border rounded-2xl p-6 shadow-sm">
           <h2 className="text-sm font-bold uppercase tracking-widest mb-6">Existing Components</h2>
-          <ComponentList 
+          <ComponentList
             records={records} 
             onEdit={handleSelectRecord} 
             onDelete={async (id) => { if(confirm('Delete?')) { await componentContentApi.remove(id); refresh(); }}} 
@@ -333,7 +342,7 @@ export default function TurnkeyPageManager() {
           <div className="p-8 space-y-6">
             <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
               <label className={labelClass}>Template Key
-                <select className={fieldClass} value={form.key} onChange={e => handleKeyChange(e.target.value as any)}>
+                <select className={fieldClass} value={form.key || ""} onChange={e => handleKeyChange(e.target.value as TurnkeyPageContentKeys)}>
                   {turnkeyPageKeys.map(k => <option key={k.key} value={k.key}>{k.label}</option>)}
                 </select>
               </label>
@@ -346,7 +355,7 @@ export default function TurnkeyPageManager() {
             {form.key === "turnkey.facilities" && renderFacilitiesForm()}
             {form.key === "turnkey.customized" && renderCustomizedForm()}
             {form.key === "turnkey.featuredProjects" && renderFeaturedProjectsForm()}
-            {form.key === "turnkey.readyToBuild" && renderReadyToBuildForm()}
+            {form.key === "turnkey.readyToBuild" && typeof renderReadyToBuildForm === 'function' && renderReadyToBuildForm()}
           </div>
         </form>
       </section>

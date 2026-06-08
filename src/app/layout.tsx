@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { AuthProvider } from "@/components/auth/AuthContext";
 import { CommonLayout } from "@/components/common/CommonLayout";
 import {Outfit} from "next/font/google";
+import { AuthProvider } from "@/components/auth/AuthContext";
 
 export const metadata: Metadata = {
   title: "Ensis Admin",

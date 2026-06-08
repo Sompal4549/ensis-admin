@@ -1,5 +1,3 @@
-import type { ComponentContent } from "@/lib/api";
-import { defaultHomepageData } from "../homepageContent";
 export type AboutPageContentKeys =
     | "about.hero"
     | "about.statsStrip"
@@ -193,10 +191,6 @@ export const aboutpageKeys:{ key: AboutPageContentKeys; label:string; descriptio
     { key: "layout.footer", label: "Global Footer", description: "Manage the site-wide footer columns and links." },
 ]
 
-const randomId = () =>
-  typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
-    ? crypto.randomUUID()
-    : `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
 export const defaultAboutpageData :Record<AboutPageContentKeys, AboutPageData> = {
     "about.hero": {

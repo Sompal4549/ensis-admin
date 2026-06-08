@@ -1,6 +1,7 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useState } from "react";
+import Image from "next/image";
 import { Save, ImagePlus, Loader2 } from "lucide-react";
 // Correctly importing the exported member and function
 import { pageApi, type PageData, uploadImage, getImageUrl } from "@/lib/api";
@@ -34,7 +35,7 @@ export default function SEOEditor({ slug, title }: SEOEditorProps) {
     robots: "index, follow",
   });
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       // Slug 'home' is handled as '/' in your backend logic
@@ -56,22 +57,22 @@ export default function SEOEditor({ slug, title }: SEOEditorProps) {
           robots: data.robots || "index, follow",
         });
       }
-    } catch (error: any) {
-      setMessage(error.message);
+    } catch (error: unknown) {
+      setMessage(error instanceof Error ? error.message : "Failed to load SEO data");
     } finally {
       setLoading(false);
     }
-  };
+  }, [slug]);
 
-  useEffect(() => { loadData(); }, [slug]);
+  useEffect(() => { loadData(); }, [loadData]);
 
   const handleOgImageUpload = async (file: File) => {
     try {
       setUploading(true);
       const url = await uploadImage(file);
       setForm({ ...form, seo: { ...form.seo, ogImage: url } });
-    } catch (error: any) {
-      setMessage(error.message);
+    } catch (error: unknown) {
+      setMessage(error instanceof Error ? error.message : "Upload failed");
     } finally {
       setUploading(false);
     }
@@ -121,8 +122,8 @@ export default function SEOEditor({ slug, title }: SEOEditorProps) {
         setMessage("SEO page created and settings saved!");
         loadData();
       }
-    } catch (error: any) {
-      setMessage(error.message);
+    } catch (error: unknown) {
+      setMessage(error instanceof Error ? error.message : "Save failed");
     } finally {
       setLoading(false);
     }
@@ -163,7 +164,7 @@ export default function SEOEditor({ slug, title }: SEOEditorProps) {
             <div>
               <label className={labelClass}>Social Sharing Image (OG Image)</label>
               <div className="mt-2 flex items-center gap-4">
-                {form.seo.ogImage && <img src={getImageUrl(form.seo.ogImage)} alt="OG Preview" className="h-12 w-20 object-cover rounded border" />}
+                {form.seo.ogImage && <Image width={80} height={48} src={getImageUrl(form.seo.ogImage)} alt="OG Preview" className="h-12 w-20 object-cover rounded border" />}
                 <label className="cursor-pointer flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-md border border-dashed border-gray-300 text-sm">
                   {uploading ? <Loader2 className="animate-spin" size={16} /> : <ImagePlus size={16} />}
                   {form.seo.ogImage ? "Change" : "Upload"}

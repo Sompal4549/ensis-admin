@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { mediaApi, getImageUrl, type MediaFile } from "@/lib/api";
 import { Copy, Loader2, Image as ImageIcon, Search } from "lucide-react";
+import Image from "next/image";
 
 interface MediaGridProps {
   subDir?: string;
@@ -88,7 +89,7 @@ export default function MediaGrid({ subDir = "" }: MediaGridProps) {
             return (
               <div key={idx} className="group bg-white border border-[#ded3c4] rounded-2xl overflow-hidden hover:shadow-md transition-all">
                 <div className="aspect-square bg-[#fcfaf7] overflow-hidden border-b border-[#eee5d9] relative">
-                  <img 
+                  <Image fill 
                     src={fullUrl} 
                     alt={fileName} 
                     crossOrigin="anonymous"

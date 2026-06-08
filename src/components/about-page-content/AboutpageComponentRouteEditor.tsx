@@ -1,23 +1,15 @@
 "use client";
 
 import { ImageUploadField } from "@/components/common/ImageUploadField";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { useSearchParams } from "next/navigation";
-import Link from "next/link";
 import {
-  ArrowDown,
-  ArrowUp,
-  CheckCircle,
-  FilePlus,
-  ImagePlus,
   Loader2,
   Plus,
   Save,
   Trash2,
-  ChevronLeft,
 } from "lucide-react";
-import { componentContentApi, getImageUrl, uploadImage, type ComponentContent } from "@/lib/api";
+import { componentContentApi, type ComponentContent } from "@/lib/api";
 import {
   aboutpageKeys,
   defaultAboutpageData,
@@ -36,7 +28,7 @@ import {
   type HeaderData,
   type FooterData,
 } from "@/lib/about/aboutPageContent";
-import { fieldClass, labelClass, cardClass } from "@/constants";
+import { fieldClass, labelClass } from "@/constants";
 
 
 
@@ -45,46 +37,43 @@ type ContentForm = Omit<ComponentContent, "_id"> & { key: AboutPageContentKeys }
 const randomId = () => Math.random().toString(36).slice(2, 9);
 
 
-
 export default function AboutpageComponentRouteEditor({ componentKey, title }: { componentKey: AboutPageContentKeys | "layout.header" | "layout.footer", title: string }) {
   const [form, setForm] = useState<ContentForm>({
-    key: componentKey as any,
+    key: componentKey as AboutPageContentKeys,
     label: title,
     page: "about",
     description: "",
     isActive: true,
-    data: (defaultAboutpageData[componentKey as AboutPageContentKeys] || {}) as AboutPageData,
+    data: ((defaultAboutpageData[componentKey as AboutPageContentKeys] || {}) as unknown) as AboutPageData,
   });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [uploadingField, setUploadingField] = useState<string | null>(null);
-  const [records, setRecords] = useState<ComponentContent[]>([]);
 
-  const refresh = async () => {
+  const refresh = useCallback(async () => {
     setLoading(true);
     try {
       const list = await componentContentApi.list();
-      setRecords(list.filter((r) => r.page === "about" || r.page === "layout"));
       const existing = list.find(r => r.key === componentKey);
       if (existing) {
         setEditingId(existing._id);
         setForm({
-          key: existing.key as any,
+          key: existing.key as AboutPageContentKeys,
           label: existing.label,
           page: existing.page || "about",
           description: existing.description || "",
           isActive: existing.isActive,
-          data: existing.data as any,
+          data: (existing.data as unknown) as AboutPageData,
         });
       } else {
         setEditingId(null);
         const keyInfo = aboutpageKeys.find(k => k.key === componentKey);
         setForm(prev => ({
           ...prev,
-          key: componentKey as any,
+          key: componentKey as AboutPageContentKeys,
           label: keyInfo?.label || title,
           description: keyInfo?.description || "",
-          data: (defaultAboutpageData[componentKey as AboutPageContentKeys] || {}) as AboutPageData,
+          data: ((defaultAboutpageData[componentKey as AboutPageContentKeys] || {}) as unknown) as AboutPageData,
         }));
       }
     } catch (error) {
@@ -92,9 +81,9 @@ export default function AboutpageComponentRouteEditor({ componentKey, title }: {
     } finally {
       setLoading(false);
     }
-  };
+  }, [componentKey, title]);
 
-  useEffect(() => { refresh(); }, [componentKey]);
+  useEffect(() => { refresh(); }, [refresh]);
 
   const setData = (nextData: AboutPageData) => setForm((current) => ({ ...current, data: nextData }));
 
@@ -110,17 +99,6 @@ export default function AboutpageComponentRouteEditor({ componentKey, title }: {
     }));
   };
 
-  const handleSelectRecord = (record: ComponentContent) => {
-    setEditingId(record._id);
-    setForm({
-      key: record.key as AboutPageContentKeys,
-      label: record.label,
-      page: record.page || "about",
-      description: record.description || "",
-      isActive: record.isActive,
-      data: record.data as AboutPageData,
-    });
-  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -134,7 +112,7 @@ export default function AboutpageComponentRouteEditor({ componentKey, title }: {
         toast.success("Created successfully!");
       }
       await refresh();
-    } catch (err) {
+    } catch {
       toast.error("Save failed.");
     } finally {
       setLoading(false);
@@ -146,7 +124,7 @@ export default function AboutpageComponentRouteEditor({ componentKey, title }: {
     try {
       await componentContentApi.remove(id);
       toast.success("Component deleted");
-    } catch (err) {
+    } catch {
       toast.error("Delete failed");
     }
     setEditingId(null);

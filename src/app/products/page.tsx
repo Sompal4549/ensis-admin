@@ -1,8 +1,7 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import {
-  Boxes,
   Plus,
   Save,
   Pencil,
@@ -24,6 +23,7 @@ import {
   type Product,
 } from "@/lib/api";
 import { fieldClass, labelClass } from "@/constants";
+import Image from "next/image";
 
 type ProductForm = {
   id?: string;
@@ -65,7 +65,7 @@ export default function ProductsPage() {
     return category?.name || "Select category";
   }, [categories, productForm.category]);
 
-  const refreshData = async () => {
+  const refreshData = useCallback(async () => {
     const [productResult, categoryResult] = await Promise.all([
       productApi.list(),
       categoryApi.list(),
@@ -75,7 +75,7 @@ export default function ProductsPage() {
     if (!productForm.category && categoryResult[0]) {
       setProductForm((current) => ({ ...current, category: categoryResult[0]._id }));
     }
-  };
+  }, [productForm.category]);
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -86,7 +86,7 @@ export default function ProductsPage() {
         refreshData().catch((error) => setMessage(error.message));
       }
     });
-  }, []);
+  }, [refreshData]);
 
   const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -247,7 +247,7 @@ export default function ProductsPage() {
               <article key={product._id} className="grid gap-4 p-4 sm:grid-cols-[80px_1fr_auto] sm:items-center hover:bg-slate-50/20">
                 <div className="h-14 w-20 overflow-hidden rounded-lg bg-slate-50 flex-shrink-0">
                   {product.images?.[0] && (
-                    <img src={getImageUrl(product.images[0])} alt={product.title} className="h-full w-full object-cover" crossOrigin="anonymous" />
+                    <Image width={100} height={100} src={getImageUrl(product.images[0])} alt={product.title} className="h-full w-full object-cover" crossOrigin="anonymous" />
                   )}
                 </div>
                 <div className="min-w-0">
@@ -402,7 +402,7 @@ export default function ProductsPage() {
           key={idx}
           className="relative group aspect-square rounded-lg border border-slate-200 overflow-hidden bg-slate-50"
         >
-          <img
+          <Image width={100} height={100}
             src={getImageUrl(url)}
             alt={`Product ${idx}`}
             className="h-full w-full object-cover"
@@ -466,7 +466,9 @@ export default function ProductsPage() {
                 `${urls.length} image(s) uploaded successfully.`
               );
             } catch (error) {
-              setMessage("Failed to upload one or more images.");
+              setMessage("Failed to upload one or more images."+
+                " "+error
+              );
             } finally {
               setLoading(false);
               e.target.value = "";

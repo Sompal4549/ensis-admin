@@ -30,7 +30,7 @@ export default function UserManagementModal({ isOpen, onClose }: UserManagementM
         setForm({ name: "", email: "", password: "", role: "admin" });
       }, 1500);
     } catch (error) {
-      const errMsg = error.response?.data?.message || "Failed to create user";
+      const errMsg = (error as any).response?.data?.message || "Failed to create user";
       toast.error(errMsg);
     } finally {
       setLoading(false);

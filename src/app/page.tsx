@@ -10,64 +10,23 @@ import {
   Building2,
   MessageSquare,
   Activity,
-  CheckCircle,
   Eye,
   Pencil,
   Trash,
-  RefreshCw,
-  HardDrive
 } from "lucide-react";
 import {
   adminApi,
   authStore,
+  AuthUser,
   categoryApi,
   componentContentApi,
   productApi,
-  type AuthUser,
-  type Category,
-  type ComponentContent,
-  type Product,
 } from "@/lib/api";
 import Link from "next/link";
-import pink from "@/assets/lightpink.webp";
-import blue from "@/assets/blue_wave.webp";
-import orange from "@/assets/orange.webp"
-import purple from "@/assets/purple.webp"
-import green from "@/assets/green.webp"
 import { fieldClass, labelClass } from "@/constants";
-type ProductForm = {
-  id?: string;
-  title: string;
-  description: string;
-  price: string;
-  discountPrice: string;
-  stock: string;
-  category: string;
-  images: string;
-  slug: string;
-};
+import Image from "next/image";
 
-type CategoryForm = {
-  id?: string;
-  name: string;
-  description: string;
-};
 
-const emptyProduct: ProductForm = {
-  title: "",
-  description: "",
-  price: "",
-  discountPrice: "",
-  stock: "",
-  category: "",
-  images: "",
-  slug: "",
-};
-
-const emptyCategory: CategoryForm = {
-  name: "",
-  description: "",
-};
 
 // Chart Data Point Schema
 interface ChartDataPoint {
@@ -226,19 +185,13 @@ export default function AdminHome() {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [contents, setContents] = useState<ComponentContent[]>([]);
 
   const refreshData = async () => {
-    const [productResult, categoryResult, contentResult] = await Promise.all([
+    await Promise.all([
       productApi.list(),
       categoryApi.list(),
       componentContentApi.list(),
     ]);
-    setProducts(productResult.products);
-    setCategories(categoryResult);
-    setContents(contentResult);
   };
 
   useEffect(() => {
@@ -530,7 +483,7 @@ export default function AdminHome() {
             ].map((slider, idx) => (
               <div key={idx} className="flex items-center justify-between p-1.5 rounded-xl border border-slate-50 hover:bg-slate-50/50 transition-colors">
                 <div className="flex items-center gap-2 min-w-0">
-                  <img
+                  <Image width={48} height={32}
                     src={slider.img}
                     alt={slider.title}
                     className="h-8 w-12 object-cover rounded-lg bg-slate-50 flex-shrink-0"

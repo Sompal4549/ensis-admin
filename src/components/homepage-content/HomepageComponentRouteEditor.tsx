@@ -7,6 +7,7 @@ import { getImageUrl, uploadImage } from "@/lib/api";
 import { type HomepageComponentKey, type HomepageData } from "@/lib/homepageContent";
 import { HomepageContentProvider, useHomepageContent } from "./HomepageContentContext";
 import { fieldClass, labelClass, cardClass } from "@/constants";
+import Image from "next/image";
 
 
 
@@ -159,7 +160,7 @@ function ImageField({
         }}
       />
       <input className={fieldClass} value={value} onChange={(event) => onChange(event.target.value)} placeholder={`${path.join(".")} path`} />
-      {value ? <img src={getImageUrl(value)} alt={label} className="mt-3 h-24 w-full max-w-xs rounded-md object-cover shadow-sm" crossOrigin="anonymous" /> : null}
+      {value ? <Image height={96} width={96} src={getImageUrl(value)} alt={label} className="mt-3 h-24 w-full max-w-xs rounded-md object-cover shadow-sm" crossOrigin="anonymous" /> : null}
       {error ? <p className="mt-2 text-xs font-semibold text-red-600">{error}</p> : null}
     </div>
   );

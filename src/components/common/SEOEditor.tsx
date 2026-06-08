@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { toast } from "react-toastify";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useState } from "react";
 import { Save, ImagePlus, Loader2 } from "lucide-react";
 // Correctly importing the exported member and function
 import { pageApi, type PageData, uploadImage, getImageUrl } from "@/lib/api";
@@ -35,7 +35,7 @@ export default function SEOEditor({ slug, title }: SEOEditorProps) {
     robots: "index, follow",
   });
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       // Slug 'home' is handled as '/' in your backend logic
@@ -57,22 +57,22 @@ export default function SEOEditor({ slug, title }: SEOEditorProps) {
           robots: data.robots || "index, follow",
         });
       }
-    } catch (error: any) {
-      toast.error(error.message || "Failed to load SEO data");
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : "Failed to load SEO data");
     } finally {
       setLoading(false);
     }
-  };
+  }, [slug]);
 
-  useEffect(() => { loadData(); }, [slug]);
+  useEffect(() => { loadData(); }, [loadData]);
 
   const handleOgImageUpload = async (file: File) => {
     try {
       setUploading(true);
       const url = await uploadImage(file);
       setForm({ ...form, seo: { ...form.seo, ogImage: url } });
-    } catch (error: any) {
-      toast.error(error.message || "Image upload failed");
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : "Image upload failed");
     } finally {
       setUploading(false);
     }
@@ -121,8 +121,8 @@ export default function SEOEditor({ slug, title }: SEOEditorProps) {
         toast.success("SEO page created and settings saved!");
         loadData();
       }
-    } catch (error: any) {
-      toast.error(error.message || "Failed to save SEO updates");
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : "Failed to save SEO updates");
     } finally {
       setLoading(false);
     }

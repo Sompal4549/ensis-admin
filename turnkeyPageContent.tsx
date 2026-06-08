@@ -1,4 +1,4 @@
-import { ImageData } from "../about/aboutPageContent";
+import { ImageData } from "@/lib/about/aboutPageContent";
 
 export type TurnkeyPageContentKeys =
   | "turnkey.banner"

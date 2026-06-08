@@ -1,24 +1,18 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DropResult } from "@hello-pangea/dnd";
 import { toast } from "react-toastify";
 import PageStatsCards from "@/components/common/PageStatsCards";
-import Link from "next/link";
 import {
   ArrowDown,
   ArrowUp,
   CheckCircle,
-  FilePlus,
   ImagePlus,
   Loader2,
   Plus,
   Save,
   Trash2,
-  GripVertical,
-  Edit2,
-  Eye,
-  MoreVertical,
 } from "lucide-react";
 import { componentContentApi, getImageUrl, uploadImage, type ComponentContent } from "@/lib/api";
 import ComponentList from "@/components/common/ComponentList";
@@ -36,6 +30,7 @@ import {
 } from "@/lib/homepageContent";
 import { labelClass, fieldClass, cardClass, frontendUrl } from "@/constants";
 import LivePreviewIframe from "@/components/common/LivePreviewIframe";
+import Image from "next/image";
 
 type ContentForm = Omit<ComponentContent, "_id"> & { key: HomepageComponentKey };
 
@@ -103,7 +98,7 @@ const ImageUploadField = ({
       />
       <input className={fieldClass} type="text" value={value} readOnly placeholder="Uploaded image URL" />
       {value ? (
-        <img src={getImageUrl(value)} alt={label} className="mt-3 h-24 w-full max-w-xs rounded-md object-cover shadow-sm" />
+        <Image height={24} width={24} src={getImageUrl(value)} alt={label} className="mt-3 h-24 w-full max-w-xs rounded-md object-cover shadow-sm" />
       ) : null}
     </div>
   );
@@ -118,9 +113,9 @@ export default function HomepageContentAdminPage() {
   const [loading, setLoading] = useState<boolean>(false);
   const [uploadingField, setUploadingField] = useState<string | null>(null);
 
-  const knownKeys = homepageKeys.map((item) => item.key);
+  const knownKeys = useMemo(() => homepageKeys.map((item) => item.key), []);
 
-  const refresh = async () => {
+  const refresh = useCallback(async () => {
     setLoading(true);
     setStatusMessage("");
     try {
@@ -132,7 +127,44 @@ export default function HomepageContentAdminPage() {
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  const setData = (nextData: HomepageData) => setForm((current) => ({ ...current, data: nextData }));
+
+  const resetForm = (key: HomepageComponentKey = "home.hero") => {
+    setEditingId(null);
+    setErrors([]);
+    setStatusMessage("");
+    setForm(buildEmptyHomepageContent(key));
   };
+
+  const startNew = () => resetForm("home.hero");
+
+  const handleSelectRecord = useCallback((record: ComponentContent) => {
+    if (!knownKeys.includes(record.key as HomepageComponentKey)) {
+      setStatusMessage(`Cannot edit record with unsupported key: ${record.key}`);
+      return;
+    }
+    setEditingId(record._id);
+    setErrors([]);
+    setStatusMessage("");
+    setForm({
+      key: record.key as HomepageComponentKey,
+      label: record.label,
+      page: record.page || "home",
+      description: record.description || "",
+      isActive: record.isActive,
+      data: record.data as HomepageData,
+    });
+  }, [knownKeys]);
+
+  const handleKeyChange = useCallback((key: HomepageComponentKey) => {
+    setForm((current) => ({
+      ...current,
+      key,
+      data: current.key === key ? current.data : createHomepageData(key),
+    }));
+  }, []);
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -144,14 +176,14 @@ export default function HomepageContentAdminPage() {
             const found = list.find((rec) => rec.key === componentKey);
             if (found) {
               handleSelectRecord(found);
-            } else if (knownKeys.includes(componentKey as any)) {
-              handleKeyChange(componentKey as any);
+            } else if (knownKeys.includes(componentKey as HomepageComponentKey)) {
+              handleKeyChange(componentKey as HomepageComponentKey);
             }
           }
         }
       });
     });
-  }, []);
+  }, [refresh, handleSelectRecord, handleKeyChange, knownKeys]);
 
   const onDragEnd = async (result: DropResult) => {
     if (!result.destination) return;
@@ -171,47 +203,11 @@ export default function HomepageContentAdminPage() {
         )
       );
       toast.success("Component order saved successfully");
-    } catch (error: any) {
-      toast.error(error.message || "Failed to save new order");
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Failed to save new order";
+      toast.error(message);
       refresh(); // Revert to server state if the API call fails
     }
-  };
-
-  const setData = (nextData: HomepageData) => setForm((current) => ({ ...current, data: nextData }));
-
-  const resetForm = (key: HomepageComponentKey = "home.hero") => {
-    setEditingId(null);
-    setErrors([]);
-    setStatusMessage("");
-    setForm(buildEmptyHomepageContent(key));
-  };
-
-  const startNew = () => resetForm("home.hero");
-
-  const handleSelectRecord = (record: ComponentContent) => {
-    if (!knownKeys.includes(record.key as HomepageComponentKey)) {
-      setStatusMessage(`Cannot edit record with unsupported key: ${record.key}`);
-      return;
-    }
-    setEditingId(record._id);
-    setErrors([]);
-    setStatusMessage("");
-    setForm({
-      key: record.key as HomepageComponentKey,
-      label: record.label,
-      page: record.page || "home",
-      description: record.description || "",
-      isActive: record.isActive,
-      data: record.data as HomepageData,
-    });
-  };
-
-  const handleKeyChange = (key: HomepageComponentKey) => {
-    setForm((current) => ({
-      ...current,
-      key,
-      data: current.key === key ? current.data : createHomepageData(key),
-    }));
   };
 
   const handleSave = async (event: React.FormEvent<HTMLFormElement>) => {

@@ -11,7 +11,8 @@ import {
   CheckCircle2,
   ChevronDown
 } from "lucide-react";
-import { authStore, uploadImage } from "@/lib/api";
+import {  uploadImage } from "@/lib/api";
+import Image from "next/image";
 
 type UploadStatus = "idle" | "uploading" | "success" | "error";
 
@@ -36,7 +37,7 @@ export default function BulkImageUploadPage() {
     return () => {
       fileStates.forEach(state => URL.revokeObjectURL(state.preview));
     };
-  }, []);
+  }, [fileStates]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -241,7 +242,7 @@ export default function BulkImageUploadPage() {
                 {fileStates.map((state, index) => (
                   <div key={index} className="p-5 flex flex-col sm:flex-row sm:items-center gap-5 hover:bg-[#fcfaf7] transition-colors">
                     <div className="h-20 w-20 rounded-xl bg-gray-50 border border-[#eee5d9] overflow-hidden shrink-0 shadow-inner">
-                      <img src={state.preview} alt="preview" className="h-full w-full object-cover" />
+                      <Image height={100} width={100} src={state.preview} alt="preview" className="h-full w-full object-cover" />
                     </div>
 
                     <div className="flex-1 min-w-0">

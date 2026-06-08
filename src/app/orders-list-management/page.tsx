@@ -22,8 +22,9 @@ export default function OrdersPage() {
       try {
         const data = await orderApi.list();
         setOrders(data);
-      } catch (err: any) {
-        setError(err.message || "Failed to fetch orders");
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : "Failed to fetch orders";
+        setError(message);
       } finally {
         setLoading(false);
       }
@@ -43,14 +44,15 @@ export default function OrdersPage() {
     setUpdating(true);
     try {
       const updated = await orderApi.update(selectedOrder._id, {
-        status: formStatus as any,
-        name: formName, // Assuming the backend accepts a top-level name update for the order/customer
-      } as any);
+        status: formStatus,
+        name: formName,
+      } as Partial<Order>);
       setOrders(prev => prev.map(o => o._id === updated._id ? updated : o));
       setSelectedOrder(null);
       toast.success(`Order #${updated.orderNumber} updated!`);
-    } catch (err: any) {
-      toast.error(err.message || "Failed to update order");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Failed to update order";
+      toast.error(message);
     } finally {
       setUpdating(false);
     }

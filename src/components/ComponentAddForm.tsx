@@ -1,6 +1,6 @@
 import React from 'react';
 import { z } from 'zod';
-import { AdminFormWrapper } from '../AdminFormWrapper';
+import { AdminFormWrapper } from './AdminFormWrapper';
 
 const productSchema = z.object({
   name: z.string().min(3, "Name is too short"),

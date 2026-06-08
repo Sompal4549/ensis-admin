@@ -22,17 +22,10 @@ interface LivePreviewIframeProps {
 
 export default function LivePreviewIframe({
   iframeSrc,
-  title = "Live Homepage Preview",
-  subtitle = "See how your homepage looks live.",
-  ctaLabel = "View Full Site",
   ctaHref,
   pageName,
   lastUpdated: lastUpdatedProp,
   publishedBy: publishedByProp,
-  navLinks = ["Home", "About Us", "Services", "Projects", "Industries", "Contact Us"],
-  heroHeading = "We Create Impactful Spaces That Inspire",
-  heroText = "End to end interior & turnkey solutions for retail, commercial & corporate spaces.",
-  brandText = "ensis",
 }: LivePreviewIframeProps) {
   const actionLink = ctaHref ?? iframeSrc;
   const { user } = useAuth();

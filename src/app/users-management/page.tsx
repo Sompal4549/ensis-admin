@@ -12,7 +12,6 @@ import {
   Mail,
   Lock,
   Search,
-  ShieldCheck
 } from "lucide-react";
 import { fieldClass, labelClass } from "@/constants";
 import { adminApi, type AuthUser } from "@/lib/api";
@@ -37,8 +36,9 @@ function UsersManagementPage() {
     try {
       const data = await adminApi.listUsers();
       setUsers(data || []);
-    } catch (error: any) {
-      toast.error(error.message || "Failed to load users");
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Failed to load users";
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -67,7 +67,7 @@ function UsersManagementPage() {
     setFormLoading(true);
     try {
       if (isEditing && currentId) {
-        const payload: any = { ...form };
+        const payload: Partial<typeof form> = { ...form };
         if (!payload.password) delete payload.password;
         await adminApi.updateUser(currentId, payload);
         toast.success("User updated successfully");
@@ -82,8 +82,9 @@ function UsersManagementPage() {
       }
       resetForm();
       fetchUsers();
-    } catch (error: any) {
-      toast.error(error.message || "Operation failed");
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Operation failed";
+      toast.error(message);
     } finally {
       setFormLoading(false);
     }
@@ -95,8 +96,9 @@ function UsersManagementPage() {
       await adminApi.deleteUser(id);
       toast.success("User deleted");
       fetchUsers();
-    } catch (error: any) {
-      toast.error(error.message || "Delete failed");
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Delete failed";
+      toast.error(message);
     }
   };
 
@@ -242,4 +244,3 @@ function UsersManagementPage() {
 }
 
 export default withRole(UsersManagementPage, ["superadmin"]);
-

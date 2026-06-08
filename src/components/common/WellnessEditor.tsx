@@ -1,8 +1,8 @@
 "use client";
 
 import { toast } from "react-toastify";
-import { FormEvent, useEffect, useState } from "react";
-import { Save, Plus, Trash2 } from "lucide-react";
+import { FormEvent, useCallback, useEffect, useState } from "react";
+import { Trash2 } from "lucide-react";
 import RichTextEditor from "@/components/common/RichTextEditor";
 import { componentContentApi, type ComponentContent } from "@/lib/api";
 import { fieldClass, labelClass } from "@/constants";
@@ -23,11 +23,11 @@ export default function WellnessEditor() {
       description: "",
       buttonText: "",
       buttonHref: "",
-      services: [] as any[]
+      services: [] as { title: string; image: string; description: string }[]
     },
   });
 
-  const loadContent = async () => {
+  const loadContent = useCallback(async () => {
     try {
       setLoading(true);
       const item = await componentContentApi.getByKey("home.wellnessSection");
@@ -45,9 +45,9 @@ export default function WellnessEditor() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  useEffect(() => { loadContent(); }, []);
+  useEffect(() => { loadContent(); }, [loadContent]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -63,7 +63,7 @@ export default function WellnessEditor() {
     }
   };
 
-  const updateData = (field: string, value: any) => {
+  const updateData = (field: string, value: unknown) => {
     setForm({ ...form, data: { ...form.data, [field]: value } });
   };
 

@@ -127,8 +127,8 @@ const request = async <T>(path: string, options: AxiosRequestConfig = {}) => {
       throw new Error(payload.message || "API request failed");
     }
     return payload.data;
-  } catch (error: any) {
-    const message = error.response?.data?.message || error.message || "API request failed";
+  } catch (error: unknown) {
+    const message = (error as { response?: { data?: { message?: string } } }).response?.data?.message || (error as Error).message || "API request failed";
     throw new Error(message);
   }
 };
@@ -141,8 +141,8 @@ export const adminApi = {
     }),
   dashboard: () => request<Record<string, unknown>>("/admin/dashboard"),
   listUsers: () => request<AuthUser[]>("/admin/users"),
-  createUser: (payload: any) => request<AuthUser>("/admin/users", { method: "POST", data: payload }),
-  updateUser: (id: string, payload: any) =>
+  createUser: (payload: Record<string, unknown>) => request<AuthUser>("/admin/users", { method: "POST", data: payload }),
+  updateUser: (id: string, payload: Record<string, unknown>) =>
     request<AuthUser>(`/admin/users/${id}`, { method: "PUT", data: payload }),
   deleteUser: (id: string) => request<null>(`/admin/users/${id}`, { method: "DELETE" }),
 };
@@ -151,7 +151,7 @@ export const categoryApi = {
   list: () => request<Category[]>("/categories"),
   create: (payload: Pick<Category, "name" | "description">) =>
     request<Category>("/categories", { method: "POST", data: payload }),
-  update: (id: string, payload: Pick<Category, "name" | "description">) =>
+  update: (id: string, payload: Partial<Pick<Category, "name" | "description">>) =>
     request<Category>(`/categories/${id}`, { method: "PUT", data: payload }),
   remove: (id: string) => request<null>(`/categories/${id}`, { method: "DELETE" }),
 };
@@ -207,7 +207,7 @@ export const pageApi = {
     // Backend handles 'home' as '/'
     get: (slug: string) => request<PageData>(`/pages/${slug}`),
     
-    create: (payload: any) => request('/pages', {
+    create: (payload: Partial<PageData>) => request('/pages', {
         method: 'POST',
         data: payload
     }),

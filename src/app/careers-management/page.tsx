@@ -11,14 +11,13 @@ import {
   X, 
   Loader2, 
   Briefcase,
-  CheckCircle2,
   MapPin,
   Clock,
   ChevronLeft,
   ChevronRight
 } from "lucide-react";
 import { fieldClass, labelClass } from "@/constants";
-import { api, authStore } from "@/lib/api";
+import { api} from "@/lib/api";
 
 interface Career {
   _id: string;

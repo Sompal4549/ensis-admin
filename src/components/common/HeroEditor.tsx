@@ -1,8 +1,8 @@
 "use client";
 
 import { toast } from "react-toastify";
-import { FormEvent, useEffect, useState } from "react";
-import { Save, Plus, Trash2, Layout } from "lucide-react";
+import { FormEvent, useCallback, useEffect, useState } from "react";
+import { Save, Plus, Trash2 } from "lucide-react";
 import RichTextEditor from "@/components/common/RichTextEditor";
 import { componentContentApi, type ComponentContent } from "@/lib/api";
 import { fieldClass, labelClass } from "@/constants";
@@ -26,7 +26,7 @@ export default function HeroEditor() {
     },
   });
 
-  const loadContent = async () => {
+  const loadContent = useCallback(async () => {
     try {
       setLoading(true);
       // Direct fetch by key for efficiency
@@ -48,11 +48,11 @@ export default function HeroEditor() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadContent();
-  }, []);
+  }, [loadContent]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -183,11 +183,11 @@ export default function HeroEditor() {
                   </button>
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {(slide.features || []).map((feature: any, fIdx: number) => (
+                  {(slide.features || []).map((feature: { imgUrl: string; title: string }, fIdx: number) => (
                     <div key={fIdx} className="bg-gray-50 p-4 rounded-xl border border-gray-100 relative group">
                       <button type="button" onClick={() => {
                         const newSlides = [...form.data.slides];
-                        newSlides[index].features = slide.features?.filter((_: any, i: number) => i !== fIdx);
+                        newSlides[index].features = slide.features?.filter((_, i) => i !== fIdx);
                         setForm({ ...form, data: { ...form.data, slides: newSlides } });
                       }} className="absolute -top-2 -right-2 bg-white text-red-400 p-1.5 rounded-full border border-red-50 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm">
                         <Trash2 size={12} />

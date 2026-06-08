@@ -1,6 +1,6 @@
 import React from 'react';
 import { z } from 'zod';
-// @ts-ignore
+// @ts-expect-error
 import { useFormContext } from 'react-hook-form';
 import { AdminFormWrapper } from './AdminFormWrapper';
 

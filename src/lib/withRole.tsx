@@ -1,12 +1,12 @@
 "use client";
 
-import { useAuth } from "@/components/auth/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
+import { useAuth } from "@/components/auth/AuthContext";
 
-export function withRole(Component: React.ComponentType<any>, allowedRoles: string[]) {
-  return function RoleProtected(props: any) {
+export function withRole<P extends object>(Component: React.ComponentType<P>, allowedRoles: string[]) {
+  return function RoleProtected(props: P) {
     const { user, isReady } = useAuth();
     const router = useRouter();
 

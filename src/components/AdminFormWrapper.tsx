@@ -1,6 +1,6 @@
-// @ts-ignore
+// @ts-expect-error
 import { useForm, FormProvider } from 'react-hook-form';
-// @ts-ignore
+// @ts-expect-error
 import { zodResolver } from '@hookform/resolvers/zod';
 import React from 'react';
 import { z } from 'zod';

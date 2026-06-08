@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState, type Dispatch, type ReactNode, type SetStateAction } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type Dispatch, type ReactNode, type SetStateAction } from "react";
 import { componentContentApi, type ComponentContent } from "@/lib/api";
 import {
   buildEmptyHomepageContent,
@@ -56,7 +56,7 @@ export function HomepageContentProvider({
   const [message, setMessage] = useState("");
   const [errors, setErrors] = useState<string[]>([]);
 
-  const refresh = async () => {
+  const refresh = useCallback(async () => {
     setLoading(true);
     setMessage("");
     setErrors([]);
@@ -78,15 +78,15 @@ export function HomepageContentProvider({
     } finally {
       setLoading(false);
     }
-  };
+  }, [componentKey]);
 
   useEffect(() => {
     void refresh();
-  }, [componentKey]);
+  }, [refresh]);
 
   const setData = (data: HomepageData) => setForm((current) => ({ ...current, data }));
 
-  const save = async () => {
+  const save = useCallback(async () => {
     setLoading(true);
     setMessage("");
     setErrors([]);
@@ -128,11 +128,11 @@ export function HomepageContentProvider({
     } finally {
       setLoading(false);
     }
-  };
+  }, [componentKey, form, componentId, refresh]);
 
   const value = useMemo(
     () => ({ componentId, errors, form, loading, message, setData, setForm, save, refresh }),
-    [componentId, errors, form, loading, message],
+    [componentId, errors, form, loading, message, save, refresh],
   );
 
   return <HomepageContentContext.Provider value={value}>{children}</HomepageContentContext.Provider>;

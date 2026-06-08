@@ -1,7 +1,7 @@
 "use client";
 
 import { toast } from "react-toastify";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useState } from "react";
 import { Save } from "lucide-react";
 import RichTextEditor from "@/components/common/RichTextEditor";
 import {
@@ -31,7 +31,7 @@ export default function ComponentEditor({
     data: "{\n\n}",
   });
 
-  const loadContent = async () => {
+  const loadContent = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -60,11 +60,11 @@ export default function ComponentEditor({
     } finally {
       setLoading(false);
     }
-  };
+  }, [componentKey]);
 
   useEffect(() => {
     loadContent();
-  }, [componentKey]);
+  }, [loadContent]);
 
   const handleSubmit = async (
     event: FormEvent<HTMLFormElement>
