@@ -15,8 +15,16 @@ body {
   color: var(--foreground);
   font-family: var(--font-outfit);
   overflow: hidden; /* Keep the view locked at 100vh */
+  font-family: var(--font-montserrat), Arial, Helvetica, sans-serif;
 }
 
+h2, h3, h4, h5, h6{
+    font-family: var(--font-montserrat), Arial, Helvetica, sans-serif;
+}
+/* Use a consistent serif font-family for all headings */
+h1 {
+  font-family: var(--font-cormorant), Georgia, "Times New Roman", serif;
+}
 /* Custom scrollbars for components/sidebar scrolling */
 ::-webkit-scrollbar {
   width: 6px;

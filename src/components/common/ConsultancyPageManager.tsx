@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useCallback, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { Loader2, Plus, Save, Trash2 } from "lucide-react";
 import { componentContentApi, type ComponentContent } from "@/lib/api";
@@ -21,9 +21,11 @@ export default function ConsultancyPageManager() {
   const [loading, setLoading] = useState(false);
   const [uploadingField, setUploadingField] = useState<string | null>(null);
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const componentKey = searchParams.get("component");
 
   const refresh = useCallback(async () => {
-    const key = searchParams.get("component");
+    const key = componentKey;
     if (!key) {
       setEditingId(null);
       setForm(buildEmptyConsultancyContent("consultancy.hero"));
@@ -45,7 +47,7 @@ export default function ConsultancyPageManager() {
     } finally {
       setLoading(false);
     }
-  }, [searchParams]);
+  }, [componentKey]);
 
   useEffect(() => { void refresh(); }, [refresh]);
 
@@ -54,11 +56,20 @@ export default function ConsultancyPageManager() {
     e.preventDefault();
     setLoading(true);
     try {
-      const payload = { ...form, data: form.data || {} } as Omit<ComponentContent, "_id">;
+      const payload = { 
+        ...form, 
+        page: "consultancy",
+        label: form.label || (consultancyPageKeys.find(k => k.key === form.key)?.label) || "Consultancy Section",
+        data: form.data || {} 
+      } as Omit<ComponentContent, "_id">;
+
       if (editingId) {
         await componentContentApi.update(editingId, payload);
       } else {
-        await componentContentApi.create(payload);
+        const created = await componentContentApi.create(payload);
+        if (created && created.key) {
+          router.push(`?component=${created.key}`);
+        }
       }
       toast.success("Consultancy content saved!");
       refresh();
@@ -266,11 +277,9 @@ export default function ConsultancyPageManager() {
               <label className={labelClass}>Section Template
                 <select 
                   className={fieldClass} 
-                  value={form.key || ""} 
+                value={componentKey || form.key || ""} 
                   onChange={e => {
-                    const key = e.target.value as ConsultancyPageContentKeys;
-                    setEditingId(null);
-                    setForm(buildEmptyConsultancyContent(key));
+                  router.push(`?component=${e.target.value}`);
                   }}
                 >
                   {consultancyPageKeys.map(k => <option key={k.key} value={k.key}>{k.label}</option>)}

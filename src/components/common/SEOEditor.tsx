@@ -141,12 +141,30 @@ export default function SEOEditor({ slug, title }: SEOEditorProps) {
         <section className="bg-white p-6 rounded-xl border border-[#ded3c4] shadow-sm space-y-4">
           <h2 className="text-sm font-bold uppercase text-[#8d6a3a] mb-4 border-b pb-2">Core SEO Meta</h2>
           <div className="grid gap-4 md:grid-cols-2">
-            <label className={labelClass}>Page Name <input className={`${fieldClass} mt-2`} value={form.pageName} onChange={(e) => setForm({...form, pageName: e.target.value})} required /></label>
-            <label className={labelClass}>H1 Tag Content <input className={`${fieldClass} mt-2`} value={form.seo.h1} onChange={(e) => setForm({...form, seo: {...form.seo, h1: e.target.value}})} required /></label>
-            <label className={labelClass}>Meta Title <input className={`${fieldClass} mt-2`} value={form.seo.metaTitle} onChange={(e) => setForm({...form, seo: {...form.seo, metaTitle: e.target.value}})} required /></label>
+            <label className={labelClass}>
+              Meta Title
+              <input
+                className={`${fieldClass} mt-2`}
+                value={form.seo.metaTitle}
+                maxLength={65}
+                onChange={(e) => setForm({ ...form, seo: { ...form.seo, metaTitle: e.target.value } })}
+                required
+              />
+              <span className="text-xs text-[#5f5a50] mt-1 block">{(form.seo.metaTitle?.length || 0)}/65</span>
+            </label>
             <label className={labelClass}>Meta Keywords <input className={`${fieldClass} mt-2`} value={form.seo.metaKeywords} onChange={(e) => setForm({...form, seo: {...form.seo, metaKeywords: e.target.value}})} /></label>
           </div>
-          <label className={labelClass}>Meta Description <textarea className={`${fieldClass} mt-2 h-24`} value={form.seo.metaDescription} onChange={(e) => setForm({...form, seo: {...form.seo, metaDescription: e.target.value}})} required /></label>
+          <label className={labelClass}>
+            Meta Description
+            <textarea
+              className={`${fieldClass} mt-2 h-24`}
+              value={form.seo.metaDescription}
+              maxLength={155}
+              onChange={(e) => setForm({ ...form, seo: { ...form.seo, metaDescription: e.target.value } })}
+              required
+            />
+            <span className="text-xs text-[#5f5a50] mt-1 block">{(form.seo.metaDescription?.length || 0)}/155</span>
+          </label>
           <div className="grid gap-4 md:grid-cols-2">
             <label className={labelClass}>Canonical URL <input className={`${fieldClass} mt-2`} value={form.seo.canonical} onChange={(e) => setForm({...form, seo: {...form.seo, canonical: e.target.value}})} /></label>
             <label className={labelClass}>Robots <select className={`${fieldClass} mt-2`} value={form.robots} onChange={(e) => setForm({...form, robots: e.target.value})}>

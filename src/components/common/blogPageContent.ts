@@ -30,15 +30,17 @@ export const defaultBlogData: Record<BlogPageContentKeys, any> = {
     experts: [{ id: "1", image: "", description: "", name: "", designation: "" }]
   },
   "blog.allBlogs": {
+    title: "All Articles",
+    description: "Browse our complete collection of wellness insights.",
     categories: [""],
     blogs: [{ id: "1", image: "", title: "", description: "", date: "", link: "" }]
   },
   "blog.mediaResources": {
-    blogsMedia: [{ id: "1", title: "", description: "", link: "", image: "" }],
-    reportResource: { title: "", description: "", link: "", image: "" }
+    blogsMedia: [{ id: "1", title: "", description: "", buttonLabel: "", buttonHref: "", image: "" }],
+    reportResource: { title: "", description: "", buttonLabel: "", buttonHref: "", image: "" }
   },
   "blog.stayInspired": {
-    title: "", description: "", subscribeLink: ""
+    title: "", description: "", buttonLabel: "", buttonHref: ""
   },
   "blog.supportWellness": {
     iconImage: "", title: "", description: "", primaryButton: { label: "", href: "" }, bgImage: ""

@@ -124,11 +124,13 @@ export default function ContactPageManager() {
           </div>
           <div className="space-y-2">
             {data.socialLinks.links.map((link: any, idx: number) => (
-              <div key={link.id} className="flex gap-2 items-end">
+              <div key={link.id} className="flex gap-2 items-end relative group p-2 border border-slate-100 rounded-lg">
+                <button type="button" onClick={() => { const nl = data.socialLinks.links.filter((_:any, i:number) => i !== idx); setForm({...form, data: {...data, socialLinks: {...data.socialLinks, links: nl}}})}} className="absolute -top-2 -right-2 bg-white shadow rounded-full p-1 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity z-10"><Trash2 size={12} /></button>
                 <ImageUploadField label="Platform Icon" value={link.iconImage} fieldKey={`social.link.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => { const nl = [...data.socialLinks.links]; nl[idx].iconImage = url; setForm({...form, data: {...data, socialLinks: {...data.socialLinks, links: nl}}}) }} />
                 <input className={fieldClass} placeholder="URL" value={link.link} onChange={e => { const nl = [...data.socialLinks.links]; nl[idx].link = e.target.value; setForm({...form, data: {...data, socialLinks: {...data.socialLinks, links: nl}}}) }} />
               </div>
             ))}
+            <button type="button" onClick={() => setForm({...form, data: {...data, socialLinks: {...data.socialLinks, links: [...data.socialLinks.links, {id: randomId(), iconImage: '', link: ''}]}}})} className="text-blue-600 font-bold text-sm flex items-center gap-1 mt-2">+ Add Social Link</button>
           </div>
         </div>
       </div>

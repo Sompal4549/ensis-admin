@@ -6,6 +6,7 @@ import { DropResult } from "@hello-pangea/dnd";
 import { useSearchParams } from "next/navigation";
 import { Loader2, Plus, Save, Trash2 } from "lucide-react";
 import { componentContentApi, type ComponentContent } from "@/lib/api";
+import RichTextEditor from "@/components/common/RichTextEditor";
 import {
   turnkeyPageKeys,
   defaultTurnkeyData,
@@ -122,8 +123,12 @@ export default function TurnkeyPageManager() {
           <label className={labelClass}>Subheading <input className={fieldClass} value={data.subheading} onChange={e => setForm({...form, data: {...data, subheading: e.target.value}})} /></label>
           <label className={labelClass}>Title <input className={fieldClass} value={data.title} onChange={e => setForm({...form, data: {...data, title: e.target.value}})} /></label>
         </div>
-        <label className={labelClass}>Description <textarea className={fieldClass} rows={3} value={data.description} onChange={e => setForm({...form, data: {...data, description: e.target.value}})} /></label>
-        
+        <div className="space-y-1">
+          <label className={labelClass}>Description</label>
+          <RichTextEditor value={data.description || ""} onChange={val => setForm({...form, data: {...data, description: val}})} placeholder="Enter description..." minHeight="120px" />
+        </div>
+              <ImageUploadField label="Background Image" value={data.backgroundImage?.imageUrl} fieldKey="turnkey.bannerbg" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => setForm({...form, data: {...data, backgroundImage: { ...data.backgroundImage, imageUrl: url, title: data.backgroundImage?.title || 'Customized Facilities' }}})} />
+          <label className={labelClass}>Background Alt <input className={fieldClass} value={data.backgroundImage?.title} onChange={e => setForm({...form, data: {...data, backgroundImage: { ...data.backgroundImage, title: e.target.value }}})} /></label>
         <div className="pt-3 border-t">
           <h4 className="text-xs font-bold text-[#8d6a3a] mb-2 uppercase">Features Highlight</h4>
           <div className="grid grid-cols-2 gap-3">
@@ -134,6 +139,7 @@ export default function TurnkeyPageManager() {
                 <ImageUploadField label="Icon" value={feat.image.imageUrl} fieldKey={`feat.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => { const nf = [...data.features]; nf[idx].image.imageUrl = url; setForm({...form, data: {...data, features: nf}}) }} />
               </div>
             ))}
+        
             <button type="button" onClick={() => setForm({...form, data: {...data, features: [...data.features, {id: randomId(), title: '', image: {imageUrl: '', alt: ''}}]}})} className="border-2 border-dashed rounded flex items-center justify-center text-gray-400 py-4 hover:bg-gray-50"><Plus size={20} /></button>
           </div>
         </div>
@@ -151,16 +157,28 @@ export default function TurnkeyPageManager() {
     return (
       <div className="space-y-4">
         <label className={labelClass}>Title <input className={fieldClass} value={data.title} onChange={e => setForm({...form, data: {...data, title: e.target.value}})} /></label>
-        <label className={labelClass}>Description <textarea className={fieldClass} rows={3} value={data.description} onChange={e => setForm({...form, data: {...data, description: e.target.value}})} /></label>
+         <label className={labelClass}>SubHeading <input className={fieldClass} value={data.subheading} onChange={e => setForm({...form, data: {...data, subheading: e.target.value}})} /></label>
+        <div className="space-y-1">
+          <label className={labelClass}>Description</label>
+          <RichTextEditor value={data.description || ""} onChange={val => setForm({...form, data: {...data, description: val}})} placeholder="Enter description..." minHeight="120px" />
+        </div>
         
         <div className="pt-3 border-t">
           <h4 className="text-xs font-bold text-[#8d6a3a] mb-2 uppercase">Most Projects (Comparison)</h4>
           {data.mostProjects.map((proj, idx) => (
-             <div key={proj.id} className="grid grid-cols-2 gap-3 mb-3 p-2 border rounded">
+             <div key={proj.id} className="grid grid-cols-2 gap-3 mb-3 p-2 border rounded relative">
+               <button type="button" onClick={() => { const np = data.mostProjects.filter((_, i) => i !== idx); setForm({...form, data: {...data, mostProjects: np}})}} className="absolute top-1 right-1 text-red-500 hover:bg-red-50 p-1 rounded transition-colors z-10"><Trash2 size={12} /></button>
                <input className={fieldClass} placeholder="Point Title" value={proj.title} onChange={e => { const np = [...data.mostProjects]; np[idx].title = e.target.value; setForm({...form, data: {...data, mostProjects: np}}) }} />
                <ImageUploadField label="Image" value={proj.image.imageUrl} fieldKey={`most.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => { const np = [...data.mostProjects]; np[idx].image.imageUrl = url; setForm({...form, data: {...data, mostProjects: np}}) }} />
              </div>
           ))}
+          <button 
+            type="button" 
+            onClick={() => setForm({...form, data: {...data, mostProjects: [...data.mostProjects, {id: randomId(), title: '', image: {imageUrl: '', alt: ''}}]}})} 
+            className="w-full border-2 border-dashed py-3 flex items-center justify-center text-gray-400 gap-2 hover:bg-gray-50 rounded-lg transition-colors mt-2"
+          >
+            <Plus size={18} /> Add Comparison Point
+          </button>
         </div>
 
         <div className="pt-3 border-t bg-blue-50/50 p-4 rounded-xl">
@@ -168,6 +186,19 @@ export default function TurnkeyPageManager() {
           <div className="grid grid-cols-2 gap-4">
             <label className={labelClass}>Ensis Title <input className={fieldClass} value={data.withEnsis.title} onChange={e => setForm({...form, data: {...data, withEnsis: {...data.withEnsis, title: e.target.value}}})} /></label>
             <ImageUploadField label="Right Side Image" value={data.withEnsis.image.imageUrl} fieldKey="ensis.img" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => setForm({...form, data: {...data, withEnsis: {...data.withEnsis, image: {imageUrl: url, alt: 'Ensis Advantage'}}}})} />
+                {data.withEnsis.withEnsisList.map((proj, idx) => (
+             <div key={idx} className="col-span-2 flex items-center gap-2 mb-2">
+               <input className={fieldClass} placeholder="Point Title" value={proj} onChange={e => { const np = [...data.withEnsis.withEnsisList]; np[idx] = e.target.value; setForm({...form, data: {...data, withEnsis: { ...data.withEnsis, withEnsisList: np }}}); }} />
+               <button type="button" onClick={() => { const np = data.withEnsis.withEnsisList.filter((_, i) => i !== idx); setForm({...form, data: {...data, withEnsis: { ...data.withEnsis, withEnsisList: np }}}); }} className="text-red-500 hover:bg-red-50 p-1.5 rounded transition-colors shrink-0"><Trash2 size={14} /></button>
+             </div>
+          ))}
+          <button 
+            type="button" 
+            onClick={() => setForm({...form, data: {...data, withEnsis: { ...data.withEnsis, withEnsisList: [...data.withEnsis.withEnsisList, ''] }}})} 
+            className="col-span-2 border-2 border-dashed py-3 flex items-center justify-center text-gray-400 gap-2 hover:bg-gray-50 rounded-lg transition-colors mt-2"
+          >
+            <Plus size={18} /> Add With Ensis You get List
+          </button>
           </div>
         </div>
       </div>
@@ -179,6 +210,22 @@ export default function TurnkeyPageManager() {
     return (
       <div className="space-y-4">
         <label className={labelClass}>Main Title <input className={fieldClass} value={data.title} onChange={e => setForm({...form, data: {...data, title: e.target.value}})} /></label>
+
+        <div className="pt-4 border-t bg-amber-50/30 p-4 rounded-xl space-y-4">
+          <h4 className="text-xs font-bold text-[#8d6a3a] mb-2 uppercase tracking-wider">Special Featured Card</h4>
+          <div className="grid grid-cols-2 gap-4">
+            <label className={labelClass}>Special Title <input className={fieldClass} placeholder="Special Title" value={data.specialCard?.title || ""} onChange={e => setForm({...form, data: {...data, specialCard: { ...(data.specialCard || {}), title: e.target.value }}})} /></label>
+            <div className="space-y-1">
+              <label className={labelClass}>Special Description</label>
+              <RichTextEditor value={data.specialCard?.description || ""} onChange={val => setForm({...form, data: {...data, specialCard: { ...(data.specialCard || {}), description: val }}})} placeholder="Special card description..." minHeight="80px" />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <ImageUploadField label="Left Image" value={data.specialCard?.leftImage?.imageUrl} fieldKey="sol.special.left" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => setForm({...form, data: {...data, specialCard: { ...(data.specialCard || {}), leftImage: { imageUrl: url, alt: 'Special Left' }}}})} />
+            <ImageUploadField label="Right Image" value={data.specialCard?.rightImage?.imageUrl} fieldKey="sol.special.right" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => setForm({...form, data: {...data, specialCard: { ...(data.specialCard || {}), rightImage: { imageUrl: url, alt: 'Special Right' }}}})} />
+          </div>
+        </div>
+        
         <div className="space-y-4">
           <h4 className="text-xs font-bold text-[#8d6a3a] uppercase">Solution Cards</h4>
           {data.cards.map((card, idx) => (
@@ -188,7 +235,10 @@ export default function TurnkeyPageManager() {
                  <label className={labelClass}>Card Title <input className={fieldClass} value={card.title} onChange={e => { const nc = [...data.cards]; nc[idx].title = e.target.value; setForm({...form, data: {...data, cards: nc}}) }} /></label>
                  <ImageUploadField label="Card Image" value={card.image.imageUrl} fieldKey={`sol.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => { const nc = [...data.cards]; nc[idx].image.imageUrl = url; setForm({...form, data: {...data, cards: nc}}) }} />
                </div>
-               <label className={labelClass}>Description <textarea className={fieldClass} rows={2} value={card.description} onChange={e => { const nc = [...data.cards]; nc[idx].description = e.target.value; setForm({...form, data: {...data, cards: nc}}) }} /></label>
+               <div className="space-y-1">
+                 <label className={labelClass}>Description</label>
+                 <RichTextEditor value={card.description || ""} onChange={val => { const nc = [...data.cards]; nc[idx].description = val; setForm({...form, data: {...data, cards: nc}}); }} placeholder="Card description..." minHeight="100px" />
+               </div>
             </div>
           ))}
           <button type="button" onClick={() => setForm({...form, data: {...data, cards: [...data.cards, {id: randomId(), title: '', description: '', image: {imageUrl: '', alt: ''}}]}})} className="w-full border-2 border-dashed py-3 flex items-center justify-center text-gray-400 gap-2 hover:bg-gray-50"><Plus size={18} /> Add Solution Card</button>
@@ -291,7 +341,14 @@ export default function TurnkeyPageManager() {
           <label className={labelClass}>Eyebrow Title <input className={fieldClass} value={data.title} onChange={e => setForm({...form, data: {...data, title: e.target.value}})} /></label>
           <label className={labelClass}>Main Heading <input className={fieldClass} value={data.heading} onChange={e => setForm({...form, data: {...data, heading: e.target.value}})} /></label>
         </div>
-        <label className={labelClass}>Description <textarea className={fieldClass} rows={3} value={data.description} onChange={e => setForm({...form, data: {...data, description: e.target.value}})} /></label>
+        <div className="space-y-1">
+          <label className={labelClass}>Description</label>
+          <RichTextEditor value={data.description || ""} onChange={val => setForm({...form, data: {...data, description: val}})} placeholder="Enter description..." minHeight="120px" />
+        </div>
+         <div className="space-y-1">
+
+         <ImageUploadField label="Left Side Image" value={data.leftImage?.imageUrl} fieldKey="leftSide.bg" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => setForm({...form, data: {...data, leftImage: { ...data.leftImage, imageUrl: url, alt: data.leftImage?.alt || 'Customized Facilities' }}})} />
+         </div>
         
         <div className="pt-4 border-t">
           <h4 className="text-xs font-bold text-[#8d6a3a] mb-3 uppercase">Action Buttons</h4>

@@ -10,6 +10,7 @@ export type TurnkeyPageContentKeys =
   | "turnkey.readyToBuild";
 
 export type TurnkeyBanner = {
+  backgroundImage: {title: string; imageUrl: string; alt: string};
   subheading: string;
   title: string;
   description: string;
@@ -23,12 +24,18 @@ export type TurnkeyWhatIs = {
   title: string;
   description: string;
   mostProjects: { id: string; image: ImageData; title: string }[];
-  withEnsis: { title: string; image: ImageData };
+  withEnsis: { title: string; image: ImageData,withEnsisList:string[] };
 };
 
 export type TurnkeySolutions = {
   title: string;
   cards: { id: string; image: ImageData; title: string; description: string }[];
+  specialCard?: {
+    leftImage: ImageData;
+    rightImage: ImageData;
+    title: string;
+    description: string;
+  };
 };
 
 export type TurnkeyFacilities = {
@@ -52,6 +59,7 @@ export type TurnkeyReadyToBuild = {
   title: string;
   heading: string;
   description: string;
+  leftImage: ImageData;
   buttons: { id: string; image: ImageData; title: string; description: string }[];
 };
 
@@ -77,7 +85,8 @@ export const defaultTurnkeyData: Record<TurnkeyPageContentKeys, unknown> = {
       { id: randomId(), title: "Expert Engineering", image: { imageUrl: "", alt: "" } }
     ],
     primaryButton: { label: "Get a Quote", url: "/contact" },
-    secondaryButton: { label: "Our Process", url: "#process" }
+    secondaryButton: { label: "Our Process", url: "#process" },
+    backgroundImage: { imageUrl: "", alt: "", title: "" }
   },
   "turnkey.whatIsTurnkey": {
     subheading: "DEFINITION",
@@ -88,14 +97,21 @@ export const defaultTurnkeyData: Record<TurnkeyPageContentKeys, unknown> = {
     ],
     withEnsis: {
       title: "The Ensis Advantage",
-      image: { imageUrl: "", alt: "" }
+      image: { imageUrl: "", alt: "" },
+      withEnsisList: []
     }
   },
   "turnkey.completeSolutions": {
     title: "Our Complete Turnkit Solutions",
     cards: [
       { id: randomId(), title: "Panchkarma Centers", description: "Complete setup for Ayurvedic treatment centers.", image: { imageUrl: "", alt: "" } }
-    ]
+    ],
+    specialCard: {
+      leftImage: { imageUrl: "", alt: "" },
+      rightImage: { imageUrl: "", alt: "" },
+      title: "",
+      description: ""
+    }
   },
   "turnkey.facilities": {
     title: "Facilities We Build",
@@ -115,6 +131,7 @@ export const defaultTurnkeyData: Record<TurnkeyPageContentKeys, unknown> = {
     title: "GET STARTED",
     heading: "Ready to Build Your Wellness Sanctuary?",
     description: "Connect with our experts today to bring your vision to life.",
+    leftImage: { imageUrl: "", alt: "" },
     buttons: [{ id: randomId(), title: "Inquiry", description: "Send us a message", image: { imageUrl: "", alt: "" } }]
   }
 };

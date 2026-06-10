@@ -1,295 +1,391 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react"; // Removed Suspense from import
-import { useSearchParams } from "next/navigation"; // Keep useSearchParams
+import { useCallback, useEffect, useState, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { DropResult } from "@hello-pangea/dnd";
 import { toast } from "react-toastify";
-import { Loader2, Plus, Save, Trash2 } from "lucide-react";
+import { Loader2, Plus, Save, Trash2, Calendar, User, Tag } from "lucide-react";
 import { componentContentApi, type ComponentContent } from "@/lib/api";
 import { fieldClass, labelClass } from "@/constants";
 import { ImageUploadField } from "@/components/common/ImageUploadField";
-import { BlogPageContentKeys, blogPageKeys, buildEmptyBlogContent } from "./blogPageContent";
 import RichTextEditor from "@/components/common/RichTextEditor";
-
+import ComponentList from "./ComponentList";
+import { buildEmptyBlogContent, BlogPageContentKeys, blogPageKeys } from "./blogPageContent";
 
 const randomId = () => Math.random().toString(36).slice(2, 9);
 
 export default function BlogPageManager() {
   const [records, setRecords] = useState<ComponentContent[]>([]);
-  const [form, setForm] = useState<Partial<ComponentContent>>(buildEmptyBlogContent("blog.hero"));
-  const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [uploadingField, setUploadingField] = useState<string | null>(null);
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const componentKey = searchParams.get("component");
+
+  const [form, setForm] = useState<Partial<ComponentContent>>({
+    key: `blog.${Date.now()}`,
+    label: "",
+    page: "blog",
+    isActive: true,
+    data: {
+      title: "",
+      author: "",
+      date: new Date().toISOString().split('T')[0],
+      category: "",
+      image: "",
+      excerpt: "",
+      content: ""
+    },
+  });
 
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
-      const list = await componentContentApi.list();
-      setRecords(list.filter(item => item.page === "blog" || item.key.startsWith("blog.")));
-    } catch (error: unknown) {
-      toast.error("Failed to load blog components.");
+      const list = await componentContentApi.getByPage("blog");
+      setRecords(list);
+
+      if (componentKey) {
+        const existing = list.find(r => r.key === componentKey);
+        if (existing) {
+          setEditingId(existing._id);
+          setForm(existing);
+        } else if (blogPageKeys.some(k => k.key === componentKey)) {
+          setEditingId(null);
+          setForm(buildEmptyBlogContent(componentKey as BlogPageContentKeys));
+        }
+      }
+    } catch (error) {
+      toast.error("Failed to load blogs.");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [componentKey]);
 
   useEffect(() => { void refresh(); }, [refresh]);
 
-  useEffect(() => {
-    const key = searchParams.get("component");
-    if (key && records.length > 0) {
-      const found = records.find(r => r.key === key);
-      if (found) {
-        setEditingId(found._id);
-        setForm(found);
-      }
+  const handleEdit = (record: ComponentContent) => {
+    setEditingId(record._id);
+    setForm(record);
+    if (blogPageKeys.some(k => k.key === record.key)) {
+      router.push(`?component=${record.key}`);
+    } else {
+      router.push("/blogs-page-management");
     }
-  }, [searchParams, records]);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const resetForm = () => {
+    setEditingId(null);
+    setForm({
+      key: `blog.${Date.now()}`,
+      label: "",
+      page: "blog",
+      isActive: true,
+      data: {
+        title: "",
+        author: "",
+        date: new Date().toISOString().split('T')[0],
+        category: "",
+        image: "",
+        excerpt: "",
+        content: ""
+      },
+    });
+    router.push("/blogs-page-management");
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const payload = { ...form, data: form.data || {} } as Omit<ComponentContent, "_id">;
+      let label = (form.data as any).title || form.label || "Untitled Blog";
+      if (componentKey && blogPageKeys.some(k => k.key === componentKey)) {
+        label = blogPageKeys.find(k => k.key === componentKey)?.label || label;
+      }
+
+      const payload = { ...form, label, page: "blog" };
       if (editingId) {
         await componentContentApi.update(editingId, payload);
       } else {
-        await componentContentApi.create(payload);
+        const created = await componentContentApi.create(payload as Omit<ComponentContent, "_id">);
+        if (componentKey && created && created.key) {
+          router.push(`?component=${created.key}`);
+        }
       }
-      toast.success("Blog content saved!");
+      toast.success("Blog saved successfully!");
+      if (!componentKey) resetForm();
       refresh();
-    } catch (error: unknown) {
-      const msg = (error as any).response?.data?.message || "Save failed";
-      toast.error(msg);
+    } catch {
+      toast.error("Save failed.");
     } finally {
       setLoading(false);
     }
   };
 
-  const renderHeroForm = () => {
-    const data = form.data as any;
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this blog?")) return;
+    try {
+      await componentContentApi.remove(id);
+      toast.success("Blog deleted");
+      refresh();
+    } catch {
+      toast.error("Delete failed");
+    }
+  };
+
+  const updateData = (field: string, value: any) => {
+    setForm({ ...form, data: { ...(form.data as any), [field]: value } });
+  };
+
+  const onReorder = async (result: DropResult) => {
+    if (!result.destination) return;
+    const items = Array.from(records);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+    setRecords(items);
+    try {
+      await Promise.all(items.map((item, index) => componentContentApi.update(item._id, { index })));
+      toast.success("Order updated");
+    } catch (error) {
+      toast.error("Failed to update order");
+      refresh();
+    }
+  };
+
+  const data = (form.data || {}) as any;
+
+  const renderFeaturedArticlesForm = () => {
+    const articles = data.articles || [];
     return (
       <div className="space-y-4">
-        <label className={labelClass}>Title <input className={fieldClass} value={data.title} onChange={e => setForm({...form, data: {...data, title: e.target.value}})} /></label>
-        <label className={labelClass}>Heading <input className={fieldClass} value={data.heading} onChange={e => setForm({...form, data: {...data, heading: e.target.value}})} /></label>
-        <div className="mt-2">
-          <label className={labelClass}>Description</label>
-          <RichTextEditor 
-            value={data.description || ""} 
-            onChange={val => setForm({...form, data: {...data, description: val}})} 
-            placeholder="Enter hero description..."
-            minHeight="120px" 
-          />
-        </div>
-        <ImageUploadField label="Background Image" value={data.bgImage} fieldKey="blog.hero.bg" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => setForm({...form, data: {...data, bgImage: url}})} />
+        <h4 className="text-xs font-bold text-[#8d6a3a] uppercase tracking-wider">Featured Articles</h4>
+        <p className="text-xs text-gray-500 italic">Individual blog posts are managed in the standard blog list below. This section displays selected highlights.</p>
       </div>
     );
   };
 
-  const renderArticlesForm = () => {
-    const data = form.data as any;
-    return (
-      <div className="space-y-4">
-        {data.articles.map((art: any, idx: number) => (
-          <div key={art.id} className="p-4 border rounded-xl bg-slate-50 relative space-y-3">
-            <button type="button" onClick={() => { const na = data.articles.filter((_:any, i:number) => i !== idx); setForm({...form, data: {...data, articles: na}})}} className="absolute top-2 right-2 text-red-500"><Trash2 size={16} /></button>
-            <input className={fieldClass} placeholder="Article Title" value={art.title} onChange={e => { const na = [...data.articles]; na[idx].title = e.target.value; setForm({...form, data: {...data, articles: na}}) }} />
-            <input className={fieldClass} placeholder="Read More Link" value={art.readMoreLink} onChange={e => { const na = [...data.articles]; na[idx].readMoreLink = e.target.value; setForm({...form, data: {...data, articles: na}}) }} />
-            <ImageUploadField label="Image" value={art.image} fieldKey={`art.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => { const na = [...data.articles]; na[idx].image = url; setForm({...form, data: {...data, articles: na}}) }} />
-          </div>
-        ))}
-        <button type="button" onClick={() => setForm({...form, data: {...data, articles: [...data.articles, {id: randomId(), title: '', readMoreLink: '', image: ''}]}})} className="w-full py-4 border-2 border-dashed rounded-xl text-slate-400 flex items-center justify-center gap-2"><Plus size={20} /> Add Article</button>
+  const renderHeroForm = () => (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-4">
+        <label className={labelClass}>Title <input className={fieldClass} value={data.title || ""} onChange={e => updateData("title", e.target.value)} /></label>
+        <label className={labelClass}>Heading <input className={fieldClass} value={data.heading || ""} onChange={e => updateData("heading", e.target.value)} /></label>
       </div>
-    );
-  };
+      <div className="space-y-1">
+        <label className={labelClass}>Description</label>
+        <RichTextEditor value={data.description || ""} onChange={val => updateData("description", val)} placeholder="Enter hero description..." minHeight="120px" />
+      </div>
+      <ImageUploadField label="Background Image" value={data.bgImage} fieldKey="blog.hero.bg" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => updateData("bgImage", url)} />
+    </div>
+  );
 
   const renderExpertsForm = () => {
-    const data = form.data as any;
+    const experts = data.experts || [];
     return (
       <div className="space-y-4">
-        {data.experts.map((exp: any, idx: number) => (
-          <div key={exp.id} className="p-4 border rounded-xl bg-white space-y-3 relative shadow-sm">
-            <button type="button" onClick={() => { const ne = data.experts.filter((_:any, i:number) => i !== idx); setForm({...form, data: {...data, experts: ne}})}} className="absolute top-2 right-2 text-red-400"><Trash2 size={16} /></button>
+        <div className="flex justify-between items-center">
+          <h4 className="text-xs font-bold text-[#8d6a3a] uppercase tracking-wider">Voice of Experts</h4>
+          <button type="button" className="text-xs bg-[#263016] text-white px-2 py-1 rounded" onClick={() => updateData("experts", [...experts, { id: randomId(), image: '', description: '', name: '', designation: '' }])}>Add Expert</button>
+        </div>
+        {experts.map((exp: any, idx: number) => (
+          <div key={exp.id} className="p-4 border rounded-xl bg-slate-50 relative space-y-3 shadow-sm">
+            <button type="button" onClick={() => updateData("experts", experts.filter((_: any, i: number) => i !== idx))} className="absolute top-2 right-2 text-red-500"><Trash2 size={16} /></button>
             <div className="grid grid-cols-2 gap-4">
-              <input className={fieldClass} placeholder="Expert Name" value={exp.name} onChange={e => { const ne = [...data.experts]; ne[idx].name = e.target.value; setForm({...form, data: {...data, experts: ne}}) }} />
-              <input className={fieldClass} placeholder="Designation" value={exp.designation} onChange={e => { const ne = [...data.experts]; ne[idx].designation = e.target.value; setForm({...form, data: {...data, experts: ne}}) }} />
+              <input className={fieldClass} placeholder="Name" value={exp.name || ""} onChange={e => { const ne = [...experts]; ne[idx] = { ...ne[idx], name: e.target.value }; updateData("experts", ne); }} />
+              <input className={fieldClass} placeholder="Designation" value={exp.designation || ""} onChange={e => { const ne = [...experts]; ne[idx] = { ...ne[idx], designation: e.target.value }; updateData("experts", ne); }} />
             </div>
-            <div className="mt-1">
-              <label className="text-[10px] font-bold text-gray-400 uppercase">Description</label>
-              <RichTextEditor 
-                value={exp.description || ""} 
-                onChange={val => { const ne = [...data.experts]; ne[idx].description = val; setForm({...form, data: {...data, experts: ne}}); }} 
-                placeholder="Enter expert description..."
-                minHeight="100px" 
-              />
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-gray-400 uppercase">Expert Insights</label>
+              <RichTextEditor value={exp.description || ""} onChange={val => { const ne = [...experts]; ne[idx] = { ...ne[idx], description: val }; updateData("experts", ne); }} placeholder="Short expert description..." minHeight="100px" />
             </div>
-            <ImageUploadField label="Expert Photo" value={exp.image} fieldKey={`exp.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => { const ne = [...data.experts]; ne[idx].image = url; setForm({...form, data: {...data, experts: ne}}) }} />
+            <ImageUploadField label="Expert Image" value={exp.image} fieldKey={`expert.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => { const ne = [...experts]; ne[idx] = { ...ne[idx], image: url }; updateData("experts", ne); }} />
           </div>
         ))}
-        <button type="button" onClick={() => setForm({...form, data: {...data, experts: [...data.experts, {id: randomId(), name: '', designation: '', description: '', image: ''}]}})} className="w-full py-3 bg-slate-100 rounded-lg text-slate-600 font-bold flex items-center justify-center gap-2"><Plus size={18} /> Add Expert</button>
-      </div>
-    );
-  };
-
-  const renderAllBlogsForm = () => {
-    const data = form.data as any;
-    return (
-      <div className="space-y-6">
-        <div className="p-4 bg-blue-50 rounded-xl space-y-3">
-          <h4 className="text-sm font-bold text-blue-800">Categories (Comma Separated)</h4>
-          <textarea className={fieldClass} value={data.categories.join(", ")} onChange={e => setForm({...form, data: {...data, categories: e.target.value.split(",").map(s => s.trim())}})} />
-        </div>
-        <div className="space-y-4">
-          <h4 className="font-bold">Blog Entries</h4>
-          {data.blogs.map((blog: any, idx: number) => (
-            <div key={blog.id} className="p-4 border rounded-xl bg-white space-y-2">
-              <div className="flex gap-4">
-                <input className={fieldClass} placeholder="Blog Title" value={blog.title} onChange={e => { const nb = [...data.blogs]; nb[idx].title = e.target.value; setForm({...form, data: {...data, blogs: nb}}) }} />
-                <input className={fieldClass} type="date" value={blog.date} onChange={e => { const nb = [...data.blogs]; nb[idx].date = e.target.value; setForm({...form, data: {...data, blogs: nb}}) }} />
-              </div>
-              <div className="mt-1">
-                <label className="text-[10px] font-bold text-gray-400 uppercase">Short Description</label>
-                <RichTextEditor 
-                  value={blog.description || ""} 
-                  onChange={val => { const nb = [...data.blogs]; nb[idx].description = val; setForm({...form, data: {...data, blogs: nb}}); }} 
-                  placeholder="Enter short description..."
-                  minHeight="100px" 
-                />
-              </div>
-              <input className={fieldClass} placeholder="Post Link" value={blog.link} onChange={e => { const nb = [...data.blogs]; nb[idx].link = e.target.value; setForm({...form, data: {...data, blogs: nb}}) }} />
-              <ImageUploadField label="Cover Image" value={blog.image} fieldKey={`blog.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => { const nb = [...data.blogs]; nb[idx].image = url; setForm({...form, data: {...data, blogs: nb}}) }} />
-            </div>
-          ))}
-        </div>
       </div>
     );
   };
 
   const renderMediaForm = () => {
-    const data = form.data as any;
+    const items = data.blogsMedia || [];
+    const report = data.reportResource || { title: '', description: '', buttonLabel: '', buttonHref: '', image: '' };
     return (
-      <div className="space-y-8">
-        <div className="space-y-4">
-          <h4 className="font-bold">Blogs Media List</h4>
-          {data.blogsMedia.map((m: any, idx: number) => (
-            <div key={m.id} className="p-4 border rounded-lg space-y-2 bg-slate-50">
-              <input className={fieldClass} placeholder="Media Title" value={m.title} onChange={e => { const nm = [...data.blogsMedia]; nm[idx].title = e.target.value; setForm({...form, data: {...data, blogsMedia: nm}}) }} />
-              <div className="mt-1">
-                <label className="text-[10px] font-bold text-gray-400 uppercase">Description</label>
-                <RichTextEditor 
-                  value={m.description || ""} 
-                  onChange={val => { const nm = [...data.blogsMedia]; nm[idx].description = val; setForm({...form, data: {...data, blogsMedia: nm}}); }} 
-                  placeholder="Enter media description..."
-                  minHeight="100px" 
-                />
-              </div>
-              <ImageUploadField label="Image" value={m.image} fieldKey={`media.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => { const nm = [...data.blogsMedia]; nm[idx].image = url; setForm({...form, data: {...data, blogsMedia: nm}}) }} />
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <h4 className="text-xs font-bold text-[#8d6a3a] uppercase tracking-wider">Blogs Media Configuration</h4>
+          <button type="button" className="text-xs bg-[#263016] text-white px-2 py-1 rounded" onClick={() => updateData("blogsMedia", [...items, { id: randomId(), title: '', description: '', buttonLabel: '', buttonHref: '', image: '' }])}>Add Media Card</button>
+        </div>
+        {items.map((item: any, idx: number) => (
+          <div key={item.id} className="p-4 border rounded-xl bg-white space-y-3 relative shadow-sm">
+            <button type="button" onClick={() => updateData("blogsMedia", items.filter((_: any, i: number) => i !== idx))} className="absolute top-2 right-2 text-red-500"><Trash2 size={16} /></button>
+            <input className={fieldClass} placeholder="Title" value={item.title || ""} onChange={e => { const ni = [...items]; ni[idx] = { ...ni[idx], title: e.target.value }; updateData("blogsMedia", ni); }} />
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-gray-400 uppercase">Description</label>
+              <RichTextEditor value={item.description || ""} onChange={val => { const ni = [...items]; ni[idx] = { ...ni[idx], description: val }; updateData("blogsMedia", ni); }} placeholder="Card description..." minHeight="100px" />
             </div>
-          ))}
-        </div>
-        <div className="p-4 border-2 border-amber-200 bg-amber-50 rounded-2xl space-y-4">
-          <h4 className="font-bold text-amber-900">Report Resource</h4>
-          <input className={fieldClass} placeholder="Report Title" value={data.reportResource.title} onChange={e => setForm({...form, data: {...data, reportResource: {...data.reportResource, title: e.target.value}}})} />
-          <div className="mt-1">
-            <label className="text-[10px] font-bold text-gray-400 uppercase">Report Description</label>
-            <RichTextEditor 
-              value={data.reportResource.description || ""} 
-              onChange={val => setForm({...form, data: {...data, reportResource: {...data.reportResource, description: val}}})} 
-              placeholder="Enter report description..."
-              minHeight="100px" 
-            />
+            <div className="grid grid-cols-2 gap-4">
+              <input className={fieldClass} placeholder="Button Label" value={item.buttonLabel || ""} onChange={e => { const ni = [...items]; ni[idx] = { ...ni[idx], buttonLabel: e.target.value }; updateData("blogsMedia", ni); }} />
+              <input className={fieldClass} placeholder="Button Href" value={item.buttonHref || ""} onChange={e => { const ni = [...items]; ni[idx] = { ...ni[idx], buttonHref: e.target.value }; updateData("blogsMedia", ni); }} />
+            </div>
+            <ImageUploadField label="Image" value={item.image} fieldKey={`media.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => { const ni = [...items]; ni[idx] = { ...ni[idx], image: url }; updateData("blogsMedia", ni); }} />
           </div>
-          <input className={fieldClass} placeholder="Download Link" value={data.reportResource.link} onChange={e => setForm({...form, data: {...data, reportResource: {...data.reportResource, link: e.target.value}}})} />
-          <ImageUploadField label="Cover" value={data.reportResource.image} fieldKey="media.rep" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => setForm({...form, data: {...data, reportResource: {...data.reportResource, image: url}}})} />
+        ))}
+
+        <div className="p-4 border-t pt-6">
+          <h4 className="text-xs font-bold text-[#8d6a3a] mb-4 uppercase tracking-wider">Report Resource (Single Item)</h4>
+          <div className="p-4 border rounded-xl bg-amber-50/30 space-y-3 relative">
+            <input className={fieldClass} placeholder="Report Title" value={report.title || ""} onChange={e => updateData("reportResource", { ...report, title: e.target.value })} />
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-gray-400 uppercase">Description</label>
+              <RichTextEditor value={report.description || ""} onChange={val => updateData("reportResource", { ...report, description: val })} placeholder="Report description..." minHeight="80px" />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <input className={fieldClass} placeholder="Button Label" value={report.buttonLabel || ""} onChange={e => updateData("reportResource", { ...report, buttonLabel: e.target.value })} />
+              <input className={fieldClass} placeholder="Button Href" value={report.buttonHref || ""} onChange={e => updateData("reportResource", { ...report, buttonHref: e.target.value })} />
+            </div>
+            <ImageUploadField label="Report Cover" value={report.image} fieldKey="report.cover" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => updateData("reportResource", { ...report, image: url })} />
+          </div>
         </div>
       </div>
     );
   };
 
-  const renderStayInspiredForm = () => {
-    const data = form.data as any;
-    return (
-      <div className="space-y-4">
-        <input className={fieldClass} placeholder="Title" value={data.title} onChange={e => setForm({...form, data: {...data, title: e.target.value}})} />
-        <div className="mt-1">
-          <label className="text-[10px] font-bold text-gray-400 uppercase">Description</label>
-          <RichTextEditor 
-            value={data.description || ""} 
-            onChange={val => setForm({...form, data: {...data, description: val}})} 
-            placeholder="Enter inspiration description..."
-            minHeight="120px" 
-          />
-        </div>
-        <input className={fieldClass} placeholder="Subscription Link" value={data.subscribeLink} onChange={e => setForm({...form, data: {...data, subscribeLink: e.target.value}})} />
+  const renderStayInspiredForm = () => (
+    <div className="space-y-4">
+      <label className={labelClass}>Title <input className={fieldClass} value={data.title || ""} onChange={e => updateData("title", e.target.value)} /></label>
+      <div className="space-y-1">
+        <label className={labelClass}>Description</label>
+        <RichTextEditor value={data.description || ""} onChange={val => updateData("description", val)} placeholder="Enter subscription text..." minHeight="120px" />
       </div>
-    );
-  };
+      <div className="grid grid-cols-2 gap-4">
+        <label className={labelClass}>Button Label <input className={fieldClass} value={data.buttonLabel || ""} onChange={e => updateData("buttonLabel", e.target.value)} /></label>
+        <label className={labelClass}>Button Href <input className={fieldClass} value={data.buttonHref || ""} onChange={e => updateData("buttonHref", e.target.value)} /></label>
+      </div>
+    </div>
+  );
 
-  const renderSupportWellnessForm = () => {
-    const data = form.data as any;
-    return (
-      <div className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <ImageUploadField label="Icon" value={data.iconImage} fieldKey="supp.icon" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => setForm({...form, data: {...data, iconImage: url}})} />
-          <ImageUploadField label="BG Image" value={data.bgImage} fieldKey="supp.bg" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => setForm({...form, data: {...data, bgImage: url}})} />
-        </div>
-        <input className={fieldClass} placeholder="Title" value={data.title} onChange={e => setForm({...form, data: {...data, title: e.target.value}})} />
-        <div className="mt-1">
-          <label className="text-[10px] font-bold text-gray-400 uppercase">Description</label>
-          <RichTextEditor 
-            value={data.description || ""} 
-            onChange={val => setForm({...form, data: {...data, description: val}})} 
-            placeholder="Enter wellness description..."
-            minHeight="120px" 
-          />
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <input className={fieldClass} placeholder="Button Label" value={data.primaryButton.label} onChange={e => setForm({...form, data: {...data, primaryButton: {...data.primaryButton, label: e.target.value}}})} />
-          <input className={fieldClass} placeholder="Button Href" value={data.primaryButton.href} onChange={e => setForm({...form, data: {...data, primaryButton: {...data.primaryButton, href: e.target.value}}})} />
+  const renderSupportWellnessForm = () => (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-4">
+        <label className={labelClass}>Title <input className={fieldClass} value={data.title || ""} onChange={e => updateData("title", e.target.value)} /></label>
+        <ImageUploadField label="Icon Image" value={data.iconImage} fieldKey="well.icon" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => updateData("iconImage", url)} />
+      </div>
+      <div className="space-y-1">
+        <label className={labelClass}>Description</label>
+        <RichTextEditor value={data.description || ""} onChange={val => updateData("description", val)} placeholder="Enter support text..." minHeight="120px" />
+      </div>
+      <div className="grid grid-cols-2 gap-3 p-3 border rounded bg-gray-50">
+        <div className="space-y-2 col-span-2">
+          <h4 className="text-[10px] font-bold text-[#8d6a3a] uppercase">Action Button</h4>
+          <div className="grid grid-cols-2 gap-2">
+            <input className={fieldClass} placeholder="Label" value={data.primaryButton?.label || ""} onChange={e => updateData("primaryButton", { ...data.primaryButton, label: e.target.value })} />
+            <input className={fieldClass} placeholder="URL" value={data.primaryButton?.href || ""} onChange={e => updateData("primaryButton", { ...data.primaryButton, href: e.target.value })} />
+          </div>
         </div>
       </div>
-    );
-  };
+      <ImageUploadField label="Background Image" value={data.bgImage} fieldKey="well.bg" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => updateData("bgImage", url)} />
+    </div>
+  );
 
   return (
-    <div className="w-full">
-      <section className="w-full">
+    <Suspense fallback={<div className="flex justify-center p-20"><Loader2 className="animate-spin text-[#8d6a3a]" size={40} /></div>}>
+    <div className="grid grid-cols-1 xl:grid-cols-[1fr_350px] gap-6">
+      <div className="space-y-6">
         <form onSubmit={handleSave} className="bg-white border rounded-2xl shadow-sm overflow-hidden">
-          <div className="bg-slate-50 border-b p-6 flex items-center justify-between">
-            <h2 className="text-xl font-bold">Blog Page Manager</h2>
-            <button type="submit" disabled={loading} className="bg-blue-600 text-white px-6 py-2 rounded-xl font-bold flex items-center gap-2">
-              {loading ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />} Save Changes
-            </button>
+          <div className="bg-[#fcfaf7] border-b p-6 flex items-center justify-between">
+            <h2 className="font-serif text-2xl">{editingId ? (componentKey ? `Edit ${form.label}` : "Edit Blog Post") : (componentKey ? `Create ${blogPageKeys.find(k => k.key === componentKey)?.label}` : "Create New Blog")}</h2>
+            <div className="flex gap-3">
+              {(editingId || componentKey) && <button type="button" onClick={resetForm} className="px-4 py-2 text-sm font-bold text-gray-500 hover:text-gray-700">Cancel / New Blog</button>}
+              <button type="submit" disabled={loading} className="bg-[#8d6a3a] text-white px-6 py-2 rounded-xl font-bold flex items-center gap-2">
+                {loading ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />} Save Blog
+              </button>
+            </div>
           </div>
 
           <div className="p-8 space-y-6">
-            <div className="grid grid-cols-2 gap-4 p-4 bg-slate-50 rounded-xl">
-              <label className={labelClass}>Template Type
+            <div className="grid grid-cols-1 gap-4 p-4 bg-slate-50 rounded-xl">
+              <label className={labelClass}>Section Template / Page Management
                 <select 
                   className={fieldClass} 
-                  value={form.key || ""} 
+                  value={componentKey || ""} 
                   onChange={e => {
-                    const key = e.target.value as BlogPageContentKeys;
-                    setEditingId(null);
-                    setForm(buildEmptyBlogContent(key));
+                    const key = e.target.value;
+                    if (key === "") router.push("/blogs-page-management");
+                    else router.push(`?component=${key}`);
                   }}
                 >
+                  <option value="">-- Individual Blog Post (Standard) --</option>
                   {blogPageKeys.map(k => <option key={k.key} value={k.key}>{k.label}</option>)}
                 </select>
               </label>
-              <label className={labelClass}>Active <div className="mt-2"><input type="checkbox" checked={form.isActive} onChange={e => setForm({...form, isActive: e.target.checked})} /></div></label>
+              <label className={labelClass}>Visibility <div className="mt-2"><input type="checkbox" checked={form.isActive} onChange={e => setForm({...form, isActive: e.target.checked})} /></div></label>
             </div>
 
-            {form.key === "blog.hero" && renderHeroForm()}
-            {form.key === "blog.featuredArticles" && renderArticlesForm()}
-            {form.key === "blog.voiceOfExperts" && renderExpertsForm()}
-            {form.key === "blog.allBlogs" && renderAllBlogsForm()}
-            {form.key === "blog.mediaResources" && renderMediaForm()}
-            {form.key === "blog.stayInspired" && renderStayInspiredForm()}
-            {form.key === "blog.supportWellness" && renderSupportWellnessForm()}
+            {componentKey === "blog.hero" && renderHeroForm()}
+            {componentKey === "blog.featuredArticles" && renderFeaturedArticlesForm()}
+            {componentKey === "blog.voiceOfExperts" && renderExpertsForm()}
+            {componentKey === "blog.mediaResources" && renderMediaForm()}
+            {componentKey === "blog.stayInspired" && renderStayInspiredForm()}
+            {componentKey === "blog.supportWellness" && renderSupportWellnessForm()}
+
+            {!componentKey && (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div className="space-y-1">
+                      <div className="flex justify-between items-center">
+                        <label className={labelClass}>Blog Title</label>
+                        <span className={`text-[10px] font-bold ${(data.title || "").length > 65 ? 'text-red-500' : 'text-slate-400'}`}>
+                          {(data.title || "").length} / 65
+                        </span>
+                      </div>
+                      <input className={fieldClass} value={data.title || ""} onChange={e => updateData("title", e.target.value)} required />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <label className={labelClass}><span className="flex items-center gap-2"><User size={14}/> Author</span> <input className={fieldClass} value={data.author || ""} onChange={e => updateData("author", e.target.value)} /></label>
+                      <label className={labelClass}><span className="flex items-center gap-2"><Calendar size={14}/> Date</span> <input type="date" className={fieldClass} value={data.date || ""} onChange={e => updateData("date", e.target.value)} /></label>
+                    </div>
+                    <label className={labelClass}><span className="flex items-center gap-2"><Tag size={14}/> Category</span> <input className={fieldClass} value={data.category || ""} onChange={e => updateData("category", e.target.value)} /></label>
+                  </div>
+                  <div className="space-y-4">
+                    <ImageUploadField label="Featured Image" value={data.image} fieldKey="blog.image" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => updateData("image", url)} />
+                    <div className="space-y-1">
+                      <div className="flex justify-between items-center">
+                        <label className={labelClass}>Short Excerpt</label>
+                        <span className={`text-[10px] font-bold ${(data.excerpt || "").length > 155 ? 'text-red-500' : 'text-slate-400'}`}>
+                          {(data.excerpt || "").length} / 155
+                        </span>
+                      </div>
+                      <textarea className={fieldClass} rows={2} value={data.excerpt || ""} onChange={e => updateData("excerpt", e.target.value)} />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t">
+                  <label className={labelClass}>Full Blog Content</label>
+                  <div className="mt-2">
+                    <RichTextEditor value={data.content || ""} onChange={val => updateData("content", val)} minHeight="400px" />
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </form>
-      </section>
+      </div>
+
+      <aside className="space-y-4">
+        <div className="bg-white border rounded-2xl p-6 shadow-sm">
+          <h3 className="font-bold text-gray-800 mb-4">Saved Blogs</h3>
+          <ComponentList 
+            records={records} 
+            onEdit={handleEdit} 
+            onDelete={handleDelete} 
+            onReorder={onReorder}
+            editingId={editingId} 
+          />
+        </div>
+      </aside>
     </div>
+    </Suspense>
   );
 }

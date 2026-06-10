@@ -1,6 +1,7 @@
 "use client";
 
 import { ImageUploadField } from "@/components/common/ImageUploadField";
+import RichTextEditor from "@/components/common/RichTextEditor";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import {
@@ -271,7 +272,10 @@ export default function AboutpageComponentRouteEditor({ componentKey, title }: {
           <label className={labelClass}>Title <input className={fieldClass} value={data.title || ""} onChange={e => setData({ ...data, title: e.target.value })} /></label>
           <label className={labelClass}>Main Image Alt <input className={fieldClass} placeholder="Image Alt" value={data.imageurl?.alt || ""} onChange={e => setData({ ...data, imageurl: { ...data.imageurl, alt: e.target.value } })} /></label>
         </div>
-        <label className={labelClass}>Description <textarea className={fieldClass} rows={3} value={data.description || ""} onChange={e => setData({ ...data, description: e.target.value })} /></label>
+        <div className="space-y-1">
+          <label className={labelClass}>Description</label>
+          <RichTextEditor value={data.description || ""} onChange={val => setData({ ...data, description: val })} placeholder="Enter section description..." minHeight="120px" />
+        </div>
         <ImageUploadField label="Main Image" value={data.imageurl?.imageUrl} fieldKey="why.main" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={(m) => toast.error(m)} onUpload={url => setData({ ...data, imageurl: { ...data.imageurl, imageUrl: url } })} />
         
         <div className="flex justify-between items-center">
@@ -282,7 +286,9 @@ export default function AboutpageComponentRouteEditor({ componentKey, title }: {
           <div key={item.id} className="p-3 border rounded bg-gray-50 space-y-2 relative">
             <button type="button" onClick={() => setData({ ...data, experience: data.experience.filter((_, i) => i !== idx) })} className="absolute top-2 right-2 text-red-500"><Trash2 size={14} /></button>
             <input className={fieldClass} placeholder="Title" value={item.title || ""} onChange={e => { const ne = data.experience.map((ex, i) => i === idx ? { ...ex, title: e.target.value } : ex); setData({ ...data, experience: ne }); }} />
-            <textarea className={fieldClass} placeholder="Description" rows={2} value={item.description || ""} onChange={e => { const ne = data.experience.map((ex, i) => i === idx ? { ...ex, description: e.target.value } : ex); setData({ ...data, experience: ne }); }} />
+            <div className="space-y-1">
+              <RichTextEditor value={item.description || ""} onChange={val => { const ne = data.experience.map((ex, i) => i === idx ? { ...ex, description: val } : ex); setData({ ...data, experience: ne }); }} placeholder="Card description..." minHeight="100px" />
+            </div>
             <ImageUploadField label="Icon" value={item.imageurl?.imageUrl} fieldKey={`why.item.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={(m) => toast.error(m)} onUpload={url => { const ne = data.experience.map((ex, i) => i === idx ? { ...ex, imageurl: { ...ex.imageurl, imageUrl: url } } : ex); setData({ ...data, experience: ne }); }} />
           </div>
         ))}
@@ -307,7 +313,9 @@ export default function AboutpageComponentRouteEditor({ componentKey, title }: {
           <div key={step.id} className="p-3 border rounded bg-gray-50 space-y-2 relative">
             <button type="button" onClick={() => setData({ ...data, steps: data.steps.filter((_, i) => i !== idx) })} className="absolute top-2 right-2 text-red-500"><Trash2 size={14} /></button>
             <input className={fieldClass} placeholder="Step Title" value={step.title || ""} onChange={e => { const ns = data.steps.map((s, i) => i === idx ? { ...s, title: e.target.value } : s); setData({ ...data, steps: ns }); }} />
-            <textarea className={fieldClass} placeholder="Step Description" rows={2} value={step.description || ""} onChange={e => { const ns = data.steps.map((s, i) => i === idx ? { ...s, description: e.target.value } : s); setData({ ...data, steps: ns }); }} />
+        
+            <ImageUploadField label="Step Icon" value={step.imageurl?.imageUrl} fieldKey={`process.step.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={(m) => toast.error(m)} onUpload={url => { const ns = data.steps.map((s, i) => i === idx ? { ...s, imageurl: { ...s.imageurl, imageUrl: url } } : s); setData({ ...data, steps: ns }); }} />
+            <input className={fieldClass} placeholder="Image Alt Text" value={step.imageurl?.alt || ""} onChange={e => { const ns = data.steps.map((s, i) => i === idx ? { ...s, imageurl: { ...s.imageurl, alt: e.target.value } } : s); setData({ ...data, steps: ns }); }} />
           </div>
         ))}
       </div>
@@ -329,6 +337,8 @@ export default function AboutpageComponentRouteEditor({ componentKey, title }: {
               <button type="button" onClick={() => setData({ ...data, industries: data.industries.filter((_, i) => i !== idx) })} className="absolute top-2 right-2 text-red-500"><Trash2 size={14} /></button>
               <input className={fieldClass} placeholder="Name" value={ind.title || ""} onChange={e => { const ni = data.industries.map((it, i) => i === idx ? { ...it, title: e.target.value } : it); setData({ ...data, industries: ni }); }} />
               <input className={fieldClass} placeholder="Link URL" value={ind.linkUrl || ""} onChange={e => { const ni = data.industries.map((it, i) => i === idx ? { ...it, linkUrl: e.target.value } : it); setData({ ...data, industries: ni }); }} />
+              <ImageUploadField label="Industry Image" value={ind.imageurl?.imageUrl} fieldKey={`ind.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={(m) => toast.error(m)} onUpload={url => { const ni = data.industries.map((it, i) => i === idx ? { ...it, imageurl: { ...it.imageurl, imageUrl: url } } : it); setData({ ...data, industries: ni }); }} />
+              <input className={fieldClass} placeholder="Image Alt Text" value={ind.imageurl?.alt || ""} onChange={e => { const ni = data.industries.map((it, i) => i === idx ? { ...it, imageurl: { ...it.imageurl, alt: e.target.value } } : it); setData({ ...data, industries: ni }); }} />
             </div>
           ))}
         </div>

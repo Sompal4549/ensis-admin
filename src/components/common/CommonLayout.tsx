@@ -671,6 +671,12 @@ export function CommonLayout({
 }: LayoutProps) {
   const { user, isReady } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const pathname = usePathname();
   const isComponentPage =
     pathname.startsWith("/homepage-content/") ||
@@ -746,7 +752,7 @@ export function CommonLayout({
     }
   };
 
-  if (!isReady) {
+  if (!mounted || !isReady) {
     return <main className="min-h-screen bg-slate-50" />;
   }
 

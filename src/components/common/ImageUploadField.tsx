@@ -59,9 +59,15 @@ export const ImageUploadField = ({
           }
         }}
       />
-      <input className={fieldClass} type="text" value={displayValue} readOnly placeholder="Uploaded path will appear here" />
+      <input 
+        className={fieldClass} 
+        type="text" 
+        value={displayValue} 
+        onChange={(e) => onUpload(e.target.value)} 
+        placeholder="Paste image URL or use upload button" 
+      />
       {imgUrl ? (
-        <Image height={80} width={128} src={imgUrl} alt={label} className="mt-3 h-20 w-32 rounded-md object-cover border border-[#eee5d9]"  crossOrigin="anonymous" />
+        <Image height={80} width={128} src={imgUrl} alt={label} className="mt-3 h-20 w-32 rounded-md object-cover border border-[#eee5d9]" unoptimized crossOrigin="anonymous" />
       ) : null}
     </div>
   );

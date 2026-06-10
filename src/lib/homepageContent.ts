@@ -11,7 +11,8 @@ export type HomepageComponentKey =
   | "home.wellnessRoomSetups"
   | "home.manufacturingAndProjects"
   | "home.testimonials"
-  | "home.blogInsights";
+  | "home.blogInsights"
+  | "home.readyToBuild";
 
 export type HomeHeroSlide = {
   id: string;
@@ -65,11 +66,6 @@ export type HomeWellnessData = {
 
 export type FullWidthFeatureItem = { image: string; title: string; description: string; tag?: string };
 export type FullWidthFeaturesData = {
-  subtitle: string;
-  heading: string;
-  description: string;
-  buttonText: string;
-  buttonPath: string;
   features: FullWidthFeatureItem[];
 };
 
@@ -95,6 +91,15 @@ export type ManufacturingAndProjectsData = {
   description: string;
   stats: { value: string; label: string }[];
   projects: ManufacturingProject[];
+  mfgFeatures:string[],
+  mfgButtonText:string,
+  mfgButtonHref:string
+  mfgImages: ManufacturingProject[];
+  projSubtitle:string,
+  projHeading:string,
+  projDescription:string,
+  projButtonText:string,
+  projButtonHref:string
 };
 
 export type TestimonialItem = { text: string; name: string; role: string; image: string };
@@ -103,18 +108,18 @@ export type TestimonialsData = {
   testimonials: TestimonialItem[];
 };
 
-export type BlogItem = { title: string; image: string };
 export type BlogInsightsData = {
   subtitle: string;
   heading: string;
   buttonText: string;
   buttonPath: string;
-  blogs: BlogItem[];
-  ctaHeading: string;
-  ctaDescription: string;
-  ctaButtonText: string;
-  ctaButtonPath: string;
-  ctaBgImage: string;
+};
+
+export type ReadyToBuildData = {
+  heading: string;
+  subheading: string;
+  buttonText: string;
+  buttonHref: string;
 };
 
 // ---------- UNION TYPE ----------
@@ -122,7 +127,7 @@ export type BlogInsightsData = {
 export type HomepageData =
   | { slides: HomeHeroSlide[] }
   | HomeWellnessData
-  | { features: HomeFeaturesFeature[] }
+  | { features: HomeFeaturesFeature[] } // for home.features
   | { eyebrow: string; heading: string; description: string; buttonText: string; buttonHref?: string; backgroundImage: string; solutions: HomeTurnkeySolution[] }
   | { eyebrow: string; heading: string; description: string; image: string; stats: HomeGlobalPresenceStat[] }
   | FullWidthFeaturesData
@@ -130,7 +135,8 @@ export type HomepageData =
   | WellnessRoomSetupsData
   | ManufacturingAndProjectsData
   | TestimonialsData
-  | BlogInsightsData;
+  | BlogInsightsData
+  | ReadyToBuildData; // Ensure this is included in the union type
 
 // ---------- KEY REGISTRY ----------
 
@@ -146,6 +152,7 @@ export const homepageKeys: { key: HomepageComponentKey; label: string; descripti
   { key: "home.manufacturingAndProjects", label: "Manufacturing & Projects", description: "Manufacturing section with stats and project cards." },
   { key: "home.testimonials", label: "Testimonials", description: "Testimonial cards with text, name, role, and image." },
   { key: "home.blogInsights", label: "Blog Insights", description: "Blog section heading, blog cards, and CTA strip." },
+  { key: "home.readyToBuild", label: "Ready to Build", description: "Call to action section for starting a project." }, // Ensure this entry is present
 ];
 
 const randomId = () =>
@@ -167,7 +174,6 @@ export const defaultHomepageData: Record<HomepageComponentKey, HomepageData> = {
   "home.turnkeySolutions": { eyebrow: "", heading: "", description: "", buttonText: "", buttonHref: "", backgroundImage: "", solutions: [{ imgUrl: "", title: "" }] },
   "home.globalPresence": { eyebrow: "", heading: "", description: "", image: "", stats: [{ value: "", label: "" }] },
   "home.fullWidthFeatures": {
-    subtitle: "", heading: "", description: "", buttonText: "", buttonPath: "/products",
     features: [{ image: "", title: "", description: "", tag: "" }],
   },
   "home.productsGrid": { subtitle: "", heading: "", description: "", buttonText: "View All Products", buttonPath: "/products" },
@@ -176,12 +182,25 @@ export const defaultHomepageData: Record<HomepageComponentKey, HomepageData> = {
     subtitle: "", heading: "", description: "",
     stats: [{ value: "", label: "" }],
     projects: [{ image: "", title: "", location: "" }],
+    mfgFeatures: [""],
+    mfgButtonText: "",
+    mfgButtonHref: "",
+    mfgImages: [{ image: "", title: "", location: "" }],
+    projSubtitle: "",
+    projHeading: "",
+    projDescription: "",
+    projButtonText: "",
+    projButtonHref: ""
   },
   "home.testimonials": { subtitle: "", testimonials: [{ text: "", name: "", role: "", image: "" }] },
   "home.blogInsights": {
     subtitle: "", heading: "", buttonText: "VIEW ALL BLOGS", buttonPath: "/blog",
-    blogs: [{ title: "", image: "" }],
-    ctaHeading: "", ctaDescription: "", ctaButtonText: "CONTACT US TODAY", ctaButtonPath: "/contact", ctaBgImage: "",
+  },
+  "home.readyToBuild": { // Ensure this default data is present
+    heading: "Ready to Build?",
+    subheading: "Let's turn your vision into reality.",
+    buttonText: "Get Started",
+    buttonHref: "/contact",
   },
 };
 
@@ -277,7 +296,6 @@ export const validateHomepageContent = (content: Omit<ComponentContent, "_id">) 
     }
     case "home.fullWidthFeatures": {
       const d = data as FullWidthFeaturesData;
-      if (!isNonEmptyString(d.heading)) errors.push("Heading is required.");
       if (!d.features?.length) errors.push("At least one feature is required.");
       break;
     }
@@ -309,10 +327,14 @@ export const validateHomepageContent = (content: Omit<ComponentContent, "_id">) 
     case "home.blogInsights": {
       const d = data as BlogInsightsData;
       if (!isNonEmptyString(d.heading)) errors.push("Heading is required.");
-      if (!d.blogs?.length) errors.push("At least one blog entry is required.");
-      d.blogs?.forEach((b, i) => {
-        if (!isNonEmptyString(b.title)) errors.push(`Blog ${i + 1}: title is required.`);
-      });
+      break;
+    }
+    case "home.readyToBuild": { // Add validation for ReadyToBuildData
+      const d = data as ReadyToBuildData;
+      if (!isNonEmptyString(d.heading)) errors.push("Heading is required.");
+      if (!isNonEmptyString(d.subheading)) errors.push("Subheading is required.");
+      if (!isNonEmptyString(d.buttonText)) errors.push("Button text is required.");
+      if (!isNonEmptyString(d.buttonHref)) errors.push("Button href is required.");
       break;
     }
     default:
