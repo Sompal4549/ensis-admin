@@ -360,7 +360,7 @@ function EditorInner({ title }: { title: string }) {
           </div>
         )}
 
-        {isManufacturingComponent && (
+        {/* {isManufacturingComponent && (
           <div className="grid grid-cols-1 gap-6 p-5 bg-[#f7fcf9] rounded-xl border border-[#d1efe0] mb-2 shadow-sm">
             <div className="flex items-center justify-between border-b border-[#d1efe0] pb-3">
               <div>
@@ -417,9 +417,9 @@ function EditorInner({ title }: { title: string }) {
               </div>
             </div>
           </div>
-        )}
+        )} */}
         
-        {isRoomSetupsComponent && (
+        {/* {isRoomSetupsComponent && (
           <div className="grid grid-cols-1 gap-6 p-5 bg-[#fcf7fd] rounded-xl border border-[#eed1ef] mb-2 shadow-sm">
             <div className="flex items-center justify-between border-b border-[#eed1ef] pb-3">
               <div>
@@ -455,15 +455,15 @@ function EditorInner({ title }: { title: string }) {
               <label className={labelClass}>Section Button Path <input className={`${fieldClass} mt-1.5`} value={(form.data as any).sectionButtonPath || ""} onChange={e => setData({...form.data as any, sectionButtonPath: e.target.value})} placeholder="e.g. /rooms" /></label>
             </div>
           </div>
-        )}
+        )} */}
 
         
-        {isReadyToBuildComponent && (
+        {/* {isReadyToBuildComponent && (
           <div className="grid grid-cols-1 gap-6 p-5 bg-[#f7fafc] rounded-xl border border-[#d1e3ee] mb-2 shadow-sm">
             <div className="flex items-center justify-between border-b border-[#d1e3ee] pb-3">
               <div>
                 <h3 className="text-sm font-bold text-[#2e527d] uppercase tracking-wider">Ready to Build Configuration</h3>
-                <p className="text-[11px] text-gray-500">Manage heading, subheading and button actions.</p>
+                <p className="text-[11px] text-gray-500">Manage heading, subheading, image and button actions.</p>
               </div>
               <button 
                 type="button"
@@ -474,6 +474,7 @@ function EditorInner({ title }: { title: string }) {
                     subheading: d.subheading || "Let's turn your vision into reality.",
                     buttonText: d.buttonText || "Get Started",
                     buttonHref: d.buttonHref || "/contact",
+                    image: d.image || "",
                     ...d
                   });
                 }}
@@ -488,6 +489,14 @@ function EditorInner({ title }: { title: string }) {
             <label className={labelClass}>Subheading
               <input className={`${fieldClass} mt-1.5`} value={(form.data as any).subheading || ""} onChange={e => setData({...form.data as any, subheading: e.target.value})} placeholder="e.g. Let's turn your vision into reality." />
             </label>
+            <div>
+              <ImageField
+                label="Image"
+                path={["image"]}
+                value={(form.data as any).image || ""}
+                onChange={(v: string) => setData({ ...form.data as any, image: v })}
+              />
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <label className={labelClass}>Button Text 
                 <input className={`${fieldClass} mt-1.5`} value={(form.data as any).buttonText || ""} onChange={e => setData({...form.data as any, buttonText: e.target.value})} placeholder="e.g. Get Started" />
@@ -497,9 +506,9 @@ function EditorInner({ title }: { title: string }) {
               </label>
             </div>
           </div>
-        )}
+        )} */}
 
-        {isTestimonialsComponent && (
+        {/* {isTestimonialsComponent && (
           <div className="grid grid-cols-1 gap-6 p-5 bg-[#f7fcfb] rounded-xl border border-[#d1eee9] mb-2 shadow-sm">
             <div className="flex items-center justify-between border-b border-[#d1eee9] pb-3">
               <div>
@@ -539,7 +548,7 @@ function EditorInner({ title }: { title: string }) {
               </div>
             </div>
           </div>
-        )}
+        )} */}
         
         <StructuredField path={[]} value={form.data as EditableValue} root={form.data as EditableValue} onRootChange={(value) => setData(value as HomepageData)} />
       </section>

@@ -133,6 +133,10 @@ const NAV_ITEMS: NavItem[] = [
             label: "Blog Insights",
             path: "/homepage-content/blog-insights",
           },
+           {
+            label: "Ready To Build",
+            path: "/homepage-content/ready-to-build",
+          },
         ],
       },
       {
@@ -272,6 +276,10 @@ const NAV_ITEMS: NavItem[] = [
       {
         label: "About Images",
         path: "/media/about",
+      },
+         {
+        label: "Products Images",
+        path: "/media/products",
       },
     ],
   },

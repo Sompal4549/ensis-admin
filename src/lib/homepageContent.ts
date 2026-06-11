@@ -66,6 +66,8 @@ export type HomeWellnessData = {
 
 export type FullWidthFeatureItem = { image: string; title: string; description: string; };
 export type FullWidthFeaturesData = {
+  buttonText: string;
+  buttonPath: string;
   features: FullWidthFeatureItem[];
 };
 
@@ -82,6 +84,9 @@ export type WellnessRoomSetupsData = {
   subtitle: string;
   heading: string;
   cards: RoomSetupCard[];
+  description: string;
+  sectionButtonPath:string;
+  sectionButtonText:string;
 };
 
 export type ManufacturingProject = { image: string; title: string; location: string };
@@ -120,6 +125,7 @@ export type ReadyToBuildData = {
   subheading: string;
   buttonText: string;
   buttonHref: string;
+  image: string;
 };
 
 // ---------- UNION TYPE ----------
@@ -146,7 +152,7 @@ export const homepageKeys: { key: HomepageComponentKey; label: string; descripti
   { key: "home.features", label: "Home Features", description: "Feature cards with image, title, and description." },
   { key: "home.turnkeySolutions", label: "Home Turnkey Solutions", description: "Turnkey solutions section with heading, background image, and solution cards." },
   { key: "home.globalPresence", label: "Home Global Presence", description: "Global presence section with image and stat cards." },
-  { key: "home.fullWidthFeatures", label: "Full Width Features", description: "Full-width feature cards with image, title, description, and tag." },
+  { key: "home.fullWidthFeatures", label: "Full Width Features", description: "Full-width feature cards with image, title, description, and CTA button." },
   { key: "home.productsGrid", label: "Products Grid", description: "Products section headings, description, and CTA button." },
   { key: "home.wellnessRoomSetups", label: "Wellness Room Setups", description: "Room setup grid cards with title, image, and tag." },
   { key: "home.manufacturingAndProjects", label: "Manufacturing & Projects", description: "Manufacturing section with stats and project cards." },
@@ -174,10 +180,12 @@ export const defaultHomepageData: Record<HomepageComponentKey, HomepageData> = {
   "home.turnkeySolutions": { eyebrow: "", heading: "", description: "", buttonText: "", buttonHref: "", backgroundImage: "", solutions: [{ imgUrl: "", title: "" }] },
   "home.globalPresence": { eyebrow: "", heading: "", description: "", image: "", stats: [{ value: "", label: "" }] },
   "home.fullWidthFeatures": {
+    buttonText: "",
+    buttonPath: "",
     features: [{ image: "", title: "", description: "" }],
   },
   "home.productsGrid": { subtitle: "", heading: "", description: "", buttonText: "View All Products", buttonPath: "/products" },
-  "home.wellnessRoomSetups": { subtitle: "", heading: "", cards: [{ id: randomId(), title: "", image: "", tag: "" }] },
+  "home.wellnessRoomSetups": { subtitle: "", heading: "",description:"",sectionButtonText:"View All Rooms",sectionButtonPath:"", cards: [{ id: randomId(), title: "", image: "", tag: "" }] },
   "home.manufacturingAndProjects": {
     subtitle: "", heading: "", description: "",
     stats: [{ value: "", label: "" }],
@@ -201,6 +209,7 @@ export const defaultHomepageData: Record<HomepageComponentKey, HomepageData> = {
     subheading: "Let's turn your vision into reality.",
     buttonText: "Get Started",
     buttonHref: "/contact",
+    image: "/media/any.jpg",
   },
 };
 
@@ -215,14 +224,18 @@ export const createHomepageData = (key: HomepageComponentKey): HomepageData => {
   return data;
 };
 
-export const buildEmptyHomepageContent = (key: HomepageComponentKey): Omit<ComponentContent, "_id"> & { key: HomepageComponentKey } => ({
-  key,
-  label: "",
-  page: "home",
-  description: "",
-  isActive: true,
-  data: createHomepageData(key),
-});
+export const buildEmptyHomepageContent = (key: HomepageComponentKey): Omit<ComponentContent, "_id"> & { key: HomepageComponentKey } => {
+  const keyInfo = homepageKeys.find(k => k.key === key);
+
+  return {
+    key,
+    label: keyInfo?.label || "",
+    page: "home",
+    description: keyInfo?.description || "",
+    isActive: true,
+    data: createHomepageData(key),
+  };
+};
 
 const isNonEmptyString = (value: unknown) => typeof value === "string" && value.trim().length > 0;
 
@@ -297,6 +310,8 @@ export const validateHomepageContent = (content: Omit<ComponentContent, "_id">) 
     case "home.fullWidthFeatures": {
       const d = data as FullWidthFeaturesData;
       if (!d.features?.length) errors.push("At least one feature is required.");
+      if (!isNonEmptyString(d.buttonText)) errors.push("Button text is required.");
+      if (!isNonEmptyString(d.buttonPath)) errors.push("Button path is required.");
       break;
     }
     case "home.productsGrid": {
@@ -308,6 +323,7 @@ export const validateHomepageContent = (content: Omit<ComponentContent, "_id">) 
       const d = data as WellnessRoomSetupsData;
       if (!isNonEmptyString(d.heading)) errors.push("Heading is required.");
       if (!d.cards?.length) errors.push("At least one room card is required.");
+       if (!d.description) errors.push("Description is required.");
       break;
     }
     case "home.manufacturingAndProjects": {
@@ -335,6 +351,7 @@ export const validateHomepageContent = (content: Omit<ComponentContent, "_id">) 
       if (!isNonEmptyString(d.subheading)) errors.push("Subheading is required.");
       if (!isNonEmptyString(d.buttonText)) errors.push("Button text is required.");
       if (!isNonEmptyString(d.buttonHref)) errors.push("Button href is required.");
+       if (!isNonEmptyString(d.image)) errors.push("Image is required.");
       break;
     }
     default:
