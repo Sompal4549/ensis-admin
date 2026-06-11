@@ -311,7 +311,6 @@ function EditorInner({ title }: { title: string }) {
   const isBlogComponent = title.toLowerCase().includes("blog");
   const isManufacturingComponent = title.toLowerCase().includes("manufacturing");
   const isRoomSetupsComponent = title.toLowerCase().includes("room setups");
-  const isFullWidthFeaturesComponent = title.toLowerCase().includes("full width features");
   const isReadyToBuildComponent = title.toLowerCase().includes("ready to build");
   const isTestimonialsComponent = title.toLowerCase().includes("testimonials");
 

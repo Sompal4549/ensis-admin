@@ -64,7 +64,7 @@ export type HomeWellnessData = {
 
 // ---------- NEW TYPES ----------
 
-export type FullWidthFeatureItem = { image: string; title: string; description: string; tag?: string };
+export type FullWidthFeatureItem = { image: string; title: string; description: string; };
 export type FullWidthFeaturesData = {
   features: FullWidthFeatureItem[];
 };
@@ -174,7 +174,7 @@ export const defaultHomepageData: Record<HomepageComponentKey, HomepageData> = {
   "home.turnkeySolutions": { eyebrow: "", heading: "", description: "", buttonText: "", buttonHref: "", backgroundImage: "", solutions: [{ imgUrl: "", title: "" }] },
   "home.globalPresence": { eyebrow: "", heading: "", description: "", image: "", stats: [{ value: "", label: "" }] },
   "home.fullWidthFeatures": {
-    features: [{ image: "", title: "", description: "", tag: "" }],
+    features: [{ image: "", title: "", description: "" }],
   },
   "home.productsGrid": { subtitle: "", heading: "", description: "", buttonText: "View All Products", buttonPath: "/products" },
   "home.wellnessRoomSetups": { subtitle: "", heading: "", cards: [{ id: randomId(), title: "", image: "", tag: "" }] },
