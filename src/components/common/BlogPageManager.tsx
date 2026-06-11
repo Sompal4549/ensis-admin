@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState, Suspense } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { DropResult } from "@hello-pangea/dnd";
 import { toast } from "react-toastify";
@@ -287,7 +287,7 @@ export default function BlogPageManager() {
   );
 
   return (
-    <Suspense fallback={<div className="flex justify-center p-20"><Loader2 className="animate-spin text-[#8d6a3a]" size={40} /></div>}>
+    <Suspense fallback={<div className="flex justify-center p-20"><Loader2 className="animate-spin text-[#8d6a3a]" size={40} /></div>}> {/* Moved Suspense to wrap the entire component */}
     <div className="grid grid-cols-1 xl:grid-cols-[1fr_350px] gap-6">
       <div className="space-y-6">
         <form onSubmit={handleSave} className="bg-white border rounded-2xl shadow-sm overflow-hidden">

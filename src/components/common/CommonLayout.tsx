@@ -185,13 +185,18 @@ const NAV_ITEMS: NavItem[] = [
     ],
   },
      {
+        label: "Products Page Management",
+        path: "/product-page-management",
+        icon: <Boxes size={16} />,
+      },
+         {
         label: "Products",
         path: "/products",
         icon: <Boxes size={16} />,
       },
       {
         label: "Categories",
-        path: "/categories",
+        path: "/categories-management", // Assuming a new page for categories
         icon: <LayoutGrid size={16} />,
       },
     {
@@ -695,6 +700,7 @@ export function CommonLayout({
       "turnkey-page-content": { name: "turnkey", path: "/turnkey" },
       "consultancy-page-management": { name: "consultancy", path: "/consultancy" },
       "blogs-page-management": { name: "blog", path: "/blog" },
+      "products-page-management": { name: "product", path: "/products" },
       "contact-page-management": { name: "contact", path: "/contact" },
     };
 
