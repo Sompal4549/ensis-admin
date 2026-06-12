@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify"; // Ensure toast is imported
 import { DropResult } from "@hello-pangea/dnd";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { Loader2, Plus, Save, Trash2 } from "lucide-react";
 import { componentContentApi, type ComponentContent } from "@/lib/api";
 import RichTextEditor from "@/components/common/RichTextEditor";
@@ -27,14 +27,16 @@ const randomId = () => Math.random().toString(36).slice(2, 9);
 
 export default function TurnkeyPageManager() {
   const searchParams = useSearchParams();
-  const queryKey = searchParams.get("key") as TurnkeyPageContentKeys;
+  const router = useRouter();
+  const pathname = usePathname();
+  const componentKey = searchParams.get("component") as TurnkeyPageContentKeys;
   const [records, setRecords] = useState<ComponentContent[]>([]);
   const [form, setForm] = useState<Partial<ComponentContent>>({
-    key: "turnkey.banner",
-    label: "Turnkey Banner",
+    key: componentKey || "turnkey.banner",
+    label: turnkeyPageKeys.find(k => k.key === (componentKey || "turnkey.banner"))?.label || "Turnkey Banner",
     page: "turnkey",
     isActive: true,
-    data: defaultTurnkeyData["turnkey.banner"] as Record<string, unknown>,
+    data: defaultTurnkeyData[componentKey || "turnkey.banner"] as Record<string, unknown>,
   });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -45,34 +47,36 @@ export default function TurnkeyPageManager() {
     setForm({ ...record });
   }, []);
 
-  const handleKeyChange = useCallback((key: TurnkeyPageContentKeys) => {
-    const keyInfo = turnkeyPageKeys.find(k => k.key === key);
-    setEditingId(null);
-    setForm({
-      key,
-      label: keyInfo?.label || "",
-      page: "turnkey",
-      isActive: true,
-      data: defaultTurnkeyData[key] as Record<string, unknown>
-    });
-  }, []);
-
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
       const list = await componentContentApi.list();
       const filtered = list.filter(item => item.page === "turnkey" || item.key.startsWith("turnkey."));
       setRecords(filtered);
-      if (queryKey) {
-        const existing = filtered.find(r => r.key === queryKey);
-        if (existing) handleSelectRecord(existing);
+
+      const targetKey = componentKey || "turnkey.banner";
+      const existing = filtered.find(r => r.key === targetKey);
+
+      if (existing) {
+        setEditingId(existing._id);
+        setForm(existing);
+      } else {
+        const keyInfo = turnkeyPageKeys.find(k => k.key === targetKey);
+        setEditingId(null);
+        setForm({
+          key: targetKey,
+          label: keyInfo?.label || "",
+          page: "turnkey",
+          isActive: true,
+          data: defaultTurnkeyData[targetKey] as Record<string, unknown>
+        });
       }
     } catch (error: unknown) {
       toast.error("Failed to load components.");
     } finally {
       setLoading(false);
     }
-  }, [queryKey, handleSelectRecord]);
+  }, [componentKey]);
 
   useEffect(() => { void refresh(); }, [refresh]);
 
@@ -158,6 +162,7 @@ export default function TurnkeyPageManager() {
     return (
       <div className="space-y-4">
         <label className={labelClass}>Title <input className={fieldClass} value={data.title} onChange={e => setForm({...form, data: {...data, title: e.target.value}})} /></label>
+        <label className={labelClass}>Most Project Title <input className={fieldClass} value={data.mostProjectsTitle} onChange={e => setForm({...form, data: {...data, mostProjectsTitle: e.target.value}})} /></label>
          <label className={labelClass}>SubHeading <input className={fieldClass} value={data.subheading} onChange={e => setForm({...form, data: {...data, subheading: e.target.value}})} /></label>
         <div className="space-y-1">
           <label className={labelClass}>Description</label>
@@ -207,44 +212,51 @@ export default function TurnkeyPageManager() {
   };
 
   const renderSolutionsForm = () => {
-    const data = form.data as TurnkeySolutions;
+    const data = (form.data || {}) as TurnkeySolutions;
+    const specialCard = data.specialCard || { 
+      leftImage: { imageUrl: "", alt: "" }, 
+      rightImage: { imageUrl: "", alt: "" }, 
+      title: "", 
+      details: [] 
+    };
+
     return (
       <div className="space-y-4">
-        <label className={labelClass}>Main Title <input className={fieldClass} value={data.title} onChange={e => setForm({...form, data: {...data, title: e.target.value}})} /></label>
+        <label className={labelClass}>Main Title <input className={fieldClass} value={data.title || ""} onChange={e => setForm({...form, data: {...data, title: e.target.value}})} /></label>
 
         <div className="pt-4 border-t bg-amber-50/30 p-4 rounded-xl space-y-4">
           <h4 className="text-xs font-bold text-[#8d6a3a] mb-2 uppercase tracking-wider">Special Featured Card</h4>
           <div className="grid grid-cols-2 gap-4">
-            <label className={labelClass}>Special Title <input className={fieldClass} placeholder="Special Title" value={data.specialCard?.title || ""} onChange={e => setForm({...form, data: {...data, specialCard: { ...(data.specialCard || { leftImage: { imageUrl: "", alt: "" }, rightImage: { imageUrl: "", alt: "" }, details: [] }), title: e.target.value }}})} /></label>
+            <label className={labelClass}>Special Title <input className={fieldClass} placeholder="Special Title" value={specialCard.title} onChange={e => setForm({...form, data: {...data, specialCard: { ...specialCard, title: e.target.value }}})} /></label>
           </div>
           <div className="space-y-2">
             <label className={labelClass}>Special Details (List)</label>
-            {(data.specialCard?.details || []).map((detail, dIdx) => (
+            {(specialCard.details || []).map((detail, dIdx) => (
               <div key={dIdx} className="flex items-center gap-2 mb-2">
                 <input className={fieldClass} placeholder="Detail point" value={detail} onChange={e => {
-                  const newDetails = [...(data.specialCard?.details || [])];
+                  const newDetails = [...specialCard.details];
                   newDetails[dIdx] = e.target.value;
-                  setForm({...form, data: {...data, specialCard: { ...(data.specialCard || { leftImage: { imageUrl: "", alt: "" }, rightImage: { imageUrl: "", alt: "" }, title: "" }), details: newDetails }}});
+                  setForm({...form, data: {...data, specialCard: { ...specialCard, details: newDetails }}});
                 }} />
                 <button type="button" onClick={() => {
-                  const newDetails = data.specialCard?.details.filter((_, i) => i !== dIdx);
-                  setForm({...form, data: {...data, specialCard: { ...(data.specialCard || { leftImage: { imageUrl: "", alt: "" }, rightImage: { imageUrl: "", alt: "" }, title: "" }), details: newDetails || [] }}});
+                  const newDetails = specialCard.details.filter((_, i) => i !== dIdx);
+                  setForm({...form, data: {...data, specialCard: { ...specialCard, details: newDetails }}});
                 }} className="text-red-500 hover:bg-red-50 p-1.5 rounded transition-colors shrink-0"><Trash2 size={14} /></button>
               </div>
             ))}
-            <button type="button" onClick={() => setForm({...form, data: {...data, specialCard: { ...(data.specialCard || { leftImage: { imageUrl: "", alt: "" }, rightImage: { imageUrl: "", alt: "" }, title: "" }), details: [...(data.specialCard?.details || []), ""] }}})} className="text-xs font-bold text-[#8d6a3a] flex items-center gap-1">+ Add Detail</button>
+            <button type="button" onClick={() => setForm({...form, data: {...data, specialCard: { ...specialCard, details: [...specialCard.details, ""] }}})} className="text-xs font-bold text-[#8d6a3a] flex items-center gap-1">+ Add Detail</button>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <ImageUploadField label="Left Image" value={data.specialCard?.leftImage?.imageUrl} fieldKey="sol.special.left" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => setForm({...form, data: {...data, specialCard: { ...(data.specialCard || {}), leftImage: { imageUrl: url, alt: 'Special Left' }}}})} />
-            <ImageUploadField label="Right Image" value={data.specialCard?.rightImage?.imageUrl} fieldKey="sol.special.right" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => setForm({...form, data: {...data, specialCard: { ...(data.specialCard || {}), rightImage: { imageUrl: url, alt: 'Special Right' }}}})} />
+            <ImageUploadField label="Left Image" value={specialCard.leftImage?.imageUrl} fieldKey="sol.special.left" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => setForm({...form, data: {...data, specialCard: { ...specialCard, leftImage: { imageUrl: url, alt: 'Special Left' }}}})} />
+            <ImageUploadField label="Right Image" value={specialCard.rightImage?.imageUrl} fieldKey="sol.special.right" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => setForm({...form, data: {...data, specialCard: { ...specialCard, rightImage: { imageUrl: url, alt: 'Special Right' }}}})} />
           </div>
         </div>
         
         <div className="space-y-4">
           <h4 className="text-xs font-bold text-[#8d6a3a] uppercase">Solution Cards</h4>
-          {data.cards.map((card, idx) => (
+          {(data.cards || []).map((card, idx) => (
             <div key={card.id} className="p-4 border rounded bg-white relative space-y-3">
-               <button type="button" onClick={() => { const nc = data.cards.filter((_, i) => i !== idx); setForm({...form, data: {...data, cards: nc}})}} className="absolute top-2 right-2 text-red-500"><Trash2 size={16} /></button>
+               <button type="button" onClick={() => { const nc = [...data.cards]; nc.splice(idx, 1); setForm({...form, data: {...data, cards: nc}})}} className="absolute top-2 right-2 text-red-500"><Trash2 size={16} /></button>
                <div className="grid grid-cols-2 gap-4">
                  <label className={labelClass}>Card Title <input className={fieldClass} value={card.title} onChange={e => { const nc = [...data.cards]; nc[idx].title = e.target.value; setForm({...form, data: {...data, cards: nc}}) }} /></label>
                  <ImageUploadField label="Card Image" value={card.image.imageUrl} fieldKey={`sol.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => { const nc = [...data.cards]; nc[idx].image.imageUrl = url; setForm({...form, data: {...data, cards: nc}}) }} />
@@ -275,7 +287,7 @@ export default function TurnkeyPageManager() {
                </div>
             </div>
           ))}
-          <button type="button" onClick={() => setForm({...form, data: {...data, cards: [...data.cards, {id: randomId(), title: '', details: [], image: {imageUrl: '', alt: ''}}]}})} className="w-full border-2 border-dashed py-3 flex items-center justify-center text-gray-400 gap-2 hover:bg-gray-50"><Plus size={18} /> Add Solution Card</button>
+          <button type="button" onClick={() => setForm({...form, data: {...data, cards: [...(data.cards || []), {id: randomId(), title: '', details: [], image: {imageUrl: '', alt: ''}}]}})} className="w-full border-2 border-dashed py-3 flex items-center justify-center text-gray-400 gap-2 hover:bg-gray-50"><Plus size={18} /> Add Solution Card</button>
         </div>
       </div>
     );
@@ -308,6 +320,7 @@ export default function TurnkeyPageManager() {
     return (
       <div className="space-y-4">
         <label className={labelClass}>Section Title <input className={fieldClass} value={data.title} onChange={e => setForm({...form, data: {...data, title: e.target.value}})} /></label>
+        <label className={labelClass}>Stats Title <input className={fieldClass} value={data.statsTitle} onChange={e => setForm({...form, data: {...data, statsTitle: e.target.value}})} /></label>
         <ImageUploadField label="Background Image" value={data.backgroundImage.imageUrl} fieldKey="cust.bg" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => setForm({...form, data: {...data, backgroundImage: {imageUrl: url, alt: 'Customized Facilities'}}})} />
         
         <div className="grid grid-cols-2 gap-6 pt-4 border-t">
@@ -342,6 +355,10 @@ export default function TurnkeyPageManager() {
       <div className="space-y-4">
         <div className="space-y-4">
           <h4 className="text-xs font-bold text-[#8d6a3a] uppercase">Project Cards</h4>
+          <div className="mb-2">
+
+                    <label className={labelClass}>Section Title <input className={fieldClass} value={data.title || ""} onChange={e => setForm({...form, data: {...data, title: e.target.value}})} /></label>
+          </div>
           <div className="grid grid-cols-2 gap-4">
             {data.cards.map((card, idx) => (
               <div key={card.id} className="p-4 border rounded bg-white relative space-y-3 shadow-sm">
@@ -420,7 +437,11 @@ export default function TurnkeyPageManager() {
           <div className="p-8 space-y-6">
             <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
               <label className={labelClass}>Template Key
-                <select className={fieldClass} value={form.key || ""} onChange={e => handleKeyChange(e.target.value as TurnkeyPageContentKeys)}>
+                <select 
+                  className={fieldClass} 
+                  value={componentKey || form.key || ""} 
+                  onChange={e => router.push(`${pathname}?component=${e.target.value}`)}
+                >
                   {turnkeyPageKeys.map(k => <option key={k.key} value={k.key}>{k.label}</option>)}
                 </select>
               </label>

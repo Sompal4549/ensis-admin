@@ -21,6 +21,7 @@ export type TurnkeyWhatIs = {
   subheading: string;
   title: string;
   description: string;
+  mostProjectsTitle:string;
   mostProjects: { id: string; image: ImageData; title: string }[];
   withEnsis: { title: string; image: ImageData };
 };
@@ -78,6 +79,7 @@ export const defaultTurnkeyData: Record<TurnkeyPageContentKeys, unknown> = {
     mostProjects: [
       { id: randomId(), title: "Fragmented Management", image: { imageUrl: "", alt: "" } }
     ],
+    mostProjectsTitle:"Most Projects Need Multiple Vendors",
     withEnsis: {
       title: "The Ensis Advantage",
       image: { imageUrl: "", alt: "" }
@@ -106,6 +108,7 @@ export const defaultTurnkeyData: Record<TurnkeyPageContentKeys, unknown> = {
     stats: [
       { id: randomId(), title: "500+", description: "Projects Completed" }
     ],
+    statsTitle:"Why Clients Choose Ensis?",
     features: [
       { id: randomId(), title: "Smart Integration", image: { imageUrl: "", alt: "" } }
     ]
@@ -119,6 +122,7 @@ export const defaultTurnkeyData: Record<TurnkeyPageContentKeys, unknown> = {
         image: { imageUrl: "", alt: "" }
       }
     ],
-    primaryButton: { label: "View All Projects", url: "/projects" }
+    primaryButton: { label: "View All Projects", url: "/projects" },
+    title:"Featured Turnkey Projects"
   }
 };

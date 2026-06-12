@@ -86,8 +86,15 @@ export default function ConsultancyPageManager() {
     return (
       <div className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
-          <label className={labelClass}>Heading <input className={fieldClass} value={data.heading} onChange={e => setForm({...form, data: {...data, heading: e.target.value}})} /></label>
-          <label className={labelClass}>Title <input className={fieldClass} value={data.title} onChange={e => setForm({...form, data: {...data, title: e.target.value}})} /></label>
+          <label className={labelClass}>Heading <input className={fieldClass} value={data.heading || ""} onChange={e => setForm({...form, data: {...data, heading: e.target.value}})} /></label>
+          <label className={labelClass}>Title Part 1 <input className={fieldClass} value={data.titlepart1 || ""} onChange={e => setForm({...form, data: {...data, titlepart1: e.target.value}})} /></label>
+          <label className={labelClass}>Title Part 2 <input className={fieldClass} value={data.titlepart2 || ""} onChange={e => setForm({...form, data: {...data, titlepart2: e.target.value}})} /></label>
+          <label className={labelClass}>Title Highlight<input className={fieldClass} value={data.titleHighlight || ""} onChange={e => setForm({...form, data: {...data, titleHighlight: e.target.value}})} /></label>
+          <label className={labelClass}>Title <input className={fieldClass} value={data.title || ""} onChange={e => setForm({...form, data: {...data, title: e.target.value}})} /></label>
+          <label className={labelClass}>Primary Button Label <input className={fieldClass} value={data.primaryButton?.label || ""} onChange={e => setForm({...form, data: {...data, primaryButton: { ...(data.primaryButton || {}), label: e.target.value }}})} /></label>
+          <label className={labelClass}>Primary Button URL <input className={fieldClass} value={data.primaryButton?.href || ""} onChange={e => setForm({...form, data: {...data, primaryButton: { ...(data.primaryButton || {}), href: e.target.value }}})} /></label>
+          <label className={labelClass}>Secondary Button Label <input className={fieldClass} value={data.secondaryButton?.label || ""} onChange={e => setForm({...form, data: {...data, secondaryButton: { ...(data.secondaryButton || {}), label: e.target.value }}})} /></label>
+          <label className={labelClass}>Secondary Button URL <input className={fieldClass} value={data.secondaryButton?.href || ""} onChange={e => setForm({...form, data: {...data, secondaryButton: { ...(data.secondaryButton || {}), href: e.target.value }}})} /></label>
         </div>
         <div>
           <label className={labelClass}>Description</label>
@@ -98,16 +105,16 @@ export default function ConsultancyPageManager() {
             minHeight="120px" 
           />
         </div>
-        <ImageUploadField label="Background Image" value={data.bgImage} fieldKey="hero.bg" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => setForm({...form, data: {...data, bgImage: url}})} />
+        <ImageUploadField label="Background Image" value={data.bgImage || ""} fieldKey="hero.bg" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => setForm({...form, data: {...data, bgImage: url}})} />
         
         <div className="pt-4 border-t">
-          <div className="flex justify-between items-center mb-4"><h4 className="text-sm font-bold">Hero Features</h4><button type="button" onClick={() => setForm({...form, data: {...data, features: [...data.features, {id: randomId(), title: '', description: '', image: '', primaryButton: {label:'', href:''}, secondaryButton: {label:'', href:''}}]}})} className="p-1 bg-slate-100 rounded text-slate-600"><Plus size={16} /></button></div>
-          {data.features.map((feat: any, idx: number) => (
+          <div className="flex justify-between items-center mb-4"><h4 className="text-sm font-bold">Hero Features</h4><button type="button" onClick={() => setForm({...form, data: {...data, features: [...(data.features || []), {id: randomId(), title: '', description: '', image: ''}]}})} className="p-1 bg-slate-100 rounded text-slate-600"><Plus size={16} /></button></div>
+          {(data.features || []).map((feat: any, idx: number) => (
             <div key={feat.id} className="p-4 border rounded-xl mb-4 bg-slate-50 relative space-y-3">
               <button type="button" onClick={() => { const nf = data.features.filter((_:any, i:number) => i !== idx); setForm({...form, data: {...data, features: nf}})}} className="absolute top-2 right-2 text-red-500"><Trash2 size={14} /></button>
               <div className="grid grid-cols-2 gap-4">
-                <input className={fieldClass} placeholder="Feature Title" value={feat.title} onChange={e => { const nf = [...data.features]; nf[idx].title = e.target.value; setForm({...form, data: {...data, features: nf}}) }} />
-                <ImageUploadField label="Feature Image" value={feat.image} fieldKey={`hero.feat.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => { const nf = [...data.features]; nf[idx].image = url; setForm({...form, data: {...data, features: nf}}) }} />
+                <input className={fieldClass} placeholder="Feature Title" value={feat.title || ""} onChange={e => { const nf = [...data.features]; nf[idx].title = e.target.value; setForm({...form, data: {...data, features: nf}}) }} />
+                <ImageUploadField label="Feature Image" value={feat.image || ""} fieldKey={`hero.feat.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => { const nf = [...data.features]; nf[idx].image = url; setForm({...form, data: {...data, features: nf}}) }} />
               </div>
               <div>
                 <label className="text-[10px] font-bold text-gray-400 uppercase">Feature Description</label>
@@ -135,6 +142,7 @@ export default function ConsultancyPageManager() {
             <div className="grid grid-cols-2 gap-4">
                 <label className={labelClass}>Title <input className={fieldClass} value={item.title} onChange={e => { const ni = [...data.items]; ni[idx].title = e.target.value; setForm({...form, data: {...data, items: ni}}) }} /></label>
                 <label className={labelClass}>Heading <input className={fieldClass} value={item.heading} onChange={e => { const ni = [...data.items]; ni[idx].heading = e.target.value; setForm({...form, data: {...data, items: ni}}) }} /></label>
+                <ImageUploadField label="Card Image" value={item.image || ""} fieldKey={`feat.card.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => { const ni = [...data.items]; ni[idx].image = url; setForm({...form, data: {...data, items: ni}}) }} />
             </div>
             <div>
               <label className="text-[10px] font-bold text-gray-400 uppercase">Description</label>
@@ -145,7 +153,6 @@ export default function ConsultancyPageManager() {
                 minHeight="100px" 
               />
             </div>
-            <ImageUploadField label="Image" value={item.image} fieldKey={`feat.item.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => { const ni = [...data.items]; ni[idx].image = url; setForm({...form, data: {...data, items: ni}}) }} />
           </div>
         ))}
         <button type="button" onClick={() => setForm({...form, data: {...data, items: [...data.items, {id: randomId(), title: '', heading: '', description: '', image: ''}]}})} className="w-full py-4 border-2 border-dashed rounded-xl text-slate-400 flex items-center justify-center gap-2"><Plus size={20} /> Add Feature</button>
@@ -157,8 +164,8 @@ export default function ConsultancyPageManager() {
     const data = form.data as any;
     return (
       <div className="space-y-4">
-        <label className={labelClass}>Subheading <input className={fieldClass} value={data.subheading} onChange={e => setForm({...form, data: {...data, subheading: e.target.value}})} /></label>
-        <label className={labelClass}>Main Title <input className={fieldClass} value={data.title} onChange={e => setForm({...form, data: {...data, title: e.target.value}})} /></label>
+        <label className={labelClass}>Subheading <input className={fieldClass} value={data.subheading || ""} onChange={e => setForm({...form, data: {...data, subheading: e.target.value}})} /></label>
+        <label className={labelClass}>Main Title <input className={fieldClass} value={data.title || ""} onChange={e => setForm({...form, data: {...data, title: e.target.value}})} /></label>
         <div>
           <label className={labelClass}>Description</label>
           <RichTextEditor 
@@ -170,9 +177,21 @@ export default function ConsultancyPageManager() {
         </div>
         <div className="pt-4 border-t space-y-4">
             <h4 className="text-sm font-bold">Service Cards</h4>
-            {data.serviceCards.map((card: any, idx: number) => (
-                <div key={card.id} className="p-4 border rounded-lg bg-slate-50 space-y-2">
-                    <input className={fieldClass} placeholder="Card Title" value={card.title} onChange={e => { const nc = [...data.serviceCards]; nc[idx].title = e.target.value; setForm({...form, data: {...data, serviceCards: nc}}) }} />
+            {(data.serviceCards || []).map((card: any, idx: number) => (
+                <div key={card.id} className="p-4 border rounded-lg bg-slate-50 space-y-3 relative group">
+                    <button type="button" onClick={() => { const nc = data.serviceCards.filter((_: any, i: number) => i !== idx); setForm({...form, data: {...data, serviceCards: nc}})}} className="absolute top-2 right-2 text-red-500 hover:text-red-700 transition-colors opacity-0 group-hover:opacity-100"><Trash2 size={16} /></button>
+                    <div className="grid grid-cols-2 gap-4">
+                        <label className={labelClass}>Card Title <input className={fieldClass} value={card.title || ""} onChange={e => { const nc = [...data.serviceCards]; nc[idx].title = e.target.value; setForm({...form, data: {...data, serviceCards: nc}}) }} /></label>
+                        <ImageUploadField 
+                            label="Card Image" 
+                            value={card.image || ""} 
+                            fieldKey={`offer.card.${idx}`} 
+                            uploadingField={uploadingField} 
+                            onUploadingChange={setUploadingField} 
+                            onError={m => toast.error(m)} 
+                            onUpload={url => { const nc = [...data.serviceCards]; nc[idx].image = url; setForm({...form, data: {...data, serviceCards: nc}}) }} 
+                        />
+                    </div>
                     <div>
                       <label className="text-[10px] font-bold text-gray-400 uppercase">Card Description</label>
                       <RichTextEditor 
@@ -182,10 +201,10 @@ export default function ConsultancyPageManager() {
                         minHeight="100px" 
                       />
                     </div>
-                    <input className={fieldClass} placeholder="Learn More Link (e.g. /services/wellness)" value={card.learnMoreLink} onChange={e => { const nc = [...data.serviceCards]; nc[idx].learnMoreLink = e.target.value; setForm({...form, data: {...data, serviceCards: nc}}) }} />
+                    <label className={labelClass}>Learn More Link <input className={fieldClass} placeholder="e.g. /services/wellness" value={card.learnMoreLink || ""} onChange={e => { const nc = [...data.serviceCards]; nc[idx].learnMoreLink = e.target.value; setForm({...form, data: {...data, serviceCards: nc}}) }} /></label>
                 </div>
             ))}
-            <button type="button" onClick={() => setForm({...form, data: {...data, serviceCards: [...data.serviceCards, {id: randomId(), title: '', description: '', learnMoreLink: ''}]}})} className="text-blue-600 text-sm font-bold flex items-center gap-1">+ Add Card</button>
+            <button type="button" onClick={() => setForm({...form, data: {...data, serviceCards: [...(data.serviceCards || []), {id: randomId(), title: '', description: '', image: '', learnMoreLink: ''}]}})} className="w-full py-4 border-2 border-dashed rounded-xl text-slate-400 flex items-center justify-center gap-2 hover:bg-slate-50 transition-colors"><Plus size={20} /> Add Service Card</button>
         </div>
       </div>
     );
@@ -219,6 +238,7 @@ export default function ConsultancyPageManager() {
           {data.ourProcess.processList.map((proc: any, idx: number) => (
              <div key={proc.id} className="p-3 border bg-white rounded-lg space-y-2">
                 <input className={fieldClass} placeholder="Step Title" value={proc.title} onChange={e => { const nl = [...data.ourProcess.processList]; nl[idx].title = e.target.value; setForm({...form, data: {...data, ourProcess: {...data.ourProcess, processList: nl}}}) }} />
+                  <input className={fieldClass} placeholder="Step Color" value={proc.color} onChange={e => { const nl = [...data.ourProcess.processList]; nl[idx].color = e.target.value; setForm({...form, data: {...data, ourProcess: {...data.ourProcess, processList: nl}}}) }} />
                 <div>
                   <label className="text-[10px] font-bold text-gray-400 uppercase">Step Description</label>
                   <RichTextEditor 

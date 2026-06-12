@@ -17,7 +17,7 @@ export const consultancyPageKeys: { key: ConsultancyPageContentKeys; label: stri
 
 export const defaultConsultancyData: Record<ConsultancyPageContentKeys, any> = {
   "consultancy.hero": {
-    heading: "", title: "", description: "", bgImage: "",
+    heading: "", title: "", description: "", bgImage: "",titlepart1:"",titlepart2:"",titleHighlight:"",
     features: [{ id: "1", image: "", title: "", description: "", primaryButton: { label: "", href: "" }, secondaryButton: { label: "", href: "" } }]
   },
   "consultancy.features": {
@@ -25,11 +25,11 @@ export const defaultConsultancyData: Record<ConsultancyPageContentKeys, any> = {
   },
   "consultancy.whatWeOffer": {
     subheading: "", title: "", description: "",
-    serviceCards: [{ id: "1", title: "", description: "", learnMoreLink: "" }]
+    serviceCards: [{ id: "1", title: "", description: "", learnMoreLink: "", imageUrl:"" }]
   },
   "consultancy.whyChooseOurProcess": {
     whyChoose: { heading: "", title: "", description: "", bgImage: "", chooseList: [""], primaryButton: { label: "", href: "" } },
-    ourProcess: { heading: "", title: "", processList: [{ id: "1", title: "", description: "", image: "" }] }
+    ourProcess: { heading: "", title: "", processList: [{ id: "1", title: "", description: "", image: "" , color:""}] }
   },
   "consultancy.readyToGetStarted": {
     title: "", heading: "", description: "", primaryButton: { label: "", href: "" }, bgImage: ""

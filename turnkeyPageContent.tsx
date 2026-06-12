@@ -47,6 +47,7 @@ export type TurnkeyCustomized = {
 export type TurnkeyFeaturedProjects = {
   cards: { id: string; image: ImageData; title: string; location: string }[];
   primaryButton: { label: string; url: string };
+  title:string;
 };
 
 export type TurnkeyReadyToBuild = {
@@ -88,6 +89,7 @@ export const defaultTurnkeyData: Record<TurnkeyPageContentKeys, any> = {
     mostProjects: [
       { id: randomId(), title: "Fragmented Management", image: { imageUrl: "", alt: "" } }
     ],
+    mostProjectsTitle:"Most Projects Need Multiple Vendors",
     withEnsis: {
       title: "The Ensis Advantage",
       image: { imageUrl: "", alt: "" }
@@ -106,12 +108,14 @@ export const defaultTurnkeyData: Record<TurnkeyPageContentKeys, any> = {
   "turnkey.customized": {
     backgroundImage: { imageUrl: "", alt: "" },
     title: "And Many More Customized Wellness Facilities",
+    statsTitle:"Why Clients Choose Ensis?",
     stats: [{ id: randomId(), title: "500+", description: "Projects Completed" }],
     features: [{ id: randomId(), title: "Smart Integration", image: { imageUrl: "", alt: "" } }]
   },
   "turnkey.featuredProjects": {
     cards: [{ id: randomId(), title: "Ayurvedic Hospital", location: "Kerala, India", image: { imageUrl: "", alt: "" } }],
-    primaryButton: { label: "View All Projects", url: "/projects" }
+    primaryButton: { label: "View All Projects", url: "/projects" },
+    title:"Featured Turnkey Projects"
   },
   "turnkey.readyToBuild": {
     title: "GET STARTED",

@@ -26,6 +26,7 @@ export type TurnkeyWhatIs = {
   description: string;
   mostProjects: { id: string; image: ImageData; title: string }[];
   withEnsis: { title: string; image: ImageData,withEnsisList:string[] };
+  mostProjectsTitle:string;
 };
 
 export type TurnkeySolutions = {
@@ -47,6 +48,7 @@ export type TurnkeyFacilities = {
 export type TurnkeyCustomized = {
   backgroundImage: ImageData;
   title: string;
+  statsTitle: string;
   stats: { id: string; title: string; description: string }[];
   features: { id: string; image: ImageData; title: string }[];
 };
@@ -54,6 +56,7 @@ export type TurnkeyCustomized = {
 export type TurnkeyFeaturedProjects = {
   cards: { id: string; image: ImageData; title: string; location: string }[];
   primaryButton: { label: string; url: string };
+  title:string
 };
 
 export type TurnkeyReadyToBuild = {
@@ -105,13 +108,13 @@ export const defaultTurnkeyData: Record<TurnkeyPageContentKeys, unknown> = {
   "turnkey.completeSolutions": {
     title: "Our Complete Turnkit Solutions",
     cards: [
-      { id: randomId(), title: "Panchkarma Centers", description: "Complete setup for Ayurvedic treatment centers.", image: { imageUrl: "", alt: "" } }
+      { id: randomId(), title: "Panchkarma Centers", details: ["Complete setup for Ayurvedic treatment centers."], image: { imageUrl: "", alt: "" } }
     ],
     specialCard: {
       leftImage: { imageUrl: "", alt: "" },
       rightImage: { imageUrl: "", alt: "" },
       title: "",
-      description: ""
+      details: []
     }
   },
   "turnkey.facilities": {
