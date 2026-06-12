@@ -28,11 +28,17 @@ import Image from "next/image";
 type ProductForm = {
   id?: string;
   title: string;
+  code: string;
   description: string;
+  shortDescription: string;
   price: string;
   discountPrice: string;
   stock: string;
   category: string;
+  subcategory: string;
+  material: string;
+  weight: string;
+  tags: string[];
   images: string[];
   slug: string;
   overview: {
@@ -54,15 +60,23 @@ type ProductForm = {
     };
     faqs: { question: string; description: string }[];
   };
+  isFeatured: boolean;
+  isActive: boolean;
 };
 
 const emptyProduct: ProductForm = {
   title: "",
+  code: "",
   description: "",
+  shortDescription: "",
   price: "",
   discountPrice: "",
   stock: "",
   category: "",
+  subcategory: "",
+  material: "",
+  weight: "",
+  tags: [""],
   images: [],
   slug: "",
   overview: {
@@ -84,6 +98,8 @@ const emptyProduct: ProductForm = {
     },
     faqs: [{ question: "", description: "" }],
   },
+  isFeatured: false,
+  isActive: true,
 };
 
 
@@ -149,14 +165,22 @@ export default function ProductsPage() {
     setMessage("");
     const payload = {
       title: productForm.title,
+      code: productForm.code,
       description: productForm.description,
+      shortDescription: productForm.shortDescription,
       price: Number(productForm.price || 0),
       discountPrice: productForm.discountPrice ? Number(productForm.discountPrice) : undefined,
       stock: productForm.stock ? Number(productForm.stock) : 0,
       category: productForm.category,
+      subcategory: productForm.subcategory,
+      material: productForm.material,
+      weight: Number(productForm.weight || 0),
+      tags: productForm.tags.filter(t => t.trim() !== ""),
       images: productForm.images,
       slug: productForm.slug.trim(),
       overview: productForm.overview,
+      isFeatured: productForm.isFeatured,
+      isActive: productForm.isActive,
     };
 
     try {
@@ -180,15 +204,67 @@ export default function ProductsPage() {
     const categoryId = typeof product.category === "string" ? product.category : product.category?._id || "";
     setProductForm({
       id: product._id,
-      title: product.title,
-      description: product.description,
+      title: product.title || "",
+      code: product.code || "",
+      description: product.description || "",
+      shortDescription: product.shortDescription || "",
       price: String(product.price || ""),
       discountPrice: String(product.discountPrice || ""),
       stock: String(product.stock || ""),
       category: categoryId,
+      subcategory: product.subcategory || "",
+      material: product.material || "",
+      weight: String(product.weight || ""),
+      tags: product.tags || [],
       images: product.images || [],
       slug: product.slug || "",
-      overview: product.overview || emptyProduct.overview,
+      overview: {
+        title: product.overview?.title || "",
+        description: product.overview?.description || "",
+        overviewList: product.overview?.overviewList || [""],
+        overviewMaterial: product.overview?.overviewMaterial || [{ title: "", description: "" }],
+        specifications: {
+          title: product.overview?.specifications?.title || "",
+          specificationsList: {
+            title: product.overview?.specifications?.specificationsList?.title || "",
+            description: product.overview?.specifications?.specificationsList?.description || ""
+          }
+        },
+        keyFeatures: {
+          title: product.overview?.keyFeatures?.title || "",
+          keyFeaturesList: {
+            title: product.overview?.keyFeatures?.keyFeaturesList?.title || "",
+            description: product.overview?.keyFeatures?.keyFeaturesList?.description || ""
+          }
+        },
+        dimensions: {
+          title: product.overview?.dimensions?.title || "",
+          dimensionsList: {
+            title: product.overview?.dimensions?.dimensionsList?.title || "",
+            description: product.overview?.dimensions?.dimensionsList?.description || ""
+          }
+        },
+        materialAndCare: {
+          title: product.overview?.materialAndCare?.title || "",
+          description: product.overview?.materialAndCare?.description || ""
+        },
+        productSpecifications: {
+          highlight: product.overview?.productSpecifications?.highlight || "",
+          title: product.overview?.productSpecifications?.title || "",
+          image: product.overview?.productSpecifications?.image || "",
+          specifications: product.overview?.productSpecifications?.specifications || [{ title: "", description: "" }]
+        },
+        whatisInclueded: product.overview?.whatisInclueded || [""],
+        smartDesignAppearance: {
+          highlight: product.overview?.smartDesignAppearance?.highlight || "",
+          title: product.overview?.smartDesignAppearance?.title || "",
+          woodFinish: product.overview?.smartDesignAppearance?.woodFinish || [""],
+          sizeOptions: product.overview?.smartDesignAppearance?.sizeOptions || [{ title: "", description: "" }]
+        },
+        faqs: product.overview?.faqs || [{ question: "", description: "" }],
+      },
+      isFeatured: !!product.isFeatured,
+      isActive: product.isActive !== false,
     });
   };
 
@@ -326,16 +402,29 @@ export default function ProductsPage() {
     {productForm.id ? "Edit Product Details" : "Add New Product"}
   </h3>
 
-  <div>
-    <label className={labelClass}>Title</label>
-    <input
-      className={fieldClass}
-      value={productForm.title}
-      onChange={(event) =>
-        setProductForm({ ...productForm, title: event.target.value })
-      }
-      required
-    />
+  <div className="grid gap-3 sm:grid-cols-2">
+    <div>
+      <label className={labelClass}>Title</label>
+      <input
+        className={fieldClass}
+        value={productForm.title}
+        onChange={(event) =>
+          setProductForm({ ...productForm, title: event.target.value })
+        }
+        required
+      />
+    </div>
+    <div>
+      <label className={labelClass}>Product Code</label>
+      <input
+        className={fieldClass}
+        value={productForm.code}
+        onChange={(event) =>
+          setProductForm({ ...productForm, code: event.target.value })
+        }
+        placeholder="e.g. ENS-001"
+      />
+    </div>
   </div>
 
   <div>
@@ -350,6 +439,17 @@ export default function ProductsPage() {
         })
       }
       required
+    />
+  </div>
+
+  <div>
+    <label className={labelClass}>Short Description</label>
+    <textarea
+      className={`${fieldClass} min-h-12`}
+      value={productForm.shortDescription}
+      onChange={(event) =>
+        setProductForm({ ...productForm, shortDescription: event.target.value })
+      }
     />
   </div>
 
@@ -431,6 +531,61 @@ export default function ProductsPage() {
         }
       />
     </div>
+  </div>
+
+  <div className="grid gap-3 sm:grid-cols-3">
+    <div>
+      <label className={labelClass}>Subcategory</label>
+      <input
+        className={fieldClass}
+        value={productForm.subcategory}
+        onChange={(event) =>
+          setProductForm({ ...productForm, subcategory: event.target.value })
+        }
+      />
+    </div>
+    <div>
+      <label className={labelClass}>Material</label>
+      <input
+        className={fieldClass}
+        value={productForm.material}
+        onChange={(event) =>
+          setProductForm({ ...productForm, material: event.target.value })
+        }
+      />
+    </div>
+    <div>
+      <label className={labelClass}>Weight (kg)</label>
+      <input
+        className={fieldClass}
+        type="number"
+        value={productForm.weight}
+        onChange={(event) =>
+          setProductForm({ ...productForm, weight: event.target.value })
+        }
+      />
+    </div>
+  </div>
+
+  <div className="flex gap-6 py-2">
+    <label className="flex items-center gap-2 cursor-pointer">
+      <input
+        type="checkbox"
+        checked={productForm.isActive}
+        onChange={(e) => setProductForm({ ...productForm, isActive: e.target.checked })}
+        className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+      />
+      <span className="text-xs font-semibold text-slate-700">Active</span>
+    </label>
+    <label className="flex items-center gap-2 cursor-pointer">
+      <input
+        type="checkbox"
+        checked={productForm.isFeatured}
+        onChange={(e) => setProductForm({ ...productForm, isFeatured: e.target.checked })}
+        className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+      />
+      <span className="text-xs font-semibold text-slate-700">Featured Product</span>
+    </label>
   </div>
 
   <div>
@@ -521,6 +676,26 @@ export default function ProductsPage() {
     <p className="text-[8px] italic text-slate-400">
       Images are stored in /uploads/products. You can select multiple files.
     </p>
+  </div>
+
+  <div className="space-y-2">
+    <label className={labelClass}>Search Tags</label>
+    <div className="flex flex-wrap gap-2">
+      {productForm.tags.map((tag, idx) => (
+        <div key={idx} className="flex gap-1 items-center bg-slate-50 border border-slate-200 rounded-md px-2 py-1">
+          <input 
+            className="bg-transparent border-none p-0 text-[11px] focus:ring-0 w-20" 
+            value={tag} 
+            onChange={e => {
+              const list = [...productForm.tags]; list[idx] = e.target.value;
+              setProductForm({...productForm, tags: list});
+            }} 
+          />
+          <button type="button" onClick={() => setProductForm({...productForm, tags: productForm.tags.filter((_, i) => i !== idx)})} className="text-rose-500 hover:bg-rose-50 p-1 rounded transition-colors"><X size={12}/></button>
+        </div>
+      ))}
+      <button type="button" onClick={() => setProductForm({...productForm, tags: [...productForm.tags, ""]})} className="text-[10px] font-bold text-blue-600 flex items-center gap-1"><Plus size={12}/> Add Tag</button>
+    </div>
   </div>
 
   {/* Detailed Overview Section */}

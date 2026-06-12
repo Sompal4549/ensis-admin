@@ -17,6 +17,7 @@ export type TurnkeyBanner = {
   features: { id: string; image: ImageData; title: string }[];
   primaryButton: { label: string; url: string };
   secondaryButton: { label: string; url: string };
+  highlight: string;
 };
 
 export type TurnkeyWhatIs = {
@@ -29,12 +30,12 @@ export type TurnkeyWhatIs = {
 
 export type TurnkeySolutions = {
   title: string;
-  cards: { id: string; image: ImageData; title: string; description: string }[];
+  cards: { id: string; image: ImageData; title: string; details: string[] }[];
   specialCard?: {
     leftImage: ImageData;
     rightImage: ImageData;
     title: string;
-    description: string;
+    details: string[]
   };
 };
 

@@ -122,6 +122,7 @@ export default function TurnkeyPageManager() {
         <div className="grid grid-cols-2 gap-4">
           <label className={labelClass}>Subheading <input className={fieldClass} value={data.subheading} onChange={e => setForm({...form, data: {...data, subheading: e.target.value}})} /></label>
           <label className={labelClass}>Title <input className={fieldClass} value={data.title} onChange={e => setForm({...form, data: {...data, title: e.target.value}})} /></label>
+           <label className={labelClass}>Highlight <input className={fieldClass} value={data.highlight} onChange={e => setForm({...form, data: {...data, highlight: e.target.value}})} /></label>
         </div>
         <div className="space-y-1">
           <label className={labelClass}>Description</label>
@@ -214,11 +215,24 @@ export default function TurnkeyPageManager() {
         <div className="pt-4 border-t bg-amber-50/30 p-4 rounded-xl space-y-4">
           <h4 className="text-xs font-bold text-[#8d6a3a] mb-2 uppercase tracking-wider">Special Featured Card</h4>
           <div className="grid grid-cols-2 gap-4">
-            <label className={labelClass}>Special Title <input className={fieldClass} placeholder="Special Title" value={data.specialCard?.title || ""} onChange={e => setForm({...form, data: {...data, specialCard: { ...(data.specialCard || {}), title: e.target.value }}})} /></label>
-            <div className="space-y-1">
-              <label className={labelClass}>Special Description</label>
-              <RichTextEditor value={data.specialCard?.description || ""} onChange={val => setForm({...form, data: {...data, specialCard: { ...(data.specialCard || {}), description: val }}})} placeholder="Special card description..." minHeight="80px" />
-            </div>
+            <label className={labelClass}>Special Title <input className={fieldClass} placeholder="Special Title" value={data.specialCard?.title || ""} onChange={e => setForm({...form, data: {...data, specialCard: { ...(data.specialCard || { leftImage: { imageUrl: "", alt: "" }, rightImage: { imageUrl: "", alt: "" }, details: [] }), title: e.target.value }}})} /></label>
+          </div>
+          <div className="space-y-2">
+            <label className={labelClass}>Special Details (List)</label>
+            {(data.specialCard?.details || []).map((detail, dIdx) => (
+              <div key={dIdx} className="flex items-center gap-2 mb-2">
+                <input className={fieldClass} placeholder="Detail point" value={detail} onChange={e => {
+                  const newDetails = [...(data.specialCard?.details || [])];
+                  newDetails[dIdx] = e.target.value;
+                  setForm({...form, data: {...data, specialCard: { ...(data.specialCard || { leftImage: { imageUrl: "", alt: "" }, rightImage: { imageUrl: "", alt: "" }, title: "" }), details: newDetails }}});
+                }} />
+                <button type="button" onClick={() => {
+                  const newDetails = data.specialCard?.details.filter((_, i) => i !== dIdx);
+                  setForm({...form, data: {...data, specialCard: { ...(data.specialCard || { leftImage: { imageUrl: "", alt: "" }, rightImage: { imageUrl: "", alt: "" }, title: "" }), details: newDetails || [] }}});
+                }} className="text-red-500 hover:bg-red-50 p-1.5 rounded transition-colors shrink-0"><Trash2 size={14} /></button>
+              </div>
+            ))}
+            <button type="button" onClick={() => setForm({...form, data: {...data, specialCard: { ...(data.specialCard || { leftImage: { imageUrl: "", alt: "" }, rightImage: { imageUrl: "", alt: "" }, title: "" }), details: [...(data.specialCard?.details || []), ""] }}})} className="text-xs font-bold text-[#8d6a3a] flex items-center gap-1">+ Add Detail</button>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <ImageUploadField label="Left Image" value={data.specialCard?.leftImage?.imageUrl} fieldKey="sol.special.left" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => setForm({...form, data: {...data, specialCard: { ...(data.specialCard || {}), leftImage: { imageUrl: url, alt: 'Special Left' }}}})} />
@@ -235,13 +249,33 @@ export default function TurnkeyPageManager() {
                  <label className={labelClass}>Card Title <input className={fieldClass} value={card.title} onChange={e => { const nc = [...data.cards]; nc[idx].title = e.target.value; setForm({...form, data: {...data, cards: nc}}) }} /></label>
                  <ImageUploadField label="Card Image" value={card.image.imageUrl} fieldKey={`sol.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => { const nc = [...data.cards]; nc[idx].image.imageUrl = url; setForm({...form, data: {...data, cards: nc}}) }} />
                </div>
-               <div className="space-y-1">
-                 <label className={labelClass}>Description</label>
-                 <RichTextEditor value={card.description || ""} onChange={val => { const nc = [...data.cards]; nc[idx].description = val; setForm({...form, data: {...data, cards: nc}}); }} placeholder="Card description..." minHeight="100px" />
+               <div className="space-y-2">
+                 <label className={labelClass}>Details (List)</label>
+                 {(card.details || []).map((detail, dIdx) => (
+                   <div key={dIdx} className="flex items-center gap-2 mb-2">
+                     <input className={fieldClass} placeholder="Detail point" value={detail} onChange={e => {
+                       const nc = [...data.cards];
+                       const nd = [...(nc[idx].details || [])];
+                       nd[dIdx] = e.target.value;
+                       nc[idx].details = nd;
+                       setForm({...form, data: {...data, cards: nc}});
+                     }} />
+                     <button type="button" onClick={() => {
+                       const nc = [...data.cards];
+                       nc[idx].details = nc[idx].details.filter((_, i) => i !== dIdx);
+                       setForm({...form, data: {...data, cards: nc}});
+                     }} className="text-red-500 hover:bg-red-50 p-1.5 rounded transition-colors shrink-0"><Trash2 size={14} /></button>
+                   </div>
+                 ))}
+                 <button type="button" onClick={() => {
+                   const nc = [...data.cards];
+                   nc[idx].details = [...(nc[idx].details || []), ""];
+                   setForm({...form, data: {...data, cards: nc}});
+                 }} className="text-xs font-bold text-[#8d6a3a] flex items-center gap-1">+ Add Detail</button>
                </div>
             </div>
           ))}
-          <button type="button" onClick={() => setForm({...form, data: {...data, cards: [...data.cards, {id: randomId(), title: '', description: '', image: {imageUrl: '', alt: ''}}]}})} className="w-full border-2 border-dashed py-3 flex items-center justify-center text-gray-400 gap-2 hover:bg-gray-50"><Plus size={18} /> Add Solution Card</button>
+          <button type="button" onClick={() => setForm({...form, data: {...data, cards: [...data.cards, {id: randomId(), title: '', details: [], image: {imageUrl: '', alt: ''}}]}})} className="w-full border-2 border-dashed py-3 flex items-center justify-center text-gray-400 gap-2 hover:bg-gray-50"><Plus size={18} /> Add Solution Card</button>
         </div>
       </div>
     );

@@ -28,7 +28,7 @@ export const defaultProductData: Record<ProductPageContentKeys, any> = {
   },
   "product.trustedBy": {
     title: "Trusted By Leading Wellness Centers Worldwide",
-    images: [""]
+    images: [{image: "",alt:""}]
   },
   "product.whyChoose": {
     whyChoose: {

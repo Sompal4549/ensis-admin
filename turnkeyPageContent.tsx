@@ -12,6 +12,7 @@ export type TurnkeyPageContentKeys =
 export type TurnkeyBanner = {
   subheading: string;
   title: string;
+  highlight:string;
   description: string;
   features: { id: string; image: ImageData; title: string }[];
   primaryButton: { label: string; url: string };
@@ -72,6 +73,7 @@ export const defaultTurnkeyData: Record<TurnkeyPageContentKeys, any> = {
     subheading: "END-TO-END SOLUTIONS",
     title: "Comprehensive Turnkey Projects",
     description: "We handle everything from conceptualization to the final handover.",
+    highlight:"Complete Wellness Spaces",
     features: [
       { id: randomId(), title: "Concept Design", image: { imageUrl: "", alt: "" } },
       { id: randomId(), title: "Expert Engineering", image: { imageUrl: "", alt: "" } }
