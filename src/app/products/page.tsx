@@ -174,7 +174,7 @@ export default function ProductsPage() {
       category: productForm.category,
       subcategory: productForm.subcategory,
       material: productForm.material,
-      weight: Number(productForm.weight || 0),
+      weight: productForm.weight,
       tags: productForm.tags.filter(t => t.trim() !== ""),
       images: productForm.images,
       slug: productForm.slug.trim(),
