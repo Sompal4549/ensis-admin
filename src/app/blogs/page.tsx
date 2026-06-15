@@ -10,7 +10,8 @@ import PageStatsCards from '@/components/common/PageStatsCards';
 import RichTextEditor from '@/components/common/RichTextEditor';
 
 interface Blog {
-  _id: string;
+  _id?: string;
+  id?: string;
   title: string;
   slug: string;
   author: string;
@@ -19,6 +20,7 @@ interface Blog {
   subtitle?: string;
   description?: string;
   featureImage?: string;
+  featuredImage?: string;
   tags?: string[];
   readingTime?: number;
   isFeatured?: boolean; // Assuming this might be returned by the API
@@ -111,13 +113,15 @@ const BlogsManagement = () => {
         author: blogForm.author,
         image: blogForm.cardImage,
         featureImage: blogForm.featureImage,
+        featuredImage: blogForm.featureImage,
+        feature_image: blogForm.featureImage,
+        featured_image: blogForm.featureImage,
         tags: blogForm.tags.split(',').map(t => t.trim()).filter(Boolean),
         seo: blogForm.seo,
         robots: blogForm.robots,
         isFeatured: blogForm.isFeatured,
         readingTime: blogForm.readingTime || calculateReadingTime(blogForm.description)
       };
-      
       if (editingBlogId) {
         await api.put(`/blogs/${editingBlogId}`, payload);
         toast.success("Blog updated successfully!");
@@ -150,10 +154,12 @@ const BlogsManagement = () => {
   };
 
   const handleEditBlog = (blog: any) => {
-    setEditingBlogId(blog._id);
+    const blogId = blog._id || blog.id || null;
+    setEditingBlogId(blogId);
     const content = blog.content || '';
     const imgMatch = content.match(/<img[^>]*src=["']([^"']+)["'][^>]*>/i);
-    const firstImg = imgMatch ? imgMatch[1] : (blog.featureImage || '');
+    const firstImg = imgMatch ? imgMatch[1] : '';
+    const featureImageValue = blog.featureImage || blog.featuredImage || firstImg;
     const cleanedContent = content.replace(/<img[^>]*>/g, '');
     setBlogForm({
       title: blog.title || '',
@@ -162,7 +168,7 @@ const BlogsManagement = () => {
       description: cleanedContent,
       author: blog.author || '',
       cardImage: blog.image || '',
-      featureImage: firstImg,
+      featureImage: featureImageValue,
       tags: (blog.tags || []).join(', '),
       readingTime: blog.readingTime || 0,
       isFeatured: blog.isFeatured || false,
@@ -289,7 +295,7 @@ const BlogsManagement = () => {
             </div>
 
             <button type="submit" disabled={loading} className="w-full bg-blue-600 text-white py-2 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-blue-700 transition-colors mt-4">
-              {loading ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} />}{editingBlogId ? ' Update Blog' : ' Create Blog'}
+              {loading ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} />}{editingBlogId ? 'Update Blog' : 'Create Blog'}
             </button>
           </form>
         </section>
