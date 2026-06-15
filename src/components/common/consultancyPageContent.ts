@@ -15,21 +15,23 @@ export const consultancyPageKeys: { key: ConsultancyPageContentKeys; label: stri
   { key: "consultancy.readyToGetStarted", label: "Ready to Start", description: "Final CTA section for lead generation." },
 ];
 
+const randomId = () => Math.random().toString(36).slice(2, 9);
+
 export const defaultConsultancyData: Record<ConsultancyPageContentKeys, any> = {
   "consultancy.hero": {
-    heading: "", title: "", description: "", bgImage: "",titlepart1:"",titlepart2:"",titleHighlight:"",
-    features: [{ id: "1", image: "", title: "", description: "", primaryButton: { label: "", href: "" }, secondaryButton: { label: "", href: "" } }]
+    heading: "", title: "", description: "", bgImage: "", titlepart1: "", titlepart2: "", titleHighlight: "",
+    features: [{ id: randomId(), image: "", title: "", description: "", primaryButton: { label: "", href: "" }, secondaryButton: { label: "", href: "" } }]
   },
   "consultancy.features": {
-    items: [{ id: "1", title: "", heading: "", description: "", image: "" }]
+    items: [{ id: randomId(), title: "", heading: "", description: "", image: "" }]
   },
   "consultancy.whatWeOffer": {
     subheading: "", title: "", description: "",
-    serviceCards: [{ id: "1", title: "", description: "", learnMoreLink: "", imageUrl:"" }]
+    serviceCards: [{ id: randomId(), title: "", description: "", learnMoreLink: "", image: "", learnMoreText: "" }]
   },
   "consultancy.whyChooseOurProcess": {
     whyChoose: { heading: "", title: "", description: "", bgImage: "", chooseList: [""], primaryButton: { label: "", href: "" } },
-    ourProcess: { heading: "", title: "", processList: [{ id: "1", title: "", description: "", image: "" , color:""}] }
+    ourProcess: { heading: "", title: "", processList: [{ id: randomId(), title: "", description: "", image: "", color: "" }] }
   },
   "consultancy.readyToGetStarted": {
     title: "", heading: "", description: "", primaryButton: { label: "", href: "" }, bgImage: ""
@@ -38,9 +40,7 @@ export const defaultConsultancyData: Record<ConsultancyPageContentKeys, any> = {
 
 export const buildEmptyConsultancyContent = (key: ConsultancyPageContentKeys): Omit<ComponentContent, "_id"> & { key: ConsultancyPageContentKeys } => {
     const data = JSON.parse(JSON.stringify(defaultConsultancyData[key]));
-    
-    // Generate unique IDs for arrays
-    const randomId = () => Math.random().toString(36).slice(2, 9);
+
     if (data.features) data.features = data.features.map((f: any) => ({ ...f, id: randomId() }));
     if (data.items) data.items = data.items.map((i: any) => ({ ...i, id: randomId() }));
     if (data.serviceCards) data.serviceCards = data.serviceCards.map((s: any) => ({ ...s, id: randomId() }));

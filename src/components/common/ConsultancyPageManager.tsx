@@ -202,9 +202,10 @@ export default function ConsultancyPageManager() {
                       />
                     </div>
                     <label className={labelClass}>Learn More Link <input className={fieldClass} placeholder="e.g. /services/wellness" value={card.learnMoreLink || ""} onChange={e => { const nc = [...data.serviceCards]; nc[idx].learnMoreLink = e.target.value; setForm({...form, data: {...data, serviceCards: nc}}) }} /></label>
+                    <label className={labelClass}>Learn More Text <input className={fieldClass} placeholder="e.g. Learn More" value={card.learnMoreText || ""} onChange={e => { const nc = [...data.serviceCards]; nc[idx].learnMoreText = e.target.value; setForm({...form, data: {...data, serviceCards: nc}}) }} /></label>
                 </div>
             ))}
-            <button type="button" onClick={() => setForm({...form, data: {...data, serviceCards: [...(data.serviceCards || []), {id: randomId(), title: '', description: '', image: '', learnMoreLink: ''}]}})} className="w-full py-4 border-2 border-dashed rounded-xl text-slate-400 flex items-center justify-center gap-2 hover:bg-slate-50 transition-colors"><Plus size={20} /> Add Service Card</button>
+            <button type="button" onClick={() => setForm({...form, data: {...data, serviceCards: [...(data.serviceCards || []), {id: randomId(), title: '', description: '', image: '', learnMoreLink: '', learnMoreText: ''}]}})} className="w-full py-4 border-2 border-dashed rounded-xl text-slate-400 flex items-center justify-center gap-2 hover:bg-slate-50 transition-colors"><Plus size={20} /> Add Service Card</button>
         </div>
       </div>
     );
