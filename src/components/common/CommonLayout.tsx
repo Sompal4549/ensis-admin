@@ -198,6 +198,11 @@ const NAV_ITEMS: NavItem[] = [
         path: "/products",
         icon: <Boxes size={16} />,
       },
+         {
+        label: "blogs",
+        path: "/blogs",
+        icon: <MessageSquare size={16} />,
+      },
       {
         label: "Categories",
         path: "/categories-management", // Assuming a new page for categories

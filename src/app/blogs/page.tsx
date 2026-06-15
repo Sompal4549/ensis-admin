@@ -206,10 +206,6 @@ const BlogsManagement = () => {
 
   return (
     <div className="space-y-6 pb-10">
-      <div className="mb-4">
-        <PageStatsCards pageName="blog" />
-      </div>
-
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
         <section className="bg-white border rounded-2xl shadow-sm overflow-hidden">
           <div className="bg-slate-50 border-b p-4 px-6 flex items-center gap-2">
