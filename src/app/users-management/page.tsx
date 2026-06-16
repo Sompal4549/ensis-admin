@@ -11,6 +11,7 @@ import {
   Loader2, 
   Mail,
   Lock,
+  Phone,
   Search,
 } from "lucide-react";
 import { fieldClass, labelClass } from "@/constants";
@@ -25,7 +26,7 @@ function UsersManagementPage() {
   const [currentId, setCurrentId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const [form, setForm] = useState({ name: "", email: "", password: "", role: "admin" });
+  const [form, setForm] = useState({ name: "", email: "", phone: "", role: "admin" });
 
   useEffect(() => {
     fetchUsers();
@@ -50,14 +51,14 @@ function UsersManagementPage() {
     setForm({
       name: user.name,
       email: user.email,
-      password: "", 
+      phone: user.phone || "",
       role: user.role
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const resetForm = () => {
-    setForm({ name: "", email: "", password: "", role: "admin" });
+    setForm({ name: "", email: "", phone: "", role: "admin" });
     setIsEditing(false);
     setCurrentId(null);
   };
@@ -68,12 +69,11 @@ function UsersManagementPage() {
     try {
       if (isEditing && currentId) {
         const payload: Partial<typeof form> = { ...form };
-        if (!payload.password) delete payload.password;
         await adminApi.updateUser(currentId, payload);
         toast.success("User updated successfully");
       } else {
-        if (!form.password) {
-          toast.error("Password is required for new users");
+        if (!form.phone) {
+          toast.error("Phone number is required for new users");
           setFormLoading(false);
           return;
         }
@@ -104,7 +104,8 @@ function UsersManagementPage() {
 
   const filteredUsers = users.filter(u => 
     u.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    u.email.toLowerCase().includes(searchTerm.toLowerCase())
+    u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    u.phone?.includes(searchTerm)
   );
 
   return (
@@ -114,7 +115,7 @@ function UsersManagementPage() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
           <input 
             type="text" 
-            placeholder="Search users by name or email..." 
+            placeholder="Search users by name, email or phone..." 
             className={`${fieldClass} pl-10 w-full`}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -140,6 +141,7 @@ function UsersManagementPage() {
                 <tr className="bg-slate-50/50 border-b border-slate-100 text-slate-500 uppercase text-[10px] font-bold tracking-wider">
                   <th className="px-6 py-3">Name</th>
                   <th className="px-6 py-3">Email</th>
+                  <th className="px-6 py-3">Phone</th>
                   <th className="px-6 py-3 text-right">Actions</th>
                 </tr>
               </thead>
@@ -162,6 +164,7 @@ function UsersManagementPage() {
                       <div className="text-[10px] text-slate-400 uppercase font-bold mt-0.5">{user.role}</div>
                     </td>
                     <td className="px-6 py-4 text-slate-500">{user.email}</td>
+                    <td className="px-6 py-4 text-slate-500">{user.phone || "—"}</td>
                     <td className="px-6 py-4 text-right space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button onClick={() => handleEdit(user)} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer">
                         <Edit size={16} />
@@ -206,14 +209,13 @@ function UsersManagementPage() {
               </div>
             </div>
             <div>
-              <label className={labelClass}>{isEditing ? "Change Password" : "Password"}</label>
+              <label className={labelClass}>WhatsApp Number</label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
                 <input 
-                  type="password" className={`${fieldClass} pl-9`} 
-                  placeholder={isEditing ? "Leave blank to keep current" : "••••••••"}
-                  minLength={8}
-                  value={form.password} onChange={(e) => setForm({...form, password: e.target.value})}
+                  type="tel" required className={`${fieldClass} pl-9`} 
+                  placeholder="91XXXXXXXXXX"
+                  value={form.phone} onChange={(e) => setForm({...form, phone: e.target.value})}
                 />
               </div>
             </div>

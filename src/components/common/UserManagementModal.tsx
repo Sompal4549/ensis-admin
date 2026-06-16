@@ -2,7 +2,7 @@
 
 import { toast } from "react-toastify";
 import { useState } from "react";
-import { X, Loader2, ShieldCheck } from "lucide-react";
+import { X, Loader2, ShieldCheck, Phone } from "lucide-react";
 import { fieldClass, labelClass } from "@/constants";
 import { api } from "@/lib/api";
 
@@ -12,7 +12,7 @@ interface UserManagementModalProps {
 }
 
 export default function UserManagementModal({ isOpen, onClose }: UserManagementModalProps) {
-  const [form, setForm] = useState({ name: "", email: "", password: "", role: "admin" });
+  const [form, setForm] = useState({ name: "", email: "", phone: "", role: "admin" });
   const [loading, setLoading] = useState(false);
 
   if (!isOpen) return null;
@@ -27,7 +27,7 @@ export default function UserManagementModal({ isOpen, onClose }: UserManagementM
       toast.success("User created successfully!");
       setTimeout(() => {
         onClose();
-        setForm({ name: "", email: "", password: "", role: "admin" });
+        setForm({ name: "", email: "", phone: "", role: "admin" });
       }, 1500);
     } catch (error) {
       const errMsg = (error as any).response?.data?.message || "Failed to create user";
@@ -78,16 +78,18 @@ export default function UserManagementModal({ isOpen, onClose }: UserManagementM
           </div>
 
           <div>
-            <label className={labelClass}>Initial Password</label>
+            <label className={labelClass}>WhatsApp Number</label>
+            <div className="relative mt-1">
+              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
             <input
-              type="password"
+              type="tel"
               required
-              minLength={8}
-              className={`${fieldClass} mt-1`}
-              placeholder="••••••••"
-              value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
+              className={`${fieldClass} pl-9`}
+              placeholder="91XXXXXXXXXX"
+              value={form.phone}
+              onChange={(e) => setForm({ ...form, phone: e.target.value })}
             />
+            </div>
           </div>
 
           <div>

@@ -1,14 +1,14 @@
 "use client";
 
 import { createContext, FormEvent, useContext, useEffect, useMemo, useState } from "react";
-import { Lock } from "lucide-react";
-import { adminApi, authStore, type AuthUser } from "@/lib/api";
+import { Lock, Phone, Key, Loader2 } from "lucide-react";
+import { api, authStore, type AuthUser } from "@/lib/api";
 import { fieldClass, labelClass } from "@/constants";
 
 type AuthContextValue = {
   user: AuthUser | null;
   isReady: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (phone: string, otp: string) => Promise<void>;
   logout: () => void;
 };
 
@@ -27,8 +27,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsReady(true);
   }, []);
 
-  const login = async (email: string, password: string) => {
-    const result = await adminApi.login(email, password);
+  const login = async (phone: string, otp: string) => {
+    const response = await api.post('/admin/login', { phone, otp });
+    const result = response.data?.data || response.data;
     authStore.setSession(result.accessToken, result.user);
     setUser(result.user);
   };
@@ -53,19 +54,53 @@ export function useAuth() {
 
 export function LoginForm() {
   const { login } = useAuth();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("");
+  const [otp, setOtp] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [timer, setTimer] = useState(0);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (timer > 0) {
+      interval = setInterval(() => {
+        setTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [timer]);
+
+  const handleSendOtp = async () => {
+    if (!phone) {
+      setMessage("Please enter your phone number.");
+      return;
+    }
+    setLoading(true);
+    setMessage("");
+    try {
+      await api.post('/auth/whatsapp-otp/send', {
+        phone,
+        purpose: "admin-login"
+      });
+      setOtpSent(true);
+      setTimer(60);
+      setMessage("OTP sent successfully to WhatsApp.");
+    } catch (error: any) {
+      setMessage(error.response?.data?.message || (error as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setLoading(true);
     setMessage("");
     try {
-      await login(email, password);
-    } catch (error) {
-      setMessage((error as Error).message);
+      await login(phone, otp);
+    } catch (error: any) {
+      setMessage(error.response?.data?.message || (error as Error).message);
     } finally {
       setLoading(false);
     }
@@ -82,40 +117,86 @@ export function LoginForm() {
         </div>
         <h1 className="text-2xl font-bold text-slate-800">Ensis Admin</h1>
         <p className="mt-1.5 text-xs text-slate-400">
-          Sign in with your credentials to access the admin control panel.
+          Sign in using OTP to access the admin control panel.
         </p>
 
         <div className="mt-6 space-y-4">
           <div>
-            <label className={labelClass}>Email Address</label>
-            <input
-              className={fieldClass}
-              type="email"
-              placeholder="admin@ensis.in"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              required
-            />
+            <label className={labelClass}>Phone Number</label>
+            <div className="relative">
+              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+              <input
+                className={`${fieldClass} pl-10`}
+                type="tel"
+                placeholder="91XXXXXXXXXX"
+                value={phone}
+                onChange={(event) => setPhone(event.target.value)}
+                required
+                disabled={otpSent}
+              />
+            </div>
           </div>
-          <div>
-            <label className={labelClass}>Password</label>
-            <input
-              className={fieldClass}
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              required
-            />
-          </div>
+          {otpSent && (
+            <div>
+              <label className={labelClass}>Enter OTP</label>
+              <div className="relative">
+                <Key className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                <input
+                  className={`${fieldClass} pl-10`}
+                  type="text"
+                  placeholder="123456"
+                  value={otp}
+                  onChange={(event) => setOtp(event.target.value)}
+                  required
+                />
+              </div>
+            </div>
+          )}
         </div>
 
-        <button
-          className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#1d5af2] py-3 text-sm font-bold text-white shadow-md shadow-blue-500/10 transition-colors hover:bg-[#154dc8] disabled:opacity-75"
-          disabled={loading}
-        >
-          {loading ? "Signing In..." : "Sign In"}
-        </button>
+        <div className="mt-6 space-y-3">
+          {!otpSent ? (
+            <button
+              type="button"
+              onClick={handleSendOtp}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#1d5af2] py-3 text-sm font-bold text-white shadow-md shadow-blue-500/10 transition-colors hover:bg-[#154dc8] disabled:opacity-75 cursor-pointer"
+              disabled={loading}
+            >
+              {loading ? <Loader2 className="animate-spin" size={18} /> : "Send OTP"}
+            </button>
+          ) : (
+            <>
+              <button
+                type="submit"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#1d5af2] py-3 text-sm font-bold text-white shadow-md shadow-blue-500/10 transition-colors hover:bg-[#154dc8] disabled:opacity-75 cursor-pointer"
+                disabled={loading}
+              >
+                {loading ? <Loader2 className="animate-spin" size={18} /> : "Sign In"}
+              </button>
+              
+              <button
+                type="button"
+                onClick={handleSendOtp}
+                disabled={loading || timer > 0}
+                className="w-full inline-flex items-center justify-center gap-2 py-1 text-xs font-bold text-blue-600 hover:text-blue-700 disabled:text-slate-400 transition-colors cursor-pointer disabled:cursor-not-allowed"
+              >
+                {loading && <Loader2 className="animate-spin" size={12} />}
+                {timer > 0 ? `Resend OTP in ${timer}s` : "Resend OTP"}
+              </button>
+            </>
+          )}
+        </div>
+
+        {otpSent && (
+          <button 
+            type="button" 
+            onClick={() => { setOtpSent(false); setOtp(""); setTimer(0); }} 
+            className="mt-3 text-center w-full text-xs font-semibold text-slate-500 hover:text-blue-600 underline"
+          >
+            Change Phone Number
+          </button>
+        )}
+
         {message && (
           <p className="mt-4 rounded-lg border border-rose-100 bg-rose-50/50 p-2.5 text-xs font-semibold text-rose-600">
             {message}
