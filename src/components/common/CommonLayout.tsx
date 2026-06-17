@@ -176,64 +176,76 @@ const NAV_ITEMS: NavItem[] = [
         path: "/contact-page-management",
         icon: <Headphones size={16} />,
       },
-
-
-
-
+    
+     {
+        label: "Projects & Clients",
+        path: "/projects-and-clients",
+        icon: <FolderOpen size={16} />,
+      },
+    
       {
         label: "Careers",
         path: "/careers-management",
         icon: <UserRoundPlus size={16} />,
       },
-
+     {
+        label: "Enquary Page Management",
+        path: "/enquiry-page-management",
+        icon: <UserRoundPlus size={16} />,
+      },
     ],
   },
-  {
-    label: "Products Page Management",
-    path: "/product-page-management",
-    icon: <Boxes size={16} />,
-  },
-  {
-    label: "Products",
-    path: "/products",
-    icon: <Boxes size={16} />,
-  },
-  {
-    label: "blogs",
-    path: "/blogs",
-    icon: <MessageSquare size={16} />,
-  },
-  {
-    label: "Categories",
-    path: "/categories-management", // Assuming a new page for categories
-    icon: <LayoutGrid size={16} />,
-  },
-  {
-    label: "Site Header",
-    path: "/header",
-    icon: <AlignJustify size={16} />,
-  },
-
-  {
-    label: "Site Footer",
-    path: "/footer",
-    icon: <PanelBottom size={16} />,
-  },
-  {
-    label: "Orders",
-    path: "/orders-list-management",
-    icon: <ArrowDownToLine size={16} />,
-  },
-  {
-    label: "Projects",
-    path: "/projects-management",
-    icon: <FolderOpen size={16} />,
-  },
-  {
-    label: "User Management",
-    path: "/users-management",
-    icon: < UserRoundCog size={16} />,
-  },
+     {
+        label: "Products Page Management",
+        path: "/product-page-management",
+        icon: <Boxes size={16} />,
+      },
+         {
+        label: "Products",
+        path: "/products",
+        icon: <Boxes size={16} />,
+      },
+         {
+        label: "blogs",
+        path: "/blogs",
+        icon: <MessageSquare size={16} />,
+      },
+      {
+        label: "Categories",
+        path: "/categories-management", // Assuming a new page for categories
+        icon: <LayoutGrid size={16} />,
+      },
+    {
+        label: "Site Header",
+        path: "/header",
+        icon: <AlignJustify size={16} />,
+      },
+    
+      {
+        label: "Site Footer",
+        path: "/footer",
+        icon: <PanelBottom size={16} />,
+      },
+      {
+        label: "Orders",
+        path: "/orders-list-management",
+        icon: <ArrowDownToLine size={16} />,
+      },
+    {
+        label: "Projects",
+        path: "/projects-management",
+        icon: <FolderOpen size={16} />,
+      },
+      {
+        label: "User Management",
+        path: "/users-management",
+        icon: < UserRoundCog size={16} />,
+      },
+       {
+        label: "Enquaries",
+        path: "/enquries",
+        icon: < UserRoundCog size={16} />,
+      },
   {
     label: "SEO",
     path: "/seo",
