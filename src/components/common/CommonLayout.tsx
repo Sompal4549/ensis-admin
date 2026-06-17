@@ -133,7 +133,7 @@ const NAV_ITEMS: NavItem[] = [
             label: "Blog Insights",
             path: "/homepage-content/blog-insights",
           },
-           {
+          {
             label: "Ready To Build",
             path: "/homepage-content/ready-to-build",
           },
@@ -156,7 +156,7 @@ const NAV_ITEMS: NavItem[] = [
           { label: "Lets Build", path: "/about-page-content/lets-build" },
         ],
       },
-        {
+      {
         label: "Turnkey",
         path: "/turnkey-page-content",
         icon: <Briefcase size={16} />,
@@ -176,64 +176,64 @@ const NAV_ITEMS: NavItem[] = [
         path: "/contact-page-management",
         icon: <Headphones size={16} />,
       },
-    
-    
-   
-    
+
+
+
+
       {
         label: "Careers",
         path: "/careers-management",
         icon: <UserRoundPlus size={16} />,
       },
-  
+
     ],
   },
-     {
-        label: "Products Page Management",
-        path: "/product-page-management",
-        icon: <Boxes size={16} />,
-      },
-         {
-        label: "Products",
-        path: "/products",
-        icon: <Boxes size={16} />,
-      },
-         {
-        label: "blogs",
-        path: "/blogs",
-        icon: <MessageSquare size={16} />,
-      },
-      {
-        label: "Categories",
-        path: "/categories-management", // Assuming a new page for categories
-        icon: <LayoutGrid size={16} />,
-      },
-    {
-        label: "Site Header",
-        path: "/header",
-        icon: <AlignJustify size={16} />,
-      },
-    
-      {
-        label: "Site Footer",
-        path: "/footer",
-        icon: <PanelBottom size={16} />,
-      },
-      {
-        label: "Orders",
-        path: "/orders-list-management",
-        icon: <ArrowDownToLine size={16} />,
-      },
-    {
-        label: "Projects",
-        path: "/projects-management",
-        icon: <FolderOpen size={16} />,
-      },
-      {
-        label: "User Management",
-        path: "/users-management",
-        icon: < UserRoundCog size={16} />,
-      },
+  {
+    label: "Products Page Management",
+    path: "/product-page-management",
+    icon: <Boxes size={16} />,
+  },
+  {
+    label: "Products",
+    path: "/products",
+    icon: <Boxes size={16} />,
+  },
+  {
+    label: "blogs",
+    path: "/blogs",
+    icon: <MessageSquare size={16} />,
+  },
+  {
+    label: "Categories",
+    path: "/categories-management", // Assuming a new page for categories
+    icon: <LayoutGrid size={16} />,
+  },
+  {
+    label: "Site Header",
+    path: "/header",
+    icon: <AlignJustify size={16} />,
+  },
+
+  {
+    label: "Site Footer",
+    path: "/footer",
+    icon: <PanelBottom size={16} />,
+  },
+  {
+    label: "Orders",
+    path: "/orders-list-management",
+    icon: <ArrowDownToLine size={16} />,
+  },
+  {
+    label: "Projects",
+    path: "/projects-management",
+    icon: <FolderOpen size={16} />,
+  },
+  {
+    label: "User Management",
+    path: "/users-management",
+    icon: < UserRoundCog size={16} />,
+  },
   {
     label: "SEO",
     path: "/seo",
@@ -282,7 +282,7 @@ const NAV_ITEMS: NavItem[] = [
         label: "About Images",
         path: "/media/about",
       },
-         {
+      {
         label: "Products Images",
         path: "/media/products",
       },
@@ -323,11 +323,10 @@ function MenuItem({
           <Link
             href={item.path}
             onClick={() => handleNavigate(item.path!)}
-            className={`flex min-h-8 flex-1 items-center gap-2.5 rounded-lg px-3 py-1.5 text-[13px] font-medium transition-all ${
-              isActive
+            className={`flex min-h-8 flex-1 items-center gap-2.5 rounded-lg px-3 py-1.5 text-[13px] font-medium transition-all ${isActive
                 ? "bg-[#1d5af2] text-white shadow-md shadow-blue-500/10"
                 : "text-slate-400 hover:text-white hover:bg-[#111e38]"
-            } ${collapsed ? "justify-center px-0" : "px-3"}`}
+              } ${collapsed ? "justify-center px-0" : "px-3"}`}
             style={{ marginLeft: collapsed ? 0 : `${level * 12}px` }}
           >
             {item.icon && <span className={`${isActive ? "text-white" : "text-slate-400 group-hover:text-white"} transition-colors`}>{item.icon}</span>}
@@ -335,9 +334,8 @@ function MenuItem({
           </Link>
         ) : (
           <div
-            className={`flex min-h-8 flex-1 cursor-default items-center gap-2.5 rounded-lg py-1.5 text-[13px] font-medium text-slate-400 ${
-              collapsed ? "justify-center px-0" : "px-3"
-            }`}
+            className={`flex min-h-8 flex-1 cursor-default items-center gap-2.5 rounded-lg py-1.5 text-[13px] font-medium text-slate-400 ${collapsed ? "justify-center px-0" : "px-3"
+              }`}
             style={{ marginLeft: collapsed ? 0 : `${level * 12}px` }}
           >
             {item.icon && <span className="text-slate-400">{item.icon}</span>}
@@ -358,9 +356,8 @@ function MenuItem({
           >
             <ChevronDown
               size={14}
-              className={`transition-transform duration-200 ${
-                isOpen ? "rotate-180" : "-rotate-90"
-              }`}
+              className={`transition-transform duration-200 ${isOpen ? "rotate-180" : "-rotate-90"
+                }`}
             />
           </button>
         )}
@@ -408,13 +405,13 @@ export function Sidebar({ activePath, onNavigate, collapsed, setCollapsed }: Sid
   };
 
   return (
-    <aside className={`fixed top-0 left-0 z-40 flex h-screen flex-shrink-0 flex-col transition-all duration-300 ${collapsed ? "w-16" : "w-64"} `} style={{backgroundImage:`url(${sidebarBg.src})`, backgroundSize: '100% 100%', backgroundRepeat: 'no-repeat'}}>
+    <aside className={`fixed top-0 left-0 z-40 flex h-screen shrink-0 flex-col transition-all duration-300 ${collapsed ? "w-16" : "w-64"} `} style={{ backgroundImage: `url(${sidebarBg.src})`, backgroundSize: '100% 100%', backgroundRepeat: 'no-repeat' }}>
       {/* Logo Header */}
       <div className="flex items-center border-b border-[#162544] px-5 py-4">
         {!collapsed ? (
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-2">
-              <Image width={150} height={28}src="/images/ensis-logo.png" alt="Ensis Logo" className="h-10 w-auto object-contain" />
+              <Image width={150} height={28} src="/images/ensis-logo.png" alt="Ensis Logo" className="h-10 w-auto object-contain" />
             </div>
           </div>
         ) : (
@@ -426,7 +423,7 @@ export function Sidebar({ activePath, onNavigate, collapsed, setCollapsed }: Sid
       {!collapsed && (
         <div className="mx-3 my-3 flex items-center justify-between rounded-xl border border-[#162544] bg-[#111e38] p-2.5">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-blue-600 text-white">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white">
               <User size={18} />
             </div>
             <div className="min-w-0 flex-1">
@@ -434,7 +431,7 @@ export function Sidebar({ activePath, onNavigate, collapsed, setCollapsed }: Sid
               <p className="truncate text-[10px] text-slate-400 uppercase font-medium tracking-wider">{user?.role || 'Admin'}</p>
             </div>
           </div>
-          <ChevronDown size={14} className="text-slate-400 flex-shrink-0" />
+          <ChevronDown size={14} className="text-slate-400 shrink-0" />
         </div>
       )}
 
@@ -461,7 +458,7 @@ export function Sidebar({ activePath, onNavigate, collapsed, setCollapsed }: Sid
 
       {/* Need Help Card */}
       {!collapsed ? (
-        <div className="mx-3 mb-4 mt-auto flex items-center justify-between rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 p-3 text-white shadow-lg shadow-blue-900/10">
+        <div className="mx-3 mb-4 mt-auto flex items-center justify-between rounded-xl bg-linear-to-r from-blue-600 to-blue-700 p-3 text-white shadow-lg shadow-blue-900/10">
           <div className="flex items-center gap-3">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/15 text-white">
               <Headphones size={16} />
@@ -494,7 +491,7 @@ export function Topbar({ title = "Dashboard", collapsed, setCollapsed }: TopbarP
     if (pathname === "/") return ["Home", "Dashboard"];
     const segments = pathname.split("/").filter(Boolean);
     const crumbs = ["Home"];
-    
+
     segments.forEach((seg) => {
       if (seg === "homepage-content") {
         crumbs.push("Pages", "Home");
@@ -526,14 +523,14 @@ export function Topbar({ title = "Dashboard", collapsed, setCollapsed }: TopbarP
   };
 
   // Generate initials for the avatar badge
-  const initials = user?.name 
+  const initials = user?.name
     ? user.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)
     : "AD";
 
   const isSuperAdmin = user?.role?.toLowerCase() === "superadmin";
 
   return (
-    <header className="flex h-16 flex-shrink-0 items-center justify-between border-b border-slate-100 bg-white px-6 z-30">
+    <header className="flex h-16 shrink-0 items-center justify-between border-b border-slate-100 bg-white px-6 z-30">
       {/* Title & Breadcrumbs */}
       <div className="flex items-center gap-4">
         <button
@@ -591,7 +588,7 @@ export function Topbar({ title = "Dashboard", collapsed, setCollapsed }: TopbarP
 
         {/* Notification Bell */}
         <div className="relative">
-          <button 
+          <button
             onClick={() => setShowNotifications(!showNotifications)}
             className="relative p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-colors cursor-pointer outline-none"
           >
@@ -672,9 +669,9 @@ export function Topbar({ title = "Dashboard", collapsed, setCollapsed }: TopbarP
       </div>
 
       {/* Modal for User Management */}
-      <UserManagementModal 
-        isOpen={showUserModal} 
-        onClose={() => setShowUserModal(false)} 
+      <UserManagementModal
+        isOpen={showUserModal}
+        onClose={() => setShowUserModal(false)}
       />
     </header>
   );
@@ -698,7 +695,8 @@ export function CommonLayout({
   const pathname = usePathname();
   const isComponentPage =
     pathname.startsWith("/homepage-content/") ||
-    pathname.startsWith("/about-page-content/");
+    pathname.startsWith("/about-page-content/") ||
+    pathname.startsWith("/product-listing");
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -801,11 +799,10 @@ export function CommonLayout({
             </div>
           )}
 
-          <div className={`grid gap-6 ${
-            !editingKey && !isComponentPage
-              ? (pageConfig.name !== "dashboard" ? "xl:grid-cols-[320px_1fr_420px]" : "xl:grid-cols-[1fr_420px]") 
+          <div className={`grid gap-6 ${!editingKey && !isComponentPage
+              ? (pageConfig.name !== "dashboard" ? "xl:grid-cols-[320px_1fr_420px]" : "xl:grid-cols-[1fr_420px]")
               : "grid-cols-1"
-          }`}>
+            }`}>
             {pageConfig.name !== "dashboard" && !editingKey && !isComponentPage && (
               <aside className="space-y-4">
                 <section className="space-y-4">
@@ -815,19 +812,19 @@ export function CommonLayout({
                         <h2 className="text-lg font-semibold">Components</h2>
                         <p className="text-sm text-[#5f5a50]">List of {pageConfig.name} component content records.</p>
                       </div>
-                      <button 
-                        type="button" 
-                        onClick={refreshComponents} 
+                      <button
+                        type="button"
+                        onClick={refreshComponents}
                         className="rounded-md border border-[#d9cdbb] bg-white px-3 py-2 text-sm font-semibold text-[#263016]"
                       >
                         Refresh
                       </button>
                     </div>
                     <div className="p-0">
-                      <ComponentList 
-                        records={records} 
-                        onEdit={(r) => router.push(`?component=${r.key}`)} 
-                        onDelete={handleDelete} 
+                      <ComponentList
+                        records={records}
+                        onEdit={(r) => router.push(`?component=${r.key}`)}
+                        onDelete={handleDelete}
                         onReorder={onReorder}
                         editingId={records.find(r => r.key === editingKey)?._id || null}
                         knownKeys={records.map(r => r.key)}
@@ -848,7 +845,7 @@ export function CommonLayout({
                     <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Live Preview</h3>
                     <p className="text-[10px] text-slate-500 italic truncate">Visualizing: {pageConfig.url}</p>
                   </div>
-                  <LivePreviewIframe 
+                  <LivePreviewIframe
                     iframeSrc={pageConfig.url}
                     ctaHref={pageConfig.url}
                     pageName={pageConfig.name}

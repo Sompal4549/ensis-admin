@@ -9,12 +9,12 @@ export const metadata: Metadata = {
   description: "Admin console for Ensis products and categories",
 };
 
-const montserrat = Montserrat({ subsets: ['latin'], weight: ['300','400','500','600','700'], variable: '--font-montserrat' });
-const cormorant = Playfair_Display({ subsets: ['latin'], weight: ['400','600','700'], variable: '--font-cormorant' });
+const montserrat = Montserrat({ subsets: ['latin'], weight: ['300', '400', '500', '600', '700'], variable: '--font-montserrat' });
+const cormorant = Playfair_Display({ subsets: ['latin'], weight: ['400', '600', '700'], variable: '--font-cormorant' });
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-     <html lang="en" className={`${montserrat.variable} ${cormorant.variable}`}>
+    <html lang="en" className={`${montserrat.variable} ${cormorant.variable}`}>
       <body>
         <AuthProvider>
           <Suspense> {/* Wrap CommonLayout with Suspense */}
