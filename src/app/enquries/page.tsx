@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import { Loader2, RefreshCw, Mail, User, Clock } from 'lucide-react';
 import { fieldClass } from "@/constants";
+import { api, API_URL } from '@/lib/api';
 
 interface Enquiry {
   _id: string;
@@ -16,6 +17,7 @@ interface Enquiry {
   createdAt: string;
 }
 
+
 const EnquiriesPage = () => {
   const [enquiries, setEnquiries] = useState<Enquiry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -24,13 +26,14 @@ const EnquiriesPage = () => {
   const fetchEnquiries = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/v1/admin/enquiries');
-      if (!response.ok) throw new Error('Failed to fetch enquiries');
-      const data = await response.json();
-      // Standardizing data access depending on API structure
-      setEnquiries(Array.isArray(data) ? data : data.data || []);
+      // Using the 'api' instance automatically includes the Bearer token in the headers
+      const response = await api.get(`${API_URL}/admin/enquiries`);
+      const data = response.data?.data || response.data;
+
+      // Standardizing data access
+      setEnquiries(Array.isArray(data) ? data : []);
     } catch (error: any) {
-      toast.error(error.message || "Error loading enquiries");
+      toast.error(error.response?.data?.message || error.message || "Error loading enquiries");
     } finally {
       setLoading(false);
     }
@@ -39,13 +42,9 @@ const EnquiriesPage = () => {
   const handleUpdateStatus = async (id: string, newStatus: string) => {
     setUpdatingId(id);
     try {
-      const response = await fetch(`/api/v1/admin/enquiries/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus }),
+      await api.put(`${API_URL}/admin/enquiries/${id}`, {
+        status: newStatus,
       });
-
-      if (!response.ok) throw new Error('Failed to update status');
       
       toast.success(`Status updated to ${newStatus}`);
       
@@ -54,7 +53,7 @@ const EnquiriesPage = () => {
         prev.map(item => item._id === id ? { ...item, status: newStatus as any } : item)
       );
     } catch (error: any) {
-      toast.error(error.message || "Failed to update status");
+      toast.error(error.response?.data?.message || error.message || "Failed to update status");
     } finally {
       setUpdatingId(null);
     }

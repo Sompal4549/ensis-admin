@@ -188,7 +188,11 @@ const NAV_ITEMS: NavItem[] = [
         path: "/careers-management",
         icon: <UserRoundPlus size={16} />,
       },
-  
+     {
+        label: "Enquary Page Management",
+        path: "/enquiry-page-management",
+        icon: <UserRoundPlus size={16} />,
+      },
     ],
   },
      {

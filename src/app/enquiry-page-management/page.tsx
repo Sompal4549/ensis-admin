@@ -1,592 +1,288 @@
 "use client";
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { productApi, getImageUrl, type Product } from "@/lib/api";
+import { Loader2 } from 'lucide-react';
+import Image from 'next/image';
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { toast } from 'react-toastify';
-import { Loader2, Save, Trash2, PlusCircle } from 'lucide-react';
-import { componentContentApi, type ComponentContent } from "@/lib/api";
-import { fieldClass, labelClass } from "@/constants";
-import { ImageUploadField } from "@/components/common/ImageUploadField";
-import RichTextEditor from "@/components/common/RichTextEditor";
+const topFeatures = [
+    { title: "PREMIUM QUALITY", desc: "High-grade materials and superior finish", img: "/images/PREMIUM.png" },
+    { title: "DURABLE & RELIABLE", desc: "Built for long-lasting performance", img: "/images/DURABLE & RELIABLE.png" },
+    { title: "TRADITIONAL DESIGN", desc: "Authentic Ayurveda heritage", img: "/images/TRADITIONAL DESIGN.png" },
+    { title: "ERGONOMIC & COMFORTABLE", desc: "Designed for therapist & client comfort", img: "/images/ERGONOMIC & COMFORTABLE.png" },
+    { title: "MADE FOR WELLNESS", desc: "Ideal for Ayurvedic centres & spas", img: "/images/MADE FOR WELLNESS.png" },
+];
 
-// Options shown in selects / checkboxes / radios
+const bottomFeatures = [
+    { title: "100% Quality Assured", desc: "Strict quality check on every product", img: "/images/100%25 Quality Assured.png" },
+    { title: "Customisation Available", desc: "Modify size, design & features as per need", img: "/images/Customisation Available.png" },
+    { title: "Pan India Delivery", desc: "Safe & secure packing with timely delivery", img: "/images/Pan India Delivery.png" },
+    { title: "After Sale Support", desc: "Dedicated support for a worry-free experience", img: "/images/After Sale.png" },
+    { title: "Trusted by Professionals", desc: "Preferred choice of leading Ayurvedic centres & spas", img: "/images/Trusted by Professionals.png" },
+];
 
-export interface SelectOption {
-  value: string;
-  label: string;
-}
+const PhoneIcon = () => (
+    <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+        <path d="M20 15.5c-1.2 0-2.4-.2-3.6-.6-.3-.1-.7 0-1 .2l-2.2 2.2c-2.8-1.4-5.1-3.8-6.6-6.6l2.2-2.2c.3-.3.4-.7.2-1-.4-1.2-.6-2.4-.6-3.6 0-.6-.5-1-1-1H4c-.6 0-1 .5-1 1 0 9.4 7.6 17 17 17 .6 0 1-.5 1-1v-3.5c0-.6-.5-1-1-1z" />
+    </svg>
+);
 
-export interface CheckboxOption {
-  id: string;
-  label: string;
-}
+const WebIcon = () => (
+    <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
+    </svg>
+);
 
-export interface RadioOption {
-  id: string;
-  label: string;
-}
+const MailIcon = () => (
+    <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+        <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+    </svg>
+);
 
-export interface WhyChooseItem {
-  id: string;
-  iconSrc: string;
-  iconAlt: string;
-  title: string;
-  description: string;
-}
+const LotusIcon = () => (
+    <svg viewBox="0 0 60 60" className="h-10 w-10" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M30 48 C30 48 12 36 12 24 C12 18 18 14 24 16 C24 16 24 8 30 6 C36 8 36 16 36 16 C42 14 48 18 48 24 C48 36 30 48 30 48Z" fill="#c99b3b" opacity="0.85" />
+        <path d="M30 48 C30 48 18 38 16 28 C19 30 22 30 24 28 C26 34 28 40 30 48Z" fill="#a07828" />
+        <path d="M30 48 C30 48 42 38 44 28 C41 30 38 30 36 28 C34 34 32 40 30 48Z" fill="#a07828" />
+        <path d="M30 6 C30 6 28 14 28 20 C28 26 30 30 30 30 C30 30 32 26 32 20 C32 14 30 6 30 6Z" fill="#e8b84b" />
+        <circle cx="30" cy="30" r="3" fill="#fff" opacity="0.3" />
+    </svg>
+);
 
-export interface EnquiryPageContent {
-  brand: {
-    logoSrc: string;
-    logoAlt: string;
-    tagline: string;
-  };
-  hero: {
-    heading: string;
-    subheading: string;
-    description: string;
-    imageSrc: string;
-    imageAlt: string;
-  };
-  formTitle: string;
-  projectTypeOptions: SelectOption[];
-  stateOptions: SelectOption[];
-  cityOptions: SelectOption[];
-  projectSizeOptions: SelectOption[];
-  budgetRangeOptions: SelectOption[];
-  timelineOptions: SelectOption[];
-  servicesOptions: CheckboxOption[];
-  preferredContactOptions: RadioOption[];
-  whyChoose: {
-    heading: string;
-    items: WhyChooseItem[];
-    bottomImageSrc: string;
-    bottomImageAlt: string;
-  };
-  upload: {
-    label: string;
-    helperText: string;
-  };
-  consentText: string;
-  submitButtonText: string;
-}
-
-const randomId = () => Math.random().toString(36).substring(2, 9);
-
-const initialEnquiryPageContentForm: EnquiryPageContent = {
-  brand: {
-    logoSrc: "",
-    logoAlt: "",
-    tagline: "",
-  },
-  hero: {
-    heading: "",
-    subheading: "",
-    description: "",
-    imageSrc: "",
-    imageAlt: "",
-  },
-  formTitle: "",
-  projectTypeOptions: [],
-  stateOptions: [],
-  cityOptions: [],
-  projectSizeOptions: [],
-  budgetRangeOptions: [],
-  timelineOptions: [],
-  servicesOptions: [],
-  preferredContactOptions: [],
-  whyChoose: {
-    heading: "",
-    items: [],
-    bottomImageSrc: "",
-    bottomImageAlt: "",
-  },
-  upload: {
-    label: "",
-    helperText: "",
-  },
-  consentText: "",
-  submitButtonText: "",
-};
-
-const EnquaryPageManagement = () => {
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [content, setContent] = useState<ComponentContent | null>(null);
-  const [form, setForm] = useState<EnquiryPageContent>(initialEnquiryPageContentForm);
-  const [uploadingField, setUploadingField] = useState<string | null>(null);
-
-  const loadContent = useCallback(async () => {
-    setLoading(true);
-    try {
-      const item = await componentContentApi.getByKey("enquiry.page");
-      if (item) {
-        setContent(item);
-        const d = (item.data || {}) as Partial<EnquiryPageContent>;
-        setForm({
-          brand: d.brand || initialEnquiryPageContentForm.brand,
-          hero: d.hero || initialEnquiryPageContentForm.hero,
-          formTitle: d.formTitle || initialEnquiryPageContentForm.formTitle,
-          projectTypeOptions: d.projectTypeOptions || initialEnquiryPageContentForm.projectTypeOptions,
-          stateOptions: d.stateOptions || initialEnquiryPageContentForm.stateOptions,
-          cityOptions: d.cityOptions || initialEnquiryPageContentForm.cityOptions,
-          projectSizeOptions: d.projectSizeOptions || initialEnquiryPageContentForm.projectSizeOptions,
-          budgetRangeOptions: d.budgetRangeOptions || initialEnquiryPageContentForm.budgetRangeOptions,
-          timelineOptions: d.timelineOptions || initialEnquiryPageContentForm.timelineOptions,
-          servicesOptions: d.servicesOptions || initialEnquiryPageContentForm.servicesOptions,
-          preferredContactOptions: d.preferredContactOptions || initialEnquiryPageContentForm.preferredContactOptions,
-          whyChoose: d.whyChoose || initialEnquiryPageContentForm.whyChoose,
-          upload: d.upload || initialEnquiryPageContentForm.upload,
-          consentText: d.consentText || initialEnquiryPageContentForm.consentText,
-          submitButtonText: d.submitButtonText || initialEnquiryPageContentForm.submitButtonText,
-        });
-      }
-    } catch (error) {
-      console.error("Failed to load enquiry page content:", error);
-      toast.error("Failed to load enquiry page content.");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadContent();
-  }, [loadContent]);
-
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
-    try {
-      const payload = {
-        key: "enquiry.page",
-        label: "Enquiry Page Content",
-        page: "enquiry",
-        isActive: true,
-        data: form as any,
-      };
-
-      if (content) {
-        await componentContentApi.update(content._id, payload as any);
-      } else {
-        await componentContentApi.create(payload as any);
-      }
-      toast.success("Enquiry page content saved successfully!");
-      loadContent();
-    } catch (error: any) {
-      toast.error(error.message || "Failed to save enquiry page content.");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const updateWhyChooseItem = (index: number, field: keyof WhyChooseItem, value: any) => {
-    const newItems = [...form.whyChoose.items];
-    newItems[index] = { ...newItems[index], [field]: value };
-    setForm({ ...form, whyChoose: { ...form.whyChoose, items: newItems } });
-  };
-
-  const updateOption = <T extends SelectOption | CheckboxOption | RadioOption>(
-    optionsArray: T[],
-    setOptionsArray: (newArray: T[]) => void,
-    index: number,
-    field: keyof T,
-    value: any
-  ) => {
-    const newOptions = [...optionsArray];
-    newOptions[index] = { ...newOptions[index], [field]: value };
-    setOptionsArray(newOptions);
-  };
-
-  if (loading) {
-    return (
-      <div className="flex justify-center p-20">
-        <Loader2 className="animate-spin text-[#8d6a3a]" size={40} />
-      </div>
-    );
-  }
-
-  return (
-    <div className="max-w-7xl mx-auto space-y-4 px-4 sm:px-6 lg:px-8 pb-8">
-      <div className="flex flex-col gap-3 bg-white px-4 py-3 sm:px-6 sm:py-4 rounded-2xl border border-slate-100 shadow-sm md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-slate-800 tracking-tight">Enquiry Page Management</h1>
-          <p className="text-slate-500 text-xs sm:text-sm">Manage content for the enquiry form page</p>
-        </div>
-        <button
-          type="submit"
-          form="enquiry-page-form"
-          disabled={saving}
-          className="bg-[#1d5af2] text-white px-5 py-2 rounded-xl font-bold text-xs flex items-center gap-2 hover:bg-[#154dc8] transition-all disabled:opacity-50 cursor-pointer shadow-lg shadow-blue-500/20"
-        >
-          {saving ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
-          <span className="hidden sm:inline">Save Page Content</span>
-        </button>
-      </div>
-
-      <form id="enquiry-page-form" onSubmit={handleSave} className="bg-white border rounded-2xl shadow-sm overflow-hidden animate-in fade-in duration-300">
-        <div className="p-4 space-y-6">
-          {/* Brand Section */}
-          <div className="border-b border-slate-100 pb-4">
-            <h2 className="text-lg font-bold text-slate-700 mb-4">Brand Information</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <ImageUploadField
-                label="Brand Logo"
-                value={form.brand.logoSrc}
-                fieldKey="enquiry.brand.logo"
-                uploadingField={uploadingField}
-                onUploadingChange={setUploadingField}
-                onUpload={url => setForm({ ...form, brand: { ...form.brand, logoSrc: url } })}
-                onError={m => toast.error(m)}
-              />
-              <div>
-                <label className={labelClass}>Logo Alt Text</label>
-                <input
-                  className={fieldClass}
-                  value={form.brand.logoAlt}
-                  onChange={e => setForm({ ...form, brand: { ...form.brand, logoAlt: e.target.value } })}
-                  placeholder="e.g. Company Logo"
-                />
-                <label className={labelClass + " mt-4"}>Tagline</label>
-                <input
-                  className={fieldClass}
-                  value={form.brand.tagline}
-                  onChange={e => setForm({ ...form, brand: { ...form.brand, tagline: e.target.value } })}
-                  placeholder="e.g. Your Partner in Success"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Hero Section */}
-          <div className="border-b border-slate-100 pb-4">
-            <h2 className="text-lg font-bold text-slate-700 mb-4">Hero Section</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className={labelClass}>Heading</label>
-                <input
-                  className={fieldClass}
-                  value={form.hero.heading}
-                  onChange={e => setForm({ ...form, hero: { ...form.hero, heading: e.target.value } })}
-                  placeholder="e.g. Get in Touch"
-                />
-                <label className={labelClass + " mt-4"}>Subheading</label>
-                <input
-                  className={fieldClass}
-                  value={form.hero.subheading}
-                  onChange={e => setForm({ ...form, hero: { ...form.hero, subheading: e.target.value } })}
-                  placeholder="e.g. We'd love to hear from you"
-                />
-              </div>
-              <ImageUploadField
-                label="Hero Image"
-                value={form.hero.imageSrc}
-                fieldKey="enquiry.hero.image"
-                uploadingField={uploadingField}
-                onUploadingChange={setUploadingField}
-                onUpload={url => setForm({ ...form, hero: { ...form.hero, imageSrc: url } })}
-                onError={m => toast.error(m)}
-              />
-              <div>
-                <label className={labelClass}>Hero Image Alt Text</label>
-                <input
-                  className={fieldClass}
-                  value={form.hero.imageAlt}
-                  onChange={e => setForm({ ...form, hero: { ...form.hero, imageAlt: e.target.value } })}
-                  placeholder="Alt text for hero image"
-                />
-              </div>
-            </div>
-            <div className="mt-4">
-              <label className={labelClass}>Description</label>
-              <RichTextEditor
-                value={form.hero.description}
-                onChange={val => setForm({ ...form, hero: { ...form.hero, description: val } })}
-                placeholder="Enter a description for the hero section..."
-                minHeight="150px"
-              />
-            </div>
-          </div>
-
-          {/* Form Title */}
-          <div className="border-b border-slate-100 pb-4">
-            <h2 className="text-lg font-bold text-slate-700 mb-4">Form Section</h2>
-            <div>
-              <label className={labelClass}>Form Title</label>
-              <input
-                className={fieldClass}
-                value={form.formTitle}
-                onChange={e => setForm({ ...form, formTitle: e.target.value })}
-                placeholder="e.g. Send us an Enquiry"
-              />
-            </div>
-          </div>
-
-          {/* Dynamic Options Sections */}
-          {[
-            { key: 'projectTypeOptions', label: 'Project Type Options' },
-            { key: 'stateOptions', label: 'State Options' },
-            { key: 'cityOptions', label: 'City Options' },
-            { key: 'projectSizeOptions', label: 'Project Size Options' },
-            { key: 'budgetRangeOptions', label: 'Budget Range Options' },
-            { key: 'timelineOptions', label: 'Timeline Options' },
-          ].map((section) => (
-            <div key={section.key} className="border-b border-slate-100 pb-4">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-md font-bold text-slate-700">{section.label}</h3>
-                <button
-                  type="button"
-                  onClick={() => setForm({ ...form, [section.key]: [...(form as any)[section.key], { value: "", label: "" }] })}
-                  className="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-green-700 flex items-center gap-1"
-                >
-                  <PlusCircle size={14} /> Add Option
-                </button>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {(form as any)[section.key].map((option: SelectOption, index: number) => (
-                  <div key={option.value + index} className="p-3 border rounded-xl bg-slate-50 relative space-y-2">
-                    <button
-                      type="button"
-                      onClick={() => setForm({ ...form, [section.key]: (form as any)[section.key].filter((_: any, i: number) => i !== index) })}
-                      className="absolute top-2 right-2 text-red-500 hover:text-red-700"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                    <div>
-                      <label className={labelClass}>Value</label>
-                      <input
-                        className={fieldClass}
-                        value={option.value}
-                        onChange={e => updateOption( (form as any)[section.key], (newArr) => setForm({ ...form, [section.key]: newArr }), index, "value", e.target.value)}
-                        placeholder="e.g. residential"
-                      />
-                    </div>
-                    <div>
-                      <label className={labelClass}>Label</label>
-                      <input
-                        className={fieldClass}
-                        value={option.label}
-                        onChange={e => updateOption( (form as any)[section.key], (newArr) => setForm({ ...form, [section.key]: newArr }), index, "label", e.target.value)}
-                        placeholder="e.g. Residential Project"
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-
-          {/* Services Options (Checkbox) */}
-          <div className="border-b border-slate-100 pb-4">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-md font-bold text-slate-700">Services Options</h3>
-              <button
-                type="button"
-                onClick={() => setForm({ ...form, servicesOptions: [...form.servicesOptions, { id: randomId(), label: "" }] })}
-                className="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-green-700 flex items-center gap-1"
-              >
-                <PlusCircle size={14} /> Add Service
-              </button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {form.servicesOptions.map((option, index) => (
-                <div key={option.id} className="p-3 border rounded-xl bg-slate-50 relative space-y-2">
-                  <button
-                    type="button"
-                    onClick={() => setForm({ ...form, servicesOptions: form.servicesOptions.filter((_, i) => i !== index) })}
-                    className="absolute top-2 right-2 text-red-500 hover:text-red-700"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                  <div>
-                    <label className={labelClass}>Label</label>
-                    <input
-                      className={fieldClass}
-                      value={option.label}
-                      onChange={e => updateOption(form.servicesOptions, (newArr) => setForm({ ...form, servicesOptions: newArr }), index, "label", e.target.value)}
-                      placeholder="e.g. Architectural Design"
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Preferred Contact Options (Radio) */}
-          <div className="border-b border-slate-100 pb-4">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-md font-bold text-slate-700">Preferred Contact Options</h3>
-              <button
-                type="button"
-                onClick={() => setForm({ ...form, preferredContactOptions: [...form.preferredContactOptions, { id: randomId(), label: "" }] })}
-                className="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-green-700 flex items-center gap-1"
-              >
-                <PlusCircle size={14} /> Add Option
-              </button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {form.preferredContactOptions.map((option, index) => (
-                <div key={option.id} className="p-3 border rounded-xl bg-slate-50 relative space-y-2">
-                  <button
-                    type="button"
-                    onClick={() => setForm({ ...form, preferredContactOptions: form.preferredContactOptions.filter((_, i) => i !== index) })}
-                    className="absolute top-2 right-2 text-red-500 hover:text-red-700"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                  <div>
-                    <label className={labelClass}>Label</label>
-                    <input
-                      className={fieldClass}
-                      value={option.label}
-                      onChange={e => updateOption(form.preferredContactOptions, (newArr) => setForm({ ...form, preferredContactOptions: newArr }), index, "label", e.target.value)}
-                      placeholder="e.g. Email"
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Why Choose Section */}
-          <div className="border-b border-slate-100 pb-4">
-            <h2 className="text-lg font-bold text-slate-700 mb-4">Why Choose Us Section</h2>
-            <div>
-              <label className={labelClass}>Heading</label>
-              <input
-                className={fieldClass}
-                value={form.whyChoose.heading}
-                onChange={e => setForm({ ...form, whyChoose: { ...form.whyChoose, heading: e.target.value } })}
-                placeholder="e.g. Why Choose Ensis?"
-              />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-              <ImageUploadField
-                label="Bottom Decorative Image"
-                value={form.whyChoose.bottomImageSrc}
-                fieldKey="enquiry.whyChoose.bottomImage"
-                uploadingField={uploadingField}
-                onUploadingChange={setUploadingField}
-                onUpload={url => setForm({ ...form, whyChoose: { ...form.whyChoose, bottomImageSrc: url } })}
-                onError={m => toast.error(m)}
-              />
-              <div>
-                <label className={labelClass}>Bottom Image Alt Text</label>
-                <input
-                  className={fieldClass}
-                  value={form.whyChoose.bottomImageAlt}
-                  onChange={e => setForm({ ...form, whyChoose: { ...form.whyChoose, bottomImageAlt: e.target.value } })}
-                  placeholder="Alt text for bottom image"
-                />
-              </div>
-            </div>
-
-            <div className="pt-4 border-t border-slate-100 mt-4 space-y-4">
-              <div className="flex justify-between items-center">
-                <h3 className="text-md font-bold text-slate-700">Why Choose Items</h3>
-                <button
-                  type="button"
-                  onClick={() => setForm({ ...form, whyChoose: { ...form.whyChoose, items: [...form.whyChoose.items, { id: randomId(), iconSrc: "", iconAlt: "", title: "", description: "" }] } })}
-                  className="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-green-700 flex items-center gap-1"
-                >
-                  <PlusCircle size={14} /> Add Item
-                </button>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {form.whyChoose.items.map((item, index) => (
-                  <div key={item.id} className="p-4 border rounded-xl bg-slate-50 relative space-y-3">
-                    <button
-                      type="button"
-                      onClick={() => setForm({ ...form, whyChoose: { ...form.whyChoose, items: form.whyChoose.items.filter((_, i) => i !== index) } })}
-                      className="absolute top-2 right-2 text-red-500 hover:text-red-700"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                    <div>
-                      <label className={labelClass}>Item Title</label>
-                      <input className={fieldClass} value={item.title} onChange={e => updateWhyChooseItem(index, "title", e.target.value)} placeholder="Title" />
-                    </div>
-                    <ImageUploadField
-                      label="Item Icon"
-                      value={item.iconSrc}
-                      fieldKey={`enquiry.whyChoose.item.icon.${index}`}
-                      uploadingField={uploadingField}
-                      onUploadingChange={setUploadingField}
-                      onUpload={url => updateWhyChooseItem(index, "iconSrc", url)}
-                      onError={m => toast.error(m)}
-                    />
-                    <div>
-                      <label className={labelClass}>Icon Alt Text</label>
-                      <input className={fieldClass} value={item.iconAlt} onChange={e => updateWhyChooseItem(index, "iconAlt", e.target.value)} placeholder="Alt text" />
-                    </div>
-                    <div>
-                      <label className={labelClass}>Description</label>
-                      <textarea className={fieldClass} value={item.description} onChange={e => updateWhyChooseItem(index, "description", e.target.value)} placeholder="Description" rows={2} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Upload Section */}
-          <div className="border-b border-slate-100 pb-4">
-            <h2 className="text-lg font-bold text-slate-700 mb-4">File Upload Section</h2>
-            <div>
-              <label className={labelClass}>Upload Field Label</label>
-              <input
-                className={fieldClass}
-                value={form.upload.label}
-                onChange={e => setForm({ ...form, upload: { ...form.upload, label: e.target.value } })}
-                placeholder="e.g. Upload Project Files"
-              />
-            </div>
-            <div className="mt-4">
-              <label className={labelClass}>Upload Helper Text</label>
-              <textarea
-                className={fieldClass}
-                value={form.upload.helperText}
-                onChange={e => setForm({ ...form, upload: { ...form.upload, helperText: e.target.value } })}
-                placeholder="e.g. Max file size 5MB, accepted formats: PDF, JPG, PNG"
-                rows={2}
-              />
-            </div>
-          </div>
-
-          {/* Consent and Submit */}
-          <div className="space-y-4">
-            <h2 className="text-lg font-bold text-slate-700 mb-4">Consent & Submission</h2>
-            <div>
-              <label className={labelClass}>Consent Text</label>
-              <RichTextEditor
-                value={form.consentText}
-                onChange={val => setForm({ ...form, consentText: val })}
-                placeholder="e.g. I agree to be contacted by Ensis..."
-                minHeight="100px"
-              />
-            </div>
-            <div className="mt-4">
-              <label className={labelClass}>Submit Button Text</label>
-              <input
-                className={fieldClass}
-                value={form.submitButtonText}
-                onChange={e => setForm({ ...form, submitButtonText: e.target.value })}
-                placeholder="e.g. Submit Enquiry"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-slate-50 border-t p-4 px-6 flex justify-end">
-          <button
-            type="submit"
-            disabled={saving}
-            className="bg-[#1d5af2] text-white px-5 py-2 rounded-xl font-bold text-xs flex items-center gap-2 hover:bg-[#154dc8] transition-all disabled:opacity-50 cursor-pointer shadow-lg shadow-blue-500/20"
-          >
-            {saving ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
-            <span className="hidden sm:inline">Save Page Content</span>
-          </button>
-        </div>
-      </form>
+const FooterNote = () => (
+    <div className="px-6 py-2 bg-white text-[10px] text-gray-700 border-b-4 border-[#013b28]">
+        Note: GST Extra | Transport Charges Extra | Prices are subject to change without prior notice | Warranty: 1 Year on Manufacturing Defect
     </div>
-  );
+);
+
+const Footer = () => (
+    <div className="bg-[#013b28] flex justify-between items-center px-8 relative h-[72px]">
+        <div className="flex gap-8 z-10 text-[13px] font-semibold items-center text-white">
+            <div className="flex items-center gap-2">
+                <PhoneIcon /> <span className='text-lg font-medium'>+91-9654900525</span>
+            </div>
+            <div className="flex items-center gap-2">
+                <WebIcon /> <span className='text-lg font-medium'>www.ensis.in</span>
+            </div>
+            <div className="flex items-center gap-2">
+                <MailIcon /> <span className='text-lg font-medium'>info@ensis.in</span>
+            </div>
+        </div>
+        <div className="absolute right-0 -top-8 bottom-0 w-[270px] z-10">
+            <div
+                className="absolute inset-y-0 -right-12 left-0 bg-[#0d261a] border-l-[3px] border-t-[3px] border-[#c99b3b] rounded-tl-[70px]"
+                style={{ transform: 'skewX(-25deg)', transformOrigin: 'bottom left' }}
+            />
+            <div className="relative z-10 flex h-full flex-col items-center justify-center pl-12 pt-2 gap-1.5">
+                <Image src="/images/Healing Tradition Modern Wellness.png" alt="lotus" width={100} height={60} className="object-contain" />
+                <span className="text-[12px] font-medium text-[#c99b3b] text-center leading-tight tracking-wide">
+                    Healing Tradition<br />Modern Wellness
+                </span>
+            </div>
+        </div>
+    </div>
+);
+
+const TableHeader = () => (
+    <thead>
+        <tr className="bg-[#013b28] text-white text-[11px]">
+            <th className="border-r border-white/20 py-2.5 px-1 w-10 font-semibold">S.No.</th>
+            <th className="border-r border-white/20 py-2.5 px-1 w-28 font-semibold">PRODUCT IMAGE</th>
+            <th className="border-r border-white/20 py-2.5 px-1 w-36 font-semibold">PRODUCT NAME</th>
+            <th className="border-r border-white/20 py-2.5 px-1 w-24 font-semibold">PRODUCT CODE</th>
+            <th className="border-r border-white/20 py-2.5 px-1 w-20 font-semibold">MRP</th>
+            <th className="border-r border-white/20 py-2.5 px-1 font-semibold">DESCRIPTION / DETAILS</th>
+            <th className="border-r border-white/20 py-2.5 px-1 w-28 font-semibold">DIMENSIONS (L × W × H)</th>
+            <th className="py-2.5 px-1 w-28 font-semibold">MATERIAL</th>
+        </tr>
+    </thead>
+);
+
+const ProductRows = ({ products, startIndex }: { products: Product[]; startIndex: number }) => (
+    <tbody>
+        {products.map((p, idx) => {
+            const descList = p.overview?.overviewList?.length
+                ? p.overview.overviewList
+                : (p.description ? [p.description] : (p.shortDescription ? [p.shortDescription] : []));
+
+            return (
+                <tr key={p._id} className={idx % 2 === 0 ? "bg-white" : "bg-[#fdfbf6]"}>
+                    <td className="border border-[#e0d6c8] text-center py-3 font-serif text-sm text-gray-700">{startIndex + idx + 1}</td>
+                    <td className="border border-[#e0d6c8] text-center p-0.5">
+                        <div className="w-24 h-16 mx-auto flex items-center justify-center">
+                            <Image 
+                                src={p.images?.[0] ? getImageUrl(p.images[0]) : 'https://placehold.co/120x80?text=Image'} 
+                                alt={p.title} 
+                                width={96}
+                                height={64}
+                                className="object-contain"
+                                unoptimized
+                            />
+                        </div>
+                    </td>
+                    <td className="border border-[#e0d6c8] text-center font-semibold text-[11px] px-1.5 text-gray-800">{p.title}</td>
+                    <td className="border border-[#e0d6c8] text-center font-semibold text-[11px] px-1.5 text-gray-800">{p.code}</td>
+                    <td className="border border-[#e0d6c8] text-center px-1.5 text-[11px] font-bold">
+                        {p.price ? `₹${p.price.toLocaleString("en-IN")}` : ""}
+                    </td>
+                    <td className="border border-[#e0d6c8] px-4 py-2.5">
+                        <ul className="list-disc pl-3 text-left space-y-0.5 text-[11px] text-gray-700">
+                            {descList.map((d, i) => <li key={i}>{d}</li>)}
+                        </ul>
+                    </td>
+                    <td className="border border-[#e0d6c8] text-center px-1.5"></td>
+                    <td className="border border-[#e0d6c8] text-center px-1.5 text-[11px] text-gray-700">{p.material}</td>
+                </tr>
+            );
+        })}
+    </tbody>
+);
+
+const MiniFeatureBar = () => (
+    <div className="bg-white px-6 py-3 border-b border-gray-200">
+        <div className="flex justify-between gap-3">
+            {bottomFeatures.map((feat, idx) => (
+                <div key={idx} className="flex gap-2.5 items-center bg-white rounded-lg border border-gray-200 p-2.5 w-1/5 shadow-sm">
+                    <Image 
+                        src={feat.img} 
+                        alt={feat.title} 
+                        width={36} 
+                        height={36} 
+                        className="object-contain shrink-0" 
+                    />
+                    <div>
+                        <h3 className="font-semibold text-[11px] text-gray-800 leading-tight">{feat.title}</h3>
+                        <p className="text-[10px] text-gray-500 mt-0.5 leading-tight">{feat.desc}</p>
+                    </div>
+                </div>
+            ))}
+        </div>
+    </div>
+);
+
+const EnsisPriceList = () => {
+    const [products, setProducts] = useState<Product[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    const fetchProducts = useCallback(async () => {
+        setLoading(true);
+        try {
+            const result = await productApi.list();
+            setProducts(result.products || []);
+        } catch (error) {
+            console.error("Failed to fetch products:", error);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchProducts();
+    }, [fetchProducts]);
+
+    const pages = useMemo(() => {
+        if (products.length === 0) return [];
+        const itemsPerPageFirst = 8;
+        const itemsPerPageRest = 14;
+        const p = [];
+        // First page
+        p.push(products.slice(0, itemsPerPageFirst));
+        // Rest of the pages
+        for (let i = itemsPerPageFirst; i < products.length; i += itemsPerPageRest) {
+            p.push(products.slice(i, i + itemsPerPageRest));
+        }
+        return p;
+    }, [products]);
+
+    if (loading) return (
+        <div className="min-h-screen flex justify-center items-center h-full p-20">
+            <Loader2 className="animate-spin text-[#013b28]" size={48} />
+        </div>
+    );
+
+    return (
+        <div className="min-h-screen flex flex-col items-center py-2 font-sans bg-gray-100 gap-4">
+
+            {/* ===== PAGE 1 ===== */}
+            <div className="w-full max-w-[1200px] bg-white shadow-2xl overflow-hidden">
+                {/* Header */}
+                <div className="relative w-full h-[420px] bg-[#fdfaf2] overflow-hidden">
+                    <div className="absolute top-0 right-0 h-[580px] w-full">
+                        <Image src="/images/Ensis Product prices List.jpg" alt="Header" fill className="object-fill" />
+                    </div>
+                    <div className="absolute top-0 right-0 p-6 z-20">
+                        <Image src="/images/logo.png" alt="Ensis Logo" width={260} height={80} className="object-contain" />
+                    </div>
+                    <div className="absolute top-9 left-28 z-20">
+                        <h1 className="text-7xl font-serif font-bold text-[#013b28] tracking-wider"
+                            style={{ textShadow: '0 0 30px #fff, 0 0 60px #fff' }}>
+                            PRICE LIST
+                        </h1>
+                        <div className="flex items-center mt-4 pl-10">
+                            <div className="h-[2px] w-20 bg-[#b58c42]"></div>
+                            <div className="px-6 py-1.5 bg-[#013b28] text-white font-semibold text-xl rounded-full border-2 border-[#b58c42] mx-3 shadow-lg">
+                                Dealer Price
+                            </div>
+                            <div className="h-[2px] w-20 bg-[#b58c42]"></div>
+                        </div>
+                        <h2 className="mt-4 text-2xl font-serif font-semibold text-[#333] tracking-wide">Premium Panchkarmaa Equipments</h2>
+                    </div>
+                </div>
+
+                {/* Green top features */}
+                <div className="bg-linear-to-r from-[#1c3226] to-[#0f2318] text-white pt-7 pb-6 px-6">
+                    <div className="flex justify-between items-start gap-3">
+                        {topFeatures.map((feat, idx) => (
+                            <div key={idx} className="flex gap-3 items-center w-1/5">
+                                <Image 
+                                    src={feat.img} 
+                                    alt={feat.title} 
+                                    width={48} 
+                                    height={48} 
+                                    className="object-contain shrink-0" 
+                                />
+                                <div>
+                                    <h3 className="font-semibold text-[11px] uppercase leading-snug">{feat.title}</h3>
+                                    <p className="text-[10px] text-[#b4d1c4] mt-0.5 leading-tight">{feat.desc}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <MiniFeatureBar />
+
+                <div className="px-6 mt-3 mb-2">
+                    {pages[0] && (
+                        <table className="w-full border-collapse text-center">
+                            <TableHeader />
+                            <ProductRows products={pages[0]} startIndex={0} />
+                        </table>
+                    )}
+                </div>
+                <FooterNote />
+                <Footer />
+            </div>
+
+            {/* ===== PAGES 2–6 ===== */}
+            {pages.length > 1 && pages.slice(1).map((page, pageIdx) => {
+                const startIndex = 8 + (pageIdx * 14);
+                return (
+                    <div key={pageIdx} className="w-full max-w-[1200px] bg-white shadow-2xl overflow-hidden">
+                        <MiniFeatureBar />
+                        <div className="px-6 mt-3 mb-2">
+                            <table className="w-full border-collapse text-center">
+                                <TableHeader />
+                                <ProductRows products={page} startIndex={startIndex} />
+                            </table>
+                        </div>
+                        <FooterNote />
+                        <Footer />
+                    </div>
+                );
+            })}
+
+        </div>
+    );
 };
 
-export default EnquaryPageManagement;
+export default EnsisPriceList;

@@ -7,6 +7,7 @@ import { componentContentApi, type ComponentContent } from "@/lib/api";
 import { fieldClass, labelClass } from "@/constants";
 import { ImageUploadField } from "@/components/common/ImageUploadField";
 import RichTextEditor from "@/components/common/RichTextEditor";
+import Image from 'next/image';
 
 export interface ClientLogo {
   id: string;
@@ -58,6 +59,7 @@ interface ProjectsBannerContent {
   description: string;
   heroImage?: string;
   sectionTitle: string;
+  bgImageAlt?: string;
 }
 
 export interface ProjectCardImage {
@@ -76,6 +78,8 @@ export interface OurProjectsContent {
   title: string;
   subtitle: string;
   cards: ProjectCard[];
+  buttonText:string;
+  buttonPath:string;
 }
 
 export interface Testimonial {
@@ -102,6 +106,7 @@ export interface ContactSection {
   ctaTitle: string;
   ctaDescription: string;
   ctaButtonText: string;
+  ctaButtonPath: string;
   contact: ContactInfo;
   leftImage: string;
   rightImage: string;
@@ -136,6 +141,8 @@ const initialOurProjectsForm: OurProjectsContent = {
   title: "",
   subtitle: "",
   cards: [],
+  buttonText: "",
+  buttonPath: "",
 };
 
 const initialContactSectionForm: ContactSection = {
@@ -144,6 +151,7 @@ const initialContactSectionForm: ContactSection = {
   ctaTitle: "",
   ctaDescription: "",
   ctaButtonText: "",
+  ctaButtonPath: "",
   contact: {
     officeName: "",
     address: "",
@@ -177,7 +185,8 @@ const ProjectAndClientManagement = () => {
     subtitle: "",
     description: "",
     heroImage: "",
-    sectionTitle: ""
+    sectionTitle: "",
+    bgImageAlt:""
   });
   const [ourClientsContent, setOurClientsContent] = useState<ComponentContent | null>(null);
   const [ourClientsForm, setOurClientsForm] = useState<OurClients>(initialOurClientsForm);
@@ -257,6 +266,8 @@ const ProjectAndClientManagement = () => {
           title: d?.title || "",
           subtitle: d?.subtitle || "",
           cards: d?.cards || [],
+          buttonText: d?.buttonText || "",
+          buttonPath: d?.buttonPath || ""
         });
       }
     } catch (error) {
@@ -274,6 +285,8 @@ const ProjectAndClientManagement = () => {
           ctaTitle: d?.ctaTitle || "",
           ctaDescription: d?.ctaDescription || "",
           ctaButtonText: d?.ctaButtonText || "",
+          ctaButtonPath: d?.ctaButtonPath || "",
+
           contact: d?.contact || initialContactSectionForm.contact,
           leftImage: d?.leftImage || "",
           rightImage: d?.rightImage || "",
@@ -523,6 +536,15 @@ const ProjectAndClientManagement = () => {
                   className={fieldClass} 
                   value={form.subtitle} 
                   onChange={e => setForm({...form, subtitle: e.target.value})} 
+                  placeholder="e.g. Delivering excellence across industries"
+                />
+              </div>
+               <div>
+                <label className={labelClass}>Background Image Alt</label>
+                <input 
+                  className={fieldClass} 
+                  value={form.bgImageAlt} 
+                  onChange={e => setForm({...form, bgImageAlt: e.target.value})} 
                   placeholder="e.g. Delivering excellence across industries"
                 />
               </div>
@@ -833,6 +855,24 @@ const ProjectAndClientManagement = () => {
                   placeholder="e.g. Our Latest Projects"
                 />
               </div>
+               <div>
+                <label className={labelClass}>Button Text</label>
+                <input 
+                  className={fieldClass} 
+                  value={ourProjectsForm.buttonText} 
+                  onChange={e => setOurProjectsForm({...ourProjectsForm, buttonText: e.target.value})} 
+                  placeholder="View All Projects"
+                />
+              </div>
+                <div>
+                <label className={labelClass}>Button Path</label>
+                <input 
+                  className={fieldClass} 
+                  value={ourProjectsForm.buttonPath} 
+                  onChange={e => setOurProjectsForm({...ourProjectsForm, buttonPath: e.target.value})} 
+                  placeholder="View All Projects"
+                />
+              </div>
               <div>
                 <label className={labelClass}>Section Subtitle</label>
                 <input 
@@ -869,7 +909,7 @@ const ProjectAndClientManagement = () => {
                         <tr key={card.id} className="hover:bg-slate-50/50 transition-all">
                           <td className="px-4 py-2">
                             <div className="h-10 w-16 rounded bg-slate-100 border border-slate-200 overflow-hidden shadow-sm">
-                              {card.image.imageUrl && <img src={card.image.imageUrl} className="h-full w-full object-cover" alt={card.image.alt} />}
+                              {card.image.imageUrl && <Image src={card.image.imageUrl} alt={card.image.alt} width={64} height={40} className="object-cover" unoptimized />}
                             </div>
                           </td>
                           <td className="px-4 py-2 font-bold text-slate-700">{card.title || 'Untitled Project'}</td>
@@ -1025,6 +1065,10 @@ const ProjectAndClientManagement = () => {
                 <div>
                   <label className={labelClass}>CTA Button Text</label>
                   <input className={fieldClass} value={contactForm.ctaButtonText} onChange={e => setContactForm({...contactForm, ctaButtonText: e.target.value})} />
+                </div>
+                    <div>
+                  <label className={labelClass}>CTA Button Path</label>
+                  <input className={fieldClass} value={contactForm.ctaButtonPath} onChange={e => setContactForm({...contactForm, ctaButtonPath: e.target.value})} />
                 </div>
                 <div>
                   <label className={labelClass}>CTA Description</label>
