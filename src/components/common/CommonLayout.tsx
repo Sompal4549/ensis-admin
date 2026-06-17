@@ -177,8 +177,11 @@ const NAV_ITEMS: NavItem[] = [
         icon: <Headphones size={16} />,
       },
     
-    
-   
+     {
+        label: "Projects & Clients",
+        path: "/projects-and-clients",
+        icon: <FolderOpen size={16} />,
+      },
     
       {
         label: "Careers",
@@ -232,6 +235,11 @@ const NAV_ITEMS: NavItem[] = [
       {
         label: "User Management",
         path: "/users-management",
+        icon: < UserRoundCog size={16} />,
+      },
+       {
+        label: "Enquaries",
+        path: "/enquries",
         icon: < UserRoundCog size={16} />,
       },
   {
