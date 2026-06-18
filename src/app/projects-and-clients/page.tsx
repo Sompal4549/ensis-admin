@@ -8,6 +8,8 @@ import { fieldClass, labelClass } from "@/constants";
 import { ImageUploadField } from "@/components/common/ImageUploadField";
 import RichTextEditor from "@/components/common/RichTextEditor";
 import Image from 'next/image';
+import ComponentList from "@/components/common/ComponentList";
+import { DropResult } from "@hello-pangea/dnd";
 
 export interface ClientLogo {
   id: string;
@@ -178,6 +180,12 @@ const ProjectAndClientManagement = () => {
   const [savingContact, setSavingContact] = useState(false);
   const [savingOurProjects, setSavingOurProjects] = useState(false);
 
+  const [records, setRecords] = useState<ComponentContent[]>([]);
+
+  const knownKeys = [
+    "projects.banner", "projects.whyPartner", "projects.ourProjects", "projects.ourClients", "projects.contactSection"
+  ];
+
   const [activeTab, setActiveTab] = useState<'banner' | 'whyPartner' | 'ourClients' | 'contact' | 'ourProjects'>('banner');
 
   const [form, setForm] = useState<ProjectsBannerContent>({
@@ -205,6 +213,13 @@ const ProjectAndClientManagement = () => {
     // created in the backend) doesn't stop the other two sections from
     // loading. Previously all three awaits were inside a single try
     // block, so a failure on the first call silently skipped the rest.
+
+    try {
+      const allRecords = await componentContentApi.list();
+      setRecords(allRecords.filter(r => r.page === "projects"));
+    } catch (error) {
+      console.error("Failed to load component list:", error);
+    }
 
     try {
       const item = await componentContentApi.getByKey("projects.banner");
@@ -460,6 +475,49 @@ const ProjectAndClientManagement = () => {
     setContactForm({ ...contactForm, testimonials: newTestimonials });
   };
 
+  const handleDeleteComponent = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this component?")) return;
+    try {
+      await componentContentApi.remove(id);
+      toast.success("Component deleted successfully");
+      loadContent();
+    } catch (error: any) {
+      toast.error(error.message || "Failed to delete component");
+    }
+  };
+
+  const handleReorder = async (result: DropResult) => {
+    if (!result.destination) return;
+    const items = Array.from(records);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+    setRecords(items);
+
+    try {
+      // Casting to any to resolve ts(2339) if the method isn't in the interface yet
+      await (componentContentApi as any).reorder(items.map((i: ComponentContent) => i._id));
+      toast.success("Order updated");
+    } catch (error: any) {
+      toast.error("Failed to update order");
+    }
+  };
+
+  const handleEditComponent = (record: ComponentContent) => {
+    const keyMap: Record<string, typeof activeTab> = {
+      "projects.banner": "banner",
+      "projects.whyPartner": "whyPartner",
+      "projects.ourProjects": "ourProjects",
+      "projects.ourClients": "ourClients",
+      "projects.contactSection": "contact"
+    };
+
+    if (keyMap[record.key]) {
+      setActiveTab(keyMap[record.key]);
+    } else {
+      toast.info("This component key is not supported by the tabs.");
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center p-20">
@@ -467,7 +525,13 @@ const ProjectAndClientManagement = () => {
       </div>
     );
   }
-
+  const currentEditingId = {
+    banner: content?._id,
+    whyPartner: whyPartnerContent?._id,
+    ourProjects: ourProjectsContent?._id,
+    ourClients: ourClientsContent?._id,
+    contact: contactContent?._id
+  }[activeTab];
 
   return (
     <div className="max-w-7xl mx-auto space-y-4 px-2 sm:px-2 lg:px-2 pb-3">
@@ -492,6 +556,24 @@ const ProjectAndClientManagement = () => {
         </div>
       </div>
 
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Sidebar: Component List */}
+        <div className="lg:col-span-4 space-y-4">
+          <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+            <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider mb-4">Components</h3>
+            <ComponentList 
+              records={records}
+              onEdit={handleEditComponent}
+              onDelete={handleDeleteComponent}
+              onReorder={handleReorder}
+              editingId={currentEditingId}
+              knownKeys={knownKeys}
+            />
+          </div>
+        </div>
+
+        {/* Main: Form Editor */}
+        <div className="lg:col-span-8 space-y-6">
       {activeTab === 'banner' && (
         <form onSubmit={handleSave} className="bg-white border rounded-2xl shadow-sm overflow-hidden animate-in fade-in duration-300">
         <div className="bg-slate-50 border-b p-4 px-6 flex items-center justify-between">
@@ -1120,6 +1202,8 @@ const ProjectAndClientManagement = () => {
           </div>
         </form>
       )}
+        </div>
+      </div>
     </div>
   );
 };
