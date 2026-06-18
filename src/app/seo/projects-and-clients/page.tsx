@@ -2,5 +2,5 @@
 import SEOEditor from "@/components/common/SEOEditor";
 
 export default function ProjectAndClientsSEOPage() {
-  return <SEOEditor slug="projects-and-credits" title="Projects Page SEO Settings" />;
+  return <SEOEditor slug="projects-and-clients" title="Projects Page SEO Settings" />;
 }

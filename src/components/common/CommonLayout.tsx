@@ -275,6 +275,14 @@ const NAV_ITEMS: NavItem[] = [
         label: "Contact SEO",
         path: "/seo/contact",
       },
+       {
+        label: "Enquiry SEO",
+        path: "/seo/enquiry",
+      },
+       {
+        label: "Projects & Clients SEO",
+        path: "/seo/projects-and-clients",
+      },
     ],
   },
   {
