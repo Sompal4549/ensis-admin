@@ -143,10 +143,10 @@ const request = async <T>(path: string, options: AxiosRequestConfig = {}) => {
 };
 
 export const adminApi = {
-  login: (email: string, password: string) =>
+  login: (mobile: string, password: string) =>
     request<{ user: AuthUser; accessToken: string }>("/admin/login", {
       method: "POST",
-      data: { email, password },
+      data: { mobile, password },
     }),
   dashboard: () => request<Record<string, unknown>>("/admin/dashboard"),
   listUsers: () => request<AuthUser[]>("/admin/users"),
