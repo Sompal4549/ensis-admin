@@ -183,11 +183,7 @@ const NAV_ITEMS: NavItem[] = [
         icon: <FolderOpen size={16} />,
       },
     
-      {
-        label: "Careers",
-        path: "/careers-management",
-        icon: <UserRoundPlus size={16} />,
-      },
+      
      {
         label: "Enquary Page Management",
         path: "/enquiry-page-management",
@@ -225,6 +221,11 @@ const NAV_ITEMS: NavItem[] = [
         label: "Site Footer",
         path: "/footer",
         icon: <PanelBottom size={16} />,
+      },
+      {
+        label: "Careers",
+        path: "/careers-management",
+        icon: <UserRoundPlus size={16} />,
       },
       {
         label: "Orders",
