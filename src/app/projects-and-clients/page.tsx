@@ -470,10 +470,10 @@ const ProjectAndClientManagement = () => {
 
 
   return (
-    <div className="max-w-7xl mx-auto space-y-4 px-4 sm:px-6 lg:px-8 pb-8">
+    <div className="max-w-7xl mx-auto space-y-4 px-2 sm:px-2 lg:px-2 pb-3">
       <div className="flex flex-col gap-3 bg-white px-4 py-3 sm:px-6 sm:py-4 rounded-2xl border border-slate-100 shadow-sm md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-slate-800 tracking-tight">Projects & Clients</h1>
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-800 tracking-tight">Projects & Clients</h2>
           <p className="text-slate-500 text-xs sm:text-sm">Manage your portfolio and client testimonials</p>
         </div>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
