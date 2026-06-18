@@ -12,16 +12,25 @@ const optionalSeoFields = ["metaKeywords", "canonical", "ogTitle", "ogDescriptio
 
 interface SEOEditorProps {
   slug: string;
+  pageName?: string;
   title: string;
 }
 
-export default function SEOEditor({ slug, title }: SEOEditorProps) {
+export default function SEOEditor({ slug, pageName, title }: SEOEditorProps) {
   const [loading, setLoading] = useState(false);
   const [pageData, setPageData] = useState<PageData | null>(null);
   const [uploading, setUploading] = useState(false);
 
+  // Generate pageName from slug if not provided
+  const generatePageName = (slugValue: string) => {
+    return slugValue
+      .split('-')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+
   const [form, setForm] = useState({
-    pageName: "",
+    pageName: pageName || generatePageName(slug),
     seo: {
       metaTitle: "",
       metaDescription: "",
@@ -141,6 +150,8 @@ export default function SEOEditor({ slug, title }: SEOEditorProps) {
         <section className="bg-white p-6 rounded-xl border border-[#ded3c4] shadow-sm space-y-4">
           <h2 className="text-sm font-bold uppercase text-[#8d6a3a] mb-4 border-b pb-2">Core SEO Meta</h2>
           <div className="grid gap-4 md:grid-cols-2">
+            <label className={labelClass}>Page Name <input className={`${fieldClass} mt-2`} value={form.pageName} onChange={(e) => setForm({...form, pageName: e.target.value})} required /></label>
+            <label className={labelClass}>H1 Tag Content <input className={`${fieldClass} mt-2`} value={form.seo.h1} onChange={(e) => setForm({...form, seo: {...form.seo, h1: e.target.value}})} required /></label>
             <label className={labelClass}>
               Meta Title
               <input

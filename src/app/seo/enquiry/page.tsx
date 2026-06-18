@@ -2,5 +2,5 @@
 import SEOEditor from "@/components/common/SEOEditor";
 
 export default function EnquirySEOPage() {
-  return <SEOEditor slug="enquiry" title="Enquiry Page SEO Settings" />;
+  return <SEOEditor slug="enquiry" pageName="enquiry" title="Enquiry Page SEO Settings" />;
 }

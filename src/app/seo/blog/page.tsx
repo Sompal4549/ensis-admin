@@ -2,5 +2,5 @@
 import SEOEditor from "@/components/common/SEOEditor";
 
 export default function BlogSEOPage() {
-  return <SEOEditor slug="blog" title="Blog Page SEO Settings" />;
+  return <SEOEditor slug="blog" title="Blog Page SEO Settings" pageName="blog" />;
 }

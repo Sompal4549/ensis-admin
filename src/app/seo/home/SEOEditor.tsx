@@ -20,8 +20,16 @@ export default function SEOEditor({ slug, title }: SEOEditorProps) {
   const [pageData, setPageData] = useState<PageData | null>(null);
   const [uploading, setUploading] = useState(false);
 
+  // Generate pageName from slug if not provided
+  const generatePageName = (slugValue: string) => {
+    return slugValue === 'home' ? 'Home' : slugValue
+      .split('-')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+
   const [form, setForm] = useState({
-    pageName: "",
+    pageName: generatePageName(slug),
     seo: {
       metaTitle: "",
       metaDescription: "",
