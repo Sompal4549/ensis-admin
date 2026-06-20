@@ -158,9 +158,9 @@ export const adminApi = {
 
 export const categoryApi = {
   list: () => request<Category[]>("/categories"),
-  create: (payload: Pick<Category, "name" | "description">) =>
+  create: (payload: Pick<Category, "name" | "description" | "slug">) =>
     request<Category>("/categories", { method: "POST", data: payload }),
-  update: (id: string, payload: Partial<Pick<Category, "name" | "description">>) =>
+  update: (id: string, payload: Partial<Pick<Category, "name" | "description" | "slug">>) =>
     request<Category>(`/categories/${id}`, { method: "PUT", data: payload }),
   remove: (id: string) => request<null>(`/categories/${id}`, { method: "DELETE" }),
 };
