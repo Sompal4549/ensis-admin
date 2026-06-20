@@ -91,7 +91,7 @@ if (returnStartIndex !== -1) {
       <header className="mb-10 flex items-center justify-between border-b border-[#eee5d9] pb-6 px-8 pt-8">
         <div>
           <span className="text-xs font-bold uppercase tracking-widest text-[#8d6a3a]">Configuration</span>
-          <h1 className="font-serif text-4xl text-[#1f261b] mt-1">{title}</h1>
+          <h2 className="font-serif text-4xl text-[#1f261b] mt-1">{title}</h2>
         </div>
         <button type="button" onClick={refresh} disabled={loading} className="flex items-center gap-2 px-4 py-2 bg-white border border-[#d9cdbb] text-[#263016] rounded-md font-bold text-sm shadow-sm hover:bg-gray-50 transition-all disabled:opacity-50">
           Refresh

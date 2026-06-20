@@ -98,7 +98,7 @@ export const defaultTurnkeyData: Record<TurnkeyPageContentKeys, any> = {
   "turnkey.completeSolutions": {
     title: "Our Complete Turnkit Solutions",
     cards: [
-      { id: randomId(), title: "Panchkarma Centers", description: "Complete setup for Ayurvedic treatment centers.", image: { imageUrl: "", alt: "" } }
+      { id: randomId(), title: "Panchkarma Centers", description: "Complete setup for Ayurvedic treatment centers.", image: { imageUrl: "", alt: "", bottomStrap:false } }
     ]
   },
   "turnkey.facilities": {
