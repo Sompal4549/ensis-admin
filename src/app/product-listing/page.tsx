@@ -226,7 +226,7 @@ const EnsisPriceList = () => {
                                 </svg>
                             </div>
 
-                            <div className="px-8 py-1 bg-[#001b0f] text-white font-semibold text-[22px] tracking-wider rounded-2xl border-[2px] border-[#b58c42] mx-2 shadow-lg"
+                            <div className="px-4 py-0.5 bg-[#001b0f] text-white font-semibold text-[24px] tracking-wider rounded-2xl border-[2px] border-[#b58c42] mx-2 shadow-lg"
                                 style={{ fontFamily: 'Arial, sans-serif' }}>
                                 Dealer Price
                             </div>
