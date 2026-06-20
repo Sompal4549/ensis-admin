@@ -89,7 +89,8 @@ export type WellnessRoomSetupsData = {
   sectionButtonText:string;
 };
 
-export type ManufacturingProject = { image: string; title: string; location: string };
+export type ManufacturingProject = { image: string; title: string; };
+export type Project = { image: string; title: string; };
 export type ManufacturingAndProjectsData = {
   subtitle: string;
   heading: string;
@@ -98,7 +99,7 @@ export type ManufacturingAndProjectsData = {
   mfgFeatures:string[],
   mfgButtonText:string,
   mfgButtonHref:string
-  mfgImages: ManufacturingProject[];
+  mfgImages: Project[];
   projSubtitle:string,
   projHeading:string,
   projDescription:string,
@@ -187,11 +188,11 @@ export const defaultHomepageData: Record<HomepageComponentKey, HomepageData> = {
   "home.wellnessRoomSetups": { subtitle: "", heading: "",description:"",sectionButtonText:"View All Rooms",sectionButtonPath:"", cards: [{ id: randomId(), title: "", image: "", tag: "" }] },
   "home.manufacturingAndProjects": {
     subtitle: "", heading: "", description: "",
-    projects: [{ image: "", title: "", location: "" }],
+    projects: [{ image: "", title: "" }],
     mfgFeatures: [""],
     mfgButtonText: "",
     mfgButtonHref: "",
-    mfgImages: [{ image: "", title: "", location: "" }],
+    mfgImages: [{ image: "", title: "" }],
     projSubtitle: "",
     projHeading: "",
     projDescription: "",

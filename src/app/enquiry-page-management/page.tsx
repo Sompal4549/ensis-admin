@@ -62,11 +62,6 @@ export interface WhyChooseItem {
 }
 
 export interface EnquiryPageContent {
-  brand: {
-    logoSrc: string;
-    logoAlt: string;
-    tagline: string;
-  };
   hero: {
     heading: string;
     subheading: string;
@@ -100,11 +95,6 @@ export interface EnquiryPageContent {
 const randomId = () => Math.random().toString(36).substring(2, 9);
 
 const initialEnquiryPageContentForm: EnquiryPageContent = {
-  brand: {
-    logoSrc: "",
-    logoAlt: "",
-    tagline: "",
-  },
   hero: {
     heading: "",
     subheading: "",
@@ -181,7 +171,6 @@ const EnquaryPageManagement = () => {
         setContent(item);
         const d = (item.data || {}) as Partial<EnquiryPageContent>;
         setForm({
-          brand: d.brand || initialEnquiryPageContentForm.brand,
           hero: d.hero || initialEnquiryPageContentForm.hero,
           formTitle: d.formTitle || initialEnquiryPageContentForm.formTitle,
           projectTypeOptions: d.projectTypeOptions || initialEnquiryPageContentForm.projectTypeOptions,
@@ -425,19 +414,6 @@ const EnquaryPageManagement = () => {
                 </button>
               </div>
               <div className="p-4 space-y-6">
-                {/* Brand Section */}
-                <div className="border-b border-slate-100 pb-4">
-                  <h2 className="text-lg font-bold text-slate-700 mb-4">Brand Information</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <ImageUploadField label="Brand Logo" value={form.brand.logoSrc} fieldKey="enquiry.brand.logo" uploadingField={uploadingField} onUploadingChange={setUploadingField} onUpload={url => setForm({ ...form, brand: { ...form.brand, logoSrc: url } })} onError={m => toast.error(m)} />
-                    <div>
-                      <label className={labelClass}>Logo Alt Text</label>
-                      <input className={fieldClass} value={form.brand.logoAlt} onChange={e => setForm({ ...form, brand: { ...form.brand, logoAlt: e.target.value } })} placeholder="e.g. Company Logo" />
-                      <label className={labelClass + " mt-4"}>Tagline</label>
-                      <input className={fieldClass} value={form.brand.tagline} onChange={e => setForm({ ...form, brand: { ...form.brand, tagline: e.target.value } })} placeholder="e.g. Your Partner in Success" />
-                    </div>
-                  </div>
-                </div>
 
                 {/* Hero Section */}
                 <div className="border-b border-slate-100 pb-4">

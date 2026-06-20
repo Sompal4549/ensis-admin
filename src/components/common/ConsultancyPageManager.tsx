@@ -24,7 +24,7 @@ export default function ConsultancyPageManager() {
   const router = useRouter();
   const componentKey = searchParams.get("component");
 
-  const refresh = useCallback(async () => {
+ const refresh = useCallback(async () => {
     const key = componentKey;
     if (!key) {
       setEditingId(null);
@@ -43,7 +43,9 @@ export default function ConsultancyPageManager() {
         setForm(buildEmptyConsultancyContent(key as ConsultancyPageContentKeys));
       }
     } catch (error: unknown) {
-      toast.error("Failed to load component data.");
+      // Naya/abhi-tak-na-bana section ho sakta hai — empty form se fallback karo
+      setEditingId(null);
+      setForm(buildEmptyConsultancyContent(key as ConsultancyPageContentKeys));
     } finally {
       setLoading(false);
     }
