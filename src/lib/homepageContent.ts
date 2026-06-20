@@ -94,7 +94,6 @@ export type ManufacturingAndProjectsData = {
   subtitle: string;
   heading: string;
   description: string;
-  stats: { value: string; label: string }[];
   projects: ManufacturingProject[];
   mfgFeatures:string[],
   mfgButtonText:string,
@@ -188,7 +187,6 @@ export const defaultHomepageData: Record<HomepageComponentKey, HomepageData> = {
   "home.wellnessRoomSetups": { subtitle: "", heading: "",description:"",sectionButtonText:"View All Rooms",sectionButtonPath:"", cards: [{ id: randomId(), title: "", image: "", tag: "" }] },
   "home.manufacturingAndProjects": {
     subtitle: "", heading: "", description: "",
-    stats: [{ value: "", label: "" }],
     projects: [{ image: "", title: "", location: "" }],
     mfgFeatures: [""],
     mfgButtonText: "",

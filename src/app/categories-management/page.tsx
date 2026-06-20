@@ -24,11 +24,13 @@ type CategoryForm = {
   id?: string;
   name: string;
   description: string;
+  slug:string;
 };
 
 const emptyCategory: CategoryForm = {
   name: "",
   description: "",
+  slug:"",
 };
 
 
@@ -273,6 +275,15 @@ export default function CategoriesPage() {
               className={fieldClass}
               value={categoryForm.name}
               onChange={(event) => setCategoryForm({ ...categoryForm, name: event.target.value })}
+              required
+            />
+          </div>
+           <div>
+            <label className={labelClass}>Slug</label>
+            <input
+              className={fieldClass}
+              value={categoryForm.slug}
+              onChange={(event) => setCategoryForm({ ...categoryForm, slug: event.target.value })}
               required
             />
           </div>
