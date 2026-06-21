@@ -6,6 +6,7 @@ import {
   buildEmptyHomepageContent,
   createHomepageData,
   homepageKeys,
+  normalizeHomepageData,
   validateHomepageContent,
   type HomepageComponentKey,
   type HomepageData,
@@ -69,7 +70,7 @@ export function HomepageContentProvider({
         page: item.page || (componentKey.startsWith("layout.") ? "layout" : "home"),
         description: item.description || getKeyMeta(componentKey)?.description || "",
         isActive: item.isActive,
-        data: (item.data || createHomepageData(componentKey)) as HomepageData,
+        data: normalizeHomepageData(componentKey, (item.data || createHomepageData(componentKey)) as HomepageData),
       });
     } catch (error) {
       setComponentId(null);
@@ -97,7 +98,7 @@ export function HomepageContentProvider({
       page: form.page.trim() || (componentKey.startsWith("layout.") ? "layout" : "home"),
       description: form.description?.trim() || "",
       isActive: form.isActive,
-      data: form.data,
+      data: normalizeHomepageData(componentKey, form.data),
     };
 
     let nextErrors = validateHomepageContent(payload);

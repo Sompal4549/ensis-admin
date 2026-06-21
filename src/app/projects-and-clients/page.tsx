@@ -216,7 +216,11 @@ const ProjectAndClientManagement = () => {
 
     try {
       const allRecords = await componentContentApi.list();
-      setRecords(allRecords.filter(r => r.page === "projects"));
+      setRecords(
+        allRecords
+          .filter(r => r.page === "projects")
+          .sort((a, b) => (a.index ?? 0) - (b.index ?? 0))
+      );
     } catch (error) {
       console.error("Failed to load component list:", error);
     }
@@ -494,11 +498,23 @@ const ProjectAndClientManagement = () => {
     setRecords(items);
 
     try {
-      // Casting to any to resolve ts(2339) if the method isn't in the interface yet
-      await (componentContentApi as any).reorder(items.map((i: ComponentContent) => i._id));
+      await Promise.all(
+        items.map((item, index) =>
+          componentContentApi.update(item._id, {
+            key: item.key,
+            label: item.label,
+            page: item.page,
+            description: item.description,
+            data: item.data,
+            isActive: item.isActive,
+            index,
+          })
+        )
+      );
       toast.success("Order updated");
     } catch (error: any) {
-      toast.error("Failed to update order");
+      toast.error(error.message || "Failed to update order");
+      loadContent();
     }
   };
 

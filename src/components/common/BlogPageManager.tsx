@@ -288,7 +288,7 @@ export default function BlogPageManager() {
 
   return (
     <Suspense fallback={<div className="flex justify-center p-20"><Loader2 className="animate-spin text-[#8d6a3a]" size={40} /></div>}> {/* Moved Suspense to wrap the entire component */}
-    <div className="grid grid-cols-1 xl:grid-cols-[1fr_350px] gap-6">
+    <div className="grid grid-cols-1 xl:grid-cols-[1fr] gap-6">
       <div className="space-y-6">
         <form onSubmit={handleSave} className="bg-white border rounded-2xl shadow-sm overflow-hidden">
           <div className="bg-[#fcfaf7] border-b p-6 flex items-center justify-between">
@@ -373,7 +373,7 @@ export default function BlogPageManager() {
         </form>
       </div>
 
-      <aside className="space-y-4">
+      {/* <aside className="space-y-4">
         <div className="bg-white border rounded-2xl p-6 shadow-sm">
           <h3 className="font-bold text-gray-800 mb-4">Saved Blogs</h3>
           <ComponentList 
@@ -384,7 +384,7 @@ export default function BlogPageManager() {
             editingId={editingId} 
           />
         </div>
-      </aside>
+      </aside> */}
     </div>
     </Suspense>
   );

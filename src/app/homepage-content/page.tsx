@@ -18,6 +18,7 @@ import {
   buildEmptyHomepageContent,
   createHomepageData,
   homepageKeys,
+  normalizeHomepageData,
   type HomepageComponentKey,
   type HomepageData,
   type HomeGlobalPresenceStat,
@@ -152,7 +153,7 @@ export default function HomepageContentAdminPage() {
       page: record.page || "home",
       description: record.description || "",
       isActive: record.isActive,
-      data: record.data as HomepageData,
+      data: normalizeHomepageData(record.key as HomepageComponentKey, record.data as HomepageData),
     });
   }, [knownKeys]);
 
@@ -195,7 +196,7 @@ export default function HomepageContentAdminPage() {
       page: form.page.trim() || "home",
       description: form.description?.trim() ?? "",
       isActive: form.isActive,
-      data: form.data,
+      data: normalizeHomepageData(form.key, form.data),
     };
 
     let validationErrors = validateHomepageContent(payload);

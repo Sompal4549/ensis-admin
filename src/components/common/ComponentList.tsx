@@ -44,8 +44,11 @@ export default function ComponentList({
                           : "bg-white border-[#eee5d9] hover:border-[#d9cdbb] shadow-sm"
                     }`}
                   >
-                    <div className="flex items-center gap-4 w-full sm:w-auto mb-2 sm:mb-0">
-                      <div {...provided.dragHandleProps} className="cursor-grab text-slate-300 hover:text-slate-500">
+                    <div
+                      {...provided.dragHandleProps}
+                      className="flex items-center gap-4 w-full sm:w-auto mb-2 sm:mb-0 cursor-grab active:cursor-grabbing"
+                    >
+                      <div className="text-slate-300 hover:text-slate-500">
                         <GripVertical size={20} />
                       </div>
                       <div onClick={() => onEdit(record)} className="cursor-pointer">

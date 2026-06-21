@@ -71,6 +71,14 @@ const emptyFromSample = (sample: EditableValue): EditableValue => {
   return "";
 };
 
+const emptyArrayItemForPath = (path: Array<string | number>, sample: EditableValue): EditableValue => {
+  const lastKey = String(path[path.length - 1] || "").toLowerCase();
+  if (lastKey === "projects" || lastKey === "mfgimages") {
+    return { image: "", title: "" };
+  }
+  return emptyFromSample(sample);
+};
+
 const isImageField = (path: Array<string | number>) => {
   const last = path[path.length - 1];
   const name = String(last || "").toLowerCase();
@@ -200,7 +208,7 @@ function StructuredField({
       <section className="rounded-lg border border-[#efe3d1] bg-[#fbf7ef] p-4">
         <div className="mb-4 flex items-center justify-between gap-3">
           <h3 className="text-sm font-bold uppercase tracking-wide text-[#263016]">{label}</h3>
-          <button type="button" onClick={() => setPathValue([...value, emptyFromSample(sample)])} className="inline-flex items-center gap-2 rounded-md bg-[#263016] px-3 py-2 text-xs font-semibold uppercase tracking-wide text-white">
+          <button type="button" onClick={() => setPathValue([...value, emptyArrayItemForPath(path, sample)])} className="inline-flex items-center gap-2 rounded-md bg-[#263016] px-3 py-2 text-xs font-semibold uppercase tracking-wide text-white">
             <Plus size={14} /> Add
           </button>
         </div>
