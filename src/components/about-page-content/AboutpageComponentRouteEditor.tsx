@@ -143,6 +143,7 @@ export default function AboutpageComponentRouteEditor({ componentKey, title }: {
         </div>
         <div className="grid grid-cols-2 gap-3">
           <label className={labelClass}>Title <input className={fieldClass} value={data.title || ""} onChange={e => setData({ ...data, title: e.target.value })} /></label>
+           <label className={labelClass}>Heading <input className={fieldClass} value={data.heading || ""} onChange={e => setData({ ...data, heading: e.target.value })} /></label>
           <label className={labelClass}>Highlight <input className={fieldClass} value={data.highlight || ""} onChange={e => setData({ ...data, highlight: e.target.value })} /></label>
         </div>
         <label className={labelClass}>Description <textarea className={fieldClass} rows={3} value={data.description || ""} onChange={e => setData({ ...data, description: e.target.value })} /></label>
@@ -205,11 +206,14 @@ export default function AboutpageComponentRouteEditor({ componentKey, title }: {
           </div>
           <div className="grid grid-cols-2 gap-2">
             {data.ourCoreValues.map((v, idx) => (
-              <div key={v.id} className="flex gap-2 items-center bg-gray-50 p-2 rounded">
+              <div key={v.id} className="p-2 border rounded bg-gray-50 space-y-1.5 relative">
+                <button type="button" onClick={() => setData({ ...data, ourCoreValues: data.ourCoreValues.filter((_, i) => i !== idx) })} className="absolute top-2 right-2 text-red-500"><Trash2 size={14} /></button>
                 <input className={fieldClass} placeholder="Value Title" value={v.title || ""} onChange={e => {
                   const nv = [...data.ourCoreValues]; nv[idx].title = e.target.value; setData({ ...data, ourCoreValues: nv });
                 }} />
-                <button type="button" onClick={() => setData({ ...data, ourCoreValues: data.ourCoreValues.filter((_, i) => i !== idx) })} className="text-red-500"><Trash2 size={16} /></button>
+                <ImageUploadField label="Icon" value={v.imageurl?.imageUrl} fieldKey={`story.value.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={(m) => toast.error(m)} onUpload={url => {
+                  const nv = [...data.ourCoreValues]; nv[idx].imageurl = { ...nv[idx].imageurl, imageUrl: url }; setData({ ...data, ourCoreValues: nv });
+                }} />
               </div>
             ))}
           </div>

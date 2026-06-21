@@ -212,7 +212,7 @@ export default function TurnkeyPageManager() {
   };
 
   const renderSolutionsForm = () => {
-    const data = (form.data || {}) as TurnkeySolutions;
+    const data = (form.data || {}) as TurnkeySolutions & { bottomStrap?: boolean };
     const specialCard = data.specialCard || { 
       leftImage: { imageUrl: "", alt: "" }, 
       rightImage: { imageUrl: "", alt: "" }, 
@@ -259,6 +259,10 @@ export default function TurnkeyPageManager() {
                <button type="button" onClick={() => { const nc = [...data.cards]; nc.splice(idx, 1); setForm({...form, data: {...data, cards: nc}})}} className="absolute top-2 right-2 text-red-500"><Trash2 size={16} /></button>
                <div className="grid grid-cols-2 gap-4">
                  <label className={labelClass}>Card Title <input className={fieldClass} value={card.title} onChange={e => { const nc = [...data.cards]; nc[idx].title = e.target.value; setForm({...form, data: {...data, cards: nc}}) }} /></label>
+                  <label className="flex items-center gap-2 text-xs font-medium text-gray-700">
+          <input type="checkbox" checked={!!data.bottomStrap} onChange={e => setForm({...form, data: {...data, bottomStrap: e.target.checked}})} />
+          Bottom Strap
+        </label>
                  <ImageUploadField label="Card Image" value={card.image.imageUrl} fieldKey={`sol.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => { const nc = [...data.cards]; nc[idx].image.imageUrl = url; setForm({...form, data: {...data, cards: nc}}) }} />
                </div>
                <div className="space-y-2">

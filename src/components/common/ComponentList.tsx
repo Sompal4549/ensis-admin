@@ -36,7 +36,7 @@ export default function ComponentList({
                   <div
                     ref={provided.innerRef}
                     {...provided.draggableProps}
-                    className={`flex items-center justify-between rounded-xl border p-4 transition-all ${
+                    className={`grid grid-cols-1 sm:grid-cols-2 gap-4 items-start sm:items-center rounded-xl border p-4 transition-all ${
                       snapshot.isDragging 
                         ? "bg-[#f3eee6] border-[#8d6a3a] shadow-lg z-50" 
                         : editingId === record._id 
@@ -44,19 +44,19 @@ export default function ComponentList({
                           : "bg-white border-[#eee5d9] hover:border-[#d9cdbb] shadow-sm"
                     }`}
                   >
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 w-full sm:w-auto mb-2 sm:mb-0">
                       <div {...provided.dragHandleProps} className="cursor-grab text-slate-300 hover:text-slate-500">
                         <GripVertical size={20} />
                       </div>
                       <div onClick={() => onEdit(record)} className="cursor-pointer">
-                        <div className="font-bold text-[#1f261b] text-sm">{record.label}</div>
-                        <div className="text-[10px] text-[#8d6a3a] mt-0.5 font-black uppercase tracking-tighter">
+                        <div className="font-bold text-[#1f261b] text-sm break-words">{record.label}</div>
+                        {/* <div className="text-[10px] text-[#8d6a3a] mt-0.5 font-black uppercase tracking-tighter">
                           {record.key} • {record.isActive ? "Active" : "Inactive"}
-                        </div>
+                        </div> */}
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-1">
+                    <div className="grid grid-cols-[repeat(auto-fit,minmax(0,1fr))] gap-1">
                       <button
                         type="button"
                         title="Edit"

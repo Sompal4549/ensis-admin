@@ -68,7 +68,7 @@ export default function LivePreviewIframe({
         <div className="relative grid gap-6 overflow-hidden rounded-4xl">
     
           <div >
-            <div className="overflow-hidden rounded-3xl ">
+            <div className="overflow-hidden rounded-3xl">
               <iframe
                 src={iframeSrc}
                 title="Live site preview"
@@ -83,21 +83,21 @@ export default function LivePreviewIframe({
 
       <div className="flex flex-col gap-3 border-t border-slate-200/80 bg-slate-50 px-6 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-8">
         <div className="space-y-1">
-          <p className="text-[11px] uppercase tracking-[0.28em] text-slate-500">Last Updated</p>
+          <p className="text-[11px] uppercase">Last Updated</p>
           <div className="flex items-center gap-2">
-            {loading && <Loader2 size={12} className="animate-spin text-slate-400" />}
-            <p className="text-sm font-semibold text-slate-700">{displayLastUpdated}</p>
+            {loading && <Loader2 size={12} className="animate-spin" />}
+            <p className="text-xs font-semibold">{displayLastUpdated}</p>
           </div>
         </div>
         <div className="space-y-1">
-          <p className="text-[11px] uppercase tracking-[0.28em] text-slate-500">Published By</p>
-          <p className="text-sm font-semibold text-slate-700">{user?.name || publishedByProp || "Super Admin"}</p>
+          <p className="text-[11px] uppercase">Published By</p>
+          <p className="text-xs font-semibold">{user?.name || publishedByProp || "Super Admin"}</p>
         </div>
         <a
           href={actionLink}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex items-center gap-2 text-sm font-semibold text-slate-900 transition hover:text-orange-500"
+          className="inline-flex items-center gap-2 text-xs font-semibold transition hover:text-orange-500"
         >
           View Full Site
           <ExternalLink className="h-4 w-4" />

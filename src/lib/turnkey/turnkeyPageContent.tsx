@@ -31,7 +31,7 @@ export type TurnkeyWhatIs = {
 
 export type TurnkeySolutions = {
   title: string;
-  cards: { id: string; image: ImageData; title: string; details: string[] }[];
+  cards: { id: string; image: ImageData; title: string; details: string[], bottomStrap:boolean }[];
   specialCard?: {
     leftImage: ImageData;
     rightImage: ImageData;
@@ -108,7 +108,7 @@ export const defaultTurnkeyData: Record<TurnkeyPageContentKeys, unknown> = {
   "turnkey.completeSolutions": {
     title: "Our Complete Turnkit Solutions",
     cards: [
-      { id: randomId(), title: "Panchkarma Centers", details: ["Complete setup for Ayurvedic treatment centers."], image: { imageUrl: "", alt: "" } }
+      { id: randomId(), title: "Panchkarma Centers", details: ["Complete setup for Ayurvedic treatment centers."], image: { imageUrl: "", alt: "",bottomStrap:false } }
     ],
     specialCard: {
       leftImage: { imageUrl: "", alt: "" },

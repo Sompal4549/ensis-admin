@@ -765,7 +765,7 @@ export default function HomepageContentAdminPage() {
           </div>
         </div>
 
-        <div className="grid gap-6 xl:grid-cols-[380px_1fr]">
+        <div>
 
           <section className="space-y-4">
             <div className={cardClass}>

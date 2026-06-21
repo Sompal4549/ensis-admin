@@ -24,11 +24,13 @@ type CategoryForm = {
   id?: string;
   name: string;
   description: string;
+  slug:string;
 };
 
 const emptyCategory: CategoryForm = {
   name: "",
   description: "",
+  slug:"",
 };
 
 
@@ -276,6 +278,15 @@ export default function CategoriesPage() {
               required
             />
           </div>
+           <div>
+            <label className={labelClass}>Slug</label>
+            <input
+              className={fieldClass}
+              value={categoryForm.slug}
+              onChange={(event) => setCategoryForm({ ...categoryForm, slug: event.target.value })}
+              required
+            />
+          </div>
           <div>
             <label className={labelClass}>Description</label>
             <textarea
@@ -317,7 +328,7 @@ export default function CategoriesPage() {
                 </div>
                 <div className="flex gap-2">
                   <button
-                    onClick={() => setCategoryForm({ id: category._id, name: category.name, description: category.description || "" })}
+                    onClick={() => setCategoryForm({ id: category._id, name: category.name, description: category.description || "", slug: category.slug || "" })}
                     className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer"
                   >
                     <Pencil size={12} />

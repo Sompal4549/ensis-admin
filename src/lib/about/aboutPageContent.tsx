@@ -22,6 +22,7 @@ export type AboutHero = {
     image: ImageData;
     title: string;
     highlight: string;
+    heading:string;
     description: string;
     primaryAction: {
         label: string;
@@ -196,6 +197,7 @@ export const defaultAboutpageData :Record<AboutPageContentKeys, AboutPageData> =
     "about.hero": {
     id: "default-hero-section",
     image: { imageUrl: '/media/about/hero-bg.jpg', alt: 'Ensis Hero Background' },
+    heading:"ABOUT ENSIS",
     title: 'Pioneering Digital Excellence with',
     highlight: 'Ensis Solutions',
     description: 'We blend artistic design with engineering precision to build software that scales, performs, and transforms businesses globally.',
