@@ -316,10 +316,13 @@ const EnquaryPageManagement = () => {
     setRecords(items);
 
     try {
-      await (componentContentApi as any).reorder(items.map(i => i._id));
+      await Promise.all(
+        items.map((item, index) => componentContentApi.update(item._id, { index }))
+      );
       toast.success("Order updated");
     } catch (error: any) {
       toast.error("Failed to update order");
+      loadContent();
     }
   };
 

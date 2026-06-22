@@ -155,7 +155,7 @@ export const homepageKeys: { key: HomepageComponentKey; label: string; descripti
   { key: "home.fullWidthFeatures", label: "Full Width Features", description: "Full-width feature cards with image, title, description, and CTA button." },
   { key: "home.productsGrid", label: "Products Grid", description: "Products section headings, description, and CTA button." },
   { key: "home.wellnessRoomSetups", label: "Wellness Room Setups", description: "Room setup grid cards with title, image, and tag." },
-  { key: "home.manufacturingAndProjects", label: "Manufacturing & Projects", description: "Manufacturing section with stats and project cards." },
+  { key: "home.manufacturingAndProjects", label: "Manufacturing & Projects", description: "Manufacturing section with project cards." },
   { key: "home.testimonials", label: "Testimonials", description: "Testimonial cards with text, name, role, and image." },
   { key: "home.blogInsights", label: "Blog Insights", description: "Blog section heading, blog cards, and CTA strip." },
   { key: "home.readyToBuild", label: "Ready to Build", description: "Call to action section for starting a project." }, // Ensure this entry is present
@@ -188,7 +188,7 @@ export const defaultHomepageData: Record<HomepageComponentKey, HomepageData> = {
   "home.wellnessRoomSetups": { subtitle: "", heading: "",description:"",sectionButtonText:"View All Rooms",sectionButtonPath:"", cards: [{ id: randomId(), title: "", image: "", tag: "" }] },
   "home.manufacturingAndProjects": {
     subtitle: "", heading: "", description: "",
-    projects: [{ image: "", title: "" }],
+    projects: [{ image: "https://res.cloudinary.com/ddjhixcwh/image/upload/v1782016161/ensis/ezbs3bmeijnbygf43vcx.jpg", title: "Project 1" }],
     mfgFeatures: [""],
     mfgButtonText: "",
     mfgButtonHref: "",
@@ -221,6 +221,23 @@ export const createHomepageData = (key: HomepageComponentKey): HomepageData => {
     return { ...(data as WellnessRoomSetupsData), cards: (data as WellnessRoomSetupsData).cards.map((c) => ({ ...c, id: randomId() })) };
   }
   return data;
+};
+
+export const normalizeHomepageData = (key: HomepageComponentKey, data: HomepageData): HomepageData => {
+  if (key !== "home.manufacturingAndProjects") return data;
+
+  const current = data as Record<string, any>;
+  const { stats: _stats, ...withoutStats } = current;
+  const normalizeProjectCard = (item: any) => ({
+    image: typeof item?.image === "string" ? item.image : "",
+    title: typeof item?.title === "string" ? item.title : typeof item?.content === "string" ? item.content : "",
+  });
+
+  return {
+    ...withoutStats,
+    projects: Array.isArray(current.projects) ? current.projects.map(normalizeProjectCard) : [],
+    mfgImages: Array.isArray(current.mfgImages) ? current.mfgImages.map(normalizeProjectCard) : [],
+  } as HomepageData;
 };
 
 export const buildEmptyHomepageContent = (key: HomepageComponentKey): Omit<ComponentContent, "_id"> & { key: HomepageComponentKey } => {

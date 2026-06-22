@@ -213,51 +213,375 @@ export default function ConsultancyPageManager() {
     );
   };
 
-  const renderProcessForm = () => {
-    const data = form.data as any;
-    if (!data.whyChoose || !data.ourProcess) return <div className="p-4 italic text-slate-400">Loading Process Structure...</div>;
+const renderProcessForm = () => {
+  const data = form.data as any;
 
+  if (!data.whyChoose || !data.ourProcess) {
     return (
-      <div className="space-y-6">
-        <div className="p-4 bg-amber-50 rounded-2xl space-y-4">
-          <h4 className="font-bold text-amber-800">Why Choose Us</h4>
-          <input className={fieldClass} placeholder="Heading" value={data.whyChoose.heading} onChange={e => setForm({...form, data: {...data, whyChoose: {...data.whyChoose, heading: e.target.value}}})} />
-          <input className={fieldClass} placeholder="Title" value={data.whyChoose.title} onChange={e => setForm({...form, data: {...data, whyChoose: {...data.whyChoose, title: e.target.value}}})} />
-          <div>
-            <label className={labelClass}>Why Choose Description</label>
-            <RichTextEditor 
-              value={data.whyChoose.description || ""} 
-              onChange={val => setForm({...form, data: {...data, whyChoose: {...data.whyChoose, description: val}}})} 
-              placeholder="Why choose us details..."
-              minHeight="120px" 
-            />
-          </div>
-          <ImageUploadField label="Background Image" value={data.whyChoose.bgImage} fieldKey="process.wc.bg" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => setForm({...form, data: {...data, whyChoose: {...data.whyChoose, bgImage: url}}})} />
-        </div>
-        <div className="p-4 bg-blue-50 rounded-2xl space-y-4">
-          <h4 className="font-bold text-blue-800">Our Process</h4>
-          <input className={fieldClass} placeholder="Heading" value={data.ourProcess.heading} onChange={e => setForm({...form, data: {...data, ourProcess: {...data.ourProcess, heading: e.target.value}}})} />
-          <input className={fieldClass} placeholder="Title" value={data.ourProcess.title} onChange={e => setForm({...form, data: {...data, ourProcess: {...data.ourProcess, title: e.target.value}}})} />
-          {data.ourProcess.processList.map((proc: any, idx: number) => (
-             <div key={proc.id} className="p-3 border bg-white rounded-lg space-y-2">
-                <input className={fieldClass} placeholder="Step Title" value={proc.title} onChange={e => { const nl = [...data.ourProcess.processList]; nl[idx].title = e.target.value; setForm({...form, data: {...data, ourProcess: {...data.ourProcess, processList: nl}}}) }} />
-                  <input className={fieldClass} placeholder="Step Color" value={proc.color} onChange={e => { const nl = [...data.ourProcess.processList]; nl[idx].color = e.target.value; setForm({...form, data: {...data, ourProcess: {...data.ourProcess, processList: nl}}}) }} />
-                <div>
-                  <label className="text-[10px] font-bold text-gray-400 uppercase">Step Description</label>
-                  <RichTextEditor 
-                    value={proc.description || ""} 
-                    onChange={val => { const nl = [...data.ourProcess.processList]; nl[idx].description = val; setForm({...form, data: {...data, ourProcess: {...data.ourProcess, processList: nl}}}); }} 
-                    placeholder="Describe this step..."
-                    minHeight="100px" 
-                  />
-                </div>
-                <ImageUploadField label="Step Icon" value={proc.image} fieldKey={`proc.step.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => { const nl = [...data.ourProcess.processList]; nl[idx].image = url; setForm({...form, data: {...data, ourProcess: {...data.ourProcess, processList: nl}}}) }} />
-             </div>
-          ))}
-        </div>
+      <div className="p-4 italic text-slate-400">
+        Loading Process Structure...
       </div>
     );
-  };
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Why Choose Us */}
+      <div className="p-4 bg-amber-50 rounded-2xl space-y-4">
+        <h4 className="font-bold text-amber-800">Why Choose Us</h4>
+
+        <input
+          className={fieldClass}
+          placeholder="Heading"
+          value={data.whyChoose.heading || ""}
+          onChange={(e) =>
+            setForm({
+              ...form,
+              data: {
+                ...data,
+                whyChoose: {
+                  ...data.whyChoose,
+                  heading: e.target.value,
+                },
+              },
+            })
+          }
+        />
+
+        <input
+          className={fieldClass}
+          placeholder="Title"
+          value={data.whyChoose.title || ""}
+          onChange={(e) =>
+            setForm({
+              ...form,
+              data: {
+                ...data,
+                whyChoose: {
+                  ...data.whyChoose,
+                  title: e.target.value,
+                },
+              },
+            })
+          }
+        />
+
+        <div>
+          <label className={labelClass}>Why Choose Description</label>
+          <RichTextEditor
+            value={data.whyChoose.description || ""}
+            onChange={(val) =>
+              setForm({
+                ...form,
+                data: {
+                  ...data,
+                  whyChoose: {
+                    ...data.whyChoose,
+                    description: val,
+                  },
+                },
+              })
+            }
+            placeholder="Why choose us details..."
+            minHeight="120px"
+          />
+        </div>
+
+        <ImageUploadField
+          label="Background Image"
+          value={data.whyChoose.bgImage}
+          fieldKey="process.wc.bg"
+          uploadingField={uploadingField}
+          onUploadingChange={setUploadingField}
+          onError={(m) => toast.error(m)}
+          onUpload={(url) =>
+            setForm({
+              ...form,
+              data: {
+                ...data,
+                whyChoose: {
+                  ...data.whyChoose,
+                  bgImage: url,
+                },
+              },
+            })
+          }
+        />
+
+        {/* Choose List */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <label className={labelClass}>Choose List</label>
+
+            <button
+              type="button"
+              className="px-3 py-1 text-xs bg-amber-200 rounded"
+              onClick={() =>
+                setForm({
+                  ...form,
+                  data: {
+                    ...data,
+                    whyChoose: {
+                      ...data.whyChoose,
+                      chooseList: [
+                        ...(data.whyChoose.chooseList || []),
+                        "",
+                      ],
+                    },
+                  },
+                })
+              }
+            >
+              + Add Item
+            </button>
+          </div>
+
+          {(data.whyChoose.chooseList || []).map(
+            (item: string, idx: number) => (
+              <div key={idx} className="flex gap-2">
+                <input
+                  className={fieldClass}
+                  placeholder={`Choose Item ${idx + 1}`}
+                  value={item}
+                  onChange={(e) => {
+                    const newList = [
+                      ...(data.whyChoose.chooseList || []),
+                    ];
+                    newList[idx] = e.target.value;
+
+                    setForm({
+                      ...form,
+                      data: {
+                        ...data,
+                        whyChoose: {
+                          ...data.whyChoose,
+                          chooseList: newList,
+                        },
+                      },
+                    });
+                  }}
+                />
+
+                <button
+                  type="button"
+                  className="px-3 py-2 border rounded text-red-500"
+                  onClick={() => {
+                    const newList = (
+                      data.whyChoose.chooseList || []
+                    ).filter((_: any, i: number) => i !== idx);
+
+                    setForm({
+                      ...form,
+                      data: {
+                        ...data,
+                        whyChoose: {
+                          ...data.whyChoose,
+                          chooseList: newList,
+                        },
+                      },
+                    });
+                  }}
+                >
+                  Remove
+                </button>
+              </div>
+            )
+          )}
+        </div>
+
+        {/* Primary Button */}
+        <div className="space-y-2">
+          <label className={labelClass}>Primary Button</label>
+
+          <input
+            className={fieldClass}
+            placeholder="Button Label"
+            value={data.whyChoose.primaryButton?.label || ""}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                data: {
+                  ...data,
+                  whyChoose: {
+                    ...data.whyChoose,
+                    primaryButton: {
+                      ...(data.whyChoose.primaryButton || {}),
+                      label: e.target.value,
+                    },
+                  },
+                },
+              })
+            }
+          />
+
+          <input
+            className={fieldClass}
+            placeholder="Button Link"
+            value={data.whyChoose.primaryButton?.href || ""}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                data: {
+                  ...data,
+                  whyChoose: {
+                    ...data.whyChoose,
+                    primaryButton: {
+                      ...(data.whyChoose.primaryButton || {}),
+                      href: e.target.value,
+                    },
+                  },
+                },
+              })
+            }
+          />
+        </div>
+      </div>
+
+      {/* Our Process */}
+      <div className="p-4 bg-blue-50 rounded-2xl space-y-4">
+        <h4 className="font-bold text-blue-800">Our Process</h4>
+
+        <input
+          className={fieldClass}
+          placeholder="Heading"
+          value={data.ourProcess.heading}
+          onChange={(e) =>
+            setForm({
+              ...form,
+              data: {
+                ...data,
+                ourProcess: {
+                  ...data.ourProcess,
+                  heading: e.target.value,
+                },
+              },
+            })
+          }
+        />
+
+        <input
+          className={fieldClass}
+          placeholder="Title"
+          value={data.ourProcess.title}
+          onChange={(e) =>
+            setForm({
+              ...form,
+              data: {
+                ...data,
+                ourProcess: {
+                  ...data.ourProcess,
+                  title: e.target.value,
+                },
+              },
+            })
+          }
+        />
+
+        {data.ourProcess.processList.map(
+          (proc: any, idx: number) => (
+            <div
+              key={proc.id}
+              className="p-3 border bg-white rounded-lg space-y-2"
+            >
+              <input
+                className={fieldClass}
+                placeholder="Step Title"
+                value={proc.title}
+                onChange={(e) => {
+                  const nl = [...data.ourProcess.processList];
+                  nl[idx].title = e.target.value;
+
+                  setForm({
+                    ...form,
+                    data: {
+                      ...data,
+                      ourProcess: {
+                        ...data.ourProcess,
+                        processList: nl,
+                      },
+                    },
+                  });
+                }}
+              />
+
+              <input
+                className={fieldClass}
+                placeholder="Step Color"
+                value={proc.color}
+                onChange={(e) => {
+                  const nl = [...data.ourProcess.processList];
+                  nl[idx].color = e.target.value;
+
+                  setForm({
+                    ...form,
+                    data: {
+                      ...data,
+                      ourProcess: {
+                        ...data.ourProcess,
+                        processList: nl,
+                      },
+                    },
+                  });
+                }}
+              />
+
+              <div>
+                <label className="text-[10px] font-bold text-gray-400 uppercase">
+                  Step Description
+                </label>
+
+                <RichTextEditor
+                  value={proc.description || ""}
+                  onChange={(val) => {
+                    const nl = [...data.ourProcess.processList];
+                    nl[idx].description = val;
+
+                    setForm({
+                      ...form,
+                      data: {
+                        ...data,
+                        ourProcess: {
+                          ...data.ourProcess,
+                          processList: nl,
+                        },
+                      },
+                    });
+                  }}
+                  placeholder="Describe this step..."
+                  minHeight="100px"
+                />
+              </div>
+
+              <ImageUploadField
+                label="Step Icon"
+                value={proc.image}
+                fieldKey={`proc.step.${idx}`}
+                uploadingField={uploadingField}
+                onUploadingChange={setUploadingField}
+                onError={(m) => toast.error(m)}
+                onUpload={(url) => {
+                  const nl = [...data.ourProcess.processList];
+                  nl[idx].image = url;
+
+                  setForm({
+                    ...form,
+                    data: {
+                      ...data,
+                      ourProcess: {
+                        ...data.ourProcess,
+                        processList: nl,
+                      },
+                    },
+                  });
+                }}
+              />
+            </div>
+          )
+        )}
+      </div>
+    </div>
+  );
+};
 
   const renderReadyForm = () => {
     const data = form.data as any;

@@ -176,6 +176,11 @@ const NAV_ITEMS: NavItem[] = [
         path: "/contact-page-management",
         icon: <Headphones size={16} />,
       },
+      {
+        label: "Career Page",
+        path: "/career-page-managment",
+        icon: <UserRoundPlus size={16} />,
+      },
     {
         label: "Product listing",
         path: "/product-listing",
