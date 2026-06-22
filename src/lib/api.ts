@@ -87,21 +87,54 @@ type ApiEnvelope<T> = {
 
 const TOKEN_KEY = "ensis_admin_token";
 const USER_KEY = "ensis_admin_user";
+const AUTH_EXPIRED_EVENT = "ensis:auth-expired";
+
+const isBrowser = () => typeof window !== "undefined";
+
+const decodeJwtPayload = (token: string): { exp?: number } | null => {
+  try {
+    const [, payload] = token.split(".");
+    if (!payload) return null;
+    const normalizedPayload = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const decoded = window.atob(normalizedPayload);
+    return JSON.parse(decoded);
+  } catch {
+    return null;
+  }
+};
+
+const isTokenExpired = (token: string) => {
+  if (!isBrowser()) return false;
+  const payload = decodeJwtPayload(token);
+  if (!payload?.exp) return false;
+  return payload.exp * 1000 <= Date.now();
+};
+
+const notifyAuthExpired = () => {
+  if (!isBrowser()) return;
+  window.dispatchEvent(new Event(AUTH_EXPIRED_EVENT));
+};
 
 export const authStore = {
-  getToken: () => (typeof window === "undefined" ? "" : localStorage.getItem(TOKEN_KEY) || ""),
+  authExpiredEvent: AUTH_EXPIRED_EVENT,
+  getToken: () => (isBrowser() ? localStorage.getItem(TOKEN_KEY) || "" : ""),
+  isTokenExpired,
   setSession: (accessToken: string, user: AuthUser) => {
     localStorage.setItem(TOKEN_KEY, accessToken);
     localStorage.setItem(USER_KEY, JSON.stringify(user));
   },
   getUser: (): AuthUser | null => {
-    if (typeof window === "undefined") return null;
+    if (!isBrowser()) return null;
     const raw = localStorage.getItem(USER_KEY);
     return raw ? JSON.parse(raw) : null;
   },
   clear: () => {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
+  },
+  expireSession: () => {
+    authStore.clear();
+    notifyAuthExpired();
   },
 };
 
@@ -120,10 +153,32 @@ export const api = axios.create({
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token = authStore.getToken();
   if (token) {
+    if (authStore.isTokenExpired(token)) {
+      authStore.expireSession();
+      return Promise.reject(new Error("Session expired. Please sign in again."));
+    }
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const status = error?.response?.status;
+    const requestUrl = String(error?.config?.url || "");
+    const isAuthRequest =
+      requestUrl.includes("/admin/login") ||
+      requestUrl.includes("/admin/logout") ||
+      requestUrl.includes("/auth/whatsapp-otp/send");
+
+    if ((status === 401 || status === 403) && !isAuthRequest && authStore.getToken()) {
+      authStore.expireSession();
+    }
+
+    return Promise.reject(error);
+  }
+);
 
 const request = async <T>(path: string, options: AxiosRequestConfig = {}) => {
   try {

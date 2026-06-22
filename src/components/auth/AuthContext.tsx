@@ -23,8 +23,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const storedUser = authStore.getUser();
     const token = authStore.getToken();
-    setUser(storedUser && token ? storedUser : null);
+    if (storedUser && token && !authStore.isTokenExpired(token)) {
+      setUser(storedUser);
+    } else {
+      authStore.clear();
+      setUser(null);
+    }
     setIsReady(true);
+  }, []);
+
+  useEffect(() => {
+    const handleAuthExpired = () => {
+      setUser(null);
+    };
+
+    window.addEventListener(authStore.authExpiredEvent, handleAuthExpired);
+    return () => window.removeEventListener(authStore.authExpiredEvent, handleAuthExpired);
   }, []);
 
   const login = async (phone: string, otp: string) => {
@@ -198,7 +212,7 @@ export function LoginForm() {
         )}
 
         {message && (
-          <p className="mt-4 rounded-lg border border-rose-100 bg-rose-50/50 p-2.5 text-xs font-semibold text-rose-600">
+          <p className="mt-4 rounded-lg border border-rose-100 bg-rose-50/50 p-2.5 text-xs font-semibold text-green-600">
             {message}
           </p>
         )}

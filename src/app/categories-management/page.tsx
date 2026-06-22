@@ -239,7 +239,7 @@ export default function CategoriesPage() {
           )}
 
           {message && (
-            <p className="mt-4 text-xs font-semibold text-rose-600 bg-rose-50/50 p-2.5 rounded-lg border border-rose-100">
+            <p className="mt-4 text-xs font-semibold text-green-600 bg-rose-50/50 p-2.5 rounded-lg border border-rose-100">
               {message}
             </p>
           )}
