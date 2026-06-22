@@ -28,15 +28,7 @@ export default function BlogPageManager() {
     label: "",
     page: "blog",
     isActive: true,
-    data: {
-      title: "",
-      author: "",
-      date: new Date().toISOString().split('T')[0],
-      category: "",
-      image: "",
-      excerpt: "",
-      content: ""
-    },
+    data: {},
   });
 
   const refresh = useCallback(async () => {
@@ -83,13 +75,6 @@ export default function BlogPageManager() {
       page: "blog",
       isActive: true,
       data: {
-        title: "",
-        author: "",
-        date: new Date().toISOString().split('T')[0],
-        category: "",
-        image: "",
-        excerpt: "",
-        content: ""
       },
     });
     router.push("/blogs-page-management");
@@ -288,92 +273,56 @@ export default function BlogPageManager() {
 
   return (
     <Suspense fallback={<div className="flex justify-center p-20"><Loader2 className="animate-spin text-[#8d6a3a]" size={40} /></div>}> {/* Moved Suspense to wrap the entire component */}
-    <div className="grid grid-cols-1 xl:grid-cols-[1fr] gap-6">
-      <div className="space-y-6">
-        <form onSubmit={handleSave} className="bg-white border rounded-2xl shadow-sm overflow-hidden">
-          <div className="bg-[#fcfaf7] border-b p-6 flex items-center justify-between">
-            <h2 className="font-serif text-2xl">{editingId ? (componentKey ? `Edit ${form.label}` : "Edit Blog Post") : (componentKey ? `Create ${blogPageKeys.find(k => k.key === componentKey)?.label}` : "Create New Blog")}</h2>
-            <div className="flex gap-3">
-              {(editingId || componentKey) && <button type="button" onClick={resetForm} className="px-4 py-2 text-sm font-bold text-gray-500 hover:text-gray-700">Cancel / New Blog</button>}
-              <button type="submit" disabled={loading} className="bg-[#8d6a3a] text-white px-6 py-2 rounded-xl font-bold flex items-center gap-2">
-                {loading ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />} Save Blog
-              </button>
-            </div>
-          </div>
-
-          <div className="p-8 space-y-6">
-            <div className="grid grid-cols-1 gap-4 p-4 bg-slate-50 rounded-xl">
-              <label className={labelClass}>Section Template / Page Management
-                <select 
-                  className={fieldClass} 
-                  value={componentKey || ""} 
-                  onChange={e => {
-                    const key = e.target.value;
-                    if (key === "") router.push("/blogs-page-management");
-                    else router.push(`?component=${key}`);
-                  }}
-                >
-                  <option value="">-- Individual Blog Post (Standard) --</option>
-                  {blogPageKeys.map(k => <option key={k.key} value={k.key}>{k.label}</option>)}
-                </select>
-              </label>
-              <label className={labelClass}>Visibility <div className="mt-2"><input type="checkbox" checked={form.isActive} onChange={e => setForm({...form, isActive: e.target.checked})} /></div></label>
+      <div className="grid grid-cols-1 xl:grid-cols-[1fr] gap-6">
+        <div className="space-y-6">
+          <form onSubmit={handleSave} className="bg-white border rounded-2xl shadow-sm overflow-hidden">
+            <div className="bg-[#fcfaf7] border-b p-6 flex items-center justify-between">
+             <h2 className="font-serif text-2xl">
+  {componentKey 
+    ? (editingId ? `Edit ${form.label}` : `Create ${blogPageKeys.find(k => k.key === componentKey)?.label}`)
+    : "Blog Page Management"
+  }
+</h2>
+              <div className="flex gap-3">
+                {(editingId || componentKey) && <button type="button" onClick={resetForm} className="px-4 py-2 text-sm font-bold text-gray-500 hover:text-gray-700">Cancel / New Blog</button>}
+                <button type="submit" disabled={loading} className="bg-[#8d6a3a] text-white px-6 py-2 rounded-xl font-bold flex items-center gap-2">
+                  {loading ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />} Save Blog
+                </button>
+              </div>
             </div>
 
-            {componentKey === "blog.hero" && renderHeroForm()}
-            {componentKey === "blog.featuredArticles" && renderFeaturedArticlesForm()}
-            {componentKey === "blog.voiceOfExperts" && renderExpertsForm()}
-            {componentKey === "blog.mediaResources" && renderMediaForm()}
-            {componentKey === "blog.stayInspired" && renderStayInspiredForm()}
-            {componentKey === "blog.supportWellness" && renderSupportWellnessForm()}
+            <div className="p-8 space-y-6">
+              <div className="grid grid-cols-1 gap-4 p-4 bg-slate-50 rounded-xl">
+                <label className={labelClass}>Section Template / Page Management
+                  <select
+                    className={fieldClass}
+                    value={componentKey || ""}
+                    onChange={e => {
+                      const key = e.target.value;
+                      if (key === "") router.push("/blogs-page-management");
+                      else router.push(`?component=${key}`);
+                    }}
+                  >
+                    {/* <option value="">-- Individual Blog Post (Standard) --</option> */}
+                    {blogPageKeys.map(k => <option key={k.key} value={k.key}>{k.label}</option>)}
+                  </select>
+                </label>
+                <label className={labelClass}>Visibility <div className="mt-2"><input type="checkbox" checked={form.isActive} onChange={e => setForm({ ...form, isActive: e.target.checked })} /></div></label>
+              </div>
 
-            {!componentKey && (
-              <>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <div className="space-y-1">
-                      <div className="flex justify-between items-center">
-                        <label className={labelClass}>Blog Title</label>
-                        <span className={`text-[10px] font-bold ${(data.title || "").length > 65 ? 'text-red-500' : 'text-slate-400'}`}>
-                          {(data.title || "").length} / 65
-                        </span>
-                      </div>
-                      <input className={fieldClass} value={data.title || ""} onChange={e => updateData("title", e.target.value)} required />
-                    </div>
+              {componentKey === "blog.hero" && renderHeroForm()}
+              {componentKey === "blog.featuredArticles" && renderFeaturedArticlesForm()}
+              {componentKey === "blog.voiceOfExperts" && renderExpertsForm()}
+              {componentKey === "blog.mediaResources" && renderMediaForm()}
+              {componentKey === "blog.stayInspired" && renderStayInspiredForm()}
+              {componentKey === "blog.supportWellness" && renderSupportWellnessForm()}
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <label className={labelClass}><span className="flex items-center gap-2"><User size={14}/> Author</span> <input className={fieldClass} value={data.author || ""} onChange={e => updateData("author", e.target.value)} /></label>
-                      <label className={labelClass}><span className="flex items-center gap-2"><Calendar size={14}/> Date</span> <input type="date" className={fieldClass} value={data.date || ""} onChange={e => updateData("date", e.target.value)} /></label>
-                    </div>
-                    <label className={labelClass}><span className="flex items-center gap-2"><Tag size={14}/> Category</span> <input className={fieldClass} value={data.category || ""} onChange={e => updateData("category", e.target.value)} /></label>
-                  </div>
-                  <div className="space-y-4">
-                    <ImageUploadField label="Featured Image" value={data.image} fieldKey="blog.image" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => updateData("image", url)} />
-                    <div className="space-y-1">
-                      <div className="flex justify-between items-center">
-                        <label className={labelClass}>Short Excerpt</label>
-                        <span className={`text-[10px] font-bold ${(data.excerpt || "").length > 155 ? 'text-red-500' : 'text-slate-400'}`}>
-                          {(data.excerpt || "").length} / 155
-                        </span>
-                      </div>
-                      <textarea className={fieldClass} rows={2} value={data.excerpt || ""} onChange={e => updateData("excerpt", e.target.value)} />
-                    </div>
-                  </div>
-                </div>
 
-                <div className="pt-4 border-t">
-                  <label className={labelClass}>Full Blog Content</label>
-                  <div className="mt-2">
-                    <RichTextEditor value={data.content || ""} onChange={val => updateData("content", val)} minHeight="400px" />
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-        </form>
-      </div>
+            </div>
+          </form>
+        </div>
 
-      {/* <aside className="space-y-4">
+        {/* <aside className="space-y-4">
         <div className="bg-white border rounded-2xl p-6 shadow-sm">
           <h3 className="font-bold text-gray-800 mb-4">Saved Blogs</h3>
           <ComponentList 
@@ -385,7 +334,7 @@ export default function BlogPageManager() {
           />
         </div>
       </aside> */}
-    </div>
+      </div>
     </Suspense>
   );
 }

@@ -174,7 +174,6 @@ const initialSection: CareerSectionProps = {
 };
 
 const initialBenefits: CareerBenefitsProps = {
-  bgImage: { imageUrl: "", alt: "" },
   title: "",
   benefits: [],
 };

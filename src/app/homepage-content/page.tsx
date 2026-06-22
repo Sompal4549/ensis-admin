@@ -153,7 +153,10 @@ export default function HomepageContentAdminPage() {
       page: record.page || "home",
       description: record.description || "",
       isActive: record.isActive,
-      data: normalizeHomepageData(record.key as HomepageComponentKey, record.data as HomepageData),
+    data: normalizeHomepageData(
+  record.key as HomepageComponentKey,
+  record.data as HomepageData  // ← yeh add karo
+),
     });
   }, [knownKeys]);
 
@@ -196,7 +199,7 @@ export default function HomepageContentAdminPage() {
       page: form.page.trim() || "home",
       description: form.description?.trim() ?? "",
       isActive: form.isActive,
-      data: normalizeHomepageData(form.key, form.data),
+data: normalizeHomepageData(form.key, form.data as HomepageData),
     };
 
     let validationErrors = validateHomepageContent(payload);
