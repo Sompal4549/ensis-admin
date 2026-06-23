@@ -23,14 +23,10 @@ import { fieldClass, labelClass } from "@/constants";
 type CategoryForm = {
   id?: string;
   name: string;
-  description: string;
-  slug:string;
 };
 
 const emptyCategory: CategoryForm = {
   name: "",
-  description: "",
-  slug:"",
 };
 
 
@@ -278,23 +274,6 @@ export default function CategoriesPage() {
               required
             />
           </div>
-           <div>
-            <label className={labelClass}>Slug</label>
-            <input
-              className={fieldClass}
-              value={categoryForm.slug}
-              onChange={(event) => setCategoryForm({ ...categoryForm, slug: event.target.value })}
-              required
-            />
-          </div>
-          <div>
-            <label className={labelClass}>Description</label>
-            <textarea
-              className={`${fieldClass} min-h-24`}
-              value={categoryForm.description}
-              onChange={(event) => setCategoryForm({ ...categoryForm, description: event.target.value })}
-            />
-          </div>
           <div className="flex gap-2.5 pt-2">
             <button
               className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 px-4 py-2 text-xs font-bold text-white transition-colors cursor-pointer"
@@ -324,11 +303,11 @@ export default function CategoriesPage() {
               <article key={category._id} className="flex flex-col gap-4 p-4 md:flex-row md:items-center md:justify-between hover:bg-slate-50/20">
                 <div className="min-w-0">
                   <h4 className="font-bold text-slate-800 text-xs">{category.name}</h4>
-                  <p className="mt-0.5 text-[11px] text-slate-400">{category.description || "No description provided"}</p>
+                  {/* <p className="mt-0.5 text-[11px] text-slate-400">{category.description || "No description provided"}</p> */}
                 </div>
                 <div className="flex gap-2">
                   <button
-                    onClick={() => setCategoryForm({ id: category._id, name: category.name, description: category.description || "", slug: category.slug || "" })}
+                    onClick={() => setCategoryForm({ id: category._id, name: category.name, })}
                     className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer"
                   >
                     <Pencil size={12} />
