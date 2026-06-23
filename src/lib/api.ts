@@ -16,24 +16,44 @@ export type Category = {
 };
 
 export type Product = {
-  isFeatured: any;
-  code: string;
-  overview: { title: string; description: string; overviewList: string[]; overviewMaterial: { title: string; description: string; }[]; specifications: { title: string; specificationsList: { title: string; description: string; }; }; keyFeatures: { title: string; keyFeaturesList: { title: string; description: string; }; }; dimensions: { title: string; dimensionsList: { title: string; description: string; }; }; materialAndCare: { title: string; description: string; }; productSpecifications: { highlight: string; title: string; image: string; specifications: { title: string; description: string; }[]; }; whatisInclueded: string[]; smartDesignAppearance: { highlight: string; title: string; woodFinish: string[]; sizeOptions: { title: string; description: string; }[]; }; faqs: { question: string; description: string; }[]; items?: { image: string; title: string; description: string }[]; };
   _id: string;
   title: string;
-  shortDescription:string;
-  material :string;
-  weight:string;
-  tags:string[];
-  subcategory:string;
   slug: string;
+  code?: string;
   description: string;
+  shortDescription?: string;
   price: number;
   discountPrice?: number;
-  stock?: number;
-  images?: string[];
-  isActive?: boolean;
   category?: Category | string;
+  subcategory?: string;
+  material?: string;
+  weight?: string;
+  images?: string[];
+  stock?: number;
+  tags?: string[];
+  averageRating?: number;
+  reviews?: string[];
+  isActive?: boolean;
+  isFeatured?: boolean;
+  overview?: {
+    title?: string;
+    description?: string;
+    overviewList?: string[];
+    specifications?: { title: string; specificationsList: { title: string; description: string }[] }[];
+    keyFeatures?: { title: string; keyFeaturesList: string[] };
+    dimensions?: { title: string; dimensionsList: { title: string; description: string }[] }[];
+    materialAndCare?: { title: string; description: string };
+    productSpecifications?: { highlight: string; title: string; image: string; specifications: { title: string; description: string }[] }[];
+    whatisInclueded?: string[];
+    items?: { image: string; title: string; description: string }[];
+    smartDesignAppearance?: {
+      highlight?: string;
+      title?: string;
+      woodFinish?: string[];
+      sizeOptions?: { title: string; description: string }[];
+    };
+    faqs?: { question: string; description: string }[];
+  };
 };
 
 export type ComponentContent = {

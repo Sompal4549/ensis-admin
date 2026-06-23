@@ -553,15 +553,15 @@ const ProjectAndClientManagement = () => {
     <div className="max-w-7xl mx-auto space-y-4 px-2 sm:px-2 lg:px-2 pb-3">
       <div className="flex flex-col gap-3 bg-white px-4 py-3 sm:px-6 sm:py-4 rounded-2xl border border-slate-100 shadow-sm md:flex-row md:items-center md:justify-between">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-slate-800 tracking-tight">Projects & Clients</h2>
-          <p className="text-slate-500 text-xs sm:text-sm">Manage your portfolio and client testimonials</p>
+          <h2 className="text-xl sm:text-2xl font-bold  tracking-tight">Projects & Clients</h2>
+          <p className=" text-xs sm:text-sm">Manage your portfolio and client testimonials</p>
         </div>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
       
           <select
             value={activeTab}
             onChange={(e) => setActiveTab(e.target.value as any)}
-            className="block w-full sm:w-48 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 shadow-sm focus:border-[#1d5af2] focus:ring-1 focus:ring-[#1d5af2] transition-all"
+            className="block w-full sm:w-48 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold  shadow-sm focus:border-[#1d5af2] focus:ring-1 focus:ring-[#1d5af2] transition-all"
           >
             <option value="banner">Banner</option>
             <option value="whyPartner">Why Partner</option>
@@ -576,7 +576,7 @@ const ProjectAndClientManagement = () => {
         {/* Sidebar: Component List */}
         <div className="lg:col-span-4 space-y-4">
           <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
-            <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider mb-4">Components</h3>
+            <h3 className="text-sm font-bold  uppercase tracking-wider mb-4">Components</h3>
             <ComponentList 
               records={records}
               onEdit={handleEditComponent}
@@ -593,7 +593,7 @@ const ProjectAndClientManagement = () => {
       {activeTab === 'banner' && (
         <form onSubmit={handleSave} className="bg-white border rounded-2xl shadow-sm overflow-hidden animate-in fade-in duration-300">
         <div className="bg-slate-50 border-b p-4 px-6 flex items-center justify-between">
-          <h2 className="font-bold text-slate-700 text-xs sm:text-sm uppercase tracking-wider">Banner Section</h2>
+          <h2 className="font-bold  text-xs sm:text-sm uppercase tracking-wider">Banner Section</h2>
           <button 
             type="submit" 
             disabled={savingBanner} 
@@ -690,7 +690,7 @@ const ProjectAndClientManagement = () => {
       {activeTab === 'whyPartner' && (
         <form onSubmit={handleSaveWhyPartner} className="bg-white border rounded-2xl shadow-sm overflow-hidden animate-in fade-in duration-300">
         <div className="bg-slate-50 border-b p-4 px-6 flex items-center justify-between">
-          <h2 className="font-bold text-slate-700 text-xs sm:text-sm uppercase tracking-wider">Why Partner Section</h2>
+          <h2 className="font-bold  text-xs sm:text-sm uppercase tracking-wider">Why Partner Section</h2>
           <button 
             type="submit" 
             disabled={savingWhyPartner} 
@@ -735,7 +735,7 @@ const ProjectAndClientManagement = () => {
 
           <div className="pt-4 border-t border-slate-100 space-y-4">
             <div className="flex justify-between items-center">
-              <h3 className="text-sm font-bold text-slate-700">Partner Features</h3>
+              <h3 className="text-sm font-bold ">Partner Features</h3>
               <button 
                 type="button" 
                 onClick={() => setWhyPartnerForm({...whyPartnerForm, features: [...whyPartnerForm.features, {id: randomId(), iconSrc: "", iconAlt: "", title: "", description: ""}]})}
@@ -789,7 +789,7 @@ const ProjectAndClientManagement = () => {
       {activeTab === 'ourClients' && (
         <form onSubmit={handleSaveOurClients} className="bg-white border rounded-2xl shadow-sm overflow-hidden animate-in fade-in duration-300">
         <div className="bg-slate-50 border-b p-4 px-6 flex items-center justify-between">
-          <h2 className="font-bold text-slate-700 text-xs sm:text-sm uppercase tracking-wider">Our Clients Section</h2>
+          <h2 className="font-bold  text-xs sm:text-sm uppercase tracking-wider">Our Clients Section</h2>
           <button 
             type="submit" 
             disabled={savingOurClients} 
@@ -822,7 +822,7 @@ const ProjectAndClientManagement = () => {
 
           <div className="pt-4 border-t border-slate-100 space-y-4">
             <div className="flex justify-between items-center">
-              <h3 className="text-sm font-bold text-slate-700">Client Logos</h3>
+              <h3 className="text-sm font-bold ">Client Logos</h3>
               <button 
                 type="button" 
                 onClick={() => setOurClientsForm({...ourClientsForm, clients: [...ourClientsForm.clients, {id: randomId(), name: "", imageSrc: "", imageAlt: "", width: DEFAULT_LOGO_WIDTH, height: DEFAULT_LOGO_HEIGHT}]})}
@@ -885,7 +885,7 @@ const ProjectAndClientManagement = () => {
 
           <div className="pt-4 border-t border-slate-100 space-y-4">
             <div className="flex justify-between items-center">
-              <h3 className="text-sm font-bold text-slate-700">Trust Stats</h3>
+              <h3 className="text-sm font-bold ">Trust Stats</h3>
               <button 
                 type="button" 
                 onClick={() => setOurClientsForm({...ourClientsForm, stats: [...ourClientsForm.stats, {id: randomId(), iconSrc: "", iconAlt: "", value: "", label: ""}]})}
@@ -931,7 +931,7 @@ const ProjectAndClientManagement = () => {
       {activeTab === 'ourProjects' && (
         <form onSubmit={handleSaveOurProjects} className="bg-white border rounded-2xl shadow-sm overflow-hidden animate-in fade-in duration-300">
           <div className="bg-slate-50 border-b p-4 px-6 flex items-center justify-between">
-            <h2 className="font-bold text-slate-700 text-xs sm:text-sm uppercase tracking-wider">Our Projects Section</h2>
+            <h2 className="font-bold  text-xs sm:text-sm uppercase tracking-wider">Our Projects Section</h2>
             <button 
               type="submit" 
               disabled={savingOurProjects} 
@@ -985,11 +985,11 @@ const ProjectAndClientManagement = () => {
             {/* Projects Summary List */}
             <div className="pt-4 border-t border-slate-100">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider">Current Projects Summary</h3>
+                <h3 className="text-sm font-bold  uppercase tracking-wider">Current Projects Summary</h3>
               </div>
               <div className="overflow-x-auto rounded-xl border border-slate-100 bg-white">
                 <table className="w-full text-left text-[11px] min-w-[500px]">
-                  <thead className="bg-slate-50 text-slate-500 font-bold border-b border-slate-100 uppercase tracking-tighter">
+                  <thead className="bg-slate-50  font-bold border-b border-slate-100 uppercase tracking-tighter">
                     <tr>
                       <th className="px-4 py-3">Preview</th>
                       <th className="px-4 py-3">Project Title</th>
@@ -1000,7 +1000,7 @@ const ProjectAndClientManagement = () => {
                   <tbody className="divide-y divide-slate-50">
                     {ourProjectsForm.cards.length === 0 ? (
                       <tr>
-                        <td colSpan={4} className="px-4 py-8 text-center text-slate-400 italic">No projects added yet. Use the button below to add your first project.</td>
+                        <td colSpan={4} className="px-4 py-8 text-center  italic">No projects added yet. Use the button below to add your first project.</td>
                       </tr>
                     ) : (
                       ourProjectsForm.cards.map((card, index) => (
@@ -1010,8 +1010,8 @@ const ProjectAndClientManagement = () => {
                               {card.image.imageUrl && <Image src={card.image.imageUrl} alt={card.image.alt} width={64} height={40} className="object-cover" unoptimized />}
                             </div>
                           </td>
-                          <td className="px-4 py-2 font-bold text-slate-700">{card.title || 'Untitled Project'}</td>
-                          <td className="px-4 py-2 text-slate-500">{card.location || 'N/A'}</td>
+                          <td className="px-4 py-2 font-bold ">{card.title || 'Untitled Project'}</td>
+                          <td className="px-4 py-2 ">{card.location || 'N/A'}</td>
                           <td className="px-4 py-2 text-right">
                             <button 
                               type="button" 
@@ -1032,7 +1032,7 @@ const ProjectAndClientManagement = () => {
 
             <div className="pt-4 border-t border-slate-100 space-y-4">
               <div className="flex justify-between items-center">
-                <h3 className="text-sm font-bold text-slate-700">Project Cards</h3>
+                <h3 className="text-sm font-bold ">Project Cards</h3>
                 <button 
                   type="button" 
                   onClick={() => setOurProjectsForm({...ourProjectsForm, cards: [...ourProjectsForm.cards, {id: randomId(), title: "", location: "", image: {imageUrl: "", alt: ""}}]})}
@@ -1084,7 +1084,7 @@ const ProjectAndClientManagement = () => {
       {activeTab === 'contact' && (
         <form onSubmit={handleSaveContactSection} className="bg-white border rounded-2xl shadow-sm overflow-hidden animate-in fade-in duration-300">
           <div className="bg-slate-50 border-b p-4 px-6 flex items-center justify-between">
-            <h2 className="font-bold text-slate-700 text-xs sm:text-sm uppercase tracking-wider">Contact Section</h2>
+            <h2 className="font-bold  text-xs sm:text-sm uppercase tracking-wider">Contact Section</h2>
             <button 
               type="submit" 
               disabled={savingContact} 
@@ -1119,7 +1119,7 @@ const ProjectAndClientManagement = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-100">
               <div className="space-y-4">
-                <h3 className="text-sm font-bold text-slate-700">Contact Information</h3>
+                <h3 className="text-sm font-bold ">Contact Information</h3>
                 <div>
                   <label className={labelClass}>Office Name</label>
                   <input className={fieldClass} value={contactForm.contact.officeName} onChange={e => setContactForm({...contactForm, contact: {...contactForm.contact, officeName: e.target.value}})} />
@@ -1155,7 +1155,7 @@ const ProjectAndClientManagement = () => {
               </div>
 
               <div className="space-y-4">
-                <h3 className="text-sm font-bold text-slate-700">Call to Action</h3>
+                <h3 className="text-sm font-bold ">Call to Action</h3>
                 <div>
                   <label className={labelClass}>CTA Title</label>
                   <input className={fieldClass} value={contactForm.ctaTitle} onChange={e => setContactForm({...contactForm, ctaTitle: e.target.value})} />
@@ -1181,7 +1181,7 @@ const ProjectAndClientManagement = () => {
 
             <div className="pt-4 border-t border-slate-100 space-y-4">
               <div className="flex justify-between items-center">
-                <h3 className="text-sm font-bold text-slate-700">Testimonials</h3>
+                <h3 className="text-sm font-bold ">Testimonials</h3>
                 <button 
                   type="button" 
                   onClick={() => setContactForm({...contactForm, testimonials: [...contactForm.testimonials, {id: randomId(), logo: "", company: "", person: "", designation: ""}]})}

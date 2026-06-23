@@ -126,12 +126,12 @@ function ProductManagerInner() {
           </div>
           <div className="grid grid-cols-2 gap-4">
              <div className="space-y-2">
-               <h5 className="text-[10px] font-bold text-slate-400 uppercase">Primary Button</h5>
+               <h5 className="text-[10px] font-bold  uppercase">Primary Button</h5>
                <input className={fieldClass} placeholder="Label" value={slide.primaryButton?.label} onChange={e => { const ns = [...data.slides]; ns[idx].primaryButton = {...ns[idx].primaryButton, label: e.target.value}; setForm({...form, data: {...data, slides: ns}}) }} />
                <input className={fieldClass} placeholder="URL" value={slide.primaryButton?.url} onChange={e => { const ns = [...data.slides]; ns[idx].primaryButton = {...ns[idx].primaryButton, url: e.target.value}; setForm({...form, data: {...data, slides: ns}}) }} />
              </div>
              <div className="space-y-2">
-               <h5 className="text-[10px] font-bold text-slate-400 uppercase">Secondary Button</h5>
+               <h5 className="text-[10px] font-bold  uppercase">Secondary Button</h5>
                <input className={fieldClass} placeholder="Label" value={slide.secondaryButton?.label} onChange={e => { const ns = [...data.slides]; ns[idx].secondaryButton = {...ns[idx].secondaryButton, label: e.target.value}; setForm({...form, data: {...data, slides: ns}}) }} />
                <input className={fieldClass} placeholder="URL" value={slide.secondaryButton?.url} onChange={e => { const ns = [...data.slides]; ns[idx].secondaryButton = {...ns[idx].secondaryButton, url: e.target.value}; setForm({...form, data: {...data, slides: ns}}) }} />
              </div>
@@ -140,7 +140,7 @@ function ProductManagerInner() {
           <ImageUploadField label="Background Image" value={slide.bgImage} fieldKey={`hero.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => { const ns = [...data.slides]; ns[idx].bgImage = url; setForm({...form, data: {...data, slides: ns}}) }} />
         </div>
       ))}
-      <button type="button" onClick={() => setForm({...form, data: {...data, slides: [...(data.slides || []), { id: randomId(), title: '', highlight: '', primaryButton: {label:'', url:''}, secondaryButton: {label:'', url:''}, description: '', bgImage: '' }]}})} className="w-full py-4 border-2 border-dashed rounded-xl text-slate-400 flex items-center justify-center gap-2 hover:bg-slate-50">+ Add Hero Slide</button>
+      <button type="button" onClick={() => setForm({...form, data: {...data, slides: [...(data.slides || []), { id: randomId(), title: '', highlight: '', primaryButton: {label:'', url:''}, secondaryButton: {label:'', url:''}, description: '', bgImage: '' }]}})} className="w-full py-4 border-2 border-dashed rounded-xl  flex items-center justify-center gap-2 hover:bg-slate-50">+ Add Hero Slide</button>
     </div>
   );
 
@@ -156,14 +156,14 @@ function ProductManagerInner() {
           <ImageUploadField label="Icon/Image" value={feat.image} fieldKey={`strip.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => { const nf = [...data.features]; nf[idx].image = url; setForm({...form, data: {...data, features: nf}}) }} />
         </div>
       ))}
-      <button type="button" onClick={() => setForm({...form, data: {...data, features: [...(data.features || []), { id: randomId(), image: '', title: '', subtitle: '' }]}})} className="w-full py-3 border-2 border-dashed rounded-xl text-slate-400 flex items-center justify-center gap-2">+ Add Feature Strip Item</button>
+      <button type="button" onClick={() => setForm({...form, data: {...data, features: [...(data.features || []), { id: randomId(), image: '', title: '', subtitle: '' }]}})} className="w-full py-3 border-2 border-dashed rounded-xl  flex items-center justify-center gap-2">+ Add Feature Strip Item</button>
     </div>
   );
 
   const renderTrustedByForm = () => (
     <div className="space-y-4">
       <label className={labelClass}>Section Title <input className={fieldClass} value={data.title} onChange={e => setForm({...form, data: {...data, title: e.target.value}})} /></label>
-      <h4 className="text-xs font-bold text-slate-400 uppercase">Center Logos</h4>
+      <h4 className="text-xs font-bold  uppercase">Center Logos</h4>
       <div className="grid grid-cols-3 gap-4">
         {(data.images || []).map((img: string, idx: number) => (
           <div key={idx} className="relative group">
@@ -171,7 +171,7 @@ function ProductManagerInner() {
             <button type="button" onClick={() => { const ni = data.images.filter((_: any, i: number) => i !== idx); setForm({...form, data: {...data, images: ni}}) }} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={12} /></button>
           </div>
         ))}
-        <button type="button" onClick={() => setForm({...form, data: {...data, images: [...(data.images || []), ""]}})} className="border-2 border-dashed rounded-xl flex items-center justify-center text-slate-300 min-h-[100px] hover:bg-slate-50 transition-colors">+ Add Logo</button>
+        <button type="button" onClick={() => setForm({...form, data: {...data, images: [...(data.images || []), ""]}})} className="border-2 border-dashed rounded-xl flex items-center justify-center  min-h-[100px] hover:bg-slate-50 transition-colors">+ Add Logo</button>
       </div>
     </div>
   );
@@ -222,7 +222,7 @@ function ProductManagerInner() {
                   <ImageUploadField label="Icon" value={f.image} fieldKey={`wt.feat.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => { const nf = [...wt.features]; nf[idx].image = url; setForm({...form, data: {...data, welcomeToEnsis: {...wt, features: nf}}}) }} />
                 </div>
               ))}
-              <button type="button" onClick={() => setForm({...form, data: {...data, welcomeToEnsis: {...wt, features: [...(wt.features || []), {id: randomId(), image: '', title: ''}]}}})} className="border-2 border-dashed rounded flex items-center justify-center text-slate-300 hover:bg-blue-50 transition-colors">+ Add</button>
+              <button type="button" onClick={() => setForm({...form, data: {...data, welcomeToEnsis: {...wt, features: [...(wt.features || []), {id: randomId(), image: '', title: ''}]}}})} className="border-2 border-dashed rounded flex items-center justify-center  hover:bg-blue-50 transition-colors">+ Add</button>
             </div>
           </div>
         </div>
@@ -253,7 +253,7 @@ function ProductManagerInner() {
             </div>
           </div>
         ))}
-        <button type="button" onClick={() => setForm({...form, data: {...data, testimonials: [...(data.testimonials || []), { id: randomId(), name: '', designation: '', description: '', rating: 5, userImage: '' }]}})} className="w-full py-4 border-2 border-dashed rounded-xl text-slate-400 flex items-center justify-center gap-2 hover:bg-slate-50">+ Add Testimonial</button>
+        <button type="button" onClick={() => setForm({...form, data: {...data, testimonials: [...(data.testimonials || []), { id: randomId(), name: '', designation: '', description: '', rating: 5, userImage: '' }]}})} className="w-full py-4 border-2 border-dashed rounded-xl  flex items-center justify-center gap-2 hover:bg-slate-50">+ Add Testimonial</button>
       </div>
     </div>
   );
@@ -261,7 +261,7 @@ function ProductManagerInner() {
   const renderProductSection = () => (
     <div className="space-y-8">
       <div className="p-5 border rounded-2xl bg-slate-50 space-y-4">
-        <h4 className="font-bold text-slate-800 border-b pb-2 uppercase text-xs tracking-wider">Price Range Filtering</h4>
+        <h4 className="font-bold  border-b pb-2 uppercase text-xs tracking-wider">Price Range Filtering</h4>
         <div className="grid grid-cols-2 gap-4">
           <label className={labelClass}>Start Price <input type="number" className={fieldClass} value={data.priceRange?.start} onChange={e => setForm({...form, data: {...data, priceRange: {...data.priceRange, start: Number(e.target.value) || 0}}})} /></label>
           <label className={labelClass}>End Price <input type="number" className={fieldClass} value={data.priceRange?.end} onChange={e => setForm({...form, data: {...data, priceRange: {...data.priceRange, end: Number(e.target.value) || 0}}})} /></label>
@@ -270,7 +270,7 @@ function ProductManagerInner() {
 
       <div className="p-5 border rounded-2xl bg-white space-y-4">
         <div className="flex justify-between items-center border-b pb-2">
-          <h4 className="font-bold text-slate-800 uppercase text-xs tracking-wider">Available Materials</h4>
+          <h4 className="font-bold  uppercase text-xs tracking-wider">Available Materials</h4>
           <button type="button" onClick={() => setForm({...form, data: {...data, materials: [...(data.materials || []), {id: randomId(), title: ''}]}})} className="text-xs bg-[#263016] text-white px-2 py-1 rounded">Add Material</button>
         </div>
         <div className="grid grid-cols-2 gap-3">
@@ -285,7 +285,7 @@ function ProductManagerInner() {
 
       <div className="p-5 border rounded-2xl bg-white space-y-4">
         <div className="flex justify-between items-center border-b pb-2">
-          <h4 className="font-bold text-slate-800 uppercase text-xs tracking-wider">Ideal For Categories</h4>
+          <h4 className="font-bold  uppercase text-xs tracking-wider">Ideal For Categories</h4>
           <button type="button" onClick={() => setForm({...form, data: {...data, idealFor: [...(data.idealFor || []), {id: randomId(), title: ''}]}})} className="text-xs bg-[#263016] text-white px-2 py-1 rounded">Add Category</button>
         </div>
         <div className="grid grid-cols-2 gap-3">
@@ -311,7 +311,7 @@ function ProductManagerInner() {
 
       <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <h4 className="font-bold text-slate-800 uppercase text-xs tracking-wider">Contact Options</h4>
+          <h4 className="font-bold  uppercase text-xs tracking-wider">Contact Options</h4>
           <button type="button" onClick={() => setForm({...form, data: {...data, contact: [...(data.contact || []), { id: randomId(), imageUrl: '', alt: '', value: '', title: '', url: '' }]}})} className="text-xs bg-[#263016] text-white px-2 py-1 rounded">Add Contact Method</button>
         </div>
         {(data.contact || []).map((c: any, idx: number) => (
@@ -337,7 +337,7 @@ function ProductManagerInner() {
       <div className="space-y-6">
         <form onSubmit={handleSave} className="bg-white border rounded-2xl shadow-sm overflow-hidden">
           <div className="bg-slate-50 border-b p-6 flex items-center justify-between">
-            <h2 className="text-xl font-bold text-slate-800">{editingId ? "Edit Component" : "Create Component"}</h2>
+            <h2 className="text-xl font-bold ">{editingId ? "Edit Component" : "Create Component"}</h2>
             <div className="flex gap-3">
               <button type="submit" disabled={loading} className="bg-[#263016] text-white px-6 py-2 rounded-xl font-bold flex items-center gap-2">
                 {loading ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />} Save Layout

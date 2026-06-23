@@ -11,6 +11,7 @@
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
     "axios": "^1.16.1",
+    "critters": "^0.0.23",
     "lucide-react": "^1.17.0",
     "next": "15.2.8",
     "react": "^18.2.0",

@@ -68,7 +68,7 @@ const EnquiriesPage = () => {
       case 'pending': return 'bg-amber-100 text-amber-700 border-amber-200';
       case 'contacted': return 'bg-blue-100 text-blue-700 border-blue-200';
       case 'closed': return 'bg-emerald-100 text-green-700 border-emerald-200';
-      default: return 'bg-slate-100 text-slate-700 border-slate-200';
+      default: return 'bg-slate-100  border-slate-200';
     }
   };
 
@@ -76,13 +76,13 @@ const EnquiriesPage = () => {
     <div className="max-w-7xl mx-auto space-y-4 px-4 sm:px-6 lg:px-8 pb-8">
       <div className="flex flex-col gap-3 bg-white px-4 py-3 sm:px-6 sm:py-4 rounded-2xl border border-slate-100 shadow-sm md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-slate-800 tracking-tight">Customer Enquiries</h1>
-          <p className="text-slate-500 text-xs sm:text-sm">View and manage incoming contact requests</p>
+          <h1 className="text-xl sm:text-2xl font-bold  tracking-tight">Customer Enquiries</h1>
+          <p className=" text-xs sm:text-sm">View and manage incoming contact requests</p>
         </div>
         <button 
           onClick={fetchEnquiries}
           disabled={loading}
-          className="flex items-center justify-center gap-2 px-4 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl border border-slate-200 text-sm font-semibold transition-all disabled:opacity-50"
+          className="flex items-center justify-center gap-2 px-4 py-2 bg-slate-50 hover:bg-slate-100  rounded-xl border border-slate-200 text-sm font-semibold transition-all disabled:opacity-50"
         >
           <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
           Refresh
@@ -93,12 +93,12 @@ const EnquiriesPage = () => {
         {loading && enquiries.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full p-20 space-y-4">
             <Loader2 className="animate-spin text-[#1d5af2]" size={40} />
-            <p className="text-slate-400 animate-pulse text-sm font-medium">Fetching enquiries...</p>
+            <p className=" animate-pulse text-sm font-medium">Fetching enquiries...</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left">
-              <thead className="bg-slate-50 border-b border-slate-100 text-slate-500 font-bold text-[11px] uppercase tracking-wider">
+              <thead className="bg-slate-50 border-b border-slate-100  font-bold text-[11px] uppercase tracking-wider">
                 <tr>
                   <th className="px-6 py-4">Sender Details</th>
                   <th className="px-6 py-4">Enquiry Content</th>
@@ -109,7 +109,7 @@ const EnquiriesPage = () => {
               <tbody className="divide-y divide-slate-50">
                 {enquiries.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="px-6 py-12 text-center text-slate-400 italic text-sm">
+                    <td colSpan={4} className="px-6 py-12 text-center  italic text-sm">
                       No enquiries found.
                     </td>
                   </tr>
@@ -118,13 +118,13 @@ const EnquiriesPage = () => {
                     <tr key={enquiry._id} className="hover:bg-slate-50/50 transition-colors">
                       <td className="px-6 py-4">
                         <div className="flex flex-col gap-1">
-                          <span className="text-sm font-bold text-slate-700 flex items-center gap-1.5">
-                            <User size={14} className="text-slate-400" /> {enquiry.name}
+                          <span className="text-sm font-bold  flex items-center gap-1.5">
+                            <User size={14} className="" /> {enquiry.name}
                           </span>
-                          <span className="text-xs text-slate-500 flex items-center gap-1.5">
-                            <Mail size={14} className="text-slate-400" /> {enquiry.email}
+                          <span className="text-xs  flex items-center gap-1.5">
+                            <Mail size={14} className="" /> {enquiry.email}
                           </span>
-                          <span className="text-[10px] text-slate-400 flex items-center gap-1.5 mt-1 font-medium">
+                          <span className="text-[10px]  flex items-center gap-1.5 mt-1 font-medium">
                             <Clock size={12} /> {new Date(enquiry.createdAt).toLocaleDateString(undefined, {
                               year: 'numeric', month: 'short', day: 'numeric'
                             })}
@@ -133,8 +133,8 @@ const EnquiriesPage = () => {
                       </td>
                       <td className="px-6 py-4 max-w-xs lg:max-w-md">
                         <div className="flex flex-col gap-1">
-                          <span className="text-[11px] font-bold text-slate-600 uppercase">{enquiry.subject || 'General Inquiry'}</span>
-                          <p className="text-xs text-slate-500 line-clamp-3 leading-relaxed">
+                          <span className="text-[11px] font-bold  uppercase">{enquiry.subject || 'General Inquiry'}</span>
+                          <p className="text-xs  line-clamp-3 leading-relaxed">
                             {enquiry.message}
                           </p>
                         </div>

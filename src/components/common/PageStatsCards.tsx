@@ -191,8 +191,8 @@ export default function PageStatsCards({ pageName }: { pageName: string }) {
       {Object.values(stats).map((card, idx) => (
         <div key={idx} className="px-4 py-2.5 rounded-2xl border border-slate-100 shadow-sm flex justify-between h-full bg-center bg-cover bg-no-repeat bg-white" style={{ backgroundImage: `url(${card.bg})` }}>
           <div className="min-w-0">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600">{card.title}</span>
-            <p className="text-xl font-bold leading-tight text-slate-800">{card.count}</p>
+            <span className="text-[10px] font-bold uppercase tracking-wider ">{card.title}</span>
+            <p className="text-xl font-bold leading-tight ">{card.count}</p>
             <span className={`text-[9px] font-semibold leading-none ${card.colorClass}`}>{card.subText}</span>
           </div>
           <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full mt-2 ${card.bgClass} ${card.colorClass}`}>

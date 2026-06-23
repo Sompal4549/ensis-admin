@@ -346,7 +346,7 @@ export default function AdminHome() {
             ].map((item, idx) => (
               <div key={idx} className="flex items-center justify-between py-2 first:pt-0">
                 <div className="flex items-center gap-2 min-w-0">
-                  <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 text-[10px] font-bold text-slate-600">
+                  <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 text-[10px] font-bold ">
                     {item.avatar}
                   </div>
                   <div className="min-w-0">
@@ -377,7 +377,7 @@ export default function AdminHome() {
                 { label: "New Slider", icon: <ImageIcon size={28} />,bg:"bg-purple-50", color: "text-purple-600", path: "/homepage-content/hero" },
                 { label: "Manage Services", icon: <LayoutGrid size={28} />,bg:"bg-amber-50", color: "text-amber-600", path: "/products" },
                 { label: "Inquiries", icon: <MessageSquare size={28} />,bg:"bg-sky-50", color: "text-sky-600", path: "/homepage-content" },
-                { label: "Site Settings", icon: <Activity size={28} />,bg:"bg-slate-100", color: "text-slate-600", path: "/about-page-content" },
+                { label: "Site Settings", icon: <Activity size={28} />,bg:"bg-slate-100", color: "", path: "/about-page-content" },
               ].map((act, idx) => (
                 <Link
                   href={act.path}
@@ -426,8 +426,8 @@ export default function AdminHome() {
                   { title: "Projects", temp: "Projects", status: "Published", updated: "13 May, 10:10 AM" },
                 ].map((row, idx) => (
                   <tr key={idx} className="group">
-                    <td className="py-2 font-bold text-slate-700">{row.title}</td>
-                    <td className="py-2 text-slate-500">{row.temp}</td>
+                    <td className="py-2 font-bold ">{row.title}</td>
+                    <td className="py-2 ">{row.temp}</td>
                     <td className="py-2">
                       <span className="inline-block bg-green-50 text-green-600 px-1.5 py-0.1 rounded text-[8px] font-bold border border-green-100">
                         {row.status}
@@ -509,7 +509,7 @@ export default function AdminHome() {
         <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm col-span-3 h-full flex flex-col overflow-hidden">
           <h3 className="text-xs font-bold  border-b border-slate-50 pb-2 flex-shrink-0">System Status</h3>
 
-          <div className="flex-1 overflow-y-auto scrollbar-none py-1.5 space-y-3 text-[11px] text-slate-600 min-h-0">
+          <div className="flex-1 overflow-y-auto scrollbar-none py-1.5 space-y-3 text-[11px]  min-h-0">
             <div className="flex items-center justify-between">
               <span>Website Status</span>
               <span className="bg-green-500 text-white px-1.5 py-0.2 rounded font-bold text-[8px]">Live</span>
@@ -522,13 +522,13 @@ export default function AdminHome() {
 
             <div className="flex items-center justify-between">
               <span>Last Backup</span>
-              <span className="font-semibold text-[10px] text-slate-500">19 May, 02:30 AM</span>
+              <span className="font-semibold text-[10px] ">19 May, 02:30 AM</span>
             </div>
 
             <div className="pt-2 border-t border-slate-100">
               <div className="flex items-center justify-between mb-1">
                 <span>Storage Usage</span>
-                <span className="font-semibold text-slate-500">2.45 GB / 10 GB</span>
+                <span className="font-semibold ">2.45 GB / 10 GB</span>
               </div>
               {/* Progress Bar */}
               <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">

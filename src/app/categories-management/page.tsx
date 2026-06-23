@@ -152,8 +152,8 @@ export default function CategoriesPage() {
           <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
             <Lock size={22} />
           </div>
-          <h1 className="text-2xl font-bold text-slate-800">Ensis Admin</h1>
-          <p className="mt-1.5 text-xs text-slate-400">
+          <h1 className="text-2xl font-bold ">Ensis Admin</h1>
+          <p className="mt-1.5 text-xs ">
             Sign in using OTP to manage categories.
           </p>
 
@@ -161,7 +161,7 @@ export default function CategoriesPage() {
             <div>
               <label className={labelClass}>Phone Number</label>
               <div className="relative">
-                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 " size={16} />
                 <input
                   className={`${fieldClass} pl-10`}
                   type="tel"
@@ -177,7 +177,7 @@ export default function CategoriesPage() {
               <div>
                 <label className={labelClass}>Enter OTP</label>
                 <div className="relative">
-                  <Key className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                  <Key className="absolute left-3 top-1/2 -translate-y-1/2 " size={16} />
                   <input
                     className={`${fieldClass} pl-10`}
                     type="text"
@@ -215,7 +215,7 @@ export default function CategoriesPage() {
                   type="button"
                   onClick={handleSendOtp}
                   disabled={loading || timer > 0}
-                  className="w-full inline-flex items-center justify-center gap-2 py-1 text-xs font-bold text-blue-600 hover:text-blue-700 disabled:text-slate-400 transition-colors cursor-pointer disabled:cursor-not-allowed"
+                  className="w-full inline-flex items-center justify-center gap-2 py-1 text-xs font-bold text-blue-600 hover:text-blue-700 disabled: transition-colors cursor-pointer disabled:cursor-not-allowed"
                 >
                   {loading && <Loader2 className="animate-spin" size={12} />}
                   {timer > 0 ? `Resend OTP in ${timer}s` : "Resend OTP"}
@@ -228,7 +228,7 @@ export default function CategoriesPage() {
             <button 
               type="button" 
               onClick={() => { setOtpSent(false); setOtp(""); setTimer(0); }} 
-              className="mt-3 text-center w-full text-xs font-semibold text-slate-500 hover:text-blue-600 underline"
+              className="mt-3 text-center w-full text-xs font-semibold  hover:text-blue-600 underline"
             >
               Change Phone Number
             </button>
@@ -250,7 +250,7 @@ export default function CategoriesPage() {
       <div className="flex flex-wrap items-center justify-between gap-4 bg-white px-5 py-4 rounded-2xl border border-slate-100 shadow-sm">
         <div>
           <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600">Database Editor</span>
-          <h2 className="text-lg font-bold text-slate-800">Product Categories</h2>
+          <h2 className="text-lg font-bold ">Product Categories</h2>
         </div>
         {message && (
           <p className="text-xs font-semibold text-amber-600 bg-amber-50 px-3 py-1 rounded-lg border border-amber-100">
@@ -262,7 +262,7 @@ export default function CategoriesPage() {
       <section className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
         {/* Add Category Form */}
         <form onSubmit={submitCategory} className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm space-y-4 h-fit">
-          <h3 className="flex items-center gap-2 text-sm font-bold text-slate-800">
+          <h3 className="flex items-center gap-2 text-sm font-bold ">
             <Plus size={16} /> {categoryForm.id ? "Edit Category Details" : "Add New Category"}
           </h3>
           <div>
@@ -285,7 +285,7 @@ export default function CategoriesPage() {
               <button
                 type="button"
                 onClick={() => setCategoryForm(emptyCategory)}
-                className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors cursor-pointer"
+                className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold  hover:bg-slate-50 transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -295,15 +295,15 @@ export default function CategoriesPage() {
 
         {/* Categories List */}
         <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm h-fit">
-          <div className="border-b border-slate-100 px-5 py-4 text-xs font-bold text-slate-800">
+          <div className="border-b border-slate-100 px-5 py-4 text-xs font-bold ">
             {categories.length} Categories Available
           </div>
           <div className="divide-y divide-slate-100 max-h-[65vh] overflow-y-auto">
             {categories.map((category) => (
               <article key={category._id} className="flex flex-col gap-4 p-4 md:flex-row md:items-center md:justify-between hover:bg-slate-50/20">
                 <div className="min-w-0">
-                  <h4 className="font-bold text-slate-800 text-xs">{category.name}</h4>
-                  {/* <p className="mt-0.5 text-[11px] text-slate-400">{category.description || "No description provided"}</p> */}
+                  <h4 className="font-bold  text-xs">{category.name}</h4>
+                  {/* <p className="mt-0.5 text-[11px] ">{category.description || "No description provided"}</p> */}
                 </div>
                 <div className="flex gap-2">
                   <button

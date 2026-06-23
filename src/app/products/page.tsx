@@ -29,9 +29,8 @@ type ProductForm = {
     title: string;
     description: string;
     overviewList: string[];
-    overviewMaterial: { title: string; description: string }[];
     specifications: { title: string; specificationsList: { title: string; description: string }[] }[];
-    keyFeatures: { title: string; keyFeaturesList: { title: string; description: string }[] };
+    keyFeatures: { title: string; keyFeaturesList: string[] };
     dimensions: { title: string; dimensionsList: { title: string; description: string }[] }[];
     materialAndCare: { title: string; description: string };
     productSpecifications: { highlight: string; title: string; image: string; specifications: { title: string; description: string }[] }[];
@@ -57,9 +56,8 @@ const emptyProduct: ProductForm = {
   overview: {
     title: "", description: "",
     overviewList: [""],
-    overviewMaterial: [{ title: "", description: "" }],
     specifications: [{ title: "", specificationsList: [{ title: "", description: "" }] }],
-    keyFeatures: { title: "", keyFeaturesList: [{ title: "", description: "" }] },
+    keyFeatures: { title: "", keyFeaturesList: [""] },
     dimensions: [{ title: "", dimensionsList: [{ title: "", description: "" }] }],
     materialAndCare: { title: "", description: "" },
     productSpecifications: [{ highlight: "", title: "", image: "", specifications: [{ title: "", description: "" }] }],
@@ -175,16 +173,13 @@ export default function ProductsPage() {
         title: product.overview?.title || "",
         description: product.overview?.description || "",
         overviewList: product.overview?.overviewList || [""],
-        overviewMaterial: product.overview?.overviewMaterial || [{ title: "", description: "" }],
         specifications: toArray(product.overview?.specifications, [{ title: "", specificationsList: [{ title: "", description: "" }] }]).map(s => ({
           title: s.title || "",
           specificationsList: Array.isArray(s.specificationsList) ? s.specificationsList : [{ title: "", description: "" }],
         })),
         keyFeatures: {
           title: product.overview?.keyFeatures?.title || "",
-          keyFeaturesList: Array.isArray(product.overview?.keyFeatures?.keyFeaturesList)
-            ? product.overview.keyFeatures.keyFeaturesList
-            : [{ title: "", description: "" }],
+          keyFeaturesList: product.overview?.keyFeatures?.keyFeaturesList || [""],
         },
         dimensions: toArray(product.overview?.dimensions, [{ title: "", dimensionsList: [{ title: "", description: "" }] }]).map(d => ({
           title: d.title || "",
@@ -237,7 +232,7 @@ export default function ProductsPage() {
             <Lock size={22} />
           </div>
           <h1 className="text-2xl font-bold text-slate-800">Ensis Admin</h1>
-          <p className="mt-1.5 text-xs text-slate-400">Sign in with your credentials to manage products.</p>
+          <p className="mt-1.5 text-xs ">Sign in with your credentials to manage products.</p>
           <div className="mt-6 space-y-4">
             <div>
               <label className={labelClass}>Email Address</label>
@@ -275,7 +270,7 @@ export default function ProductsPage() {
                 </div>
                 <div className="min-w-0">
                   <h4 className="font-bold text-slate-800 text-xs truncate">{product.title}</h4>
-                  <p className="mt-0.5 line-clamp-1 text-[11px] text-slate-400">{product.description}</p>
+                  <p className="mt-0.5 line-clamp-1 text-[11px] ">{product.description}</p>
                   <p className="mt-1 text-[10px] font-bold text-emerald-600">
                     Rs. {product.price?.toLocaleString("en-IN")} · {typeof product.category === "string" ? product.category : product.category?.name}
                   </p>
@@ -390,8 +385,8 @@ export default function ProductsPage() {
                 </div>
               ))}
               <label className="flex flex-col items-center justify-center aspect-square rounded-lg border border-dashed border-slate-200 hover:border-blue-400 hover:bg-blue-50/30 transition-all cursor-pointer group">
-                {loading ? <Loader2 className="h-4 w-4 animate-spin text-blue-500" /> : <ImagePlus className="h-4 w-4 text-slate-400 group-hover:text-blue-500 transition-colors" />}
-                <span className="mt-0.5 text-[9px] font-semibold text-slate-500 group-hover:text-blue-600">Add Image</span>
+                {loading ? <Loader2 className="h-4 w-4 animate-spin text-blue-500" /> : <ImagePlus className="h-4 w-4  group-hover:text-blue-500 transition-colors" />}
+                <span className="mt-0.5 text-[9px] font-semibold  group-hover:text-blue-600">Add Image</span>
                 <input type="file" multiple className="hidden" accept="image/*" onChange={async (e) => {
                   const files = Array.from(e.target.files || []);
                   if (!files.length) return;
@@ -410,7 +405,7 @@ export default function ProductsPage() {
                 }} />
               </label>
             </div>
-            <p className="text-[8px] italic text-slate-400">Images are stored in /uploads/products. You can select multiple files.</p>
+            <p className="text-[8px] italic ">Images are stored in /uploads/products. You can select multiple files.</p>
           </div>
 
           {/* Tags */}
@@ -464,7 +459,7 @@ export default function ProductsPage() {
                     </div>
                   </div>
                 ))}
-                <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, items: [...productForm.overview.items, { image: "", title: "", description: "" }] } })} className="w-full py-2 border-2 border-dashed rounded-lg text-slate-400 text-[10px] font-bold hover:bg-slate-50">+ Add Item</button>
+                <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, items: [...productForm.overview.items, { image: "", title: "", description: "" }] } })} className="w-full py-2 border-2 border-dashed rounded-lg  text-[10px] font-bold hover:bg-slate-50">+ Add Item</button>
               </div>
             </div>
 
@@ -496,25 +491,10 @@ export default function ProductsPage() {
               </div>
             </div>
 
-            {/* Overview Materials */}
-            <div>
-              <label className={labelClass}>Overview Materials</label>
-              <div className="space-y-2 mt-1">
-                {productForm.overview.overviewMaterial.map((m, idx) => (
-                  <div key={idx} className="flex gap-2">
-                    <input className={fieldClass} placeholder="Title (e.g. Wood Type)" value={m.title} onChange={e => { const list = [...productForm.overview.overviewMaterial]; list[idx].title = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, overviewMaterial: list } }); }} />
-                    <input className={fieldClass} placeholder="Description (e.g. Solid Teak)" value={m.description} onChange={e => { const list = [...productForm.overview.overviewMaterial]; list[idx].description = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, overviewMaterial: list } }); }} />
-                    <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, overviewMaterial: productForm.overview.overviewMaterial.filter((_, i) => i !== idx) } })} className="shrink-0 text-rose-500 hover:bg-rose-50 p-1.5 rounded"><Trash2 size={13} /></button>
-                  </div>
-                ))}
-                <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, overviewMaterial: [...productForm.overview.overviewMaterial, { title: "", description: "" }] } })} className="text-[10px] font-bold text-blue-600 flex items-center gap-1"><Plus size={12} /> Add Material</button>
-              </div>
-            </div>
-
             {/* Key Specifications */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <label className="text-[10px] font-bold text-slate-500 uppercase block">Key Specifications</label>
+                <label className="text-[10px] font-bold  uppercase block">Key Specifications</label>
                 <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, specifications: [...productForm.overview.specifications, { title: "", specificationsList: [{ title: "", description: "" }] }] } })} className="text-[10px] font-bold text-blue-600 flex items-center gap-1"><Plus size={11} /> Add Group</button>
               </div>
               {productForm.overview.specifications.map((spec, sIdx) => (
@@ -539,24 +519,23 @@ export default function ProductsPage() {
 
             {/* Key Features */}
             <div className="p-3 border border-slate-200 rounded-xl bg-slate-50 space-y-2">
-              <label className="text-[10px] font-bold text-slate-500 uppercase block">Key Features</label>
+              <label className="text-[10px] font-bold  uppercase block">Key Features</label>
               <input className={fieldClass} placeholder="Section Title" value={productForm.overview.keyFeatures.title} onChange={e => setProductForm({ ...productForm, overview: { ...productForm.overview, keyFeatures: { ...productForm.overview.keyFeatures, title: e.target.value } } })} />
               <div className="space-y-2">
-                {productForm.overview.keyFeatures.keyFeaturesList.map((row, idx) => (
+                {productForm.overview.keyFeatures.keyFeaturesList.map((item, idx) => (
                   <div key={idx} className="flex gap-2">
-                    <input className={fieldClass} placeholder="Label" value={row.title} onChange={e => { const list = [...productForm.overview.keyFeatures.keyFeaturesList]; list[idx].title = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, keyFeatures: { ...productForm.overview.keyFeatures, keyFeaturesList: list } } }); }} />
-                    <input className={fieldClass} placeholder="Value" value={row.description} onChange={e => { const list = [...productForm.overview.keyFeatures.keyFeaturesList]; list[idx].description = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, keyFeatures: { ...productForm.overview.keyFeatures, keyFeaturesList: list } } }); }} />
+                    <input className={fieldClass} placeholder="Feature detail..." value={item} onChange={e => { const list = [...productForm.overview.keyFeatures.keyFeaturesList]; list[idx] = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, keyFeatures: { ...productForm.overview.keyFeatures, keyFeaturesList: list } } }); }} />
                     <button type="button" onClick={() => { const list = productForm.overview.keyFeatures.keyFeaturesList.filter((_, i) => i !== idx); setProductForm({ ...productForm, overview: { ...productForm.overview, keyFeatures: { ...productForm.overview.keyFeatures, keyFeaturesList: list } } }); }} className="shrink-0 text-rose-500 hover:bg-rose-50 p-1 rounded"><Trash2 size={12} /></button>
                   </div>
                 ))}
-                <button type="button" onClick={() => { const list = [...productForm.overview.keyFeatures.keyFeaturesList, { title: "", description: "" }]; setProductForm({ ...productForm, overview: { ...productForm.overview, keyFeatures: { ...productForm.overview.keyFeatures, keyFeaturesList: list } } }); }} className="text-[10px] font-bold text-blue-600 flex items-center gap-1"><Plus size={11} /> Add Row</button>
+                <button type="button" onClick={() => { const list = [...productForm.overview.keyFeatures.keyFeaturesList, ""]; setProductForm({ ...productForm, overview: { ...productForm.overview, keyFeatures: { ...productForm.overview.keyFeatures, keyFeaturesList: list } } }); }} className="text-[10px] font-bold text-blue-600 flex items-center gap-1"><Plus size={11} /> Add Feature</button>
               </div>
             </div>
 
             {/* Product Dimensions */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <label className="text-[10px] font-bold text-slate-500 uppercase block">Product Dimensions</label>
+                <label className="text-[10px] font-bold  uppercase block">Product Dimensions</label>
                 <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, dimensions: [...productForm.overview.dimensions, { title: "", dimensionsList: [{ title: "", description: "" }] }] } })} className="text-[10px] font-bold text-blue-600 flex items-center gap-1"><Plus size={11} /> Add Group</button>
               </div>
               {productForm.overview.dimensions.map((dim, dIdx) => (
@@ -626,7 +605,7 @@ export default function ProductsPage() {
 
             {/* Smart Design & Appearance */}
             <div className="p-4 border border-slate-200 rounded-xl bg-slate-50 space-y-3">
-              <h5 className="text-[10px] font-bold text-slate-500 uppercase">Smart Design & Appearance</h5>
+              <h5 className="text-[10px] font-bold  uppercase">Smart Design & Appearance</h5>
               <input className={fieldClass} placeholder="Highlight" value={productForm.overview.smartDesignAppearance.highlight} onChange={e => setProductForm({ ...productForm, overview: { ...productForm.overview, smartDesignAppearance: { ...productForm.overview.smartDesignAppearance, highlight: e.target.value } } })} />
               <input className={fieldClass} placeholder="Appearance Title" value={productForm.overview.smartDesignAppearance.title} onChange={e => setProductForm({ ...productForm, overview: { ...productForm.overview, smartDesignAppearance: { ...productForm.overview.smartDesignAppearance, title: e.target.value } } })} />
               <div>
@@ -673,7 +652,7 @@ export default function ProductsPage() {
                   <textarea className={`${fieldClass} min-h-12`} placeholder="Answer" value={faq.description} onChange={e => { const list = [...productForm.overview.faqs]; list[idx].description = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, faqs: list } }); }} />
                 </div>
               ))}
-              <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, faqs: [...productForm.overview.faqs, { question: "", description: "" }] } })} className="w-full py-2 border-2 border-dashed rounded-lg text-slate-400 text-[10px] font-bold hover:bg-slate-50">+ Add FAQ</button>
+              <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, faqs: [...productForm.overview.faqs, { question: "", description: "" }] } })} className="w-full py-2 border-2 border-dashed rounded-lg  text-[10px] font-bold hover:bg-slate-50">+ Add FAQ</button>
             </div>
           </div>
 
