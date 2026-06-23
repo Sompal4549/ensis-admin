@@ -243,7 +243,7 @@ const Input = ({
 
 const SectionShell = ({ title, children }: { title: string; children: React.ReactNode }) => (
   <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-4">
-    <h3 className="mb-4 text-sm font-bold uppercase tracking-wider text-slate-700">{title}</h3>
+    <h3 className="mb-4 text-sm font-bold uppercase tracking-wider ">{title}</h3>
     <div className="space-y-4">{children}</div>
   </div>
 );
@@ -374,13 +374,13 @@ const [testimonialForm, setTestimonialForm] = useState<Testimonial>(initialTesti
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-8">
       <div className="flex flex-col gap-3 rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-sm sm:px-6 sm:py-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h2 className="text-xl font-bold tracking-tight text-slate-800 sm:text-2xl">Career Page Management</h2>
-          <p className="text-xs text-slate-500 sm:text-sm">Manage content for career page components</p>
+          <h2 className="text-xl font-bold tracking-tight  sm:text-2xl">Career Page Management</h2>
+          <p className="text-xs  sm:text-sm">Manage content for career page components</p>
         </div>
         <select
           value={activeTab}
           onChange={(event) => setActiveTab(event.target.value as CareerTab)}
-          className="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 shadow-sm focus:border-[#1d5af2] focus:ring-1 focus:ring-[#1d5af2] sm:w-64"
+          className="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold  shadow-sm focus:border-[#1d5af2] focus:ring-1 focus:ring-[#1d5af2] sm:w-64"
         >
           <option value="banner">Career Banner</option>
           <option value="section">Career Section</option>
@@ -395,7 +395,7 @@ const [testimonialForm, setTestimonialForm] = useState<Testimonial>(initialTesti
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
         <div className="space-y-4 lg:col-span-4">
           <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-            <h3 className="mb-4 text-sm font-bold uppercase tracking-wider text-slate-700">Components</h3>
+            <h3 className="mb-4 text-sm font-bold uppercase tracking-wider ">Components</h3>
             <ComponentList
               records={records}
               onEdit={handleEditComponent}
@@ -410,7 +410,7 @@ const [testimonialForm, setTestimonialForm] = useState<Testimonial>(initialTesti
         <div className="space-y-6 lg:col-span-8">
           <form onSubmit={handleSave} className="animate-in overflow-hidden rounded-2xl border bg-white shadow-sm duration-300 fade-in">
             <div className="flex items-center justify-between border-b bg-slate-50 p-4 px-6">
-              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-700 sm:text-sm">{componentMeta[activeTab].label}</h2>
+              <h2 className="text-xs font-bold uppercase tracking-wider  sm:text-sm">{componentMeta[activeTab].label}</h2>
               <button
                 type="submit"
                 disabled={saving}
@@ -682,7 +682,7 @@ const [testimonialForm, setTestimonialForm] = useState<Testimonial>(initialTesti
             ],
           })
         }
-        className="w-full py-3 border-2 border-dashed rounded-xl text-slate-400 flex items-center justify-center gap-2"
+        className="w-full py-3 border-2 border-dashed rounded-xl  flex items-center justify-center gap-2"
       >
         + Add Feature Strip Item
       </button>

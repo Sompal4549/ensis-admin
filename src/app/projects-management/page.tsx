@@ -183,7 +183,7 @@ console.log(form)
               <div className="p-1.5 bg-blue-100 text-blue-600 rounded-lg">
                 <Briefcase size={18} />
               </div>
-              <h2 className="text-sm font-bold text-slate-800">Projects</h2>
+              <h2 className="text-sm font-bold ">Projects</h2>
             </div>
             <div className="flex items-center gap-2">
               {selectedIds.length > 0 && (
@@ -191,7 +191,7 @@ console.log(form)
                   <Trash2 size={14} /> Delete ({selectedIds.length})
                 </button>
               )}
-              <span className="text-[10px] font-bold text-slate-400 uppercase bg-slate-100 px-2 py-0.5 rounded-full">
+              <span className="text-[10px] font-bold  uppercase bg-slate-100 px-2 py-0.5 rounded-full">
                 {projects.length} Total
               </span>
             </div>
@@ -212,16 +212,16 @@ console.log(form)
                         {project.image ? (
                           <Image src={getImageUrl(project.image)} alt="" width={48} height={48} className="object-cover w-full h-full" unoptimized crossOrigin="anonymous" />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-slate-400"><Briefcase size={20} /></div>
+                          <div className="w-full h-full flex items-center justify-center "><Briefcase size={20} /></div>
                         )}
                       </div>
                       <div className="min-w-0">
-                        <h3 className="text-sm font-bold text-slate-800 truncate">{project.title}</h3>
-                        <p className="text-[11px] text-slate-500">{project.category} • {project.location}</p>
+                        <h3 className="text-sm font-bold  truncate">{project.title}</h3>
+                        <p className="text-[11px] ">{project.category} • {project.location}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
-                      <button onClick={() => handleEdit(project)} className="p-2 text-slate-400 hover:text-blue-600 rounded-lg">
+                      <button onClick={() => handleEdit(project)} className="p-2  hover:text-blue-600 rounded-lg">
                         <Edit size={16} />
                       </button>
                     </div>
@@ -233,7 +233,7 @@ console.log(form)
 
           {totalPages > 1 && (
             <div className="px-6 py-3 border-t border-slate-50 bg-slate-50/30 flex items-center justify-between">
-              <span className="text-[10px] font-bold text-slate-400">Page {currentPage} of {totalPages}</span>
+              <span className="text-[10px] font-bold ">Page {currentPage} of {totalPages}</span>
               <div className="flex items-center gap-2">
                 <button disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)} className="p-1 disabled:opacity-30"><ChevronLeft size={18} /></button>
                 <button disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)} className="p-1 disabled:opacity-30"><ChevronRight size={18} /></button>
@@ -245,8 +245,8 @@ console.log(form)
         {/* Right Column: Project Form */}
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden sticky top-6 self-start">
           <div className="px-6 py-4 border-b border-slate-50 bg-slate-50/30 flex justify-between items-center">
-            <h2 className="text-sm font-bold text-slate-800">{isEditing ? "Edit Project" : "New Project"}</h2>
-            {isEditing && <button onClick={resetForm} className="text-xs text-slate-400 hover:text-slate-600"><X size={16} /></button>}
+            <h2 className="text-sm font-bold ">{isEditing ? "Edit Project" : "New Project"}</h2>
+            {isEditing && <button onClick={resetForm} className="text-xs  hover:"><X size={16} /></button>}
           </div>
 
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
@@ -255,7 +255,7 @@ console.log(form)
                 <label className={labelClass}>Project Image</label>
                 <div className="mt-2 flex items-center gap-4">
                   <div className="w-20 h-20 rounded-xl bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden">
-                    {form.image ? <Image src={getImageUrl(form.image)} alt="" width={80} height={80} className="object-cover w-full h-full" unoptimized crossOrigin="anonymous" /> : <ImagePlus className="text-slate-300" />}
+                    {form.image ? <Image src={getImageUrl(form.image)} alt="" width={80} height={80} className="object-cover w-full h-full" unoptimized crossOrigin="anonymous" /> : <ImagePlus className="" />}
                   </div>
                   <label className="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-xs font-bold cursor-pointer transition-colors">
                     {imageUploading ? "Uploading..." : "Upload Photo"}
@@ -292,7 +292,7 @@ console.log(form)
 
               <label className="flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" checked={form.isFeatured} onChange={e => setForm({...form, isFeatured: e.target.checked})} className="w-4 h-4 rounded border-slate-300 text-blue-600" />
-                <span className="text-xs font-bold text-slate-700">Feature this project</span>
+                <span className="text-xs font-bold ">Feature this project</span>
               </label>
             </div>
 

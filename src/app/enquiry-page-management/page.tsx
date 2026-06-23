@@ -378,13 +378,13 @@ const EnquaryPageManagement = () => {
     <div className="max-w-7xl mx-auto space-y-6 px-4 py-8">
       <div className="flex flex-col gap-3 bg-white px-4 py-3 sm:px-6 sm:py-4 rounded-2xl border border-slate-100 shadow-sm md:flex-row md:items-center md:justify-between">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-slate-800 tracking-tight">Enquiry Management</h2>
-          <p className="text-slate-500 text-xs sm:text-sm">Manage content for the enquiry form page</p>
+          <h2 className="text-xl sm:text-2xl font-bold  tracking-tight">Enquiry Management</h2>
+          <p className=" text-xs sm:text-sm">Manage content for the enquiry form page</p>
         </div>
         <select
           value={activeTab}
           onChange={(e) => setActiveTab(e.target.value as any)}
-          className="block w-full sm:w-48 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 shadow-sm focus:border-[#1d5af2] focus:ring-1 focus:ring-[#1d5af2]"
+          className="block w-full sm:w-48 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold  shadow-sm focus:border-[#1d5af2] focus:ring-1 focus:ring-[#1d5af2]"
         >
           <option value="form">Enquiry Form</option>
           <option value="getInTouch">Get In Touch</option>
@@ -395,7 +395,7 @@ const EnquaryPageManagement = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <div className="lg:col-span-4 space-y-4">
           <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
-            <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider mb-4">Components</h3>
+            <h3 className="text-sm font-bold  uppercase tracking-wider mb-4">Components</h3>
             <ComponentList 
               records={records}
               onEdit={handleEditComponent}
@@ -411,7 +411,7 @@ const EnquaryPageManagement = () => {
           {activeTab === 'form' && (
             <form id="enquiry-page-form" onSubmit={handleSave} className="bg-white border rounded-2xl shadow-sm overflow-hidden animate-in fade-in duration-300">
               <div className="bg-slate-50 border-b p-4 px-6 flex items-center justify-between">
-                <h2 className="font-bold text-slate-700 text-xs sm:text-sm uppercase tracking-wider">Form Section</h2>
+                <h2 className="font-bold  text-xs sm:text-sm uppercase tracking-wider">Form Section</h2>
                 <button type="submit" disabled={savingForm} className="bg-[#1d5af2] text-white px-5 py-2 rounded-xl font-bold text-xs flex items-center gap-2 hover:bg-[#154dc8] transition-all disabled:opacity-50 shadow-lg shadow-blue-500/20">
                   {savingForm ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />} Save Form
                 </button>
@@ -420,7 +420,7 @@ const EnquaryPageManagement = () => {
 
                 {/* Hero Section */}
                 <div className="border-b border-slate-100 pb-4">
-                  <h2 className="text-lg font-bold text-slate-700 mb-4">Hero Section</h2>
+                  <h2 className="text-lg font-bold  mb-4">Hero Section</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className={labelClass}>Heading</label>
@@ -433,7 +433,7 @@ const EnquaryPageManagement = () => {
                 </div>
 
                 {/* Dynamic Options Section Mapping ... (rest of the form fields) */}
-                <p className="text-xs italic text-slate-400">Rest of the form fields go here...</p>
+                <p className="text-xs italic ">Rest of the form fields go here...</p>
               </div>
             </form>
           )}
@@ -441,7 +441,7 @@ const EnquaryPageManagement = () => {
           {activeTab === 'getInTouch' && (
             <form onSubmit={handleSaveGetInTouch} className="bg-white border rounded-2xl shadow-sm overflow-hidden animate-in fade-in duration-300">
               <div className="bg-slate-50 border-b p-4 px-6 flex items-center justify-between">
-                <h2 className="font-bold text-slate-700 text-xs sm:text-sm uppercase tracking-wider">Get In Touch Section</h2>
+                <h2 className="font-bold  text-xs sm:text-sm uppercase tracking-wider">Get In Touch Section</h2>
                 <button type="submit" disabled={savingGetInTouch} className="bg-[#1d5af2] text-white px-5 py-2 rounded-xl font-bold text-xs flex items-center gap-2 hover:bg-[#154dc8] transition-all disabled:opacity-50 shadow-lg shadow-blue-500/20">
                   {savingGetInTouch ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />} Save Section
                 </button>
@@ -453,7 +453,7 @@ const EnquaryPageManagement = () => {
                 </div>
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <h3 className="text-md font-bold text-slate-700">Contact Items</h3>
+                    <h3 className="text-md font-bold ">Contact Items</h3>
                     <button type="button" onClick={() => setGetInTouchForm({...getInTouchForm, items: [...getInTouchForm.items, { id: randomId(), label: "", iconSrc: "", lines: [""] }]})} className="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-green-700 flex items-center gap-1">
                       <PlusCircle size={14} /> Add Item
                     </button>
@@ -504,7 +504,7 @@ const EnquaryPageManagement = () => {
           {activeTab === 'ctaBanner' && (
             <form onSubmit={handleSaveCtaBanner} className="bg-white border rounded-2xl shadow-sm overflow-hidden animate-in fade-in duration-300">
               <div className="bg-slate-50 border-b p-4 px-6 flex items-center justify-between">
-                <h2 className="font-bold text-slate-700 text-xs sm:text-sm uppercase tracking-wider">CTA Banner Section</h2>
+                <h2 className="font-bold  text-xs sm:text-sm uppercase tracking-wider">CTA Banner Section</h2>
                 <button type="submit" disabled={savingCtaBanner} className="bg-[#1d5af2] text-white px-5 py-2 rounded-xl font-bold text-xs flex items-center gap-2 hover:bg-[#154dc8] transition-all disabled:opacity-50 shadow-lg shadow-blue-500/20">
                   {savingCtaBanner ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />} Save Section
                 </button>

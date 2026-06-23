@@ -1,5 +1,5 @@
 "use client";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { ImagePlus, Loader2 } from "lucide-react";
 import { getImageUrl, uploadImage } from "@/lib/api";
 import { fieldClass, labelClass } from "@/constants";
@@ -23,6 +23,7 @@ export const ImageUploadField = ({
   onError: (message: string) => void;
 }) => {
   const fileRef = useRef<HTMLInputElement | null>(null);
+  const [imgSize, setImgSize] = useState<{ w: number; h: number } | null>(null); // ✅
   const displayValue = typeof value === 'string' ? value : '';
   const imgUrl = getImageUrl(displayValue);
 
@@ -59,15 +60,34 @@ export const ImageUploadField = ({
           }
         }}
       />
-      <input 
-        className={fieldClass} 
-        type="text" 
-        value={displayValue} 
-        onChange={(e) => onUpload(e.target.value)} 
-        placeholder="Paste image URL or use upload button" 
+      <input
+        className={fieldClass}
+        type="text"
+        value={displayValue}
+        onChange={(e) => { onUpload(e.target.value); setImgSize(null); }}
+        placeholder="Paste image URL or use upload button"
       />
       {imgUrl ? (
-        <Image height={80} width={128} src={imgUrl} alt={label} className="mt-3 h-20 w-32 rounded-md object-cover border border-[#eee5d9]" unoptimized crossOrigin="anonymous" />
+        <div className="mt-3 flex items-end gap-3">
+          <Image
+            height={80}
+            width={128}
+            src={imgUrl}
+            alt={label}
+            className="h-20 w-32 rounded-md object-cover border border-[#eee5d9]"
+            unoptimized
+            crossOrigin="anonymous"
+            onLoad={(e) => {
+              const img = e.target as HTMLImageElement;
+              setImgSize({ w: img.naturalWidth, h: img.naturalHeight }); // ✅
+            }}
+          />
+          {imgSize && (
+            <span className="text-[10px] text-[#8d7a62] font-mono bg-[#faf6ef] border border-[#ded3c4] rounded px-2 py-1">
+              {imgSize.w} × {imgSize.h}px
+            </span>
+          )}
+        </div>
       ) : null}
     </div>
   );

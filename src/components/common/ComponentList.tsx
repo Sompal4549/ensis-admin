@@ -48,7 +48,7 @@ export default function ComponentList({
                       {...provided.dragHandleProps}
                       className="flex items-center gap-4 w-full sm:w-auto mb-2 sm:mb-0 cursor-grab active:cursor-grabbing"
                     >
-                      <div className="text-slate-300 hover:text-slate-500">
+                      <div className=" hover:">
                         <GripVertical size={20} />
                       </div>
                       <div onClick={() => onEdit(record)} className="cursor-pointer">
@@ -65,14 +65,14 @@ export default function ComponentList({
                         title="Edit"
                         disabled={knownKeys.length > 0 && !knownKeys.includes(record.key)}
                         onClick={() => onEdit(record)}
-                        className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors disabled:opacity-30"
+                        className="p-2  hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors disabled:opacity-30"
                       >
                         <Edit2 size={18} />
                       </button>
                       <Link
                         href={`/preview/${record.key}`}
                         target="_blank"
-                        className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                        className="p-2  hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
                       >
                         <Eye size={18} />
                       </Link>
@@ -80,7 +80,7 @@ export default function ComponentList({
                         <button
                           type="button"
                           onClick={() => setOpenMenuId(openMenuId === record._id ? null : record._id)}
-                          className="p-2 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors"
+                          className="p-2  hover: hover:bg-slate-100 rounded-lg transition-colors"
                         >
                           <MoreVertical size={18} />
                         </button>

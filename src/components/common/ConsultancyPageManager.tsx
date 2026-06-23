@@ -110,7 +110,7 @@ export default function ConsultancyPageManager() {
         <ImageUploadField label="Background Image" value={data.bgImage || ""} fieldKey="hero.bg" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => setForm({...form, data: {...data, bgImage: url}})} />
         
         <div className="pt-4 border-t">
-          <div className="flex justify-between items-center mb-4"><h4 className="text-sm font-bold">Hero Features</h4><button type="button" onClick={() => setForm({...form, data: {...data, features: [...(data.features || []), {id: randomId(), title: '', description: '', image: ''}]}})} className="p-1 bg-slate-100 rounded text-slate-600"><Plus size={16} /></button></div>
+          <div className="flex justify-between items-center mb-4"><h4 className="text-sm font-bold">Hero Features</h4><button type="button" onClick={() => setForm({...form, data: {...data, features: [...(data.features || []), {id: randomId(), title: '', description: '', image: ''}]}})} className="p-1 bg-slate-100 rounded "><Plus size={16} /></button></div>
           {(data.features || []).map((feat: any, idx: number) => (
             <div key={feat.id} className="p-4 border rounded-xl mb-4 bg-slate-50 relative space-y-3">
               <button type="button" onClick={() => { const nf = data.features.filter((_:any, i:number) => i !== idx); setForm({...form, data: {...data, features: nf}})}} className="absolute top-2 right-2 text-red-500"><Trash2 size={14} /></button>
@@ -157,7 +157,7 @@ export default function ConsultancyPageManager() {
             </div>
           </div>
         ))}
-        <button type="button" onClick={() => setForm({...form, data: {...data, items: [...data.items, {id: randomId(), title: '', heading: '', description: '', image: ''}]}})} className="w-full py-4 border-2 border-dashed rounded-xl text-slate-400 flex items-center justify-center gap-2"><Plus size={20} /> Add Feature</button>
+        <button type="button" onClick={() => setForm({...form, data: {...data, items: [...data.items, {id: randomId(), title: '', heading: '', description: '', image: ''}]}})} className="w-full py-4 border-2 border-dashed rounded-xl  flex items-center justify-center gap-2"><Plus size={20} /> Add Feature</button>
       </div>
     );
   };
@@ -207,7 +207,7 @@ export default function ConsultancyPageManager() {
                     <label className={labelClass}>Learn More Text <input className={fieldClass} placeholder="e.g. Learn More" value={card.learnMoreText || ""} onChange={e => { const nc = [...data.serviceCards]; nc[idx].learnMoreText = e.target.value; setForm({...form, data: {...data, serviceCards: nc}}) }} /></label>
                 </div>
             ))}
-            <button type="button" onClick={() => setForm({...form, data: {...data, serviceCards: [...(data.serviceCards || []), {id: randomId(), title: '', description: '', image: '', learnMoreLink: '', learnMoreText: ''}]}})} className="w-full py-4 border-2 border-dashed rounded-xl text-slate-400 flex items-center justify-center gap-2 hover:bg-slate-50 transition-colors"><Plus size={20} /> Add Service Card</button>
+            <button type="button" onClick={() => setForm({...form, data: {...data, serviceCards: [...(data.serviceCards || []), {id: randomId(), title: '', description: '', image: '', learnMoreLink: '', learnMoreText: ''}]}})} className="w-full py-4 border-2 border-dashed rounded-xl  flex items-center justify-center gap-2 hover:bg-slate-50 transition-colors"><Plus size={20} /> Add Service Card</button>
         </div>
       </div>
     );
@@ -218,7 +218,7 @@ const renderProcessForm = () => {
 
   if (!data.whyChoose || !data.ourProcess) {
     return (
-      <div className="p-4 italic text-slate-400">
+      <div className="p-4 italic ">
         Loading Process Structure...
       </div>
     );

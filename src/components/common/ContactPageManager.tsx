@@ -80,7 +80,7 @@ export default function ContactPageManager() {
         <ImageUploadField label="Background Image" value={data.bgImage} fieldKey="contact.hero.bg" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => setForm({...form, data: {...data, bgImage: url}})} />
         
         <div className="pt-4 border-t">
-          <h4 className="text-sm font-bold mb-4 text-slate-500 uppercase">Hero Features Icons</h4>
+          <h4 className="text-sm font-bold mb-4  uppercase">Hero Features Icons</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {data.features.map((feat: any, idx: number) => (
               <div key={feat.id} className="p-4 border rounded-xl bg-slate-50 relative space-y-2">
@@ -151,7 +151,7 @@ export default function ContactPageManager() {
             <textarea className={fieldClass} placeholder="Description" value={feat.description} onChange={e => { const nf = [...data.features]; nf[idx].description = e.target.value; setForm({...form, data: {...data, features: nf}}) }} />
           </div>
         ))}
-        <button type="button" onClick={() => setForm({...form, data: {...data, features: [...data.features, {id: randomId(), iconImage: '', title: '', description: ''}]}})} className="w-full py-4 border-2 border-dashed rounded-xl text-slate-400 flex items-center justify-center gap-2"><Plus size={20} /> Add Strip Item</button>
+        <button type="button" onClick={() => setForm({...form, data: {...data, features: [...data.features, {id: randomId(), iconImage: '', title: '', description: ''}]}})} className="w-full py-4 border-2 border-dashed rounded-xl  flex items-center justify-center gap-2"><Plus size={20} /> Add Strip Item</button>
       </div>
     );
   };
@@ -161,7 +161,7 @@ export default function ContactPageManager() {
       <section className="w-full">
         <form onSubmit={handleSave} className="bg-white border rounded-2xl shadow-sm overflow-hidden">
           <div className="bg-slate-50 border-b p-6 flex items-center justify-between">
-            <h2 className="text-xl font-bold text-slate-800">Contact Page Manager</h2>
+            <h2 className="text-xl font-bold ">Contact Page Manager</h2>
             <button type="submit" disabled={loading} className="bg-blue-600 text-white px-6 py-2 rounded-xl font-bold flex items-center gap-2 transition-all hover:bg-blue-700">
               {loading ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />} Save Changes
             </button>

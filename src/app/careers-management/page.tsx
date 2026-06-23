@@ -185,9 +185,9 @@ export default function CareerManagementPage() {
               <div className="p-1.5 bg-blue-100 text-blue-600 rounded-lg">
                 <Briefcase size={18} />
               </div>
-              <h2 className="text-sm font-bold text-slate-800">Job Openings</h2>
+              <h2 className="text-sm font-bold ">Job Openings</h2>
             </div>
-            <span className="text-[10px] font-bold text-slate-400 uppercase bg-slate-100 px-2 py-0.5 rounded-full">
+            <span className="text-[10px] font-bold  uppercase bg-slate-100 px-2 py-0.5 rounded-full">
               {careers.length} Total
             </span>
           </div>
@@ -196,11 +196,11 @@ export default function CareerManagementPage() {
             {loading ? (
               <div className="flex flex-col items-center justify-center py-20 gap-3">
                 <Loader2 className="animate-spin text-blue-600" size={32} />
-                <p className="text-xs text-slate-400 font-medium">Loading careers...</p>
+                <p className="text-xs  font-medium">Loading careers...</p>
               </div>
             ) : careers.length === 0 ? (
               <div className="text-center py-20">
-                <p className="text-sm text-slate-400 font-medium">No job openings found.</p>
+                <p className="text-sm  font-medium">No job openings found.</p>
               </div>
             ) : (
               <div className="divide-y divide-slate-50">
@@ -208,27 +208,27 @@ export default function CareerManagementPage() {
                   <div key={career._id} className="p-4 hover:bg-slate-50/50 transition-colors flex items-center justify-between group">
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <h3 className="text-sm font-bold text-slate-800 truncate">{career.title}</h3>
-                        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md uppercase ${career.status === 'active' ? 'bg-green-100 text-green-600' : 'bg-slate-100 text-slate-500'}`}>
+                        <h3 className="text-sm font-bold  truncate">{career.title}</h3>
+                        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md uppercase ${career.status === 'active' ? 'bg-green-100 text-green-600' : 'bg-slate-100 '}`}>
                           {career.status}
                         </span>
                       </div>
                       <div className="flex flex-wrap items-center gap-y-1 gap-x-3 mt-1">
-                        <span className="text-[11px] text-slate-500 flex items-center gap-1">
+                        <span className="text-[11px]  flex items-center gap-1">
                           <MapPin size={12} /> {career.location}
                         </span>
-                        <span className="text-[11px] text-slate-500 flex items-center gap-1">
+                        <span className="text-[11px]  flex items-center gap-1">
                           <Clock size={12} /> {career.type}
                         </span>
-                        <span className="text-[11px] text-slate-400">• {career.experience} exp</span>
+                        <span className="text-[11px] ">• {career.experience} exp</span>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button onClick={() => handleEdit(career)} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer">
+                      <button onClick={() => handleEdit(career)} className="p-2  hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer">
                         <Edit size={16} />
                       </button>
-                      <button onClick={() => handleDelete(career._id)} className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer">
+                      <button onClick={() => handleDelete(career._id)} className="p-2  hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer">
                         <Trash2 size={16} />
                       </button>
                     </div>
@@ -240,7 +240,7 @@ export default function CareerManagementPage() {
 
           {totalPages > 1 && (
             <div className="px-6 py-4 border-t border-slate-50 bg-slate-50/30 flex items-center justify-between">
-              <span className="text-[10px] font-bold text-slate-400 uppercase">Page {currentPage} of {totalPages}</span>
+              <span className="text-[10px] font-bold  uppercase">Page {currentPage} of {totalPages}</span>
               <div className="flex items-center gap-2">
                 <button disabled={currentPage === 1} onClick={() => setCurrentPage(prev => prev - 1)} className="p-1.5 rounded-lg hover:bg-slate-100 disabled:opacity-30 transition-colors">
                   <ChevronLeft size={16} />
@@ -260,10 +260,10 @@ export default function CareerManagementPage() {
               <div className="p-1.5 bg-green-100 text-green-600 rounded-lg">
                 {isEditing ? <Edit size={18} /> : <Plus size={18} />}
               </div>
-              <h2 className="text-sm font-bold text-slate-800">{isEditing ? "Edit Posting" : "New Career Posting"}</h2>
+              <h2 className="text-sm font-bold ">{isEditing ? "Edit Posting" : "New Career Posting"}</h2>
             </div>
             {isEditing && (
-              <button onClick={resetForm} className="text-[10px] font-bold text-slate-400 hover:text-slate-600 flex items-center gap-1 uppercase transition-colors">
+              <button onClick={resetForm} className="text-[10px] font-bold  hover: flex items-center gap-1 uppercase transition-colors">
                 <X size={12} /> Cancel
               </button>
             )}

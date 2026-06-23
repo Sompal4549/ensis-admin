@@ -506,7 +506,7 @@ const BlogsManagement = () => {
               <h2 className="text-lg font-bold">{editingBlogId ? "Edit Blog" : "Create New Blog"}</h2>
             </div>
             {editingBlogId && (
-              <button type="button" onClick={() => { setEditingBlogId(null); setBlogForm(emptyBlogForm()); setActiveTab("basic"); }} className="text-xs text-slate-400 hover:text-slate-600 font-medium">
+              <button type="button" onClick={() => { setEditingBlogId(null); setBlogForm(emptyBlogForm()); setActiveTab("basic"); }} className="text-xs  hover: font-medium">
                 Cancel Edit
               </button>
             )}
@@ -522,7 +522,7 @@ const BlogsManagement = () => {
                 className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold whitespace-nowrap border-b-2 transition-colors ${
                   activeTab === tab.key
                     ? "border-[#8d6a3a] text-[#8d6a3a]"
-                    : "border-transparent text-slate-400 hover:text-slate-600"
+                    : "border-transparent  hover:"
                 }`}
               >
                 {tab.icon} {tab.label}
@@ -557,7 +557,7 @@ const BlogsManagement = () => {
           <div className="p-6 overflow-x-auto max-h-[600px] overflow-y-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="border-b text-slate-400 text-xs uppercase font-bold">
+                <tr className="border-b  text-xs uppercase font-bold">
                   <th className="pb-3 px-4">Title</th>
                   <th className="pb-3 px-4">Author</th>
                   <th className="pb-3 px-4">Read Time</th>
@@ -567,9 +567,9 @@ const BlogsManagement = () => {
               <tbody className="divide-y">
                 {blogs.map(blog => (
                   <tr key={blog._id} className={`hover:bg-slate-50 transition-colors ${editingBlogId === (blog._id || blog.id) ? 'bg-blue-50' : ''}`}>
-                    <td className="py-3 px-4 text-sm font-medium text-slate-700"><div className="line-clamp-1">{blog.title}</div></td>
-                    <td className="py-3 px-4 text-sm text-slate-500">{blog.author}</td>
-                    <td className="py-3 px-4 text-sm text-slate-500">{blog.readingTime || 0} min</td>
+                    <td className="py-3 px-4 text-sm font-medium "><div className="line-clamp-1">{blog.title}</div></td>
+                    <td className="py-3 px-4 text-sm ">{blog.author}</td>
+                    <td className="py-3 px-4 text-sm ">{blog.readingTime || 0} min</td>
                     <td className="py-3 px-4 text-right">
                       <button onClick={() => handleEditBlog(blog)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Edit Blog">
                         <Edit2 size={16} />
@@ -602,7 +602,7 @@ const BlogsManagement = () => {
                 <label className={labelClass}>Select Recipients</label>
                 <div className="flex gap-4">
                   <button type="button" onClick={() => setSelectedEmails(subscribers.map(s => s.email))} className="text-[9px] font-bold text-blue-600 uppercase hover:underline">Select All</button>
-                  <button type="button" onClick={() => setSelectedEmails([])} className="text-[9px] font-bold text-slate-400 uppercase hover:underline">Clear</button>
+                  <button type="button" onClick={() => setSelectedEmails([])} className="text-[9px] font-bold  uppercase hover:underline">Clear</button>
                 </div>
               </div>
               <div className="border rounded-xl max-h-[300px] overflow-y-auto p-3 space-y-1 bg-slate-50 border-slate-200">
@@ -612,12 +612,12 @@ const BlogsManagement = () => {
                       if (e.target.checked) setSelectedEmails(prev => [...prev, sub.email]);
                       else setSelectedEmails(prev => prev.filter(email => email !== sub.email));
                     }} />
-                    <span className="text-xs font-medium text-slate-600 group-hover:text-slate-900">{sub.email}</span>
+                    <span className="text-xs font-medium  group-hover:">{sub.email}</span>
                   </label>
                 ))}
-                {subscribers.length === 0 && <p className="text-[10px] text-slate-400 italic text-center py-2">No subscribers found</p>}
+                {subscribers.length === 0 && <p className="text-[10px]  italic text-center py-2">No subscribers found</p>}
               </div>
-              {selectedEmails.length > 0 && <div className="text-[10px] font-medium text-slate-500 italic">Selected: {selectedEmails.length} recipients</div>}
+              {selectedEmails.length > 0 && <div className="text-[10px] font-medium  italic">Selected: {selectedEmails.length} recipients</div>}
             </div>
             <div className="space-y-1">
               <label className={labelClass}>Or Enter Emails Manually (comma separated)</label>
@@ -641,7 +641,7 @@ const BlogsManagement = () => {
           <div className="p-6 overflow-x-auto max-h-[500px] overflow-y-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="border-b text-slate-400 text-xs uppercase font-bold">
+                <tr className="border-b  text-xs uppercase font-bold">
                   <th className="pb-3 px-4">Email Address</th>
                   <th className="pb-3 px-4">Subscribed Date</th>
                 </tr>
@@ -649,12 +649,12 @@ const BlogsManagement = () => {
               <tbody className="divide-y">
                 {subscribers.map(sub => (
                   <tr key={sub._id} className="hover:bg-slate-50 transition-colors">
-                    <td className="py-3 px-4 text-sm font-medium text-slate-700">{sub.email}</td>
-                    <td className="py-3 px-4 text-sm text-slate-500">{sub.createdAt ? new Date(sub.createdAt).toLocaleDateString() : 'N/A'}</td>
+                    <td className="py-3 px-4 text-sm font-medium ">{sub.email}</td>
+                    <td className="py-3 px-4 text-sm ">{sub.createdAt ? new Date(sub.createdAt).toLocaleDateString() : 'N/A'}</td>
                   </tr>
                 ))}
                 {subscribers.length === 0 && (
-                  <tr><td colSpan={2} className="py-8 text-center text-slate-400 italic">No subscribers yet</td></tr>
+                  <tr><td colSpan={2} className="py-8 text-center  italic">No subscribers yet</td></tr>
                 )}
               </tbody>
             </table>

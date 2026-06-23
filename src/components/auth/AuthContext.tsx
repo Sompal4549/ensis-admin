@@ -129,8 +129,8 @@ export function LoginForm() {
         <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
           <Lock size={22} />
         </div>
-        <h1 className="text-2xl font-bold text-slate-800">Ensis Admin</h1>
-        <p className="mt-1.5 text-xs text-slate-400">
+        <h1 className="text-2xl font-bold ">Ensis Admin</h1>
+        <p className="mt-1.5 text-xs ">
           Sign in using OTP to access the admin control panel.
         </p>
 
@@ -138,7 +138,7 @@ export function LoginForm() {
           <div>
             <label className={labelClass}>Phone Number</label>
             <div className="relative">
-              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 " size={16} />
               <input
                 className={`${fieldClass} pl-10`}
                 type="tel"
@@ -154,7 +154,7 @@ export function LoginForm() {
             <div>
               <label className={labelClass}>Enter OTP</label>
               <div className="relative">
-                <Key className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                <Key className="absolute left-3 top-1/2 -translate-y-1/2 " size={16} />
                 <input
                   className={`${fieldClass} pl-10`}
                   type="text"
@@ -192,7 +192,7 @@ export function LoginForm() {
                 type="button"
                 onClick={handleSendOtp}
                 disabled={loading || timer > 0}
-                className="w-full inline-flex items-center justify-center gap-2 py-1 text-xs font-bold text-blue-600 hover:text-blue-700 disabled:text-slate-400 transition-colors cursor-pointer disabled:cursor-not-allowed"
+                className="w-full inline-flex items-center justify-center gap-2 py-1 text-xs font-bold text-blue-600 hover:text-blue-700 disabled: transition-colors cursor-pointer disabled:cursor-not-allowed"
               >
                 {loading && <Loader2 className="animate-spin" size={12} />}
                 {timer > 0 ? `Resend OTP in ${timer}s` : "Resend OTP"}
@@ -205,7 +205,7 @@ export function LoginForm() {
           <button 
             type="button" 
             onClick={() => { setOtpSent(false); setOtp(""); setTimer(0); }} 
-            className="mt-3 text-center w-full text-xs font-semibold text-slate-500 hover:text-blue-600 underline"
+            className="mt-3 text-center w-full text-xs font-semibold  hover:text-blue-600 underline"
           >
             Change Phone Number
           </button>

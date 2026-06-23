@@ -13,29 +13,47 @@ export const BACKEND_URL = API_URL.replace(/\/api\/v1$/, "");
 export type Category = {
   _id: string;
   name: string;
-  slug: string;
-  description?: string;
 };
 
 export type Product = {
-  isFeatured: any;
-  code: string;
-  overview: { title: string; description: string; overviewList: string[]; overviewMaterial: { title: string; description: string; }[]; specifications: { title: string; specificationsList: { title: string; description: string; }; }; keyFeatures: { title: string; keyFeaturesList: { title: string; description: string; }; }; dimensions: { title: string; dimensionsList: { title: string; description: string; }; }; materialAndCare: { title: string; description: string; }; productSpecifications: { highlight: string; title: string; image: string; specifications: { title: string; description: string; }[]; }; whatisInclueded: string[]; smartDesignAppearance: { highlight: string; title: string; woodFinish: string[]; sizeOptions: { title: string; description: string; }[]; }; faqs: { question: string; description: string; }[]; };
   _id: string;
   title: string;
-  shortDescription:string;
-  material :string;
-  weight:string;
-  tags:string[];
-  subcategory:string;
   slug: string;
+  code?: string;
   description: string;
+  shortDescription?: string;
   price: number;
   discountPrice?: number;
-  stock?: number;
-  images?: string[];
-  isActive?: boolean;
   category?: Category | string;
+  subcategory?: string;
+  material?: string;
+  weight?: string;
+  images?: string[];
+  stock?: number;
+  tags?: string[];
+  averageRating?: number;
+  reviews?: string[];
+  isActive?: boolean;
+  isFeatured?: boolean;
+  overview?: {
+    title?: string;
+    description?: string;
+    overviewList?: string[];
+    specifications?: { title: string; specificationsList: { title: string; description: string }[] }[];
+    keyFeatures?: { title: string; keyFeaturesList: string[] };
+    dimensions?: { title: string; dimensionsList: { title: string; description: string }[] }[];
+    materialAndCare?: { title: string; description: string };
+    productSpecifications?: { highlight: string; title: string; image: string; specifications: { title: string; description: string }[] }[];
+    whatisInclueded?: string[];
+    items?: { image: string; title: string; description: string }[];
+    smartDesignAppearance?: {
+      highlight?: string;
+      title?: string;
+      woodFinish?: string[];
+      sizeOptions?: { title: string; description: string }[];
+    };
+    faqs?: { question: string; description: string }[];
+  };
 };
 
 export type ComponentContent = {
@@ -213,9 +231,9 @@ export const adminApi = {
 
 export const categoryApi = {
   list: () => request<Category[]>("/categories"),
-  create: (payload: Pick<Category, "name" | "description" | "slug">) =>
+  create: (payload: Pick<Category, "name">) =>
     request<Category>("/categories", { method: "POST", data: payload }),
-  update: (id: string, payload: Partial<Pick<Category, "name" | "description" | "slug">>) =>
+  update: (id: string, payload: Partial<Pick<Category, "name">>) =>
     request<Category>(`/categories/${id}`, { method: "PUT", data: payload }),
   remove: (id: string) => request<null>(`/categories/${id}`, { method: "DELETE" }),
 };
@@ -255,9 +273,8 @@ export type PageData = {
     metaKeywords?: string;
     h1: string;
     canonical?: string;
-    ogTitle?: string;
-    ogDescription?: string;
-    ogImage?: string;
+ogJson?:string;
+     schema?: string;
   };
   advanceSeo?: {
     headCode?: string;

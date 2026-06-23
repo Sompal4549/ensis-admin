@@ -45,9 +45,9 @@ export default function UserManagementModal({ isOpen, onClose }: UserManagementM
             <div className="p-1.5 bg-blue-100 text-blue-600 rounded-lg">
               <ShieldCheck size={18} />
             </div>
-            <h2 className="text-sm font-bold text-slate-800">Create New Admin User</h2>
+            <h2 className="text-sm font-bold ">Create New Admin User</h2>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors">
+          <button onClick={onClose} className=" hover: transition-colors">
             <X size={20} />
           </button>
         </div>
@@ -80,7 +80,7 @@ export default function UserManagementModal({ isOpen, onClose }: UserManagementM
           <div>
             <label className={labelClass}>WhatsApp Number</label>
             <div className="relative mt-1">
-              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 " size={14} />
             <input
               type="tel"
               required

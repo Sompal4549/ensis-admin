@@ -112,7 +112,7 @@ function UsersManagementPage() {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 " size={16} />
           <input 
             type="text" 
             placeholder="Search users by name, email or phone..." 
@@ -131,14 +131,14 @@ function UsersManagementPage() {
               <div className="p-1.5 bg-blue-100 text-blue-600 rounded-lg">
                 <Users size={18} />
               </div>
-              <h2 className="text-sm font-bold text-slate-800">Admin Users</h2>
+              <h2 className="text-sm font-bold ">Admin Users</h2>
             </div>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-[13px]">
               <thead>
-                <tr className="bg-slate-50/50 border-b border-slate-100 text-slate-500 uppercase text-[10px] font-bold tracking-wider">
+                <tr className="bg-slate-50/50 border-b border-slate-100  uppercase text-[10px] font-bold tracking-wider">
                   <th className="px-6 py-3">Name</th>
                   <th className="px-6 py-3">Email</th>
                   <th className="px-6 py-3">Phone</th>
@@ -150,26 +150,26 @@ function UsersManagementPage() {
                   <tr>
                     <td colSpan={3} className="py-10 text-center">
                       <Loader2 className="animate-spin mx-auto text-blue-600 mb-2" size={24} />
-                      <span className="text-slate-400">Loading users...</span>
+                      <span className="">Loading users...</span>
                     </td>
                   </tr>
                 ) : filteredUsers.length === 0 ? (
                   <tr>
-                    <td colSpan={3} className="py-10 text-center text-slate-400 italic">No users found</td>
+                    <td colSpan={3} className="py-10 text-center  italic">No users found</td>
                   </tr>
                 ) : filteredUsers.map(user => (
                   <tr key={user._id} className="hover:bg-slate-50/50 transition-colors group">
                     <td className="px-6 py-4">
-                      <div className="font-semibold text-slate-700">{user.name}</div>
-                      <div className="text-[10px] text-slate-400 uppercase font-bold mt-0.5">{user.role}</div>
+                      <div className="font-semibold ">{user.name}</div>
+                      <div className="text-[10px]  uppercase font-bold mt-0.5">{user.role}</div>
                     </td>
-                    <td className="px-6 py-4 text-slate-500">{user.email}</td>
-                    <td className="px-6 py-4 text-slate-500">{user.phone || "—"}</td>
+                    <td className="px-6 py-4 ">{user.email}</td>
+                    <td className="px-6 py-4 ">{user.phone || "—"}</td>
                     <td className="px-6 py-4 text-right space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button onClick={() => handleEdit(user)} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer">
+                      <button onClick={() => handleEdit(user)} className="p-1.5  hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer">
                         <Edit size={16} />
                       </button>
-                      <button onClick={() => handleDelete(user._id)} className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer">
+                      <button onClick={() => handleDelete(user._id)} className="p-1.5  hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer">
                         <Trash2 size={16} />
                       </button>
                     </td>
@@ -183,9 +183,9 @@ function UsersManagementPage() {
         {/* Form Column */}
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden self-start sticky top-6">
           <div className="px-6 py-4 border-b border-slate-50 bg-slate-50/30 flex justify-between items-center">
-            <h2 className="text-sm font-bold text-slate-800">{isEditing ? "Edit User Details" : "Add New User"}</h2>
+            <h2 className="text-sm font-bold ">{isEditing ? "Edit User Details" : "Add New User"}</h2>
             {isEditing && (
-              <button onClick={resetForm} className="text-slate-400 hover:text-slate-600 cursor-pointer">
+              <button onClick={resetForm} className=" hover: cursor-pointer">
                 <X size={18} />
               </button>
             )}
@@ -201,7 +201,7 @@ function UsersManagementPage() {
             <div>
               <label className={labelClass}>Email Address</label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 " size={14} />
                 <input 
                   type="email" required className={`${fieldClass} pl-9`} 
                   value={form.email} onChange={(e) => setForm({...form, email: e.target.value})}
@@ -211,7 +211,7 @@ function UsersManagementPage() {
             <div>
               <label className={labelClass}>WhatsApp Number</label>
               <div className="relative">
-                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 " size={14} />
                 <input 
                   type="tel" required className={`${fieldClass} pl-9`} 
                   placeholder="91XXXXXXXXXX"

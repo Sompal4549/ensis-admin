@@ -1,26 +1,10 @@
 "use client";
 
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { Plus, Save, Pencil, Trash2, Lock, X, Loader2, ImagePlus } from "lucide-react";
 import {
-  Plus,
-  Save,
-  Pencil,
-  Trash2,
-  Lock,
-  X,
-  Loader2,
-  ImagePlus,
-} from "lucide-react";
-import {
-  adminApi,
-  authStore,
-  categoryApi,
-  getImageUrl,
-  productApi,
-  uploadImage,
-  type AuthUser,
-  type Category,
-  type Product,
+  adminApi, authStore, categoryApi, getImageUrl, productApi, uploadImage,
+  type AuthUser, type Category, type Product,
 } from "@/lib/api";
 import { fieldClass, labelClass } from "@/constants";
 import Image from "next/image";
@@ -45,13 +29,13 @@ type ProductForm = {
     title: string;
     description: string;
     overviewList: string[];
-    overviewMaterial: { title: string; description: string }[];
-    specifications: { title: string; specificationsList: { title: string; description: string } };
-    keyFeatures: { title: string; keyFeaturesList: { title: string; description: string } };
-    dimensions: { title: string; dimensionsList: { title: string; description: string } };
+    specifications: { title: string; specificationsList: { title: string; description: string }[] }[];
+    keyFeatures: { title: string; keyFeaturesList: string[] };
+    dimensions: { title: string; dimensionsList: { title: string; description: string }[] }[];
     materialAndCare: { title: string; description: string };
-    productSpecifications: { highlight: string; title: string; image: string; specifications: { title: string; description: string }[] };
+    productSpecifications: { highlight: string; title: string; image: string; specifications: { title: string; description: string }[] }[];
     whatisInclueded: string[];
+    items: { image: string; title: string; description: string }[];
     smartDesignAppearance: {
       highlight: string;
       title: string;
@@ -65,44 +49,25 @@ type ProductForm = {
 };
 
 const emptyProduct: ProductForm = {
-  title: "",
-  code: "",
-  description: "",
-  shortDescription: "",
-  price: "",
-  discountPrice: "",
-  stock: "",
-  category: "",
-  subcategory: "",
-  material: "",
-  weight: "",
-  tags: [""],
-  images: [],
-  slug: "",
+  title: "", code: "", description: "", shortDescription: "",
+  price: "", discountPrice: "", stock: "", category: "",
+  subcategory: "", material: "", weight: "",
+  tags: [""], images: [], slug: "",
   overview: {
-    title: "",
-    description: "",
+    title: "", description: "",
     overviewList: [""],
-    overviewMaterial: [{ title: "", description: "" }],
-    specifications: { title: "", specificationsList: { title: "", description: "" } },
-    keyFeatures: { title: "", keyFeaturesList: { title: "", description: "" } },
-    dimensions: { title: "", dimensionsList: { title: "", description: "" } },
+    specifications: [{ title: "", specificationsList: [{ title: "", description: "" }] }],
+    keyFeatures: { title: "", keyFeaturesList: [""] },
+    dimensions: [{ title: "", dimensionsList: [{ title: "", description: "" }] }],
     materialAndCare: { title: "", description: "" },
-    productSpecifications: { highlight: "", title: "", image: "", specifications: [{ title: "", description: "" }] },
+    productSpecifications: [{ highlight: "", title: "", image: "", specifications: [{ title: "", description: "" }] }],
     whatisInclueded: [""],
-    smartDesignAppearance: {
-      highlight: "",
-      title: "",
-      woodFinish: [""],
-      sizeOptions: [{ title: "", description: "" }],
-    },
+    items: [{ image: "", title: "", description: "" }],
+    smartDesignAppearance: { highlight: "", title: "", woodFinish: [""], sizeOptions: [{ title: "", description: "" }] },
     faqs: [{ question: "", description: "" }],
   },
-  isFeatured: false,
-  isActive: true,
+  isFeatured: false, isActive: true,
 };
-
-
 
 export default function ProductsPage() {
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -120,10 +85,7 @@ export default function ProductsPage() {
   }, [categories, productForm.category]);
 
   const refreshData = useCallback(async () => {
-    const [productResult, categoryResult] = await Promise.all([
-      productApi.list(),
-      categoryApi.list(),
-    ]);
+    const [productResult, categoryResult] = await Promise.all([productApi.list(), categoryApi.list()]);
     setProducts(productResult.products);
     setCategories(categoryResult);
     if (!productForm.category && categoryResult[0]) {
@@ -164,25 +126,18 @@ export default function ProductsPage() {
     setLoading(true);
     setMessage("");
     const payload = {
-      title: productForm.title,
-      code: productForm.code,
-      description: productForm.description,
-      shortDescription: productForm.shortDescription,
+      title: productForm.title, code: productForm.code,
+      description: productForm.description, shortDescription: productForm.shortDescription,
       price: Number(productForm.price || 0),
       discountPrice: productForm.discountPrice ? Number(productForm.discountPrice) : undefined,
       stock: productForm.stock ? Number(productForm.stock) : 0,
-      category: productForm.category,
-      subcategory: productForm.subcategory,
-      material: productForm.material,
-      weight: productForm.weight,
+      category: productForm.category, subcategory: productForm.subcategory,
+      material: productForm.material, weight: productForm.weight,
       tags: productForm.tags.filter(t => t.trim() !== ""),
-      images: productForm.images,
-      slug: productForm.slug.trim(),
+      images: productForm.images, slug: productForm.slug.trim(),
       overview: productForm.overview,
-      isFeatured: productForm.isFeatured,
-      isActive: productForm.isActive,
+      isFeatured: productForm.isFeatured, isActive: productForm.isActive,
     };
-
     try {
       if (productForm.id) {
         await productApi.update(productForm.id, payload);
@@ -202,64 +157,51 @@ export default function ProductsPage() {
 
   const editProduct = (product: Product) => {
     const categoryId = typeof product.category === "string" ? product.category : product.category?._id || "";
+    const toArray = <T,>(val: T | T[] | undefined, fallback: T[]): T[] =>
+      val ? (Array.isArray(val) ? val : [val]) : fallback;
+
     setProductForm({
       id: product._id,
-      title: product.title || "",
-      code: product.code || "",
-      description: product.description || "",
-      shortDescription: product.shortDescription || "",
-      price: String(product.price || ""),
-      discountPrice: String(product.discountPrice || ""),
-      stock: String(product.stock || ""),
-      category: categoryId,
-      subcategory: product.subcategory || "",
-      material: product.material || "",
+      title: product.title || "", code: product.code || "",
+      description: product.description || "", shortDescription: product.shortDescription || "",
+      price: String(product.price || ""), discountPrice: String(product.discountPrice || ""),
+      stock: String(product.stock || ""), category: categoryId,
+      subcategory: product.subcategory || "", material: product.material || "",
       weight: String(product.weight || ""),
-      tags: product.tags || [],
-      images: product.images || [],
-      slug: product.slug || "",
+      tags: product.tags || [], images: product.images || [], slug: product.slug || "",
       overview: {
         title: product.overview?.title || "",
         description: product.overview?.description || "",
         overviewList: product.overview?.overviewList || [""],
-        overviewMaterial: product.overview?.overviewMaterial || [{ title: "", description: "" }],
-        specifications: {
-          title: product.overview?.specifications?.title || "",
-          specificationsList: {
-            title: product.overview?.specifications?.specificationsList?.title || "",
-            description: product.overview?.specifications?.specificationsList?.description || ""
-          }
-        },
+        specifications: toArray(product.overview?.specifications, [{ title: "", specificationsList: [{ title: "", description: "" }] }]).map(s => ({
+          title: s.title || "",
+          specificationsList: Array.isArray(s.specificationsList) ? s.specificationsList : [{ title: "", description: "" }],
+        })),
         keyFeatures: {
           title: product.overview?.keyFeatures?.title || "",
-          keyFeaturesList: {
-            title: product.overview?.keyFeatures?.keyFeaturesList?.title || "",
-            description: product.overview?.keyFeatures?.keyFeaturesList?.description || ""
-          }
+          keyFeaturesList: product.overview?.keyFeatures?.keyFeaturesList || [""],
         },
-        dimensions: {
-          title: product.overview?.dimensions?.title || "",
-          dimensionsList: {
-            title: product.overview?.dimensions?.dimensionsList?.title || "",
-            description: product.overview?.dimensions?.dimensionsList?.description || ""
-          }
-        },
+        dimensions: toArray(product.overview?.dimensions, [{ title: "", dimensionsList: [{ title: "", description: "" }] }]).map(d => ({
+          title: d.title || "",
+          dimensionsList: Array.isArray(d.dimensionsList) ? d.dimensionsList : [{ title: "", description: "" }],
+        })),
         materialAndCare: {
           title: product.overview?.materialAndCare?.title || "",
-          description: product.overview?.materialAndCare?.description || ""
+          description: product.overview?.materialAndCare?.description || "",
         },
-        productSpecifications: {
-          highlight: product.overview?.productSpecifications?.highlight || "",
-          title: product.overview?.productSpecifications?.title || "",
-          image: product.overview?.productSpecifications?.image || "",
-          specifications: product.overview?.productSpecifications?.specifications || [{ title: "", description: "" }]
-        },
+        productSpecifications: toArray(product.overview?.productSpecifications, [{ highlight: "", title: "", image: "", specifications: [{ title: "", description: "" }] }]).map(ps => ({
+          highlight: ps.highlight || "",
+          title: ps.title || "",
+          image: ps.image || "",
+          specifications: ps.specifications || [{ title: "", description: "" }],
+        })),
         whatisInclueded: product.overview?.whatisInclueded || [""],
+        items: product.overview?.items || [{ image: "", title: "", description: "" }],
         smartDesignAppearance: {
           highlight: product.overview?.smartDesignAppearance?.highlight || "",
           title: product.overview?.smartDesignAppearance?.title || "",
           woodFinish: product.overview?.smartDesignAppearance?.woodFinish || [""],
-          sizeOptions: product.overview?.smartDesignAppearance?.sizeOptions || [{ title: "", description: "" }]
+          sizeOptions: product.overview?.smartDesignAppearance?.sizeOptions || [{ title: "", description: "" }],
         },
         faqs: product.overview?.faqs || [{ question: "", description: "" }],
       },
@@ -285,54 +227,26 @@ export default function ProductsPage() {
   if (!user) {
     return (
       <main className="grid min-h-[70vh] place-items-center bg-slate-50 px-4 py-12">
-        <form
-          onSubmit={handleLogin}
-          className="w-full max-w-md rounded-2xl border border-slate-100 bg-white p-8 shadow-xl shadow-slate-200/50"
-        >
+        <form onSubmit={handleLogin} className="w-full max-w-md rounded-2xl border border-slate-100 bg-white p-8 shadow-xl shadow-slate-200/50">
           <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
             <Lock size={22} />
           </div>
           <h1 className="text-2xl font-bold text-slate-800">Ensis Admin</h1>
-          <p className="mt-1.5 text-xs text-slate-400">
-            Sign in with your credentials to manage products.
-          </p>
-
+          <p className="mt-1.5 text-xs ">Sign in with your credentials to manage products.</p>
           <div className="mt-6 space-y-4">
             <div>
               <label className={labelClass}>Email Address</label>
-              <input
-                className={fieldClass}
-                type="email"
-                placeholder="admin@ensis.in"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                required
-              />
+              <input className={fieldClass} type="email" placeholder="admin@ensis.in" value={email} onChange={(e) => setEmail(e.target.value)} required />
             </div>
             <div>
               <label className={labelClass}>Password</label>
-              <input
-                className={fieldClass}
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                required
-              />
+              <input className={fieldClass} type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required />
             </div>
           </div>
-
-          <button
-            className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#1d5af2] hover:bg-[#154dc8] py-3 text-sm font-bold text-white shadow-md shadow-blue-500/10 transition-colors disabled:opacity-75"
-            disabled={loading}
-          >
+          <button className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#1d5af2] hover:bg-[#154dc8] py-3 text-sm font-bold text-white shadow-md shadow-blue-500/10 transition-colors disabled:opacity-75" disabled={loading}>
             {loading ? "Signing In..." : "Sign In"}
           </button>
-          {message && (
-            <p className="mt-4 text-xs font-semibold text-rose-600 bg-rose-50/50 p-2.5 rounded-lg border border-rose-100">
-              {message}
-            </p>
-          )}
+          {message && <p className="mt-4 text-xs font-semibold text-rose-600 bg-rose-50/50 p-2.5 rounded-lg border border-rose-100">{message}</p>}
         </form>
       </main>
     );
@@ -340,20 +254,8 @@ export default function ProductsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header Panel */}
-      {/* <div className="flex flex-wrap items-center justify-between gap-4 bg-white px-5 py-4 rounded-2xl border border-slate-100 shadow-sm">
-        <div>
-          <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600">Database Editor</span>
-          <h2 className="text-lg font-bold text-slate-800">Products Catalog</h2>
-        </div>
-        {message && (
-          <p className="text-xs font-semibold text-amber-600 bg-amber-50 px-3 py-1 rounded-lg border border-amber-100">
-            {message}
-          </p>
-        )}
-      </div> */}
-
       <section className="grid gap-6 lg:grid-cols-[1.4fr_0.95fr]">
+        {/* Product List */}
         <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm h-fit">
           <div className="border-b border-slate-100 px-5 py-4 text-xs font-bold text-slate-800">
             {products.length} Products Cataloged
@@ -368,329 +270,151 @@ export default function ProductsPage() {
                 </div>
                 <div className="min-w-0">
                   <h4 className="font-bold text-slate-800 text-xs truncate">{product.title}</h4>
-                  <p className="mt-0.5 line-clamp-1 text-[11px] text-slate-400">{product.description}</p>
+                  <p className="mt-0.5 line-clamp-1 text-[11px] ">{product.description}</p>
                   <p className="mt-1 text-[10px] font-bold text-emerald-600">
-                    Rs. {product.price?.toLocaleString("en-IN")} ·{" "}
-                    {typeof product.category === "string" ? product.category : product.category?.name}
+                    Rs. {product.price?.toLocaleString("en-IN")} · {typeof product.category === "string" ? product.category : product.category?.name}
                   </p>
                 </div>
                 <div className="flex gap-2">
-                  <button
-                    onClick={() => editProduct(product)}
-                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer"
-                  >
-                    <Pencil size={12} />
-                  </button>
-                  <button
-                    onClick={() => deleteProduct(product)}
-                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
-                  >
-                    <Trash2 size={12} />
-                  </button>
+                  <button onClick={() => editProduct(product)} className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer"><Pencil size={12} /></button>
+                  <button onClick={() => deleteProduct(product)} className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"><Trash2 size={12} /></button>
                 </div>
               </article>
             ))}
           </div>
         </div>
-        {/* Add/Edit Product Form */}
-        <form
-          onSubmit={submitProduct}
-          className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm space-y-3 h-fit max-h-[90vh] overflow-y-auto"
-        >
+
+        {/* Form */}
+        <form onSubmit={submitProduct} className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm space-y-3 h-fit max-h-[90vh] overflow-y-auto">
           <h3 className="flex items-center gap-1.5 text-xs font-bold text-slate-800">
             <Plus size={14} />
             {productForm.id ? "Edit Product Details" : "Add New Product"}
           </h3>
 
+          {/* Title & Code */}
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
               <label className={labelClass}>Title</label>
-              <input
-                className={fieldClass}
-                value={productForm.title}
-                onChange={(event) =>
-                  setProductForm({ ...productForm, title: event.target.value })
-                }
-                required
-              />
+              <input className={fieldClass} value={productForm.title} onChange={(e) => setProductForm({ ...productForm, title: e.target.value })} required />
             </div>
             <div>
               <label className={labelClass}>Product Code</label>
-              <input
-                className={fieldClass}
-                value={productForm.code}
-                onChange={(event) =>
-                  setProductForm({ ...productForm, code: event.target.value })
-                }
-                placeholder="e.g. ENS-001"
-              />
+              <input className={fieldClass} value={productForm.code} onChange={(e) => setProductForm({ ...productForm, code: e.target.value })} placeholder="e.g. ENS-001" />
             </div>
           </div>
 
+          {/* Description */}
           <div>
             <label className={labelClass}>Description</label>
-            <textarea
-              className={`${fieldClass} min-h-20`}
-              value={productForm.description}
-              onChange={(event) =>
-                setProductForm({
-                  ...productForm,
-                  description: event.target.value,
-                })
-              }
-              required
-            />
+            <textarea className={`${fieldClass} min-h-20`} value={productForm.description} onChange={(e) => setProductForm({ ...productForm, description: e.target.value })} required />
           </div>
 
+          {/* Short Description */}
           <div>
             <label className={labelClass}>Short Description</label>
-            <textarea
-              className={`${fieldClass} min-h-12`}
-              value={productForm.shortDescription}
-              onChange={(event) =>
-                setProductForm({ ...productForm, shortDescription: event.target.value })
-              }
-            />
+            <textarea className={`${fieldClass} min-h-12`} value={productForm.shortDescription} onChange={(e) => setProductForm({ ...productForm, shortDescription: e.target.value })} />
           </div>
 
+          {/* Price, Discount, Stock */}
           <div className="grid gap-3 sm:grid-cols-3">
             <div>
               <label className={labelClass}>Price (INR)</label>
-              <input
-                className={fieldClass}
-                type="number"
-                min="0"
-                value={productForm.price}
-                onChange={(event) =>
-                  setProductForm({ ...productForm, price: event.target.value })
-                }
-                required
-              />
+              <input className={fieldClass} type="number" min="0" value={productForm.price} onChange={(e) => setProductForm({ ...productForm, price: e.target.value })} required />
             </div>
-
             <div>
               <label className={labelClass}>Discount Price</label>
-              <input
-                className={fieldClass}
-                type="number"
-                min="0"
-                value={productForm.discountPrice}
-                onChange={(event) =>
-                  setProductForm({
-                    ...productForm,
-                    discountPrice: event.target.value,
-                  })
-                }
-              />
+              <input className={fieldClass} type="number" min="0" value={productForm.discountPrice} onChange={(e) => setProductForm({ ...productForm, discountPrice: e.target.value })} />
             </div>
-
             <div>
               <label className={labelClass}>Stock Quantity</label>
-              <input
-                className={fieldClass}
-                type="number"
-                min="0"
-                value={productForm.stock}
-                onChange={(event) =>
-                  setProductForm({ ...productForm, stock: event.target.value })
-                }
-              />
+              <input className={fieldClass} type="number" min="0" value={productForm.stock} onChange={(e) => setProductForm({ ...productForm, stock: e.target.value })} />
             </div>
           </div>
 
+          {/* Category & Slug */}
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
               <label className={labelClass}>Category</label>
-              <select
-                className={fieldClass}
-                value={productForm.category}
-                onChange={(event) =>
-                  setProductForm({
-                    ...productForm,
-                    category: event.target.value,
-                  })
-                }
-                required
-              >
+              <select className={fieldClass} value={productForm.category} onChange={(e) => setProductForm({ ...productForm, category: e.target.value })} required>
                 <option value="">{selectedCategoryName}</option>
-                {categories.map((category) => (
-                  <option key={category._id} value={category._id}>
-                    {category.name}
-                  </option>
-                ))}
+                {categories.map((c) => <option key={c._id} value={c._id}>{c.name}</option>)}
               </select>
             </div>
-
             <div>
-              <label className={labelClass}>Url Slug</label>
-              <input
-                className={fieldClass}
-                value={productForm.slug}
-                onChange={(event) =>
-                  setProductForm({ ...productForm, slug: event.target.value })
-                }
-              />
+              <label className={labelClass}>URL Slug</label>
+              <input className={fieldClass} value={productForm.slug} onChange={(e) => setProductForm({ ...productForm, slug: e.target.value })} />
             </div>
           </div>
 
+          {/* Subcategory, Material, Weight */}
           <div className="grid gap-3 sm:grid-cols-3">
             <div>
               <label className={labelClass}>Subcategory</label>
-              <input
-                className={fieldClass}
-                value={productForm.subcategory}
-                onChange={(event) =>
-                  setProductForm({ ...productForm, subcategory: event.target.value })
-                }
-              />
+              <input className={fieldClass} value={productForm.subcategory} onChange={(e) => setProductForm({ ...productForm, subcategory: e.target.value })} />
             </div>
             <div>
               <label className={labelClass}>Material</label>
-              <input
-                className={fieldClass}
-                value={productForm.material}
-                onChange={(event) =>
-                  setProductForm({ ...productForm, material: event.target.value })
-                }
-              />
+              <input className={fieldClass} value={productForm.material} onChange={(e) => setProductForm({ ...productForm, material: e.target.value })} />
             </div>
             <div>
               <label className={labelClass}>Weight (kg)</label>
-              <input
-                className={fieldClass}
-                type="number"
-                value={productForm.weight}
-                onChange={(event) =>
-                  setProductForm({ ...productForm, weight: event.target.value })
-                }
-              />
+              <input className={fieldClass} type="number" value={productForm.weight} onChange={(e) => setProductForm({ ...productForm, weight: e.target.value })} />
             </div>
           </div>
 
+          {/* Checkboxes */}
           <div className="flex gap-6 py-2">
             <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={productForm.isActive}
-                onChange={(e) => setProductForm({ ...productForm, isActive: e.target.checked })}
-                className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-              />
+              <input type="checkbox" checked={productForm.isActive} onChange={(e) => setProductForm({ ...productForm, isActive: e.target.checked })} className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
               <span className="text-xs font-semibold text-slate-700">Active</span>
             </label>
             <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={productForm.isFeatured}
-                onChange={(e) => setProductForm({ ...productForm, isFeatured: e.target.checked })}
-                className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-              />
+              <input type="checkbox" checked={productForm.isFeatured} onChange={(e) => setProductForm({ ...productForm, isFeatured: e.target.checked })} className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
               <span className="text-xs font-semibold text-slate-700">Featured Product</span>
             </label>
           </div>
 
+          {/* Product Images */}
           <div>
             <label className={labelClass}>Product Images</label>
-
             <div className="grid grid-cols-4 gap-2 mb-2">
               {productForm.images.map((url, idx) => (
-                <div
-                  key={idx}
-                  className="relative group aspect-square rounded-lg border border-slate-200 overflow-hidden bg-slate-50"
-                >
-                  <Image width={100} height={100}
-                    src={getImageUrl(url)}
-                    alt={`Product ${idx}`}
-                    className="h-full w-full object-cover"
-                    crossOrigin="anonymous"
-                  />
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const newImages = [...productForm.images];
-                      newImages.splice(idx, 1);
-                      setProductForm({
-                        ...productForm,
-                        images: newImages,
-                      });
-                    }}
-                    className="absolute top-1 right-1 p-0.5 bg-white/90 rounded-full text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm hover:bg-rose-50 cursor-pointer"
-                  >
-                    <X size={10} />
-                  </button>
+                <div key={idx} className="relative group aspect-square rounded-lg border border-slate-200 overflow-hidden bg-slate-50">
+                  <Image width={100} height={100} src={getImageUrl(url)} alt={`Product ${idx}`} className="h-full w-full object-cover" crossOrigin="anonymous" />
+                  <button type="button" onClick={() => { const imgs = [...productForm.images]; imgs.splice(idx, 1); setProductForm({ ...productForm, images: imgs }); }} className="absolute top-1 right-1 p-0.5 bg-white/90 rounded-full text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm hover:bg-rose-50 cursor-pointer"><X size={10} /></button>
                 </div>
               ))}
-
               <label className="flex flex-col items-center justify-center aspect-square rounded-lg border border-dashed border-slate-200 hover:border-blue-400 hover:bg-blue-50/30 transition-all cursor-pointer group">
-                {loading ? (
-                  <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
-                ) : (
-                  <ImagePlus className="h-4 w-4 text-slate-400 group-hover:text-blue-500 transition-colors" />
-                )}
-
-                <span className="mt-0.5 text-[9px] font-semibold text-slate-500 group-hover:text-blue-600">
-                  Add Image
-                </span>
-
-                <input
-                  type="file"
-                  multiple
-                  className="hidden"
-                  accept="image/*"
-                  onChange={async (e) => {
-                    const files = Array.from(e.target.files || []);
-
-                    if (files.length === 0) return;
-
-                    setLoading(true);
-                    setMessage("Uploading images...");
-
-                    try {
-                      const uploadPromises = files.map((file) =>
-                        uploadImage(file, "products")
-                      );
-
-                      const urls = await Promise.all(uploadPromises);
-
-                      setProductForm((prev) => ({
-                        ...prev,
-                        images: [...prev.images, ...urls],
-                      }));
-
-                      setMessage(
-                        `${urls.length} image(s) uploaded successfully.`
-                      );
-                    } catch (error) {
-                      setMessage("Failed to upload one or more images." +
-                        " " + error
-                      );
-                    } finally {
-                      setLoading(false);
-                      e.target.value = "";
-                    }
-                  }}
-                />
+                {loading ? <Loader2 className="h-4 w-4 animate-spin text-blue-500" /> : <ImagePlus className="h-4 w-4  group-hover:text-blue-500 transition-colors" />}
+                <span className="mt-0.5 text-[9px] font-semibold  group-hover:text-blue-600">Add Image</span>
+                <input type="file" multiple className="hidden" accept="image/*" onChange={async (e) => {
+                  const files = Array.from(e.target.files || []);
+                  if (!files.length) return;
+                  setLoading(true);
+                  setMessage("Uploading images...");
+                  try {
+                    const urls = await Promise.all(files.map(f => uploadImage(f, "products")));
+                    setProductForm(prev => ({ ...prev, images: [...prev.images, ...urls] }));
+                    setMessage(`${urls.length} image(s) uploaded successfully.`);
+                  } catch (error) {
+                    setMessage("Failed to upload one or more images. " + error);
+                  } finally {
+                    setLoading(false);
+                    e.target.value = "";
+                  }
+                }} />
               </label>
             </div>
-
-            <p className="text-[8px] italic text-slate-400">
-              Images are stored in /uploads/products. You can select multiple files.
-            </p>
+            <p className="text-[8px] italic ">Images are stored in /uploads/products. You can select multiple files.</p>
           </div>
 
+          {/* Tags */}
           <div className="space-y-2">
             <label className={labelClass}>Search Tags</label>
             <div className="flex flex-wrap gap-2">
               {productForm.tags.map((tag, idx) => (
                 <div key={idx} className="flex gap-1 items-center bg-slate-50 border border-slate-200 rounded-md px-2 py-1">
-                  <input
-                    className="bg-transparent border-none p-0 text-[11px] focus:ring-0 w-20"
-                    value={tag}
-                    onChange={e => {
-                      const list = [...productForm.tags]; list[idx] = e.target.value;
-                      setProductForm({ ...productForm, tags: list });
-                    }}
-                  />
+                  <input className="bg-transparent border-none p-0 text-[11px] focus:ring-0 w-20" value={tag} onChange={e => { const list = [...productForm.tags]; list[idx] = e.target.value; setProductForm({ ...productForm, tags: list }); }} />
                   <button type="button" onClick={() => setProductForm({ ...productForm, tags: productForm.tags.filter((_, i) => i !== idx) })} className="text-rose-500 hover:bg-rose-50 p-1 rounded transition-colors"><X size={12} /></button>
                 </div>
               ))}
@@ -698,171 +422,212 @@ export default function ProductsPage() {
             </div>
           </div>
 
-          {/* Detailed Overview Section */}
-          <div className="pt-6 border-t border-slate-100 space-y-6">
-            <h4 className="text-[10px] font-black uppercase text-blue-600 tracking-widest flex items-center gap-2">
-              Technical Overview & Details
-            </h4>
+          {/* ────── Technical Overview ────── */}
+          <div className="pt-6 border-t border-slate-100 space-y-5">
+            <h4 className="text-[10px] font-black uppercase text-blue-600 tracking-widest">Technical Overview & Details</h4>
 
             {/* Basic Overview */}
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-1">
+            <div className="space-y-3">
+              <div>
                 <label className={labelClass}>Overview Section Title</label>
-                <input className={fieldClass} value={productForm.overview.title} onChange={e => setProductForm({ ...productForm, overview: { ...productForm.overview, title: e.target.value } })} placeholder="e.g., Exquisite Craftsmanship" />
+                <input className={fieldClass} value={productForm.overview.title} onChange={e => setProductForm({ ...productForm, overview: { ...productForm.overview, title: e.target.value } })} placeholder="e.g. Exquisite Craftsmanship" />
               </div>
-              <div className="space-y-1">
+              <div>
                 <label className={labelClass}>Overview Description</label>
-                <textarea className={fieldClass} rows={1} value={productForm.overview.description} onChange={e => setProductForm({ ...productForm, overview: { ...productForm.overview, description: e.target.value } })} placeholder="Short intro to technical details..." />
+                <textarea className={`${fieldClass} min-h-16`} value={productForm.overview.description} onChange={e => setProductForm({ ...productForm, overview: { ...productForm.overview, description: e.target.value } })} placeholder="Short intro to technical details..." />
               </div>
             </div>
 
-            {/* Overview List & Included items */}
-            <div className="grid gap-6 sm:grid-cols-2">
-              <div className="space-y-2">
-                <label className={labelClass}>Overview Bullet Points</label>
+            {/* Overview Items */}
+            <div>
+              <label className={labelClass}>Overview Items</label>
+              <div className="space-y-3 mt-1">
+                {productForm.overview.items.map((item, idx) => (
+                  <div key={idx} className="p-3 border border-slate-200 rounded-xl bg-white space-y-2 relative">
+                    <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, items: productForm.overview.items.filter((_, i) => i !== idx) } })} className="absolute top-2 right-2 text-rose-500"><Trash2 size={13} /></button>
+                    <input className={fieldClass} placeholder="Title" value={item.title} onChange={e => { const list = [...productForm.overview.items]; list[idx].title = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, items: list } }); }} />
+                    <textarea className={`${fieldClass} min-h-12`} placeholder="Description" value={item.description} onChange={e => { const list = [...productForm.overview.items]; list[idx].description = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, items: list } }); }} />
+                    <div className="flex gap-3 items-end">
+                      {item.image && <Image width={80} height={56} src={getImageUrl(item.image)} alt="Item" className="h-14 w-20 rounded object-cover border shrink-0" crossOrigin="anonymous" />}
+                      <div className="flex-1 space-y-1.5">
+                        <input className={fieldClass} placeholder="Paste image URL" value={item.image} onChange={e => { const list = [...productForm.overview.items]; list[idx].image = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, items: list } }); }} />
+                        <label className="cursor-pointer inline-flex items-center gap-1.5 bg-white border border-slate-200 px-2.5 py-1 rounded text-[10px] font-bold hover:bg-blue-50 transition-colors">
+                          <ImagePlus size={11} /> Upload
+                          <input type="file" className="hidden" accept="image/*" onChange={async (e) => { const file = e.target.files?.[0]; if (!file) return; const url = await uploadImage(file, "products"); const list = [...productForm.overview.items]; list[idx].image = url; setProductForm({ ...productForm, overview: { ...productForm.overview, items: list } }); }} />
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, items: [...productForm.overview.items, { image: "", title: "", description: "" }] } })} className="w-full py-2 border-2 border-dashed rounded-lg  text-[10px] font-bold hover:bg-slate-50">+ Add Item</button>
+              </div>
+            </div>
+
+            {/* Overview Bullet Points */}
+            <div>
+              <label className={labelClass}>Overview Bullet Points</label>
+              <div className="space-y-2 mt-1">
                 {productForm.overview.overviewList.map((item, idx) => (
                   <div key={idx} className="flex gap-2">
-                    <input className={fieldClass} value={item} onChange={e => {
-                      const list = [...productForm.overview.overviewList]; list[idx] = e.target.value;
-                      setProductForm({ ...productForm, overview: { ...productForm.overview, overviewList: list } });
-                    }} />
-                    <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, overviewList: productForm.overview.overviewList.filter((_, i) => i !== idx) } })} className="text-rose-500 hover:bg-rose-50 p-1 rounded"><Trash2 size={14} /></button>
+                    <input className={fieldClass} value={item} onChange={e => { const list = [...productForm.overview.overviewList]; list[idx] = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, overviewList: list } }); }} />
+                    <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, overviewList: productForm.overview.overviewList.filter((_, i) => i !== idx) } })} className="shrink-0 text-rose-500 hover:bg-rose-50 p-1.5 rounded"><Trash2 size={13} /></button>
                   </div>
                 ))}
                 <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, overviewList: [...productForm.overview.overviewList, ""] } })} className="text-[10px] font-bold text-blue-600 flex items-center gap-1"><Plus size={12} /> Add Point</button>
               </div>
+            </div>
 
-              <div className="space-y-2">
-                <label className={labelClass}>What's Included</label>
+            {/* What's Included */}
+            <div>
+              <label className={labelClass}>What's Included</label>
+              <div className="space-y-2 mt-1">
                 {productForm.overview.whatisInclueded.map((item, idx) => (
                   <div key={idx} className="flex gap-2">
-                    <input className={fieldClass} value={item} onChange={e => {
-                      const list = [...productForm.overview.whatisInclueded]; list[idx] = e.target.value;
-                      setProductForm({ ...productForm, overview: { ...productForm.overview, whatisInclueded: list } });
-                    }} />
-                    <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, whatisInclueded: productForm.overview.whatisInclueded.filter((_, i) => i !== idx) } })} className="text-rose-500 hover:bg-rose-50 p-1 rounded"><Trash2 size={14} /></button>
+                    <input className={fieldClass} value={item} onChange={e => { const list = [...productForm.overview.whatisInclueded]; list[idx] = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, whatisInclueded: list } }); }} />
+                    <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, whatisInclueded: productForm.overview.whatisInclueded.filter((_, i) => i !== idx) } })} className="shrink-0 text-rose-500 hover:bg-rose-50 p-1.5 rounded"><Trash2 size={13} /></button>
                   </div>
                 ))}
                 <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, whatisInclueded: [...productForm.overview.whatisInclueded, ""] } })} className="text-[10px] font-bold text-blue-600 flex items-center gap-1"><Plus size={12} /> Add Item</button>
               </div>
             </div>
 
-            {/* Materials Table */}
-            <div className="space-y-2">
-              <label className={labelClass}>Overview Materials</label>
-              {productForm.overview.overviewMaterial.map((m, idx) => (
-                <div key={idx} className="grid grid-cols-[1fr_1fr_auto] gap-2">
-                  <input className={fieldClass} placeholder="Title (e.g. Wood Type)" value={m.title} onChange={e => {
-                    const list = [...productForm.overview.overviewMaterial]; list[idx].title = e.target.value;
-                    setProductForm({ ...productForm, overview: { ...productForm.overview, overviewMaterial: list } });
-                  }} />
-                  <input className={fieldClass} placeholder="Description (e.g. Solid Teak)" value={m.description} onChange={e => {
-                    const list = [...productForm.overview.overviewMaterial]; list[idx].description = e.target.value;
-                    setProductForm({ ...productForm, overview: { ...productForm.overview, overviewMaterial: list } });
-                  }} />
-                  <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, overviewMaterial: productForm.overview.overviewMaterial.filter((_, i) => i !== idx) } })} className="text-rose-500"><Trash2 size={14} /></button>
+            {/* Key Specifications */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-[10px] font-bold  uppercase block">Key Specifications</label>
+                <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, specifications: [...productForm.overview.specifications, { title: "", specificationsList: [{ title: "", description: "" }] }] } })} className="text-[10px] font-bold text-blue-600 flex items-center gap-1"><Plus size={11} /> Add Group</button>
+              </div>
+              {productForm.overview.specifications.map((spec, sIdx) => (
+                <div key={sIdx} className="p-3 border border-slate-200 rounded-xl bg-slate-50 space-y-2 relative">
+                  {productForm.overview.specifications.length > 1 && (
+                    <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, specifications: productForm.overview.specifications.filter((_, i) => i !== sIdx) } })} className="absolute top-2 right-2 text-rose-500"><Trash2 size={12} /></button>
+                  )}
+                  <input className={fieldClass} placeholder="Section Title" value={spec.title} onChange={e => { const list = [...productForm.overview.specifications]; list[sIdx].title = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, specifications: list } }); }} />
+                  <div className="space-y-2">
+                    {spec.specificationsList.map((row, rIdx) => (
+                      <div key={rIdx} className="flex gap-2">
+                        <input className={fieldClass} placeholder="Label" value={row.title} onChange={e => { const list = [...productForm.overview.specifications]; list[sIdx].specificationsList[rIdx].title = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, specifications: list } }); }} />
+                        <input className={fieldClass} placeholder="Value" value={row.description} onChange={e => { const list = [...productForm.overview.specifications]; list[sIdx].specificationsList[rIdx].description = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, specifications: list } }); }} />
+                        <button type="button" onClick={() => { const list = [...productForm.overview.specifications]; list[sIdx].specificationsList = list[sIdx].specificationsList.filter((_, i) => i !== rIdx); setProductForm({ ...productForm, overview: { ...productForm.overview, specifications: list } }); }} className="shrink-0 text-rose-500 hover:bg-rose-50 p-1 rounded"><Trash2 size={12} /></button>
+                      </div>
+                    ))}
+                    <button type="button" onClick={() => { const list = [...productForm.overview.specifications]; list[sIdx].specificationsList.push({ title: "", description: "" }); setProductForm({ ...productForm, overview: { ...productForm.overview, specifications: list } }); }} className="text-[10px] font-bold text-blue-600 flex items-center gap-1"><Plus size={11} /> Add Row</button>
+                  </div>
                 </div>
               ))}
-              <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, overviewMaterial: [...productForm.overview.overviewMaterial, { title: "", description: "" }] } })} className="text-[10px] font-bold text-blue-600 flex items-center gap-1"><Plus size={12} /> Add Material Info</button>
             </div>
 
-            {/* Technical Specs Blocks */}
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="p-3 border rounded-xl bg-slate-50 space-y-2">
-                <label className="text-[10px] font-bold text-slate-500 uppercase">Key Specifications</label>
-                <input className={fieldClass} placeholder="Section Title" value={productForm.overview.specifications.title} onChange={e => setProductForm({ ...productForm, overview: { ...productForm.overview, specifications: { ...productForm.overview.specifications, title: e.target.value } } })} />
-                <div className="grid grid-cols-2 gap-2">
-                  <input className={fieldClass} placeholder="Label" value={productForm.overview.specifications.specificationsList.title} onChange={e => setProductForm({ ...productForm, overview: { ...productForm.overview, specifications: { ...productForm.overview.specifications, specificationsList: { ...productForm.overview.specifications.specificationsList, title: e.target.value } } } })} />
-                  <input className={fieldClass} placeholder="Value" value={productForm.overview.specifications.specificationsList.description} onChange={e => setProductForm({ ...productForm, overview: { ...productForm.overview, specifications: { ...productForm.overview.specifications, specificationsList: { ...productForm.overview.specifications.specificationsList, description: e.target.value } } } })} />
-                </div>
-              </div>
-
-              <div className="p-3 border rounded-xl bg-slate-50 space-y-2">
-                <label className="text-[10px] font-bold text-slate-500 uppercase">Product Dimensions</label>
-                <input className={fieldClass} placeholder="Section Title" value={productForm.overview.dimensions.title} onChange={e => setProductForm({ ...productForm, overview: { ...productForm.overview, dimensions: { ...productForm.overview.dimensions, title: e.target.value } } })} />
-                <div className="grid grid-cols-2 gap-2">
-                  <input className={fieldClass} placeholder="Label" value={productForm.overview.dimensions.dimensionsList.title} onChange={e => setProductForm({ ...productForm, overview: { ...productForm.overview, dimensions: { ...productForm.overview.dimensions, dimensionsList: { ...productForm.overview.dimensions.dimensionsList, title: e.target.value } } } })} />
-                  <input className={fieldClass} placeholder="Value" value={productForm.overview.dimensions.dimensionsList.description} onChange={e => setProductForm({ ...productForm, overview: { ...productForm.overview, dimensions: { ...productForm.overview.dimensions, dimensionsList: { ...productForm.overview.dimensions.dimensionsList, description: e.target.value } } } })} />
-                </div>
-              </div>
-            </div>
-
-            {/* Detailed Product Specs with Image */}
-            <div className="p-4 border rounded-xl border-blue-100 bg-blue-50/20 space-y-4">
-              <h5 className="text-[10px] font-bold text-blue-600 uppercase">Technical Diagram & Specs</h5>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <input className={fieldClass} placeholder="Highlight Text" value={productForm.overview.productSpecifications.highlight} onChange={e => setProductForm({ ...productForm, overview: { ...productForm.overview, productSpecifications: { ...productForm.overview.productSpecifications, highlight: e.target.value } } })} />
-                <input className={fieldClass} placeholder="Main Specification Title" value={productForm.overview.productSpecifications.title} onChange={e => setProductForm({ ...productForm, overview: { ...productForm.overview, productSpecifications: { ...productForm.overview.productSpecifications, title: e.target.value } } })} />
-              </div>
-
-              <div className="flex gap-4 items-end">
-                <div className="h-16 w-24 rounded border bg-white overflow-hidden shrink-0">
-                  {productForm.overview.productSpecifications.image && <Image width={100} height={64} src={getImageUrl(productForm.overview.productSpecifications.image)} alt="Diagram" className="h-full w-full object-contain" />}
-                </div>
-                <label className="cursor-pointer bg-white border border-slate-200 px-3 py-1.5 rounded text-[10px] font-bold hover:bg-blue-50 transition-colors">
-                  Upload Diagram
-                  <input type="file" className="hidden" onChange={async (e) => {
-                    const file = e.target.files?.[0]; if (!file) return;
-                    const url = await uploadImage(file, "products");
-                    setProductForm({ ...productForm, overview: { ...productForm.overview, productSpecifications: { ...productForm.overview.productSpecifications, image: url } } });
-                  }} />
-                </label>
-              </div>
-
+            {/* Key Features */}
+            <div className="p-3 border border-slate-200 rounded-xl bg-slate-50 space-y-2">
+              <label className="text-[10px] font-bold  uppercase block">Key Features</label>
+              <input className={fieldClass} placeholder="Section Title" value={productForm.overview.keyFeatures.title} onChange={e => setProductForm({ ...productForm, overview: { ...productForm.overview, keyFeatures: { ...productForm.overview.keyFeatures, title: e.target.value } } })} />
               <div className="space-y-2">
-                {productForm.overview.productSpecifications.specifications.map((s, idx) => (
-                  <div key={idx} className="grid grid-cols-[1fr_1fr_auto] gap-2">
-                    <input className={fieldClass} placeholder="Spec Name" value={s.title} onChange={e => {
-                      const list = [...productForm.overview.productSpecifications.specifications]; list[idx].title = e.target.value;
-                      setProductForm({ ...productForm, overview: { ...productForm.overview, productSpecifications: { ...productForm.overview.productSpecifications, specifications: list } } });
-                    }} />
-                    <input className={fieldClass} placeholder="Detail" value={s.description} onChange={e => {
-                      const list = [...productForm.overview.productSpecifications.specifications]; list[idx].description = e.target.value;
-                      setProductForm({ ...productForm, overview: { ...productForm.overview, productSpecifications: { ...productForm.overview.productSpecifications, specifications: list } } });
-                    }} />
-                    <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, productSpecifications: { ...productForm.overview.productSpecifications, specifications: productForm.overview.productSpecifications.specifications.filter((_, i) => i !== idx) } } })} className="text-rose-500"><Trash2 size={14} /></button>
+                {productForm.overview.keyFeatures.keyFeaturesList.map((item, idx) => (
+                  <div key={idx} className="flex gap-2">
+                    <input className={fieldClass} placeholder="Feature detail..." value={item} onChange={e => { const list = [...productForm.overview.keyFeatures.keyFeaturesList]; list[idx] = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, keyFeatures: { ...productForm.overview.keyFeatures, keyFeaturesList: list } } }); }} />
+                    <button type="button" onClick={() => { const list = productForm.overview.keyFeatures.keyFeaturesList.filter((_, i) => i !== idx); setProductForm({ ...productForm, overview: { ...productForm.overview, keyFeatures: { ...productForm.overview.keyFeatures, keyFeaturesList: list } } }); }} className="shrink-0 text-rose-500 hover:bg-rose-50 p-1 rounded"><Trash2 size={12} /></button>
                   </div>
                 ))}
-                <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, productSpecifications: { ...productForm.overview.productSpecifications, specifications: [...productForm.overview.productSpecifications.specifications, { title: "", description: "" }] } } })} className="text-[10px] font-bold text-blue-600 flex items-center gap-1"><Plus size={12} /> Add Diagram Point</button>
+                <button type="button" onClick={() => { const list = [...productForm.overview.keyFeatures.keyFeaturesList, ""]; setProductForm({ ...productForm, overview: { ...productForm.overview, keyFeatures: { ...productForm.overview.keyFeatures, keyFeaturesList: list } } }); }} className="text-[10px] font-bold text-blue-600 flex items-center gap-1"><Plus size={11} /> Add Feature</button>
               </div>
             </div>
 
-            {/* Design Variations */}
-            <div className="p-4 border rounded-xl bg-slate-50 space-y-4">
-              <h5 className="text-[10px] font-bold text-slate-500 uppercase">Smart Design & Appearance</h5>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <input className={fieldClass} placeholder="Highlight" value={productForm.overview.smartDesignAppearance.highlight} onChange={e => setProductForm({ ...productForm, overview: { ...productForm.overview, smartDesignAppearance: { ...productForm.overview.smartDesignAppearance, highlight: e.target.value } } })} />
-                <input className={fieldClass} placeholder="Appearance Title" value={productForm.overview.smartDesignAppearance.title} onChange={e => setProductForm({ ...productForm, overview: { ...productForm.overview, smartDesignAppearance: { ...productForm.overview.smartDesignAppearance, title: e.target.value } } })} />
+            {/* Product Dimensions */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-[10px] font-bold  uppercase block">Product Dimensions</label>
+                <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, dimensions: [...productForm.overview.dimensions, { title: "", dimensionsList: [{ title: "", description: "" }] }] } })} className="text-[10px] font-bold text-blue-600 flex items-center gap-1"><Plus size={11} /> Add Group</button>
               </div>
+              {productForm.overview.dimensions.map((dim, dIdx) => (
+                <div key={dIdx} className="p-3 border border-slate-200 rounded-xl bg-slate-50 space-y-2 relative">
+                  {productForm.overview.dimensions.length > 1 && (
+                    <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, dimensions: productForm.overview.dimensions.filter((_, i) => i !== dIdx) } })} className="absolute top-2 right-2 text-rose-500"><Trash2 size={12} /></button>
+                  )}
+                  <input className={fieldClass} placeholder="Section Title" value={dim.title} onChange={e => { const list = [...productForm.overview.dimensions]; list[dIdx].title = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, dimensions: list } }); }} />
+                  <div className="space-y-2">
+                    {dim.dimensionsList.map((row, rIdx) => (
+                      <div key={rIdx} className="flex gap-2">
+                        <input className={fieldClass} placeholder="Label" value={row.title} onChange={e => { const list = [...productForm.overview.dimensions]; list[dIdx].dimensionsList[rIdx].title = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, dimensions: list } }); }} />
+                        <input className={fieldClass} placeholder="Value" value={row.description} onChange={e => { const list = [...productForm.overview.dimensions]; list[dIdx].dimensionsList[rIdx].description = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, dimensions: list } }); }} />
+                        <button type="button" onClick={() => { const list = [...productForm.overview.dimensions]; list[dIdx].dimensionsList = list[dIdx].dimensionsList.filter((_, i) => i !== rIdx); setProductForm({ ...productForm, overview: { ...productForm.overview, dimensions: list } }); }} className="shrink-0 text-rose-500 hover:bg-rose-50 p-1 rounded"><Trash2 size={12} /></button>
+                      </div>
+                    ))}
+                    <button type="button" onClick={() => { const list = [...productForm.overview.dimensions]; list[dIdx].dimensionsList.push({ title: "", description: "" }); setProductForm({ ...productForm, overview: { ...productForm.overview, dimensions: list } }); }} className="text-[10px] font-bold text-blue-600 flex items-center gap-1"><Plus size={11} /> Add Row</button>
+                  </div>
+                </div>
+              ))}
+            </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <label className={labelClass}>Wood Finishes</label>
+            {/* Technical Diagram & Specs */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h5 className="text-[10px] font-bold text-blue-600 uppercase">Technical Diagram & Specs</h5>
+                <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, productSpecifications: [...productForm.overview.productSpecifications, { highlight: "", title: "", image: "", specifications: [{ title: "", description: "" }] }] } })} className="text-[10px] font-bold text-blue-600 flex items-center gap-1"><Plus size={11} /> Add</button>
+              </div>
+              {productForm.overview.productSpecifications.map((ps, psIdx) => (
+                <div key={psIdx} className="p-4 border border-blue-100 rounded-xl bg-blue-50/20 space-y-3 relative">
+                  {productForm.overview.productSpecifications.length > 1 && (
+                    <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, productSpecifications: productForm.overview.productSpecifications.filter((_, i) => i !== psIdx) } })} className="absolute top-2 right-2 text-rose-500"><Trash2 size={12} /></button>
+                  )}
+                  <input className={fieldClass} placeholder="Highlight Text" value={ps.highlight} onChange={e => { const list = [...productForm.overview.productSpecifications]; list[psIdx].highlight = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, productSpecifications: list } }); }} />
+                  <input className={fieldClass} placeholder="Main Specification Title" value={ps.title} onChange={e => { const list = [...productForm.overview.productSpecifications]; list[psIdx].title = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, productSpecifications: list } }); }} />
+                  <div>
+                    <label className={labelClass}>Diagram Image</label>
+                    <div className="flex gap-3 items-end mt-1">
+                      <div className="h-16 w-24 rounded border bg-white overflow-hidden shrink-0">
+                        {ps.image && <Image width={100} height={64} src={getImageUrl(ps.image)} alt="Diagram" className="h-full w-full object-contain" />}
+                      </div>
+                      <div className="flex-1 space-y-1.5">
+                        <input className={fieldClass} placeholder="Paste image URL" value={ps.image} onChange={e => { const list = [...productForm.overview.productSpecifications]; list[psIdx].image = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, productSpecifications: list } }); }} />
+                        <label className="cursor-pointer inline-flex items-center gap-1.5 bg-white border border-slate-200 px-2.5 py-1 rounded text-[10px] font-bold hover:bg-blue-50 transition-colors">
+                          <ImagePlus size={11} /> Upload
+                          <input type="file" className="hidden" onChange={async (e) => { const file = e.target.files?.[0]; if (!file) return; const url = await uploadImage(file, "products"); const list = [...productForm.overview.productSpecifications]; list[psIdx].image = url; setProductForm({ ...productForm, overview: { ...productForm.overview, productSpecifications: list } }); }} />
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <label className={labelClass}>Specifications</label>
+                    <div className="space-y-2 mt-1">
+                      {ps.specifications.map((s, sIdx) => (
+                        <div key={sIdx} className="flex gap-2">
+                          <input className={fieldClass} placeholder="Label" value={s.title} onChange={e => { const list = [...productForm.overview.productSpecifications]; list[psIdx].specifications[sIdx].title = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, productSpecifications: list } }); }} />
+                          <input className={fieldClass} placeholder="Value" value={s.description} onChange={e => { const list = [...productForm.overview.productSpecifications]; list[psIdx].specifications[sIdx].description = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, productSpecifications: list } }); }} />
+                          <button type="button" onClick={() => { const list = [...productForm.overview.productSpecifications]; list[psIdx].specifications = list[psIdx].specifications.filter((_, i) => i !== sIdx); setProductForm({ ...productForm, overview: { ...productForm.overview, productSpecifications: list } }); }} className="shrink-0 text-rose-500 hover:bg-rose-50 p-1 rounded"><Trash2 size={13} /></button>
+                        </div>
+                      ))}
+                      <button type="button" onClick={() => { const list = [...productForm.overview.productSpecifications]; list[psIdx].specifications.push({ title: "", description: "" }); setProductForm({ ...productForm, overview: { ...productForm.overview, productSpecifications: list } }); }} className="text-[10px] font-bold text-blue-600 flex items-center gap-1"><Plus size={12} /> Add Row</button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Smart Design & Appearance */}
+            <div className="p-4 border border-slate-200 rounded-xl bg-slate-50 space-y-3">
+              <h5 className="text-[10px] font-bold  uppercase">Smart Design & Appearance</h5>
+              <input className={fieldClass} placeholder="Highlight" value={productForm.overview.smartDesignAppearance.highlight} onChange={e => setProductForm({ ...productForm, overview: { ...productForm.overview, smartDesignAppearance: { ...productForm.overview.smartDesignAppearance, highlight: e.target.value } } })} />
+              <input className={fieldClass} placeholder="Appearance Title" value={productForm.overview.smartDesignAppearance.title} onChange={e => setProductForm({ ...productForm, overview: { ...productForm.overview, smartDesignAppearance: { ...productForm.overview.smartDesignAppearance, title: e.target.value } } })} />
+              <div>
+                <label className={labelClass}>Wood Finishes</label>
+                <div className="space-y-2 mt-1">
                   {productForm.overview.smartDesignAppearance.woodFinish.map((item, idx) => (
                     <div key={idx} className="flex gap-2">
-                      <input className={fieldClass} value={item} onChange={e => {
-                        const list = [...productForm.overview.smartDesignAppearance.woodFinish]; list[idx] = e.target.value;
-                        setProductForm({ ...productForm, overview: { ...productForm.overview, smartDesignAppearance: { ...productForm.overview.smartDesignAppearance, woodFinish: list } } });
-                      }} />
-                      <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, smartDesignAppearance: { ...productForm.overview.smartDesignAppearance, woodFinish: productForm.overview.smartDesignAppearance.woodFinish.filter((_, i) => i !== idx) } } })} className="text-rose-500"><Trash2 size={14} /></button>
+                      <input className={fieldClass} value={item} onChange={e => { const list = [...productForm.overview.smartDesignAppearance.woodFinish]; list[idx] = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, smartDesignAppearance: { ...productForm.overview.smartDesignAppearance, woodFinish: list } } }); }} />
+                      <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, smartDesignAppearance: { ...productForm.overview.smartDesignAppearance, woodFinish: productForm.overview.smartDesignAppearance.woodFinish.filter((_, i) => i !== idx) } } })} className="shrink-0 text-rose-500 hover:bg-rose-50 p-1.5 rounded"><Trash2 size={13} /></button>
                     </div>
                   ))}
                   <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, smartDesignAppearance: { ...productForm.overview.smartDesignAppearance, woodFinish: [...productForm.overview.smartDesignAppearance.woodFinish, ""] } } })} className="text-[10px] font-bold text-blue-600 flex items-center gap-1"><Plus size={12} /> Add Finish</button>
                 </div>
-
-                <div className="space-y-2">
-                  <label className={labelClass}>Size Options</label>
+              </div>
+              <div>
+                <label className={labelClass}>Size Options</label>
+                <div className="space-y-2 mt-1">
                   {productForm.overview.smartDesignAppearance.sizeOptions.map((opt, idx) => (
-                    <div key={idx} className="grid grid-cols-[1fr_1fr_auto] gap-2">
-                      <input className={fieldClass} placeholder="Size" value={opt.title} onChange={e => {
-                        const list = [...productForm.overview.smartDesignAppearance.sizeOptions]; list[idx].title = e.target.value;
-                        setProductForm({ ...productForm, overview: { ...productForm.overview, smartDesignAppearance: { ...productForm.overview.smartDesignAppearance, sizeOptions: list } } });
-                      }} />
-                      <input className={fieldClass} placeholder="Info" value={opt.description} onChange={e => {
-                        const list = [...productForm.overview.smartDesignAppearance.sizeOptions]; list[idx].description = e.target.value;
-                        setProductForm({ ...productForm, overview: { ...productForm.overview, smartDesignAppearance: { ...productForm.overview.smartDesignAppearance, sizeOptions: list } } });
-                      }} />
-                      <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, smartDesignAppearance: { ...productForm.overview.smartDesignAppearance, sizeOptions: productForm.overview.smartDesignAppearance.sizeOptions.filter((_, i) => i !== idx) } } })} className="text-rose-500"><Trash2 size={14} /></button>
+                    <div key={idx} className="flex gap-2">
+                      <input className={fieldClass} placeholder="Size" value={opt.title} onChange={e => { const list = [...productForm.overview.smartDesignAppearance.sizeOptions]; list[idx].title = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, smartDesignAppearance: { ...productForm.overview.smartDesignAppearance, sizeOptions: list } } }); }} />
+                      <input className={fieldClass} placeholder="Info" value={opt.description} onChange={e => { const list = [...productForm.overview.smartDesignAppearance.sizeOptions]; list[idx].description = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, smartDesignAppearance: { ...productForm.overview.smartDesignAppearance, sizeOptions: list } } }); }} />
+                      <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, smartDesignAppearance: { ...productForm.overview.smartDesignAppearance, sizeOptions: productForm.overview.smartDesignAppearance.sizeOptions.filter((_, i) => i !== idx) } } })} className="shrink-0 text-rose-500"><Trash2 size={13} /></button>
                     </div>
                   ))}
                   <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, smartDesignAppearance: { ...productForm.overview.smartDesignAppearance, sizeOptions: [...productForm.overview.smartDesignAppearance.sizeOptions, { title: "", description: "" }] } } })} className="text-[10px] font-bold text-blue-600 flex items-center gap-1"><Plus size={12} /> Add Size</button>
@@ -870,61 +635,39 @@ export default function ProductsPage() {
               </div>
             </div>
 
-            {/* Care Instructions */}
-            <div className="p-4 border rounded-xl bg-amber-50/20 space-y-2">
+            {/* Material & Care */}
+            <div className="p-4 border border-amber-100 rounded-xl bg-amber-50/20 space-y-2">
               <h5 className="text-[10px] font-bold text-amber-600 uppercase">Material & Care</h5>
               <input className={fieldClass} placeholder="Title" value={productForm.overview.materialAndCare.title} onChange={e => setProductForm({ ...productForm, overview: { ...productForm.overview, materialAndCare: { ...productForm.overview.materialAndCare, title: e.target.value } } })} />
-              <textarea className={fieldClass} rows={2} placeholder="Care instructions..." value={productForm.overview.materialAndCare.description} onChange={e => setProductForm({ ...productForm, overview: { ...productForm.overview, materialAndCare: { ...productForm.overview.materialAndCare, description: e.target.value } } })} />
+              <textarea className={`${fieldClass} min-h-16`} placeholder="Care instructions..." value={productForm.overview.materialAndCare.description} onChange={e => setProductForm({ ...productForm, overview: { ...productForm.overview, materialAndCare: { ...productForm.overview.materialAndCare, description: e.target.value } } })} />
             </div>
 
-            {/* FAQs Section */}
-            <div className="space-y-4">
+            {/* FAQs */}
+            <div className="space-y-3">
               <label className={labelClass}>Product FAQs</label>
               {productForm.overview.faqs.map((faq, idx) => (
-                <div key={idx} className="p-4 border rounded-xl bg-white relative space-y-2 shadow-sm">
-                  <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, faqs: productForm.overview.faqs.filter((_, i) => i !== idx) } })} className="absolute top-2 right-2 text-rose-500"><Trash2 size={16} /></button>
-                  <input className={fieldClass} placeholder="Question" value={faq.question} onChange={e => {
-                    const list = [...productForm.overview.faqs]; list[idx].question = e.target.value;
-                    setProductForm({ ...productForm, overview: { ...productForm.overview, faqs: list } });
-                  }} />
-                  <textarea className={fieldClass} rows={1} placeholder="Answer" value={faq.description} onChange={e => {
-                    const list = [...productForm.overview.faqs]; list[idx].description = e.target.value;
-                    setProductForm({ ...productForm, overview: { ...productForm.overview, faqs: list } });
-                  }} />
+                <div key={idx} className="p-3 border border-slate-200 rounded-xl bg-white relative space-y-2">
+                  <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, faqs: productForm.overview.faqs.filter((_, i) => i !== idx) } })} className="absolute top-2 right-2 text-rose-500"><Trash2 size={14} /></button>
+                  <input className={fieldClass} placeholder="Question" value={faq.question} onChange={e => { const list = [...productForm.overview.faqs]; list[idx].question = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, faqs: list } }); }} />
+                  <textarea className={`${fieldClass} min-h-12`} placeholder="Answer" value={faq.description} onChange={e => { const list = [...productForm.overview.faqs]; list[idx].description = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, faqs: list } }); }} />
                 </div>
               ))}
-              <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, faqs: [...productForm.overview.faqs, { question: "", description: "" }] } })} className="w-full py-2 border-2 border-dashed rounded-lg text-slate-400 text-[10px] font-bold hover:bg-slate-50">+ Add FAQ</button>
+              <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, faqs: [...productForm.overview.faqs, { question: "", description: "" }] } })} className="w-full py-2 border-2 border-dashed rounded-lg  text-[10px] font-bold hover:bg-slate-50">+ Add FAQ</button>
             </div>
           </div>
 
+          {/* Submit */}
           <div className="flex gap-2 pt-1">
-            <button
-              className="inline-flex items-center gap-1 rounded-lg bg-blue-600 hover:bg-blue-700 px-3 py-1.5 text-[11px] font-semibold text-white transition-colors cursor-pointer"
-              disabled={loading}
-            >
-              <Save size={11} />
-              Save Product
+            <button className="inline-flex items-center gap-1 rounded-lg bg-blue-600 hover:bg-blue-700 px-3 py-1.5 text-[11px] font-semibold text-white transition-colors cursor-pointer" disabled={loading}>
+              <Save size={11} /> Save Product
             </button>
-
             {productForm.id && (
-              <button
-                type="button"
-                onClick={() =>
-                  setProductForm({
-                    ...emptyProduct,
-                    category: categories[0]?._id || "",
-                  })
-                }
-                className="rounded-lg border border-slate-200 px-3 py-1.5 text-[11px] font-semibold text-slate-600 hover:bg-slate-50 transition-colors cursor-pointer"
-              >
+              <button type="button" onClick={() => setProductForm({ ...emptyProduct, category: categories[0]?._id || "" })} className="rounded-lg border border-slate-200 px-3 py-1.5 text-[11px] font-semibold text-slate-600 hover:bg-slate-50 transition-colors cursor-pointer">
                 Cancel
               </button>
             )}
           </div>
         </form>
-
-        {/* Product Items Table */}
-
       </section>
     </div>
   );
