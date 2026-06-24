@@ -39,9 +39,9 @@ export type Product = {
     title?: string;
     description?: string;
     overviewList?: string[];
-    specifications?: { title: string; specificationsList: { title: string; description: string }[] }[];
+    specifications?: { title: string; specificationsList: { title: string; description: string }[] }
     keyFeatures?: { title: string; keyFeaturesList: string[] };
-    dimensions?: { title: string; dimensionsList: { title: string; description: string }[] }[];
+    dimensions?: { title: string; dimensionsList: { title: string; description: string }[] };
     materialAndCare?: { title: string; description: string };
     productSpecifications?: { highlight: string; title: string; image: string; specifications: { title: string; description: string }[] }[];
     whatisInclueded?: string[];
