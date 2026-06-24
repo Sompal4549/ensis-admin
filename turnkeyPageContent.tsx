@@ -12,7 +12,7 @@ export type TurnkeyPageContentKeys =
 export type TurnkeyBanner = {
   subheading: string;
   title: string;
-  highlight:string;
+  highlight: string;
   description: string;
   features: { id: string; image: ImageData; title: string }[];
   primaryButton: { label: string; url: string };
@@ -47,7 +47,7 @@ export type TurnkeyCustomized = {
 export type TurnkeyFeaturedProjects = {
   cards: { id: string; image: ImageData; title: string; location: string }[];
   primaryButton: { label: string; url: string };
-  title:string;
+  title: string;
 };
 
 export type TurnkeyReadyToBuild = {
@@ -74,7 +74,7 @@ export const defaultTurnkeyData: Record<TurnkeyPageContentKeys, any> = {
     subheading: "END-TO-END SOLUTIONS",
     title: "Comprehensive Turnkey Projects",
     description: "We handle everything from conceptualization to the final handover.",
-    highlight:"Complete Wellness Spaces",
+    highlight: "Complete Wellness Spaces",
     features: [
       { id: randomId(), title: "Concept Design", image: { imageUrl: "", alt: "" } },
       { id: randomId(), title: "Expert Engineering", image: { imageUrl: "", alt: "" } }
@@ -89,7 +89,7 @@ export const defaultTurnkeyData: Record<TurnkeyPageContentKeys, any> = {
     mostProjects: [
       { id: randomId(), title: "Fragmented Management", image: { imageUrl: "", alt: "" } }
     ],
-    mostProjectsTitle:"Most Projects Need Multiple Vendors",
+    mostProjectsTitle: "Most Projects Need Multiple Vendors",
     withEnsis: {
       title: "The Ensis Advantage",
       image: { imageUrl: "", alt: "" }
@@ -98,7 +98,7 @@ export const defaultTurnkeyData: Record<TurnkeyPageContentKeys, any> = {
   "turnkey.completeSolutions": {
     title: "Our Complete Turnkit Solutions",
     cards: [
-      { id: randomId(), title: "Panchkarma Centers", description: "Complete setup for Ayurvedic treatment centers.", image: { imageUrl: "", alt: "", bottomStrap:false } }
+      { id: randomId(), title: "Panchkarma Centers", description: "Complete setup for Ayurvedic treatment centers.", image: { imageUrl: "", alt: "", bottomStrap: false } }
     ]
   },
   "turnkey.facilities": {
@@ -108,19 +108,19 @@ export const defaultTurnkeyData: Record<TurnkeyPageContentKeys, any> = {
   "turnkey.customized": {
     backgroundImage: { imageUrl: "", alt: "" },
     title: "And Many More Customized Wellness Facilities",
-    statsTitle:"Why Clients Choose Ensis?",
+    statsTitle: "Why Clients Choose Ensis?",
     stats: [{ id: randomId(), title: "500+", description: "Projects Completed" }],
     features: [{ id: randomId(), title: "Smart Integration", image: { imageUrl: "", alt: "" } }]
   },
   "turnkey.featuredProjects": {
     cards: [{ id: randomId(), title: "Ayurvedic Hospital", location: "Kerala, India", image: { imageUrl: "", alt: "" } }],
     primaryButton: { label: "View All Projects", url: "/projects" },
-    title:"Featured Turnkey Projects"
+    title: "Featured Turnkey Projects"
   },
   "turnkey.readyToBuild": {
     title: "GET STARTED",
     heading: "Ready to Build Your Wellness Sanctuary?",
     description: "Connect with our experts today to bring your vision to life.",
-    buttons: [{ id: randomId(), title: "Inquiry", description: "Send us a message", image: { imageUrl: "", alt: "" } }]
+    buttons: [{ id: randomId(), title: "Inquiry", description: "Send us a message", image: { imageUrl: "", alt: "" }, link: "" }]
   }
 };
