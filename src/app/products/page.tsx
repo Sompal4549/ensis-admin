@@ -29,9 +29,9 @@ type ProductForm = {
     title: string;
     description: string;
     overviewList: string[];
-    specifications: { title: string; specificationsList: { title: string; description: string }[] }[];
+    specifications: { title: string; specificationsList: { title: string; description: string }[] };
     keyFeatures: { title: string; keyFeaturesList: string[] };
-    dimensions: { title: string; dimensionsList: { title: string; description: string }[] }[];
+    dimensions: { title: string; dimensionsList: { title: string; description: string }[] };
     materialAndCare: { title: string; description: string };
     productSpecifications: { highlight: string; title: string; image: string; specifications: { title: string; description: string }[] }[];
     whatisInclueded: string[];
@@ -56,9 +56,12 @@ const emptyProduct: ProductForm = {
   overview: {
     title: "", description: "",
     overviewList: [""],
-    specifications: [{ title: "", specificationsList: [{ title: "", description: "" }] }],
+    specifications: { title: "", specificationsList: [{ title: "", description: "" }] },
     keyFeatures: { title: "", keyFeaturesList: [""] },
-    dimensions: [{ title: "", dimensionsList: [{ title: "", description: "" }] }],
+    dimensions: {
+      title: "",
+      dimensionsList: [{ title: "", description: "" }],
+    },
     materialAndCare: { title: "", description: "" },
     productSpecifications: [{ highlight: "", title: "", image: "", specifications: [{ title: "", description: "" }] }],
     whatisInclueded: [""],
@@ -173,18 +176,24 @@ export default function ProductsPage() {
         title: product.overview?.title || "",
         description: product.overview?.description || "",
         overviewList: product.overview?.overviewList || [""],
-        specifications: toArray(product.overview?.specifications, [{ title: "", specificationsList: [{ title: "", description: "" }] }]).map(s => ({
-          title: s.title || "",
-          specificationsList: Array.isArray(s.specificationsList) ? s.specificationsList : [{ title: "", description: "" }],
-        })),
+        specifications: {
+          title: product.overview?.specifications?.title || "",
+          specificationsList: product.overview?.specifications?.specificationsList || [{ title: "", description: "" }],
+        },
         keyFeatures: {
           title: product.overview?.keyFeatures?.title || "",
-          keyFeaturesList: product.overview?.keyFeatures?.keyFeaturesList || [""],
+          keyFeaturesList: product.overview?.keyFeatures?.keyFeaturesList?.map((item: any) =>
+            typeof item === 'string' ? item : item.title || item.description || ""
+          ) || [""],
         },
-        dimensions: toArray(product.overview?.dimensions, [{ title: "", dimensionsList: [{ title: "", description: "" }] }]).map(d => ({
-          title: d.title || "",
-          dimensionsList: Array.isArray(d.dimensionsList) ? d.dimensionsList : [{ title: "", description: "" }],
-        })),
+        dimensions: {
+          title: product.overview?.dimensions?.title || "",
+          dimensionsList:
+            product.overview?.dimensions?.dimensionsList?.map((item: any) => ({
+              title: item?.title || "",
+              description: item?.description || "",
+            })) || [{ title: "", description: "" }],
+        },
         materialAndCare: {
           title: product.overview?.materialAndCare?.title || "",
           description: product.overview?.materialAndCare?.description || "",
@@ -254,7 +263,7 @@ export default function ProductsPage() {
 
   return (
     <div className="space-y-6">
-      <section className="grid gap-6 lg:grid-cols-[1.4fr_0.95fr]">
+      <section className="grid gap-3 lg:grid-cols-[0.95fr_1.4fr]">
         {/* Product List */}
         <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm h-fit">
           <div className="border-b border-slate-100 px-5 py-4 text-xs font-bold text-slate-800">
@@ -492,29 +501,23 @@ export default function ProductsPage() {
             </div>
 
             {/* Key Specifications */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <label className="text-[10px] font-bold  uppercase block">Key Specifications</label>
-                <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, specifications: [...productForm.overview.specifications, { title: "", specificationsList: [{ title: "", description: "" }] }] } })} className="text-[10px] font-bold text-blue-600 flex items-center gap-1"><Plus size={11} /> Add Group</button>
-              </div>
-              {productForm.overview.specifications.map((spec, sIdx) => (
-                <div key={sIdx} className="p-3 border border-slate-200 rounded-xl bg-slate-50 space-y-2 relative">
-                  {productForm.overview.specifications.length > 1 && (
-                    <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, specifications: productForm.overview.specifications.filter((_, i) => i !== sIdx) } })} className="absolute top-2 right-2 text-rose-500"><Trash2 size={12} /></button>
-                  )}
-                  <input className={fieldClass} placeholder="Section Title" value={spec.title} onChange={e => { const list = [...productForm.overview.specifications]; list[sIdx].title = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, specifications: list } }); }} />
-                  <div className="space-y-2">
-                    {spec.specificationsList.map((row, rIdx) => (
-                      <div key={rIdx} className="flex gap-2">
-                        <input className={fieldClass} placeholder="Label" value={row.title} onChange={e => { const list = [...productForm.overview.specifications]; list[sIdx].specificationsList[rIdx].title = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, specifications: list } }); }} />
-                        <input className={fieldClass} placeholder="Value" value={row.description} onChange={e => { const list = [...productForm.overview.specifications]; list[sIdx].specificationsList[rIdx].description = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, specifications: list } }); }} />
-                        <button type="button" onClick={() => { const list = [...productForm.overview.specifications]; list[sIdx].specificationsList = list[sIdx].specificationsList.filter((_, i) => i !== rIdx); setProductForm({ ...productForm, overview: { ...productForm.overview, specifications: list } }); }} className="shrink-0 text-rose-500 hover:bg-rose-50 p-1 rounded"><Trash2 size={12} /></button>
-                      </div>
-                    ))}
-                    <button type="button" onClick={() => { const list = [...productForm.overview.specifications]; list[sIdx].specificationsList.push({ title: "", description: "" }); setProductForm({ ...productForm, overview: { ...productForm.overview, specifications: list } }); }} className="text-[10px] font-bold text-blue-600 flex items-center gap-1"><Plus size={11} /> Add Row</button>
+            <div className="p-3 border border-slate-200 rounded-xl bg-slate-50 space-y-2">
+              <label className="text-[10px] font-bold uppercase block">Key Specifications</label>
+              <input className={fieldClass} placeholder="Section Title"
+                value={productForm.overview.specifications.title}
+                onChange={e => setProductForm({ ...productForm, overview: { ...productForm.overview, specifications: { ...productForm.overview.specifications, title: e.target.value } } })} />
+              <div className="space-y-2">
+                {productForm.overview.specifications.specificationsList.map((row, rIdx) => (
+                  <div key={rIdx} className="flex gap-2">
+                    <input className={fieldClass} placeholder="Label" value={row.title}
+                      onChange={e => { const list = [...productForm.overview.specifications.specificationsList]; list[rIdx].title = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, specifications: { ...productForm.overview.specifications, specificationsList: list } } }); }} />
+                    <input className={fieldClass} placeholder="Value" value={row.description}
+                      onChange={e => { const list = [...productForm.overview.specifications.specificationsList]; list[rIdx].description = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, specifications: { ...productForm.overview.specifications, specificationsList: list } } }); }} />
+                    <button type="button" onClick={() => { const list = productForm.overview.specifications.specificationsList.filter((_, i) => i !== rIdx); setProductForm({ ...productForm, overview: { ...productForm.overview, specifications: { ...productForm.overview.specifications, specificationsList: list } } }); }} className="shrink-0 text-rose-500 p-1 rounded"><Trash2 size={12} /></button>
                   </div>
-                </div>
-              ))}
+                ))}
+                <button type="button" onClick={() => { const list = [...productForm.overview.specifications.specificationsList, { title: "", description: "" }]; setProductForm({ ...productForm, overview: { ...productForm.overview, specifications: { ...productForm.overview.specifications, specificationsList: list } } }); }} className="text-[10px] font-bold text-blue-600 flex items-center gap-1"><Plus size={11} /> Add Row</button>
+              </div>
             </div>
 
             {/* Key Features */}
@@ -533,29 +536,127 @@ export default function ProductsPage() {
             </div>
 
             {/* Product Dimensions */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <label className="text-[10px] font-bold  uppercase block">Product Dimensions</label>
-                <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, dimensions: [...productForm.overview.dimensions, { title: "", dimensionsList: [{ title: "", description: "" }] }] } })} className="text-[10px] font-bold text-blue-600 flex items-center gap-1"><Plus size={11} /> Add Group</button>
-              </div>
-              {productForm.overview.dimensions.map((dim, dIdx) => (
-                <div key={dIdx} className="p-3 border border-slate-200 rounded-xl bg-slate-50 space-y-2 relative">
-                  {productForm.overview.dimensions.length > 1 && (
-                    <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, dimensions: productForm.overview.dimensions.filter((_, i) => i !== dIdx) } })} className="absolute top-2 right-2 text-rose-500"><Trash2 size={12} /></button>
-                  )}
-                  <input className={fieldClass} placeholder="Section Title" value={dim.title} onChange={e => { const list = [...productForm.overview.dimensions]; list[dIdx].title = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, dimensions: list } }); }} />
-                  <div className="space-y-2">
-                    {dim.dimensionsList.map((row, rIdx) => (
-                      <div key={rIdx} className="flex gap-2">
-                        <input className={fieldClass} placeholder="Label" value={row.title} onChange={e => { const list = [...productForm.overview.dimensions]; list[dIdx].dimensionsList[rIdx].title = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, dimensions: list } }); }} />
-                        <input className={fieldClass} placeholder="Value" value={row.description} onChange={e => { const list = [...productForm.overview.dimensions]; list[dIdx].dimensionsList[rIdx].description = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, dimensions: list } }); }} />
-                        <button type="button" onClick={() => { const list = [...productForm.overview.dimensions]; list[dIdx].dimensionsList = list[dIdx].dimensionsList.filter((_, i) => i !== rIdx); setProductForm({ ...productForm, overview: { ...productForm.overview, dimensions: list } }); }} className="shrink-0 text-rose-500 hover:bg-rose-50 p-1 rounded"><Trash2 size={12} /></button>
-                      </div>
-                    ))}
-                    <button type="button" onClick={() => { const list = [...productForm.overview.dimensions]; list[dIdx].dimensionsList.push({ title: "", description: "" }); setProductForm({ ...productForm, overview: { ...productForm.overview, dimensions: list } }); }} className="text-[10px] font-bold text-blue-600 flex items-center gap-1"><Plus size={11} /> Add Row</button>
+            <div className="p-3 border border-slate-200 rounded-xl bg-slate-50 space-y-2">
+              <label className="text-[10px] font-bold uppercase block">
+                Product Dimensions
+              </label>
+
+              <input
+                className={fieldClass}
+                placeholder="Section Title"
+                value={productForm.overview.dimensions.title}
+                onChange={(e) =>
+                  setProductForm({
+                    ...productForm,
+                    overview: {
+                      ...productForm.overview,
+                      dimensions: {
+                        ...productForm.overview.dimensions,
+                        title: e.target.value,
+                      },
+                    },
+                  })
+                }
+              />
+
+              <div className="space-y-2">
+                {productForm.overview.dimensions.dimensionsList.map((item, idx) => (
+                  <div key={idx} className="flex gap-2">
+                    <input
+                      className={fieldClass}
+                      placeholder="Label"
+                      value={item.title}
+                      onChange={(e) => {
+                        const list = [...productForm.overview.dimensions.dimensionsList];
+                        list[idx].title = e.target.value;
+
+                        setProductForm({
+                          ...productForm,
+                          overview: {
+                            ...productForm.overview,
+                            dimensions: {
+                              ...productForm.overview.dimensions,
+                              dimensionsList: list,
+                            },
+                          },
+                        });
+                      }}
+                    />
+
+                    <input
+                      className={fieldClass}
+                      placeholder="Value"
+                      value={item.description}
+                      onChange={(e) => {
+                        const list = [...productForm.overview.dimensions.dimensionsList];
+                        list[idx].description = e.target.value;
+
+                        setProductForm({
+                          ...productForm,
+                          overview: {
+                            ...productForm.overview,
+                            dimensions: {
+                              ...productForm.overview.dimensions,
+                              dimensionsList: list,
+                            },
+                          },
+                        });
+                      }}
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const list =
+                          productForm.overview.dimensions.dimensionsList.filter(
+                            (_, i) => i !== idx
+                          );
+
+                        setProductForm({
+                          ...productForm,
+                          overview: {
+                            ...productForm.overview,
+                            dimensions: {
+                              ...productForm.overview.dimensions,
+                              dimensionsList: list,
+                            },
+                          },
+                        });
+                      }}
+                      className="shrink-0 text-rose-500 hover:bg-rose-50 p-1 rounded"
+                    >
+                      <Trash2 size={12} />
+                    </button>
                   </div>
-                </div>
-              ))}
+                ))}
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const list = [
+                      ...productForm.overview.dimensions.dimensionsList,
+                      {
+                        title: "",
+                        description: "",
+                      },
+                    ];
+
+                    setProductForm({
+                      ...productForm,
+                      overview: {
+                        ...productForm.overview,
+                        dimensions: {
+                          ...productForm.overview.dimensions,
+                          dimensionsList: list,
+                        },
+                      },
+                    });
+                  }}
+                  className="text-[10px] font-bold text-blue-600 flex items-center gap-1"
+                >
+                  <Plus size={11} /> Add Dimension
+                </button>
+              </div>
             </div>
 
             {/* Technical Diagram & Specs */}

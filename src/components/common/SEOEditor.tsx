@@ -36,7 +36,7 @@ export default function SEOEditor({ slug, pageName, title }: SEOEditorProps) {
       ogJson: "",
       schema: "",
     },
-    robots: "index, follow",
+    // robots: "index, follow",
   });
 
   const loadData = useCallback(async () => {
@@ -56,7 +56,7 @@ export default function SEOEditor({ slug, pageName, title }: SEOEditorProps) {
             ogJson: data.seo?.ogJson || "",
             schema: data.seo?.schema || "",
           },
-          robots: data.robots || "index, follow",
+          // robots: data.robots || "index, follow",
         });
       }
     } catch (error: unknown) {
@@ -181,7 +181,7 @@ export default function SEOEditor({ slug, pageName, title }: SEOEditorProps) {
             />
             <span className="text-xs text-[#5f5a50] mt-1 block">{form.seo.metaDescription.length}/155</span>
           </label>
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4">
             <label className={labelClass}>
               Canonical URL
               <div className="flex gap-2 mt-2">
@@ -209,7 +209,7 @@ export default function SEOEditor({ slug, pageName, title }: SEOEditorProps) {
                 </button>
               </div>
             </label>
-            <label className={labelClass}>
+            {/* <label className={labelClass}>
               Robots
               <select
                 className={`${fieldClass} mt-2`}
@@ -220,7 +220,7 @@ export default function SEOEditor({ slug, pageName, title }: SEOEditorProps) {
                 <option value="index, follow">index, follow</option>
                 <option value="noindex, nofollow">noindex, nofollow</option>
               </select>
-            </label>
+            </label> */}
           </div>
         </section>
 

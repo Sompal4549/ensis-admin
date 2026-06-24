@@ -39,9 +39,9 @@ export type Product = {
     title?: string;
     description?: string;
     overviewList?: string[];
-    specifications?: { title: string; specificationsList: { title: string; description: string }[] }[];
+    specifications?: { title: string; specificationsList: { title: string; description: string }[] }
     keyFeatures?: { title: string; keyFeaturesList: string[] };
-    dimensions?: { title: string; dimensionsList: { title: string; description: string }[] }[];
+    dimensions?: { title: string; dimensionsList: { title: string; description: string }[] };
     materialAndCare?: { title: string; description: string };
     productSpecifications?: { highlight: string; title: string; image: string; specifications: { title: string; description: string }[] }[];
     whatisInclueded?: string[];
@@ -273,30 +273,49 @@ export type PageData = {
     metaKeywords?: string;
     h1: string;
     canonical?: string;
-ogJson?:string;
-     schema?: string;
+    ogJson?: string;
+    schema?: string;
+  };
+  advanced?: {
+    sitemap?: {
+      url?: string;
+      autoGenerate?: boolean;
+      excludePaths?: string;
+    };
+    robotsTxt?: {
+      content?: string;
+    };
+    searchConsole?: {
+      googleVerification?: string;
+      bingVerification?: string;
+    };
+    analytics?: {
+      gaId?: string;
+      gtmId?: string;
+      fbPixelId?: string;
+      clarityId?: string;
+    };
   };
   advanceSeo?: {
     headCode?: string;
     bodyCode?: string;
   };
-  robots?: string;
   faqs?: Array<{ question: string; answer: string }>;
-}
+};
 
 export const pageApi = {
-    // Backend handles 'home' as '/'
-    get: (slug: string) => request<PageData>(`/pages/${slug}`),
-    
-    create: (payload: Partial<PageData>) => request('/pages', {
-        method: 'POST',
-        data: payload
-    }),
-    
-    update: (id: string, payload: Partial<PageData>) => request(`/pages/${id}`, {
-        method: 'PUT',
-        data: payload
-    })
+  // Backend handles 'home' as '/'
+  get: (slug: string) => request<PageData>(`/pages/${slug}`),
+
+  create: (payload: Partial<PageData>) => request('/pages', {
+    method: 'POST',
+    data: payload
+  }),
+
+  update: (id: string, payload: Partial<PageData>) => request(`/pages/${id}`, {
+    method: 'PUT',
+    data: payload
+  })
 };
 
 export const apiClient = {

@@ -10,7 +10,7 @@ export type TurnkeyPageContentKeys =
   | "turnkey.readyToBuild";
 
 export type TurnkeyBanner = {
-  backgroundImage: {title: string; imageUrl: string; alt: string};
+  backgroundImage: { title: string; imageUrl: string; alt: string };
   subheading: string;
   title: string;
   description: string;
@@ -25,13 +25,13 @@ export type TurnkeyWhatIs = {
   title: string;
   description: string;
   mostProjects: { id: string; image: ImageData; title: string }[];
-  withEnsis: { title: string; image: ImageData,withEnsisList:string[] };
-  mostProjectsTitle:string;
+  withEnsis: { title: string; image: ImageData, withEnsisList: string[] };
+  mostProjectsTitle: string;
 };
 
 export type TurnkeySolutions = {
   title: string;
-  cards: { id: string; image: ImageData; title: string; details: string[], bottomStrap:boolean }[];
+  cards: { id: string; image: ImageData; title: string; details: string[], bottomStrap: boolean }[];
   specialCard?: {
     leftImage: ImageData;
     rightImage: ImageData;
@@ -56,7 +56,7 @@ export type TurnkeyCustomized = {
 export type TurnkeyFeaturedProjects = {
   cards: { id: string; image: ImageData; title: string; location: string }[];
   primaryButton: { label: string; url: string };
-  title:string
+  title: string
 };
 
 export type TurnkeyReadyToBuild = {
@@ -64,7 +64,7 @@ export type TurnkeyReadyToBuild = {
   heading: string;
   description: string;
   leftImage: ImageData;
-  buttons: { id: string; image: ImageData; title: string; description: string }[];
+  buttons: { id: string; image: ImageData; title: string; description: string, link: string }[];
 };
 
 export const turnkeyPageKeys: { key: TurnkeyPageContentKeys; label: string; description: string }[] = [
@@ -108,7 +108,7 @@ export const defaultTurnkeyData: Record<TurnkeyPageContentKeys, unknown> = {
   "turnkey.completeSolutions": {
     title: "Our Complete Turnkit Solutions",
     cards: [
-      { id: randomId(), title: "Panchkarma Centers", details: ["Complete setup for Ayurvedic treatment centers."], image: { imageUrl: "", alt: "",bottomStrap:false } }
+      { id: randomId(), title: "Panchkarma Centers", details: ["Complete setup for Ayurvedic treatment centers."], image: { imageUrl: "", alt: "", bottomStrap: false } }
     ],
     specialCard: {
       leftImage: { imageUrl: "", alt: "" },

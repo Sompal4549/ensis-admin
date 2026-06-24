@@ -36,14 +36,14 @@ interface Subscriber {
   createdAt?: string;
 }
 
-type FormTab = "basic" | "banner" | "article" | "newsletter" | "seo";
+type FormTab = "basic" | "banner" | "newsletter" | "seo";
 
 const TABS: { key: FormTab; label: string; icon: React.ReactNode }[] = [
-  { key: "basic",      label: "Basic Info",   icon: <FileText size={14} /> },
-  { key: "banner",     label: "Banner",       icon: <LayoutTemplate size={14} /> },
-  { key: "article",    label: "Article",      icon: <BookOpen size={14} /> },
-  { key: "newsletter", label: "Newsletter",   icon: <Mail size={14} /> },
-  { key: "seo",        label: "SEO",          icon: <Globe size={14} /> },
+  { key: "basic", label: "Basic Info", icon: <FileText size={14} /> },
+  { key: "banner", label: "Banner", icon: <LayoutTemplate size={14} /> },
+  // { key: "article",    label: "Article",      icon: <BookOpen size={14} /> },
+  { key: "newsletter", label: "Newsletter", icon: <Mail size={14} /> },
+  { key: "seo", label: "SEO", icon: <Globe size={14} /> },
 ];
 
 const emptyBlogForm = () => ({
@@ -68,24 +68,24 @@ const emptyBlogForm = () => ({
     bgImage: '',
   },
 
-  article: {
-    heroImage: '',
-    heroAlt: '',
-    introBefore: '',
-    introHighlight: '',
-    introAfter: '',
-    whatIsPanchakarma: { heading: '', content: '' },
-    therapies: [] as { title: string; description: string; image: string }[],
-    benefitsHeading: '',
-    benefits: [] as { title: string; description: string }[],
-    modernLife: { heading: '', content: '' },
-    rightSpace: { heading: '', content: '' },
-    ensisApproach: { heading: '', content: '' },
-    conclusion: { heading: '', content: '' },
-    toc: [] as { label: string; anchor: string }[],
-    guide: { heading: '', description: '', buttonLabel: '', href: '' },
-    relatedArticles: [] as { title: string; image: string; href: string; category: string }[],
-  },
+  // article: {
+  //   heroImage: '',
+  //   heroAlt: '',
+  //   introBefore: '',
+  //   introHighlight: '',
+  //   introAfter: '',
+  //   whatIsPanchakarma: { heading: '', content: '' },
+  //   therapies: [] as { title: string; description: string; image: string }[],
+  //   benefitsHeading: '',
+  //   benefits: [] as { title: string; description: string }[],
+  //   modernLife: { heading: '', content: '' },
+  //   rightSpace: { heading: '', content: '' },
+  //   ensisApproach: { heading: '', content: '' },
+  //   conclusion: { heading: '', content: '' },
+  //   toc: [] as { label: string; anchor: string }[],
+  //   guide: { heading: '', description: '', buttonLabel: '', href: '' },
+  //   relatedArticles: [] as { title: string; image: string; href: string; category: string }[],
+  // },
 
   newsletter: {
     lotusImage: { image: '', alt: '' },
@@ -179,7 +179,7 @@ const BlogsManagement = () => {
           category: blogForm.banner.category,
           bgImage: blogForm.banner.bgImage,
         },
-        article: blogForm.article,
+        // article: blogForm.article,
         newsletter: blogForm.newsletter,
       };
 
@@ -230,7 +230,7 @@ const BlogsManagement = () => {
         category: b.category || '',
         bgImage: b.bgImage || '',
       },
-      article: blog.article || emptyBlogForm().article,
+      // article: blog.article || emptyBlogForm().article,
       newsletter: blog.newsletter || emptyBlogForm().newsletter,
       seo: blog.seo || emptyBlogForm().seo,
       robots: blog.robots || "index, follow",
@@ -261,11 +261,11 @@ const BlogsManagement = () => {
   };
 
   // ─── helpers ────────────────────────────────────────────────────────────────
-  const setArticle = (patch: Partial<typeof blogForm.article>) =>
-    setBlogForm(f => ({ ...f, article: { ...f.article, ...patch } }));
+  // const setArticle = (patch: Partial<typeof blogForm.article>) =>
+  //   setBlogForm(f => ({ ...f, article: { ...f.article, ...patch } }));
 
-  const setArticleSection = (key: 'whatIsPanchakarma' | 'modernLife' | 'rightSpace' | 'ensisApproach' | 'conclusion', patch: { heading?: string; content?: string }) =>
-    setArticle({ [key]: { ...blogForm.article[key], ...patch } });
+  // const setArticleSection = (key: 'whatIsPanchakarma' | 'modernLife' | 'rightSpace' | 'ensisApproach' | 'conclusion', patch: { heading?: string; content?: string }) =>
+  //   setArticle({ [key]: { ...blogForm.article[key], ...patch } });
 
   // ─── tab panels ─────────────────────────────────────────────────────────────
 
@@ -322,117 +322,117 @@ const BlogsManagement = () => {
     </div>
   );
 
-  const renderArticleTab = () => {
-    const art = blogForm.article;
-    const SECTIONS = ['whatIsPanchakarma', 'modernLife', 'rightSpace', 'ensisApproach', 'conclusion'] as const;
-    return (
-      <div className="space-y-5">
-        {/* Hero */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <ImageUploadField label="Hero Image" value={art.heroImage} fieldKey="blog.article.hero" uploadingField={uploadingField} onUploadingChange={setUploadingField} onUpload={url => setArticle({ heroImage: url })} onError={m => toast.error(m)} />
-          <label className={labelClass}>Hero Alt Text <input className={fieldClass} value={art.heroAlt} onChange={e => setArticle({ heroAlt: e.target.value })} /></label>
-        </div>
+  // const renderArticleTab = () => {
+  //   const art = blogForm.article;
+  //   const SECTIONS = ['whatIsPanchakarma', 'modernLife', 'rightSpace', 'ensisApproach', 'conclusion'] as const;
+  //   return (
+  //     <div className="space-y-5">
+  //       {/* Hero */}
+  //       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+  //         <ImageUploadField label="Hero Image" value={art.heroImage} fieldKey="blog.article.hero" uploadingField={uploadingField} onUploadingChange={setUploadingField} onUpload={url => setArticle({ heroImage: url })} onError={m => toast.error(m)} />
+  //         <label className={labelClass}>Hero Alt Text <input className={fieldClass} value={art.heroAlt} onChange={e => setArticle({ heroAlt: e.target.value })} /></label>
+  //       </div>
 
-        {/* Intro */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <label className={labelClass}>Intro Before <input className={fieldClass} value={art.introBefore} onChange={e => setArticle({ introBefore: e.target.value })} /></label>
-          <label className={labelClass}>Intro Highlight <input className={fieldClass} value={art.introHighlight} onChange={e => setArticle({ introHighlight: e.target.value })} /></label>
-          <label className={labelClass}>Intro After <input className={fieldClass} value={art.introAfter} onChange={e => setArticle({ introAfter: e.target.value })} /></label>
-        </div>
+  //       {/* Intro */}
+  //       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+  //         <label className={labelClass}>Intro Before <input className={fieldClass} value={art.introBefore} onChange={e => setArticle({ introBefore: e.target.value })} /></label>
+  //         <label className={labelClass}>Intro Highlight <input className={fieldClass} value={art.introHighlight} onChange={e => setArticle({ introHighlight: e.target.value })} /></label>
+  //         <label className={labelClass}>Intro After <input className={fieldClass} value={art.introAfter} onChange={e => setArticle({ introAfter: e.target.value })} /></label>
+  //       </div>
 
-        {/* Article Sections */}
-        {SECTIONS.map(key => (
-          <div key={key} className="p-4 border rounded-xl bg-slate-50 space-y-3">
-            <h4 className="text-xs font-bold text-[#8d6a3a] uppercase tracking-wider">{key}</h4>
-            <label className={labelClass}>Heading <input className={fieldClass} value={art[key].heading} onChange={e => setArticleSection(key, { heading: e.target.value })} /></label>
-            <div className="space-y-1">
-              <label className={labelClass}>Content</label>
-              <RichTextEditor value={art[key].content} onChange={val => setArticleSection(key, { content: val })} minHeight="100px" />
-            </div>
-          </div>
-        ))}
+  //       {/* Article Sections */}
+  //       {SECTIONS.map(key => (
+  //         <div key={key} className="p-4 border rounded-xl bg-slate-50 space-y-3">
+  //           <h4 className="text-xs font-bold text-[#8d6a3a] uppercase tracking-wider">{key}</h4>
+  //           <label className={labelClass}>Heading <input className={fieldClass} value={art[key].heading} onChange={e => setArticleSection(key, { heading: e.target.value })} /></label>
+  //           <div className="space-y-1">
+  //             <label className={labelClass}>Content</label>
+  //             <RichTextEditor value={art[key].content} onChange={val => setArticleSection(key, { content: val })} minHeight="100px" />
+  //           </div>
+  //         </div>
+  //       ))}
 
-        {/* Benefits */}
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <span className="text-xs font-bold text-[#8d6a3a] uppercase tracking-wider">Benefits</span>
-            <button type="button" className="text-xs bg-[#263016] text-white px-2 py-1 rounded" onClick={() => setArticle({ benefits: [...art.benefits, { title: '', description: '' }] })}>+ Add</button>
-          </div>
-          <label className={labelClass}>Benefits Heading <input className={fieldClass} value={art.benefitsHeading} onChange={e => setArticle({ benefitsHeading: e.target.value })} /></label>
-          {art.benefits.map((b, idx) => (
-            <div key={idx} className="grid grid-cols-2 gap-3 p-3 border rounded-xl bg-white relative">
-              <button type="button" onClick={() => setArticle({ benefits: art.benefits.filter((_, i) => i !== idx) })} className="absolute top-2 right-2 text-red-400"><Trash2 size={14} /></button>
-              <input className={fieldClass} placeholder="Title" value={b.title} onChange={e => { const nb = [...art.benefits]; nb[idx] = { ...nb[idx], title: e.target.value }; setArticle({ benefits: nb }); }} />
-              <input className={fieldClass} placeholder="Description" value={b.description} onChange={e => { const nb = [...art.benefits]; nb[idx] = { ...nb[idx], description: e.target.value }; setArticle({ benefits: nb }); }} />
-            </div>
-          ))}
-        </div>
+  //       {/* Benefits */}
+  //       <div className="space-y-2">
+  //         <div className="flex justify-between items-center">
+  //           <span className="text-xs font-bold text-[#8d6a3a] uppercase tracking-wider">Benefits</span>
+  //           <button type="button" className="text-xs bg-[#263016] text-white px-2 py-1 rounded" onClick={() => setArticle({ benefits: [...art.benefits, { title: '', description: '' }] })}>+ Add</button>
+  //         </div>
+  //         <label className={labelClass}>Benefits Heading <input className={fieldClass} value={art.benefitsHeading} onChange={e => setArticle({ benefitsHeading: e.target.value })} /></label>
+  //         {art.benefits.map((b, idx) => (
+  //           <div key={idx} className="grid grid-cols-2 gap-3 p-3 border rounded-xl bg-white relative">
+  //             <button type="button" onClick={() => setArticle({ benefits: art.benefits.filter((_, i) => i !== idx) })} className="absolute top-2 right-2 text-red-400"><Trash2 size={14} /></button>
+  //             <input className={fieldClass} placeholder="Title" value={b.title} onChange={e => { const nb = [...art.benefits]; nb[idx] = { ...nb[idx], title: e.target.value }; setArticle({ benefits: nb }); }} />
+  //             <input className={fieldClass} placeholder="Description" value={b.description} onChange={e => { const nb = [...art.benefits]; nb[idx] = { ...nb[idx], description: e.target.value }; setArticle({ benefits: nb }); }} />
+  //           </div>
+  //         ))}
+  //       </div>
 
-        {/* Therapies */}
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <span className="text-xs font-bold text-[#8d6a3a] uppercase tracking-wider">Therapies</span>
-            <button type="button" className="text-xs bg-[#263016] text-white px-2 py-1 rounded" onClick={() => setArticle({ therapies: [...art.therapies, { title: '', description: '', image: '' }] })}>+ Add</button>
-          </div>
-          {art.therapies.map((t, idx) => (
-            <div key={idx} className="p-3 border rounded-xl bg-white space-y-2 relative">
-              <button type="button" onClick={() => setArticle({ therapies: art.therapies.filter((_, i) => i !== idx) })} className="absolute top-2 right-2 text-red-400"><Trash2 size={14} /></button>
-              <div className="grid grid-cols-2 gap-3">
-                <input className={fieldClass} placeholder="Title" value={t.title} onChange={e => { const nt = [...art.therapies]; nt[idx] = { ...nt[idx], title: e.target.value }; setArticle({ therapies: nt }); }} />
-                <input className={fieldClass} placeholder="Description" value={t.description} onChange={e => { const nt = [...art.therapies]; nt[idx] = { ...nt[idx], description: e.target.value }; setArticle({ therapies: nt }); }} />
-              </div>
-              <ImageUploadField label="Therapy Image" value={t.image} fieldKey={`therapy.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onUpload={url => { const nt = [...art.therapies]; nt[idx] = { ...nt[idx], image: url }; setArticle({ therapies: nt }); }} onError={m => toast.error(m)} />
-            </div>
-          ))}
-        </div>
+  //       {/* Therapies */}
+  //       <div className="space-y-2">
+  //         <div className="flex justify-between items-center">
+  //           <span className="text-xs font-bold text-[#8d6a3a] uppercase tracking-wider">Therapies</span>
+  //           <button type="button" className="text-xs bg-[#263016] text-white px-2 py-1 rounded" onClick={() => setArticle({ therapies: [...art.therapies, { title: '', description: '', image: '' }] })}>+ Add</button>
+  //         </div>
+  //         {art.therapies.map((t, idx) => (
+  //           <div key={idx} className="p-3 border rounded-xl bg-white space-y-2 relative">
+  //             <button type="button" onClick={() => setArticle({ therapies: art.therapies.filter((_, i) => i !== idx) })} className="absolute top-2 right-2 text-red-400"><Trash2 size={14} /></button>
+  //             <div className="grid grid-cols-2 gap-3">
+  //               <input className={fieldClass} placeholder="Title" value={t.title} onChange={e => { const nt = [...art.therapies]; nt[idx] = { ...nt[idx], title: e.target.value }; setArticle({ therapies: nt }); }} />
+  //               <input className={fieldClass} placeholder="Description" value={t.description} onChange={e => { const nt = [...art.therapies]; nt[idx] = { ...nt[idx], description: e.target.value }; setArticle({ therapies: nt }); }} />
+  //             </div>
+  //             <ImageUploadField label="Therapy Image" value={t.image} fieldKey={`therapy.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onUpload={url => { const nt = [...art.therapies]; nt[idx] = { ...nt[idx], image: url }; setArticle({ therapies: nt }); }} onError={m => toast.error(m)} />
+  //           </div>
+  //         ))}
+  //       </div>
 
-        {/* TOC */}
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <span className="text-xs font-bold text-[#8d6a3a] uppercase tracking-wider">Table of Contents</span>
-            <button type="button" className="text-xs bg-[#263016] text-white px-2 py-1 rounded" onClick={() => setArticle({ toc: [...art.toc, { label: '', anchor: '' }] })}>+ Add</button>
-          </div>
-          {art.toc.map((t, idx) => (
-            <div key={idx} className="grid grid-cols-2 gap-3 p-3 border rounded-xl bg-white relative">
-              <button type="button" onClick={() => setArticle({ toc: art.toc.filter((_, i) => i !== idx) })} className="absolute top-2 right-2 text-red-400"><Trash2 size={14} /></button>
-              <input className={fieldClass} placeholder="Label" value={t.label} onChange={e => { const nt = [...art.toc]; nt[idx] = { ...nt[idx], label: e.target.value }; setArticle({ toc: nt }); }} />
-              <input className={fieldClass} placeholder="#anchor" value={t.anchor} onChange={e => { const nt = [...art.toc]; nt[idx] = { ...nt[idx], anchor: e.target.value }; setArticle({ toc: nt }); }} />
-            </div>
-          ))}
-        </div>
+  //       {/* TOC */}
+  //       <div className="space-y-2">
+  //         <div className="flex justify-between items-center">
+  //           <span className="text-xs font-bold text-[#8d6a3a] uppercase tracking-wider">Table of Contents</span>
+  //           <button type="button" className="text-xs bg-[#263016] text-white px-2 py-1 rounded" onClick={() => setArticle({ toc: [...art.toc, { label: '', anchor: '' }] })}>+ Add</button>
+  //         </div>
+  //         {art.toc.map((t, idx) => (
+  //           <div key={idx} className="grid grid-cols-2 gap-3 p-3 border rounded-xl bg-white relative">
+  //             <button type="button" onClick={() => setArticle({ toc: art.toc.filter((_, i) => i !== idx) })} className="absolute top-2 right-2 text-red-400"><Trash2 size={14} /></button>
+  //             <input className={fieldClass} placeholder="Label" value={t.label} onChange={e => { const nt = [...art.toc]; nt[idx] = { ...nt[idx], label: e.target.value }; setArticle({ toc: nt }); }} />
+  //             <input className={fieldClass} placeholder="#anchor" value={t.anchor} onChange={e => { const nt = [...art.toc]; nt[idx] = { ...nt[idx], anchor: e.target.value }; setArticle({ toc: nt }); }} />
+  //           </div>
+  //         ))}
+  //       </div>
 
-        {/* Guide CTA */}
-        <div className="p-4 border rounded-xl bg-slate-50 space-y-3">
-          <h4 className="text-xs font-bold text-[#8d6a3a] uppercase tracking-wider">Guide CTA</h4>
-          <div className="grid grid-cols-2 gap-3">
-            <input className={fieldClass} placeholder="Heading" value={art.guide.heading} onChange={e => setArticle({ guide: { ...art.guide, heading: e.target.value } })} />
-            <input className={fieldClass} placeholder="Button Label" value={art.guide.buttonLabel} onChange={e => setArticle({ guide: { ...art.guide, buttonLabel: e.target.value } })} />
-            <input className={fieldClass} placeholder="Description" value={art.guide.description} onChange={e => setArticle({ guide: { ...art.guide, description: e.target.value } })} />
-            <input className={fieldClass} placeholder="Href" value={art.guide.href} onChange={e => setArticle({ guide: { ...art.guide, href: e.target.value } })} />
-          </div>
-        </div>
+  //       {/* Guide CTA */}
+  //       <div className="p-4 border rounded-xl bg-slate-50 space-y-3">
+  //         <h4 className="text-xs font-bold text-[#8d6a3a] uppercase tracking-wider">Guide CTA</h4>
+  //         <div className="grid grid-cols-2 gap-3">
+  //           <input className={fieldClass} placeholder="Heading" value={art.guide.heading} onChange={e => setArticle({ guide: { ...art.guide, heading: e.target.value } })} />
+  //           <input className={fieldClass} placeholder="Button Label" value={art.guide.buttonLabel} onChange={e => setArticle({ guide: { ...art.guide, buttonLabel: e.target.value } })} />
+  //           <input className={fieldClass} placeholder="Description" value={art.guide.description} onChange={e => setArticle({ guide: { ...art.guide, description: e.target.value } })} />
+  //           <input className={fieldClass} placeholder="Href" value={art.guide.href} onChange={e => setArticle({ guide: { ...art.guide, href: e.target.value } })} />
+  //         </div>
+  //       </div>
 
-        {/* Related Articles */}
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <span className="text-xs font-bold text-[#8d6a3a] uppercase tracking-wider">Related Articles</span>
-            <button type="button" className="text-xs bg-[#263016] text-white px-2 py-1 rounded" onClick={() => setArticle({ relatedArticles: [...art.relatedArticles, { title: '', image: '', href: '', category: '' }] })}>+ Add</button>
-          </div>
-          {art.relatedArticles.map((r, idx) => (
-            <div key={idx} className="p-3 border rounded-xl bg-white space-y-2 relative">
-              <button type="button" onClick={() => setArticle({ relatedArticles: art.relatedArticles.filter((_, i) => i !== idx) })} className="absolute top-2 right-2 text-red-400"><Trash2 size={14} /></button>
-              <div className="grid grid-cols-3 gap-3">
-                <input className={fieldClass} placeholder="Title" value={r.title} onChange={e => { const nr = [...art.relatedArticles]; nr[idx] = { ...nr[idx], title: e.target.value }; setArticle({ relatedArticles: nr }); }} />
-                <input className={fieldClass} placeholder="Category" value={r.category} onChange={e => { const nr = [...art.relatedArticles]; nr[idx] = { ...nr[idx], category: e.target.value }; setArticle({ relatedArticles: nr }); }} />
-                <input className={fieldClass} placeholder="Href" value={r.href} onChange={e => { const nr = [...art.relatedArticles]; nr[idx] = { ...nr[idx], href: e.target.value }; setArticle({ relatedArticles: nr }); }} />
-              </div>
-              <ImageUploadField label="Article Image" value={r.image} fieldKey={`related.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onUpload={url => { const nr = [...art.relatedArticles]; nr[idx] = { ...nr[idx], image: url }; setArticle({ relatedArticles: nr }); }} onError={m => toast.error(m)} />
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  };
+  //       {/* Related Articles */}
+  //       <div className="space-y-2">
+  //         <div className="flex justify-between items-center">
+  //           <span className="text-xs font-bold text-[#8d6a3a] uppercase tracking-wider">Related Articles</span>
+  //           <button type="button" className="text-xs bg-[#263016] text-white px-2 py-1 rounded" onClick={() => setArticle({ relatedArticles: [...art.relatedArticles, { title: '', image: '', href: '', category: '' }] })}>+ Add</button>
+  //         </div>
+  //         {art.relatedArticles.map((r, idx) => (
+  //           <div key={idx} className="p-3 border rounded-xl bg-white space-y-2 relative">
+  //             <button type="button" onClick={() => setArticle({ relatedArticles: art.relatedArticles.filter((_, i) => i !== idx) })} className="absolute top-2 right-2 text-red-400"><Trash2 size={14} /></button>
+  //             <div className="grid grid-cols-3 gap-3">
+  //               <input className={fieldClass} placeholder="Title" value={r.title} onChange={e => { const nr = [...art.relatedArticles]; nr[idx] = { ...nr[idx], title: e.target.value }; setArticle({ relatedArticles: nr }); }} />
+  //               <input className={fieldClass} placeholder="Category" value={r.category} onChange={e => { const nr = [...art.relatedArticles]; nr[idx] = { ...nr[idx], category: e.target.value }; setArticle({ relatedArticles: nr }); }} />
+  //               <input className={fieldClass} placeholder="Href" value={r.href} onChange={e => { const nr = [...art.relatedArticles]; nr[idx] = { ...nr[idx], href: e.target.value }; setArticle({ relatedArticles: nr }); }} />
+  //             </div>
+  //             <ImageUploadField label="Article Image" value={r.image} fieldKey={`related.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onUpload={url => { const nr = [...art.relatedArticles]; nr[idx] = { ...nr[idx], image: url }; setArticle({ relatedArticles: nr }); }} onError={m => toast.error(m)} />
+  //           </div>
+  //         ))}
+  //       </div>
+  //     </div>
+  //   );
+  // };
 
   const renderNewsletterTab = () => {
     const nl = blogForm.newsletter;
@@ -497,7 +497,7 @@ const BlogsManagement = () => {
 
   return (
     <div className="space-y-6 pb-10">
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
         {/* ── CREATE / EDIT FORM ── */}
         <section className="bg-white border rounded-2xl shadow-sm overflow-hidden">
           <div className="bg-slate-50 border-b p-4 px-6 flex items-center justify-between">
@@ -519,11 +519,10 @@ const BlogsManagement = () => {
                 key={tab.key}
                 type="button"
                 onClick={() => setActiveTab(tab.key)}
-                className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold whitespace-nowrap border-b-2 transition-colors ${
-                  activeTab === tab.key
-                    ? "border-[#8d6a3a] text-[#8d6a3a]"
-                    : "border-transparent  hover:"
-                }`}
+                className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold whitespace-nowrap border-b-2 transition-colors ${activeTab === tab.key
+                  ? "border-[#8d6a3a] text-[#8d6a3a]"
+                  : "border-transparent  hover:"
+                  }`}
               >
                 {tab.icon} {tab.label}
               </button>
@@ -531,11 +530,11 @@ const BlogsManagement = () => {
           </div>
 
           <form onSubmit={handleCreateBlog} className="p-6">
-            {activeTab === "basic"      && renderBasicTab()}
-            {activeTab === "banner"     && renderBannerTab()}
-            {activeTab === "article"    && renderArticleTab()}
+            {activeTab === "basic" && renderBasicTab()}
+            {activeTab === "banner" && renderBannerTab()}
+            {/* {activeTab === "article" && renderArticleTab()} */}
             {activeTab === "newsletter" && renderNewsletterTab()}
-            {activeTab === "seo"        && renderSeoTab()}
+            {activeTab === "seo" && renderSeoTab()}
 
             <button
               type="submit"
@@ -584,7 +583,7 @@ const BlogsManagement = () => {
       </div>
 
       {/* ── NEWSLETTER + SUBSCRIBERS ── */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         <section className="bg-white border rounded-2xl shadow-sm overflow-hidden">
           <div className="bg-slate-50 border-b p-4 px-6 flex items-center gap-2">
             <Send className="text-emerald-600" size={20} />
