@@ -68,6 +68,8 @@ export interface EnquiryPageContent {
     description: string;
     imageSrc: string;
     imageAlt: string;
+    formImageSrc: string;
+    formImageAlt: string;
   };
   formTitle: string;
   projectTypeOptions: SelectOption[];
@@ -101,6 +103,8 @@ const initialEnquiryPageContentForm: EnquiryPageContent = {
     description: "",
     imageSrc: "",
     imageAlt: "",
+    formImageSrc: "",
+    formImageAlt: "",
   },
   formTitle: "",
   projectTypeOptions: [],
@@ -130,7 +134,7 @@ const EnquaryPageManagement = () => {
   const [savingForm, setSavingForm] = useState(false);
   const [savingGetInTouch, setSavingGetInTouch] = useState(false);
   const [savingCtaBanner, setSavingCtaBanner] = useState(false);
-  
+
   const [content, setContent] = useState<ComponentContent | null>(null);
   const [form, setForm] = useState<EnquiryPageContent>(initialEnquiryPageContentForm);
 
@@ -392,11 +396,11 @@ const EnquaryPageManagement = () => {
         </select>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         <div className="lg:col-span-4 space-y-4">
           <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
             <h3 className="text-sm font-bold  uppercase tracking-wider mb-4">Components</h3>
-            <ComponentList 
+            <ComponentList
               records={records}
               onEdit={handleEditComponent}
               onDelete={handleDeleteComponent}
@@ -419,21 +423,224 @@ const EnquaryPageManagement = () => {
               <div className="p-4 space-y-6">
 
                 {/* Hero Section */}
-                <div className="border-b border-slate-100 pb-4">
-                  <h2 className="text-lg font-bold  mb-4">Hero Section</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+               <div className="border-b border-slate-100 pb-4">
+            <h2 className="text-lg font-bold text-slate-700 mb-4">Hero Section</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className={labelClass}>Heading</label>
+                <input
+                  className={fieldClass}
+                  value={form.hero.heading}
+                  onChange={e => setForm({ ...form, hero: { ...form.hero, heading: e.target.value } })}
+                  placeholder="e.g. Get in Touch"
+                />
+                <label className={labelClass + " mt-4"}>Subheading</label>
+                <input
+                  className={fieldClass}
+                  value={form.hero.subheading}
+                  onChange={e => setForm({ ...form, hero: { ...form.hero, subheading: e.target.value } })}
+                  placeholder="e.g. We'd love to hear from you"
+                />
+              </div>
+              <ImageUploadField
+                label="Hero Image"
+                value={form.hero.imageSrc}
+                fieldKey="enquiry.hero.image"
+                uploadingField={uploadingField}
+                onUploadingChange={setUploadingField}
+                onUpload={url => setForm({ ...form, hero: { ...form.hero, imageSrc: url } })}
+                onError={m => toast.error(m)}
+              />     
+              
+              <div>
+                <label className={labelClass}>Hero Image Alt Text</label>
+                <input
+                  className={fieldClass}
+                  value={form.hero.imageAlt}
+                  onChange={e => setForm({ ...form, hero: { ...form.hero, imageAlt: e.target.value } })}
+                  placeholder="Alt text for hero image"
+                />
+              </div>
+               <ImageUploadField
+                label="Form Image"
+                value={form.hero.formImageSrc}
+                fieldKey="enquiry.hero.image"
+                uploadingField={uploadingField}
+                onUploadingChange={setUploadingField}
+                onUpload={url => setForm({ ...form, hero: { ...form.hero, formImageSrc: url } })}
+                onError={m => toast.error(m)}
+              />
+                 <div>
+                <label className={labelClass}>Form Image Alt Text</label>
+                <input
+                  className={fieldClass}
+                  value={form.hero.formImageAlt}
+                  onChange={e => setForm({ ...form, hero: { ...form.hero, formImageAlt: e.target.value } })}
+                  placeholder="Alt text for hero image"
+                />
+              </div>
+            </div>
+            <div className="mt-4">
+              <label className={labelClass}>Description</label>
+              <RichTextEditor
+                value={form.hero.description}
+                onChange={val => setForm({ ...form, hero: { ...form.hero, description: val } })}
+                placeholder="Enter a description for the hero section..."
+                minHeight="150px"
+              />
+            </div>
+          </div>
+
+          {/* Form Title */}
+          <div className="border-b border-slate-100 pb-4">
+            <h2 className="text-lg font-bold text-slate-700 mb-4">Form Section</h2>
+            <div>
+              <label className={labelClass}>Form Title</label>
+              <input
+                className={fieldClass}
+                value={form.formTitle}
+                onChange={e => setForm({ ...form, formTitle: e.target.value })}
+                placeholder="e.g. Send us an Enquiry"
+              />
+            </div>
+          </div>
+
+          {/* Dynamic Options Sections */}
+          {[
+            { key: 'projectTypeOptions', label: 'Project Type Options' },
+            { key: 'stateOptions', label: 'State Options' },
+            { key: 'cityOptions', label: 'City Options' },
+            { key: 'projectSizeOptions', label: 'Project Size Options' },
+            { key: 'budgetRangeOptions', label: 'Budget Range Options' },
+            { key: 'timelineOptions', label: 'Timeline Options' },
+          ].map((section) => (
+            <div key={section.key} className="border-b border-slate-100 pb-4">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-md font-bold text-slate-700">{section.label}</h3>
+                <button
+                  type="button"
+                  onClick={() => setForm({ ...form, [section.key]: [...(form as any)[section.key], { value: "", label: "" }] })}
+                  className="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-green-700 flex items-center gap-1"
+                >
+                  <PlusCircle size={14} /> Add Option
+                </button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {(form as any)[section.key].map((option: SelectOption, index: number) => (
+                  <div key={option.value + index} className="p-3 border rounded-xl bg-slate-50 relative space-y-2">
+                    <button
+                      type="button"
+                      onClick={() => setForm({ ...form, [section.key]: (form as any)[section.key].filter((_: any, i: number) => i !== index) })}
+                      className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                    >
+                      <Trash2 size={16} />
+                    </button>
                     <div>
-                      <label className={labelClass}>Heading</label>
-                      <input className={fieldClass} value={form.hero.heading} onChange={e => setForm({ ...form, hero: { ...form.hero, heading: e.target.value } })} placeholder="e.g. Get in Touch" />
-                      <label className={labelClass + " mt-4"}>Subheading</label>
-                      <input className={fieldClass} value={form.hero.subheading} onChange={e => setForm({ ...form, hero: { ...form.hero, subheading: e.target.value } })} placeholder="e.g. We'd love to hear from you" />
+                      <label className={labelClass}>Value</label>
+                      <input
+                        className={fieldClass}
+                        value={option.value}
+                    onChange={e =>
+  updateOption<SelectOption>(
+    (form as any)[section.key],
+    (newArr) => setForm({ ...form, [section.key]: newArr }),
+    index,
+    "label",
+    e.target.value
+  )
+}
+                        placeholder="e.g. residential"
+                      />
                     </div>
-                    <ImageUploadField label="Hero Image" value={form.hero.imageSrc} fieldKey="enquiry.hero.image" uploadingField={uploadingField} onUploadingChange={setUploadingField} onUpload={url => setForm({ ...form, hero: { ...form.hero, imageSrc: url } })} onError={m => toast.error(m)} />
+                    <div>
+                      <label className={labelClass}>Label</label>
+                      <input
+                        className={fieldClass}
+                        value={option.label}
+                        onChange={e => updateOption( (form as any)[section.key], (newArr) => setForm({ ...form, [section.key]: newArr }), index, "label", e.target.value)}
+                        placeholder="e.g. Residential Project"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+
+          {/* Services Options (Checkbox) */}
+          <div className="border-b border-slate-100 pb-4">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-md font-bold text-slate-700">Services Options</h3>
+              <button
+                type="button"
+                onClick={() => setForm({ ...form, servicesOptions: [...form.servicesOptions, { id: randomId(), label: "" }] })}
+                className="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-green-700 flex items-center gap-1"
+              >
+                <PlusCircle size={14} /> Add Service
+              </button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {form.servicesOptions.map((option, index) => (
+                <div key={option.id} className="p-3 border rounded-xl bg-slate-50 relative space-y-2">
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, servicesOptions: form.servicesOptions.filter((_, i) => i !== index) })}
+                    className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                  <div>
+                    <label className={labelClass}>Label</label>
+                    <input
+                      className={fieldClass}
+                      value={option.label}
+                      onChange={e => updateOption(form.servicesOptions, (newArr) => setForm({ ...form, servicesOptions: newArr }), index, "label", e.target.value)}
+                      placeholder="e.g. Architectural Design"
+                    />
                   </div>
                 </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Preferred Contact Options (Radio) */}
+          <div className="border-b border-slate-100 pb-4">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-md font-bold text-slate-700">Preferred Contact Options</h3>
+              <button
+                type="button"
+                onClick={() => setForm({ ...form, preferredContactOptions: [...form.preferredContactOptions, { id: randomId(), label: "" }] })}
+                className="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-green-700 flex items-center gap-1"
+              >
+                <PlusCircle size={14} /> Add Option
+              </button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {form.preferredContactOptions.map((option, index) => (
+                <div key={option.id} className="p-3 border rounded-xl bg-slate-50 relative space-y-2">
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, preferredContactOptions: form.preferredContactOptions.filter((_, i) => i !== index) })}
+                    className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                  <div>
+                    <label className={labelClass}>Label</label>
+                    <input
+                      className={fieldClass}
+                      value={option.label}
+                      onChange={e => updateOption(form.preferredContactOptions, (newArr) => setForm({ ...form, preferredContactOptions: newArr }), index, "label", e.target.value)}
+                      placeholder="e.g. Email"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
 
                 {/* Dynamic Options Section Mapping ... (rest of the form fields) */}
-                <p className="text-xs italic ">Rest of the form fields go here...</p>
               </div>
             </form>
           )}
@@ -449,19 +656,19 @@ const EnquaryPageManagement = () => {
               <div className="p-4 space-y-6">
                 <div>
                   <label className={labelClass}>Heading</label>
-                  <input className={fieldClass} value={getInTouchForm.heading} onChange={e => setGetInTouchForm({...getInTouchForm, heading: e.target.value})} placeholder="e.g. Get in Touch" />
+                  <input className={fieldClass} value={getInTouchForm.heading} onChange={e => setGetInTouchForm({ ...getInTouchForm, heading: e.target.value })} placeholder="e.g. Get in Touch" />
                 </div>
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <h3 className="text-md font-bold ">Contact Items</h3>
-                    <button type="button" onClick={() => setGetInTouchForm({...getInTouchForm, items: [...getInTouchForm.items, { id: randomId(), label: "", iconSrc: "", lines: [""] }]})} className="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-green-700 flex items-center gap-1">
+                    <button type="button" onClick={() => setGetInTouchForm({ ...getInTouchForm, items: [...getInTouchForm.items, { id: randomId(), label: "", iconSrc: "", lines: [""] }] })} className="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-green-700 flex items-center gap-1">
                       <PlusCircle size={14} /> Add Item
                     </button>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {getInTouchForm.items.map((item, index) => (
                       <div key={item.id} className="p-4 border rounded-xl bg-slate-50 relative space-y-3">
-                        <button type="button" onClick={() => setGetInTouchForm({...getInTouchForm, items: getInTouchForm.items.filter((_, i) => i !== index)})} className="absolute top-2 right-2 text-red-500 hover:text-red-700">
+                        <button type="button" onClick={() => setGetInTouchForm({ ...getInTouchForm, items: getInTouchForm.items.filter((_, i) => i !== index) })} className="absolute top-2 right-2 text-red-500 hover:text-red-700">
                           <Trash2 size={16} />
                         </button>
                         <div>
@@ -469,28 +676,28 @@ const EnquaryPageManagement = () => {
                           <input className={fieldClass} value={item.label} onChange={e => {
                             const newItems = [...getInTouchForm.items];
                             newItems[index] = { ...newItems[index], label: e.target.value };
-                            setGetInTouchForm({...getInTouchForm, items: newItems});
+                            setGetInTouchForm({ ...getInTouchForm, items: newItems });
                           }} placeholder="e.g. Email Us" />
                         </div>
-                        <ImageUploadField 
-                          label="Item Icon" 
-                          value={item.iconSrc || ""} 
-                          fieldKey={`enquiry.getInTouch.item.${index}`} 
-                          uploadingField={uploadingField} 
-                          onUploadingChange={setUploadingField} 
+                        <ImageUploadField
+                          label="Item Icon"
+                          value={item.iconSrc || ""}
+                          fieldKey={`enquiry.getInTouch.item.${index}`}
+                          uploadingField={uploadingField}
+                          onUploadingChange={setUploadingField}
                           onUpload={url => {
                             const newItems = [...getInTouchForm.items];
                             newItems[index] = { ...newItems[index], iconSrc: url };
-                            setGetInTouchForm({...getInTouchForm, items: newItems});
-                          }} 
-                          onError={m => toast.error(m)} 
+                            setGetInTouchForm({ ...getInTouchForm, items: newItems });
+                          }}
+                          onError={m => toast.error(m)}
                         />
                         <div>
                           <label className={labelClass}>Lines (one per line)</label>
                           <textarea className={fieldClass} value={item.lines.join('\n')} onChange={e => {
                             const newItems = [...getInTouchForm.items];
                             newItems[index] = { ...newItems[index], lines: e.target.value.split('\n') };
-                            setGetInTouchForm({...getInTouchForm, items: newItems});
+                            setGetInTouchForm({ ...getInTouchForm, items: newItems });
                           }} rows={3} placeholder="Line 1&#10;Line 2" />
                         </div>
                       </div>
@@ -513,33 +720,33 @@ const EnquaryPageManagement = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className={labelClass}>Heading</label>
-                    <input className={fieldClass} value={ctaBannerForm.heading} onChange={e => setCtaBannerForm({...ctaBannerForm, heading: e.target.value})} placeholder="e.g. Ready to start?" />
+                    <input className={fieldClass} value={ctaBannerForm.heading} onChange={e => setCtaBannerForm({ ...ctaBannerForm, heading: e.target.value })} placeholder="e.g. Ready to start?" />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className={labelClass}>CTA Label</label>
-                      <input className={fieldClass} value={ctaBannerForm.ctaLabel} onChange={e => setCtaBannerForm({...ctaBannerForm, ctaLabel: e.target.value})} placeholder="e.g. Contact Us" />
+                      <input className={fieldClass} value={ctaBannerForm.ctaLabel} onChange={e => setCtaBannerForm({ ...ctaBannerForm, ctaLabel: e.target.value })} placeholder="e.g. Contact Us" />
                     </div>
                     <div>
                       <label className={labelClass}>CTA Href</label>
-                      <input className={fieldClass} value={ctaBannerForm.ctaHref} onChange={e => setCtaBannerForm({...ctaBannerForm, ctaHref: e.target.value})} placeholder="e.g. /contact" />
+                      <input className={fieldClass} value={ctaBannerForm.ctaHref} onChange={e => setCtaBannerForm({ ...ctaBannerForm, ctaHref: e.target.value })} placeholder="e.g. /contact" />
                     </div>
                   </div>
                 </div>
                 <div>
                   <label className={labelClass}>Description</label>
-                  <RichTextEditor value={ctaBannerForm.description} onChange={val => setCtaBannerForm({...ctaBannerForm, description: val})} placeholder="Enter description..." minHeight="150px" />
+                  <RichTextEditor value={ctaBannerForm.description} onChange={val => setCtaBannerForm({ ...ctaBannerForm, description: val })} placeholder="Enter description..." minHeight="150px" />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-100">
                   <div className="space-y-4">
-                    <ImageUploadField label="Left Image" value={ctaBannerForm.leftImage.imageUrl} fieldKey="enquiry.cta.left" uploadingField={uploadingField} onUploadingChange={setUploadingField} onUpload={url => setCtaBannerForm({...ctaBannerForm, leftImage: {...ctaBannerForm.leftImage, imageUrl: url}})} onError={m => toast.error(m)} />
+                    <ImageUploadField label="Left Image" value={ctaBannerForm.leftImage.imageUrl} fieldKey="enquiry.cta.left" uploadingField={uploadingField} onUploadingChange={setUploadingField} onUpload={url => setCtaBannerForm({ ...ctaBannerForm, leftImage: { ...ctaBannerForm.leftImage, imageUrl: url } })} onError={m => toast.error(m)} />
                     <label className={labelClass}>Left Image Alt</label>
-                    <input className={fieldClass} value={ctaBannerForm.leftImage.alt} onChange={e => setCtaBannerForm({...ctaBannerForm, leftImage: {...ctaBannerForm.leftImage, alt: e.target.value}})} placeholder="Alt text" />
+                    <input className={fieldClass} value={ctaBannerForm.leftImage.alt} onChange={e => setCtaBannerForm({ ...ctaBannerForm, leftImage: { ...ctaBannerForm.leftImage, alt: e.target.value } })} placeholder="Alt text" />
                   </div>
                   <div className="space-y-4">
-                    <ImageUploadField label="Right Image" value={ctaBannerForm.rightImage.imageUrl} fieldKey="enquiry.cta.right" uploadingField={uploadingField} onUploadingChange={setUploadingField} onUpload={url => setCtaBannerForm({...ctaBannerForm, rightImage: {...ctaBannerForm.rightImage, imageUrl: url}})} onError={m => toast.error(m)} />
+                    <ImageUploadField label="Right Image" value={ctaBannerForm.rightImage.imageUrl} fieldKey="enquiry.cta.right" uploadingField={uploadingField} onUploadingChange={setUploadingField} onUpload={url => setCtaBannerForm({ ...ctaBannerForm, rightImage: { ...ctaBannerForm.rightImage, imageUrl: url } })} onError={m => toast.error(m)} />
                     <label className={labelClass}>Right Image Alt</label>
-                    <input className={fieldClass} value={ctaBannerForm.rightImage.alt} onChange={e => setCtaBannerForm({...ctaBannerForm, rightImage: {...ctaBannerForm.rightImage, alt: e.target.value}})} placeholder="Alt text" />
+                    <input className={fieldClass} value={ctaBannerForm.rightImage.alt} onChange={e => setCtaBannerForm({ ...ctaBannerForm, rightImage: { ...ctaBannerForm.rightImage, alt: e.target.value } })} placeholder="Alt text" />
                   </div>
                 </div>
               </div>

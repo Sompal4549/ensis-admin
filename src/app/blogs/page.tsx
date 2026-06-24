@@ -583,7 +583,7 @@ const BlogsManagement = () => {
       </div>
 
       {/* ── NEWSLETTER + SUBSCRIBERS ── */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         <section className="bg-white border rounded-2xl shadow-sm overflow-hidden">
           <div className="bg-slate-50 border-b p-4 px-6 flex items-center gap-2">
             <Send className="text-emerald-600" size={20} />
