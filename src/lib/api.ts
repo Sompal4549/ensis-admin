@@ -201,6 +201,76 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+export type Click = {
+  _id: string;
+  platform: string;
+  ip: string;
+  userAgent: string;
+  createdAt: string;
+};
+
+export type Stat = {
+  _id: string;
+  count: number;
+};
+export type SocialLink = {
+  _id: string;
+  platform: string;
+  url: string;
+  icon?: string;
+  isActive: boolean;
+  order: number;
+}
+export const socialClickApi = {
+  list: (page = 1, limit = 50, platform?: string) => {
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: String(limit),
+    });
+
+    if (platform) {
+      params.set("platform", platform);
+    }
+
+    return request<{
+      clicks: Click[];
+      total: number;
+    }>(`/social-clicks?${params.toString()}`);
+  },
+
+  stats: () => {
+    return request<Stat[]>("/social-clicks/stats");
+  },
+
+   links: {
+    list: () => {
+      return request<SocialLink[]>("/social-clicks/links");
+    },
+
+    create: (data: Omit<SocialLink, "_id">) => {
+      return request<SocialLink>("/social-clicks/links", {
+        method: "POST",
+        data,
+      });
+    },
+
+    update: (id: string, data: Partial<SocialLink>) => {
+      return request<SocialLink>(`/social-clicks/links/${id}`, {
+        method: "PUT",
+        data,
+      });
+    },
+
+    remove: (id: string) => {
+      return request<{ success: boolean }>(
+        `/social-clicks/links/${id}`,
+        {
+          method: "DELETE",
+        }
+      );
+    },
+  },
+};
 
 const request = async <T>(path: string, options: AxiosRequestConfig = {}) => {
   try {

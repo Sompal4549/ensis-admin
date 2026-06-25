@@ -466,6 +466,7 @@ export default function AboutpageComponentRouteEditor({ componentKey, title }: {
         <div className="p-3 border rounded bg-gray-50 space-y-2">
           <h4 className="text-xs font-bold text-[#8d6a3a] uppercase">Company Information</h4>
           <label className={labelClass}>Company Name <input className={fieldClass} value={data.company?.name || ""} onChange={e => setData({ ...data, company: { ...data.company, name: e.target.value } })} /></label>
+           <label className={labelClass}>Map Link <input className={fieldClass} value={data.company?.maplink || ""} onChange={e => setData({ ...data, company: { ...data.company, maplink: e.target.value } })} /></label>
           <label className={labelClass}>Company Description <textarea className={fieldClass} rows={2} value={data.company?.description || ""} onChange={e => setData({ ...data, company: { ...data.company, description: e.target.value } })} /></label>
           
           <div className="grid grid-cols-2 gap-4">
