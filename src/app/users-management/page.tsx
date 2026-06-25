@@ -10,7 +10,6 @@ import {
   X, 
   Loader2, 
   Mail,
-  Lock,
   Phone,
   Search,
 } from "lucide-react";
@@ -29,7 +28,7 @@ function UsersManagementPage() {
   const [form, setForm] = useState({ name: "", email: "", phone: "", role: "admin" });
 
   useEffect(() => {
-    fetchUsers();
+   fetchUsers();
   }, []);
 
   async function fetchUsers() {
@@ -81,7 +80,7 @@ function UsersManagementPage() {
         toast.success("User created successfully");
       }
       resetForm();
-      fetchUsers();
+     await fetchUsers();
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Operation failed";
       toast.error(message);
@@ -95,13 +94,29 @@ function UsersManagementPage() {
     try {
       await adminApi.deleteUser(id);
       toast.success("User deleted");
-      fetchUsers();
+      await fetchUsers();
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Delete failed";
       toast.error(message);
     }
   };
+const handleRoleChange = async (
+  userId: string,
+  role: string
+) => {
+  try {
+    await adminApi.changeUserRole(userId, role);
+    toast.success("Role updated successfully");
+    await fetchUsers();
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Failed to update role";
 
+    toast.error(message);
+  }
+};
   const filteredUsers = users.filter(u => 
     u.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
     u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -131,7 +146,7 @@ function UsersManagementPage() {
               <div className="p-1.5 bg-blue-100 text-blue-600 rounded-lg">
                 <Users size={18} />
               </div>
-              <h2 className="text-sm font-bold ">Admin Users</h2>
+            <h2 className="text-sm font-bold">Users Management</h2>
             </div>
           </div>
 
@@ -142,20 +157,21 @@ function UsersManagementPage() {
                   <th className="px-6 py-3">Name</th>
                   <th className="px-6 py-3">Email</th>
                   <th className="px-6 py-3">Phone</th>
+                  <th className="px-6 py-3">Role</th>
                   <th className="px-6 py-3 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
                 {loading ? (
                   <tr>
-                    <td colSpan={3} className="py-10 text-center">
+                    <td colSpan={5} className="py-10 text-center">
                       <Loader2 className="animate-spin mx-auto text-blue-600 mb-2" size={24} />
                       <span className="">Loading users...</span>
                     </td>
                   </tr>
                 ) : filteredUsers.length === 0 ? (
                   <tr>
-                    <td colSpan={3} className="py-10 text-center  italic">No users found</td>
+                    <td colSpan={5} className="py-10 text-center  italic">No users found</td>
                   </tr>
                 ) : filteredUsers.map(user => (
                   <tr key={user._id} className="hover:bg-slate-50/50 transition-colors group">
@@ -165,6 +181,19 @@ function UsersManagementPage() {
                     </td>
                     <td className="px-6 py-4 ">{user.email}</td>
                     <td className="px-6 py-4 ">{user.phone || "—"}</td>
+                    <td className="px-6 py-4">
+  <select
+    value={user.role}
+    onChange={(e) =>
+      handleRoleChange(user._id, e.target.value)
+    }
+    className="border border-slate-200 rounded-lg px-2 py-1 text-xs"
+  >
+    <option value="admin">Admin</option>
+    <option value="superadmin">Super Admin</option>
+    <option value="editor">Editor</option>
+  </select>
+</td>
                     <td className="px-6 py-4 text-right space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button onClick={() => handleEdit(user)} className="p-1.5  hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer">
                         <Edit size={16} />

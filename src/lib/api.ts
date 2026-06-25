@@ -295,12 +295,42 @@ export const adminApi = {
       method: "POST",
       data: { mobile, password },
     }),
+
   dashboard: () => request<Record<string, unknown>>("/admin/dashboard"),
+
   listUsers: () => request<AuthUser[]>("/admin/users"),
-  createUser: (payload: Record<string, unknown>) => request<AuthUser>("/admin/users", { method: "POST", data: payload }),
-  updateUser: (id: string, payload: Record<string, unknown>) =>
-    request<AuthUser>(`/admin/users/${id}`, { method: "PUT", data: payload }),
-  deleteUser: (id: string) => request<null>(`/admin/users/${id}`, { method: "DELETE" }),
+
+  createUser: (payload: Record<string, unknown>) =>
+    request<AuthUser>("/admin/users", {
+      method: "POST",
+      data: payload,
+    }),
+
+  updateUser: (
+    id: string,
+    payload: Record<string, unknown>
+  ) =>
+    request<AuthUser>(`/admin/users/${id}`, {
+      method: "PUT",
+      data: payload,
+    }),
+
+  deleteUser: (id: string) =>
+    request<null>(`/admin/users/${id}`, {
+      method: "DELETE",
+    }),
+
+  changeUserRole: (
+    userId: string,
+    role: string
+  ) =>
+    request<AuthUser>("/admin/users/role", {
+      method: "PUT",
+      data: {
+        userId,
+        role,
+      },
+    }),
 };
 
 export const categoryApi = {
