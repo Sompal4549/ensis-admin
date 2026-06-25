@@ -28,6 +28,10 @@ type ProductForm = {
   overview: {
     title: string;
     description: string;
+    seeItInRealSpaces: { title: string; images: { image: string; imageAlt: string }[] };
+    productPricingFeatures: { title: string; image: string }[];
+    emiOptions: boolean;
+    customSize: boolean;
     overviewList: string[];
     specifications: { title: string; specificationsList: { title: string; description: string }[] };
     keyFeatures: { title: string; keyFeaturesList: string[] };
@@ -39,7 +43,7 @@ type ProductForm = {
     smartDesignAppearance: {
       highlight: string;
       title: string;
-      woodFinish: string[];
+      woodFinish: { image: string; title: string }[];
       sizeOptions: { title: string; description: string }[];
     };
     faqs: { question: string; description: string }[];
@@ -55,18 +59,19 @@ const emptyProduct: ProductForm = {
   tags: [""], images: [], slug: "",
   overview: {
     title: "", description: "",
+    seeItInRealSpaces: { title: "", images: [] },
+    productPricingFeatures: [],
+    emiOptions: false,
+    customSize: false,
     overviewList: [""],
     specifications: { title: "", specificationsList: [{ title: "", description: "" }] },
     keyFeatures: { title: "", keyFeaturesList: [""] },
-    dimensions: {
-      title: "",
-      dimensionsList: [{ title: "", description: "" }],
-    },
+    dimensions: { title: "", dimensionsList: [{ title: "", description: "" }] },
     materialAndCare: { title: "", description: "" },
     productSpecifications: [{ highlight: "", title: "", image: "", specifications: [{ title: "", description: "" }] }],
     whatisInclueded: [""],
     items: [{ image: "", title: "", description: "" }],
-    smartDesignAppearance: { highlight: "", title: "", woodFinish: [""], sizeOptions: [{ title: "", description: "" }] },
+    smartDesignAppearance: { highlight: "", title: "", woodFinish: [], sizeOptions: [{ title: "", description: "" }] },
     faqs: [{ question: "", description: "" }],
   },
   isFeatured: false, isActive: true,
@@ -158,67 +163,124 @@ export default function ProductsPage() {
     }
   };
 
-  const editProduct = (product: Product) => {
+const editProduct = (product: Product) => {
     const categoryId = typeof product.category === "string" ? product.category : product.category?._id || "";
     const toArray = <T,>(val: T | T[] | undefined, fallback: T[]): T[] =>
       val ? (Array.isArray(val) ? val : [val]) : fallback;
 
     setProductForm({
       id: product._id,
-      title: product.title || "", code: product.code || "",
-      description: product.description || "", shortDescription: product.shortDescription || "",
-      price: String(product.price || ""), discountPrice: String(product.discountPrice || ""),
-      stock: String(product.stock || ""), category: categoryId,
-      subcategory: product.subcategory || "", material: product.material || "",
+      title: product.title || "",
+      code: product.code || "",
+      description: product.description || "",
+      shortDescription: product.shortDescription || "",
+      price: String(product.price || ""),
+      discountPrice: String(product.discountPrice || ""),
+      stock: String(product.stock || ""),
+      category: categoryId,
+      subcategory: product.subcategory || "",
+      material: product.material || "",
       weight: String(product.weight || ""),
-      tags: product.tags || [], images: product.images || [], slug: product.slug || "",
+      tags: product.tags?.length ? product.tags : [""],
+      images: product.images || [],
+      slug: product.slug || "",
       overview: {
         title: product.overview?.title || "",
         description: product.overview?.description || "",
-        overviewList: product.overview?.overviewList || [""],
+
+        seeItInRealSpaces: {
+          title: product.overview?.seeItInRealSpaces?.title || "",
+          images: (product.overview?.seeItInRealSpaces?.images || []).map((img: any) => ({
+            image: img?.image || "",
+            imageAlt: img?.imageAlt || "",
+          })),
+        },
+
+        productPricingFeatures: (product.overview?.productPricingFeatures || []).map((pf: any) => ({
+          title: pf?.title || "",
+          image: pf?.image || "",
+        })),
+
+        emiOptions: product.overview?.emiOptions || false,
+        customSize: product.overview?.customSize || false,
+
+        overviewList: product.overview?.overviewList?.length
+          ? product.overview.overviewList
+          : [""],
+
         specifications: {
           title: product.overview?.specifications?.title || "",
-          specificationsList: product.overview?.specifications?.specificationsList || [{ title: "", description: "" }],
+          specificationsList: (product.overview?.specifications?.specificationsList || [{ title: "", description: "" }]).map((s: any) => ({
+            title: s?.title || "",
+            description: s?.description || "",
+          })),
         },
+
         keyFeatures: {
           title: product.overview?.keyFeatures?.title || "",
-          keyFeaturesList: product.overview?.keyFeatures?.keyFeaturesList?.map((item: any) =>
-            typeof item === 'string' ? item : item.title || item.description || ""
-          ) || [""],
+          keyFeaturesList: (product.overview?.keyFeatures?.keyFeaturesList || [""]).map((item: any) =>
+            typeof item === "string" ? item : item?.title || item?.description || ""
+          ),
         },
+
         dimensions: {
           title: product.overview?.dimensions?.title || "",
-          dimensionsList:
-            product.overview?.dimensions?.dimensionsList?.map((item: any) => ({
-              title: item?.title || "",
-              description: item?.description || "",
-            })) || [{ title: "", description: "" }],
+          dimensionsList: (product.overview?.dimensions?.dimensionsList || [{ title: "", description: "" }]).map((item: any) => ({
+            title: item?.title || "",
+            description: item?.description || "",
+          })),
         },
+
         materialAndCare: {
           title: product.overview?.materialAndCare?.title || "",
           description: product.overview?.materialAndCare?.description || "",
         },
-        productSpecifications: toArray(product.overview?.productSpecifications, [{ highlight: "", title: "", image: "", specifications: [{ title: "", description: "" }] }]).map(ps => ({
-          highlight: ps.highlight || "",
-          title: ps.title || "",
-          image: ps.image || "",
-          specifications: ps.specifications || [{ title: "", description: "" }],
+
+        productSpecifications: toArray(
+          product.overview?.productSpecifications,
+          [{ highlight: "", title: "", image: "", specifications: [{ title: "", description: "" }] }]
+        ).map((ps: any) => ({
+          highlight: ps?.highlight || "",
+          title: ps?.title || "",
+          image: ps?.image || "",
+          specifications: (ps?.specifications || [{ title: "", description: "" }]).map((s: any) => ({
+            title: s?.title || "",
+            description: s?.description || "",
+          })),
         })),
-        whatisInclueded: product.overview?.whatisInclueded || [""],
-        items: product.overview?.items || [{ image: "", title: "", description: "" }],
+
+        whatisInclueded: product.overview?.whatisInclueded?.length
+          ? product.overview.whatisInclueded
+          : [""],
+
+        items: (product.overview?.items || [{ image: "", title: "", description: "" }]).map((item: any) => ({
+          image: item?.image || "",
+          title: item?.title || "",
+          description: item?.description || "",
+        })),
+
         smartDesignAppearance: {
           highlight: product.overview?.smartDesignAppearance?.highlight || "",
           title: product.overview?.smartDesignAppearance?.title || "",
-          woodFinish: product.overview?.smartDesignAppearance?.woodFinish || [""],
-          sizeOptions: product.overview?.smartDesignAppearance?.sizeOptions || [{ title: "", description: "" }],
+          woodFinish: (product.overview?.smartDesignAppearance?.woodFinish || []).map((wf: any) => ({
+            image: wf?.image || "",
+            title: wf?.title || "",
+          })),
+          sizeOptions: (product.overview?.smartDesignAppearance?.sizeOptions || [{ title: "", description: "" }]).map((opt: any) => ({
+            title: opt?.title || "",
+            description: opt?.description || "",
+          })),
         },
-        faqs: product.overview?.faqs || [{ question: "", description: "" }],
+
+        faqs: (product.overview?.faqs || [{ question: "", description: "" }]).map((faq: any) => ({
+          question: faq?.question || "",
+          description: faq?.description || "",
+        })),
       },
       isFeatured: !!product.isFeatured,
       isActive: product.isActive !== false,
     });
   };
-
   const deleteProduct = async (product: Product) => {
     if (!confirm(`Delete ${product.title}?`)) return;
     setLoading(true);
@@ -311,7 +373,75 @@ export default function ProductsPage() {
               <input className={fieldClass} value={productForm.code} onChange={(e) => setProductForm({ ...productForm, code: e.target.value })} placeholder="e.g. ENS-001" />
             </div>
           </div>
+{/* ────── Pricing Section ────── */}
+          <fieldset className="border border-slate-200 rounded-xl p-4 space-y-4">
+            <legend className="text-[10px] font-black uppercase text-blue-600 tracking-widest px-1">Pricing Section</legend>
 
+            {/* See It In Real Spaces */}
+            <div className="p-3 border border-slate-200 rounded-xl bg-slate-50 space-y-3">
+              <h5 className="text-[10px] font-bold uppercase">See It In Real Spaces</h5>
+              <div>
+                <label className={labelClass}>Section Title</label>
+                <input className={fieldClass} placeholder="e.g. See It In Real Spaces" value={productForm.overview.seeItInRealSpaces.title} onChange={e => setProductForm({ ...productForm, overview: { ...productForm.overview, seeItInRealSpaces: { ...productForm.overview.seeItInRealSpaces, title: e.target.value } } })} />
+              </div>
+              <div className="space-y-2">
+                <label className={labelClass}>Images</label>
+                {productForm.overview.seeItInRealSpaces.images.map((item, idx) => (
+                  <div key={idx} className="p-3 border border-slate-200 rounded-xl bg-white space-y-2 relative">
+                    <button type="button" onClick={() => { const list = productForm.overview.seeItInRealSpaces.images.filter((_, i) => i !== idx); setProductForm({ ...productForm, overview: { ...productForm.overview, seeItInRealSpaces: { ...productForm.overview.seeItInRealSpaces, images: list } } }); }} className="absolute top-2 right-2 text-rose-500"><Trash2 size={13} /></button>
+                    <input className={fieldClass} placeholder="Alt Text" value={item.imageAlt} onChange={e => { const list = [...productForm.overview.seeItInRealSpaces.images]; list[idx].imageAlt = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, seeItInRealSpaces: { ...productForm.overview.seeItInRealSpaces, images: list } } }); }} />
+                    <div className="flex gap-3 items-end">
+                      {item.image && <Image width={80} height={56} src={getImageUrl(item.image)} alt="Space" className="h-14 w-20 rounded object-cover border shrink-0" crossOrigin="anonymous" />}
+                      <div className="flex-1 space-y-1.5">
+                        <input className={fieldClass} placeholder="Paste image URL" value={item.image} onChange={e => { const list = [...productForm.overview.seeItInRealSpaces.images]; list[idx].image = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, seeItInRealSpaces: { ...productForm.overview.seeItInRealSpaces, images: list } } }); }} />
+                        <label className="cursor-pointer inline-flex items-center gap-1.5 bg-white border border-slate-200 px-2.5 py-1 rounded text-[10px] font-bold hover:bg-blue-50 transition-colors">
+                          <ImagePlus size={11} /> Upload
+                          <input type="file" className="hidden" accept="image/*" onChange={async e => { const file = e.target.files?.[0]; if (!file) return; const url = await uploadImage(file, "products"); const list = [...productForm.overview.seeItInRealSpaces.images]; list[idx].image = url; setProductForm({ ...productForm, overview: { ...productForm.overview, seeItInRealSpaces: { ...productForm.overview.seeItInRealSpaces, images: list } } }); }} />
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, seeItInRealSpaces: { ...productForm.overview.seeItInRealSpaces, images: [...productForm.overview.seeItInRealSpaces.images, { image: "", imageAlt: "" }] } } })} className="w-full py-2 border-2 border-dashed rounded-lg text-[10px] font-bold hover:bg-slate-50">+ Add Image</button>
+              </div>
+            </div>
+
+            {/* Product Pricing Features — array */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <h5 className="text-[10px] font-bold uppercase">Product Pricing Features</h5>
+                <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, productPricingFeatures: [...productForm.overview.productPricingFeatures, { title: "", image: "" }] } })} className="text-[10px] font-bold text-blue-600 flex items-center gap-1"><Plus size={11} /> Add</button>
+              </div>
+              {productForm.overview.productPricingFeatures.map((pf, idx) => (
+                <div key={idx} className="p-3 border border-slate-200 rounded-xl bg-slate-50 space-y-2 relative">
+                  <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, productPricingFeatures: productForm.overview.productPricingFeatures.filter((_, i) => i !== idx) } })} className="absolute top-2 right-2 text-rose-500"><Trash2 size={13} /></button>
+                  <input className={fieldClass} placeholder="Feature Title" value={pf.title} onChange={e => { const list = [...productForm.overview.productPricingFeatures]; list[idx].title = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, productPricingFeatures: list } }); }} />
+                  <div className="flex gap-3 items-end">
+                    {pf.image && <Image width={80} height={56} src={getImageUrl(pf.image)} alt="Feature" className="h-14 w-20 rounded object-cover border shrink-0" crossOrigin="anonymous" />}
+                    <div className="flex-1 space-y-1.5">
+                      <input className={fieldClass} placeholder="Paste image URL" value={pf.image} onChange={e => { const list = [...productForm.overview.productPricingFeatures]; list[idx].image = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, productPricingFeatures: list } }); }} />
+                      <label className="cursor-pointer inline-flex items-center gap-1.5 bg-white border border-slate-200 px-2.5 py-1 rounded text-[10px] font-bold hover:bg-blue-50 transition-colors">
+                        <ImagePlus size={11} /> Upload
+                        <input type="file" className="hidden" accept="image/*" onChange={async e => { const file = e.target.files?.[0]; if (!file) return; const url = await uploadImage(file, "products"); const list = [...productForm.overview.productPricingFeatures]; list[idx].image = url; setProductForm({ ...productForm, overview: { ...productForm.overview, productPricingFeatures: list } }); }} />
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* EMI & Custom Size */}
+            <div className="flex gap-6 py-1">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={productForm.overview.emiOptions} onChange={e => setProductForm({ ...productForm, overview: { ...productForm.overview, emiOptions: e.target.checked } })} className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
+                <span className="text-xs font-semibold text-slate-700">EMI Available</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={productForm.overview.customSize} onChange={e => setProductForm({ ...productForm, overview: { ...productForm.overview, customSize: e.target.checked } })} className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
+                <span className="text-xs font-semibold text-slate-700">Custom Size Available</span>
+              </label>
+            </div>
+          </fieldset>
           {/* Description */}
           <div>
             <label className={labelClass}>Description</label>
@@ -709,16 +839,26 @@ export default function ProductsPage() {
               <h5 className="text-[10px] font-bold  uppercase">Smart Design & Appearance</h5>
               <input className={fieldClass} placeholder="Highlight" value={productForm.overview.smartDesignAppearance.highlight} onChange={e => setProductForm({ ...productForm, overview: { ...productForm.overview, smartDesignAppearance: { ...productForm.overview.smartDesignAppearance, highlight: e.target.value } } })} />
               <input className={fieldClass} placeholder="Appearance Title" value={productForm.overview.smartDesignAppearance.title} onChange={e => setProductForm({ ...productForm, overview: { ...productForm.overview, smartDesignAppearance: { ...productForm.overview.smartDesignAppearance, title: e.target.value } } })} />
-              <div>
+             <div>
                 <label className={labelClass}>Wood Finishes</label>
                 <div className="space-y-2 mt-1">
                   {productForm.overview.smartDesignAppearance.woodFinish.map((item, idx) => (
-                    <div key={idx} className="flex gap-2">
-                      <input className={fieldClass} value={item} onChange={e => { const list = [...productForm.overview.smartDesignAppearance.woodFinish]; list[idx] = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, smartDesignAppearance: { ...productForm.overview.smartDesignAppearance, woodFinish: list } } }); }} />
-                      <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, smartDesignAppearance: { ...productForm.overview.smartDesignAppearance, woodFinish: productForm.overview.smartDesignAppearance.woodFinish.filter((_, i) => i !== idx) } } })} className="shrink-0 text-rose-500 hover:bg-rose-50 p-1.5 rounded"><Trash2 size={13} /></button>
+                    <div key={idx} className="p-3 border border-slate-200 rounded-xl bg-white space-y-2 relative">
+                      <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, smartDesignAppearance: { ...productForm.overview.smartDesignAppearance, woodFinish: productForm.overview.smartDesignAppearance.woodFinish.filter((_, i) => i !== idx) } } })} className="absolute top-2 right-2 text-rose-500"><Trash2 size={13} /></button>
+                      <input className={fieldClass} placeholder="Finish Name e.g. Walnut" value={item.title} onChange={e => { const list = [...productForm.overview.smartDesignAppearance.woodFinish]; list[idx] = { ...list[idx], title: e.target.value }; setProductForm({ ...productForm, overview: { ...productForm.overview, smartDesignAppearance: { ...productForm.overview.smartDesignAppearance, woodFinish: list } } }); }} />
+                      <div className="flex gap-3 items-end">
+                        {item.image && <Image width={80} height={56} src={getImageUrl(item.image)} alt={item.title} className="h-14 w-20 rounded object-cover border shrink-0" crossOrigin="anonymous" />}
+                        <div className="flex-1 space-y-1.5">
+                          <input className={fieldClass} placeholder="Paste image URL" value={item.image} onChange={e => { const list = [...productForm.overview.smartDesignAppearance.woodFinish]; list[idx] = { ...list[idx], image: e.target.value }; setProductForm({ ...productForm, overview: { ...productForm.overview, smartDesignAppearance: { ...productForm.overview.smartDesignAppearance, woodFinish: list } } }); }} />
+                          <label className="cursor-pointer inline-flex items-center gap-1.5 bg-white border border-slate-200 px-2.5 py-1 rounded text-[10px] font-bold hover:bg-blue-50 transition-colors">
+                            <ImagePlus size={11} /> Upload
+                            <input type="file" className="hidden" accept="image/*" onChange={async e => { const file = e.target.files?.[0]; if (!file) return; const url = await uploadImage(file, "products"); const list = [...productForm.overview.smartDesignAppearance.woodFinish]; list[idx] = { ...list[idx], image: url }; setProductForm({ ...productForm, overview: { ...productForm.overview, smartDesignAppearance: { ...productForm.overview.smartDesignAppearance, woodFinish: list } } }); }} />
+                          </label>
+                        </div>
+                      </div>
                     </div>
                   ))}
-                  <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, smartDesignAppearance: { ...productForm.overview.smartDesignAppearance, woodFinish: [...productForm.overview.smartDesignAppearance.woodFinish, ""] } } })} className="text-[10px] font-bold text-blue-600 flex items-center gap-1"><Plus size={12} /> Add Finish</button>
+                  <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, smartDesignAppearance: { ...productForm.overview.smartDesignAppearance, woodFinish: [...productForm.overview.smartDesignAppearance.woodFinish, { title: "", image: "" }] } } })} className="text-[10px] font-bold text-blue-600 flex items-center gap-1"><Plus size={12} /> Add Finish</button>
                 </div>
               </div>
               <div>

@@ -35,6 +35,7 @@ import {
   UserRoundPlus,
   UserRoundCog,
   X,
+  TrendingUp,
 } from "lucide-react";
 import { LoginForm, useAuth } from "@/components/auth/AuthContext";
 import sidebarBg from "@/assets/sidebarbg.webp";
@@ -132,9 +133,11 @@ const NAV_ITEMS: NavItem[] = [
       { label: "Product listing", path: "/product-listing", icon: <Boxes size={16} /> },
       { label: "Projects & Clients", path: "/projects-and-clients", icon: <FolderOpen size={16} /> },
       { label: "Enquary Page Management", path: "/enquiry-page-management", icon: <UserRoundPlus size={16} /> },
+      { label: "Products Page Management", path: "/product-page-management", icon: <Boxes size={16} /> },
     ],
   },
-  { label: "Products Page Management", path: "/product-page-management", icon: <Boxes size={16} /> },
+  { label: "Social Click", path: "/social-clicks-page", icon: <TrendingUp size={16} /> },
+
   { label: "Products", path: "/products", icon: <Boxes size={16} /> },
   { label: "blogs", path: "/blogs", icon: <MessageSquare size={16} /> },
   { label: "Categories", path: "/categories-management", icon: <LayoutGrid size={16} /> },
@@ -364,7 +367,7 @@ function SidebarContent({
 
       {/* Need Help */}
       {!collapsed ? (
-        <div className="mx-3 mb-4 mt-auto flex items-center justify-between rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 p-3 text-white shadow-lg shadow-blue-900/10">
+        <div className="mx-3 mb-4 mt-auto flex items-center justify-between rounded-xl bg-linear-to-r from-blue-600 to-blue-700 p-3 text-white shadow-lg shadow-blue-900/10">
           <div className="flex items-center gap-3">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/15 text-white">
               <Headphones size={16} />
