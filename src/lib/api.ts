@@ -39,7 +39,11 @@ export type Product = {
     title?: string;
     description?: string;
     overviewList?: string[];
-    specifications?: { title: string; specificationsList: { title: string; description: string }[] }
+    seeItInRealSpaces?: { title: string; images: { image: string; imageAlt: string }[] };
+    productPricingFeatures?: { title: string; image: string }[];
+    emiOptions?: boolean;
+    customSize?: boolean;
+    specifications?: { title: string; specificationsList: { title: string; description: string }[] };
     keyFeatures?: { title: string; keyFeaturesList: string[] };
     dimensions?: { title: string; dimensionsList: { title: string; description: string }[] };
     materialAndCare?: { title: string; description: string };
@@ -49,7 +53,7 @@ export type Product = {
     smartDesignAppearance?: {
       highlight?: string;
       title?: string;
-      woodFinish?: string[];
+      woodFinish?: { image: string; title: string }[];
       sizeOptions?: { title: string; description: string }[];
     };
     faqs?: { question: string; description: string }[];
