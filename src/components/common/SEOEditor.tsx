@@ -6,8 +6,6 @@ import { Save } from "lucide-react";
 import { pageApi, type PageData } from "@/lib/api";
 import { fieldClass, labelClass } from "@/constants";
 
-const optionalSeoFields = ["metaKeywords", "canonical", "ogJson", "schema"] as const;
-
 interface SEOEditorProps {
   slug: string;
   pageName?: string;
@@ -18,12 +16,11 @@ export default function SEOEditor({ slug, pageName, title }: SEOEditorProps) {
   const [loading, setLoading] = useState(false);
   const [pageData, setPageData] = useState<PageData | null>(null);
 
-  const generatePageName = (slugValue: string) => {
-    return slugValue
+  const generatePageName = (slugValue: string) =>
+    slugValue
       .split("-")
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(" ");
-  };
 
   const [form, setForm] = useState({
     pageName: pageName || generatePageName(slug),
@@ -31,12 +28,10 @@ export default function SEOEditor({ slug, pageName, title }: SEOEditorProps) {
       metaTitle: "",
       metaDescription: "",
       metaKeywords: "",
-      h1: "",
       canonical: "",
       ogJson: "",
       schema: "",
     },
-    // robots: "index, follow",
   });
 
   const loadData = useCallback(async () => {
@@ -51,12 +46,10 @@ export default function SEOEditor({ slug, pageName, title }: SEOEditorProps) {
             metaTitle: data.seo?.metaTitle || "",
             metaDescription: data.seo?.metaDescription || "",
             metaKeywords: data.seo?.metaKeywords || "",
-            h1: data.seo?.h1 || "",
             canonical: data.seo?.canonical || "",
             ogJson: data.seo?.ogJson || "",
             schema: data.seo?.schema || "",
           },
-          // robots: data.robots || "index, follow",
         });
       }
     } catch (error: unknown) {
@@ -72,37 +65,35 @@ export default function SEOEditor({ slug, pageName, title }: SEOEditorProps) {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+
+    if (form.seo.metaTitle.trim().length > 65) {
+      toast.warn("Meta Title should not exceed 65 characters");
+      return;
+    }
+    if (form.seo.metaDescription.trim().length > 155) {
+      toast.warn("Meta Description should not exceed 155 characters");
+      return;
+    }
+
     try {
       setLoading(true);
 
       const seoPayload: PageData["seo"] = {
         metaTitle: form.seo.metaTitle.trim(),
         metaDescription: form.seo.metaDescription.trim(),
-        h1: form.seo.h1.trim(),
       };
 
-      optionalSeoFields.forEach((field) => {
+      (["metaKeywords", "canonical", "ogJson", "schema"] as const).forEach((field) => {
         const value = form.seo[field]?.trim();
-        if (value) {
-          seoPayload[field] = value;
-        }
+        if (value !== undefined && value !== null) seoPayload[field] = value;
       });
 
       const payload = {
-        ...form,
         pageName: form.pageName.trim(),
         seo: seoPayload,
       };
 
-      if (payload.seo.metaTitle.length > 65) {
-        toast.warn("Meta Title should not exceed 65 characters");
-        return;
-      }
-
-      if (payload.seo.metaDescription.length > 155) {
-        toast.warn("Meta Description should not exceed 155 characters");
-        return;
-      }
+      console.log("Payload being sent:", JSON.stringify(payload, null, 2));
 
       if (pageData) {
         await pageApi.update(pageData._id, payload);
@@ -110,7 +101,7 @@ export default function SEOEditor({ slug, pageName, title }: SEOEditorProps) {
       } else {
         await pageApi.create({ ...payload, slug: slug === "home" ? "/" : slug });
         toast.success("SEO page created and settings saved!");
-        loadData();
+        await loadData();
       }
     } catch (error: unknown) {
       toast.error(error instanceof Error ? error.message : "Failed to save SEO updates");
@@ -139,15 +130,6 @@ export default function SEOEditor({ slug, pageName, title }: SEOEditorProps) {
                 className={`${fieldClass} mt-2 bg-gray-50 text-gray-400 cursor-not-allowed`}
                 value={form.pageName}
                 readOnly
-              />
-            </label>
-            <label className={labelClass}>
-              H1 Tag Content
-              <input
-                className={`${fieldClass} mt-2`}
-                value={form.seo.h1}
-                onChange={(e) => setForm({ ...form, seo: { ...form.seo, h1: e.target.value } })}
-                required
               />
             </label>
             <label className={labelClass}>
@@ -181,47 +163,32 @@ export default function SEOEditor({ slug, pageName, title }: SEOEditorProps) {
             />
             <span className="text-xs text-[#5f5a50] mt-1 block">{form.seo.metaDescription.length}/155</span>
           </label>
-          <div className="grid gap-4">
-            <label className={labelClass}>
-              Canonical URL
-              <div className="flex gap-2 mt-2">
-                <input
-                  className={fieldClass}
-                  value={form.seo.canonical}
-                  onChange={(e) => setForm({ ...form, seo: { ...form.seo, canonical: e.target.value } })}
-                  placeholder="https://ensis.in/page-slug"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() =>
-                    setForm({
-                      ...form,
-                      seo: {
-                        ...form.seo,
-                        canonical: `https://ensis.in/${slug === "home" ? "" : slug}`,
-                      },
-                    })
-                  }
-                  className="shrink-0 px-3 py-1.5 text-xs font-bold bg-[#faf6ef] border border-[#ded3c4] text-[#6f542f] rounded-md hover:bg-[#f0e8d8] transition-colors"
-                >
-                  Auto Fill
-                </button>
-              </div>
-            </label>
-            {/* <label className={labelClass}>
-              Robots
-              <select
-                className={`${fieldClass} mt-2`}
-                value={form.robots}
-                onChange={(e) => setForm({ ...form, robots: e.target.value })}
-                required
+          <label className={labelClass}>
+            Canonical URL
+            <div className="flex gap-2 mt-2">
+              <input
+                className={fieldClass}
+                value={form.seo.canonical}
+                onChange={(e) => setForm({ ...form, seo: { ...form.seo, canonical: e.target.value } })}
+                placeholder="https://ensis.in/page-slug"
+              />
+              <button
+                type="button"
+                onClick={() =>
+                  setForm({
+                    ...form,
+                    seo: {
+                      ...form.seo,
+                      canonical: `https://ensis.in/${slug === "home" ? "" : slug}`,
+                    },
+                  })
+                }
+                className="shrink-0 px-3 py-1.5 text-xs font-bold bg-[#faf6ef] border border-[#ded3c4] text-[#6f542f] rounded-md hover:bg-[#f0e8d8] transition-colors"
               >
-                <option value="index, follow">index, follow</option>
-                <option value="noindex, nofollow">noindex, nofollow</option>
-              </select>
-            </label> */}
-          </div>
+                Auto Fill
+              </button>
+            </div>
+          </label>
         </section>
 
         {/* Open Graph */}
@@ -235,7 +202,6 @@ export default function SEOEditor({ slug, pageName, title }: SEOEditorProps) {
               placeholder={`{\n  "og:type": "website",\n  "og:url": "https://ensis.in/",\n  "og:site_name": "Ensis"\n}`}
               onChange={(e) => setForm({ ...form, seo: { ...form.seo, ogJson: e.target.value } })}
               spellCheck={false}
-              required
             />
           </label>
           <p className="text-xs text-gray-400">OG properties as JSON. Will be injected as Open Graph meta tags.</p>
@@ -252,7 +218,6 @@ export default function SEOEditor({ slug, pageName, title }: SEOEditorProps) {
               placeholder={`{\n  "@context": "https://schema.org",\n  "@type": "Organization",\n  "name": "Ensis"\n}`}
               onChange={(e) => setForm({ ...form, seo: { ...form.seo, schema: e.target.value } })}
               spellCheck={false}
-              required
             />
           </label>
           <p className="text-xs text-gray-400">Paste valid JSON-LD schema. Will be injected in &lt;script type="application/ld+json"&gt; tag.</p>

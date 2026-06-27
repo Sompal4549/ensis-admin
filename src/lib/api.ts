@@ -375,7 +375,6 @@ export type PageData = {
     metaTitle: string;
     metaDescription: string;
     metaKeywords?: string;
-    h1: string;
     canonical?: string;
     ogJson?: string;
     schema?: string;
