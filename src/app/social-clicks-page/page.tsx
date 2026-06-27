@@ -9,7 +9,7 @@ import Image from "next/image";
 import { getImageUrl, socialClickApi, type SocialLink } from "@/lib/api";
 import { ImageUploadField } from "@/components/common/ImageUploadField";
 
-type Click = { _id: string; platform: string; ip: string; userAgent: string; createdAt: string };
+type Click = { _id: string; platform: string; ip: string; userAgent: string; country?: string; city?: string; region?: string; timezone?: string; createdAt: string };
 type Stat  = { _id: string; count: number };
 
 const PLATFORM_COLORS: Record<string, string> = {
@@ -299,20 +299,29 @@ export default function SocialClicksPage() {
                 </summary>
                 <div className="border-t">
                   {items.map(c => (
-                    <div key={c._id} className="border-b px-3 py-2 last:border-0">
-                      <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
-                        <div>
-                          <div className="flex items-center gap-1 font-mono text-[11px]">
-                            {c.ip}
-                            <a href={`https://ipinfo.io/${c.ip}`} target="_blank" rel="noreferrer" className="text-blue-500"><ExternalLink size={10} /></a>
-                          </div>
-                          <div className="max-w-xs truncate text-[10px] text-slate-500">{c.userAgent}</div>
-                        </div>
-                        <div className="text-[10px] text-slate-500 whitespace-nowrap">
-                          {new Date(c.createdAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}
-                        </div>
-                      </div>
-                    </div>
+                 <div key={c._id} className="border-b px-3 py-2 last:border-0">
+  <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
+    <div>
+      <div className="flex items-center gap-1 font-mono text-[11px]">
+        {c.ip}
+        <a href={`https://ipinfo.io/${c.ip}`} target="_blank" rel="noreferrer" className="text-blue-500">
+          <ExternalLink size={10} />
+        </a>
+      </div>
+      {/* Location */}
+      {(c.city || c.country) && (
+        <div className="text-[10px] text-slate-500 flex items-center gap-1 mt-0.5">
+          📍 {[c.city, c.region, c.country].filter(Boolean).join(", ")}
+          {c.timezone && <span className="text-slate-400">· {c.timezone}</span>}
+        </div>
+      )}
+      <div className="max-w-xs truncate text-[10px] text-slate-400 mt-0.5">{c.userAgent}</div>
+    </div>
+    <div className="text-[10px] text-slate-500 whitespace-nowrap">
+      {new Date(c.createdAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}
+    </div>
+  </div>
+</div>
                   ))}
                 </div>
               </details>
