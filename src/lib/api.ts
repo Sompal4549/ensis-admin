@@ -447,3 +447,53 @@ export const uploadImage = async (file: File, subDir: string = "") => {
   });
   return data.url;
 };
+
+export type Application = {
+  _id: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  currentLocation: string;
+  department: string;
+  coverLetter?: string;
+  resume: string;
+  status: "pending" | "reviewed" | "shortlisted" | "rejected";
+  createdAt: string;
+  updatedAt: string;
+};
+
+export const applicationApi = {
+  list: () =>
+    request<Application[]>("/applications"),
+
+  get: (id: string) =>
+    request<Application>(`/applications/${id}`),
+
+  create: async (formData: FormData) => {
+    const response = await api.post<ApiEnvelope<Application>>(
+      "/applications",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    return response.data.data;
+  },
+
+  update: (
+    id: string,
+    payload: Partial<Application>
+  ) =>
+    request<Application>(`/applications/${id}`, {
+      method: "PUT",
+      data: payload,
+    }),
+
+  remove: (id: string) =>
+    request<null>(`/applications/${id}`, {
+      method: "DELETE",
+    }),
+};

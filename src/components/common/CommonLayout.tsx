@@ -148,6 +148,8 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Projects", path: "/projects-management", icon: <FolderOpen size={16} /> },
   { label: "User Management", path: "/users-management", icon: <UserRoundCog size={16} /> },
   { label: "Enquaries", path: "/enquries", icon: <UserRoundCog size={16} /> },
+  { label: "Applications", path: "/applications", icon: <UserRoundCog size={16} /> },
+
   {
     label: "SEO",
     path: "/seo",
