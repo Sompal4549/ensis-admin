@@ -30,6 +30,8 @@ interface BlogForm {
   isFeatured: boolean;
   isActive?: boolean;
   viewCount?: number;
+isPopular: boolean;
+isVoiceOfExperts: boolean;
 
   banner: {
     title: string;
@@ -112,7 +114,8 @@ const emptyBlogForm = (): BlogForm => ({
   slug: "",
   author: "",
   isFeatured: false,
-
+isPopular: false,
+isVoiceOfExperts: false,
   banner: {
     title: "",
     highlight: "",
@@ -265,6 +268,8 @@ const handleCreateBlog = async (e: React.FormEvent) => {
 
   setBlogForm({
   title: blog.title || "",
+  isPopular: blogForm.isPopular,
+isVoiceOfExperts: blogForm.isVoiceOfExperts,
   slug: blog.slug || "",
   author: blog.author || "",
   isFeatured: blog.isFeatured || false,
@@ -442,6 +447,25 @@ const renderBasicTab = () => (
         Featured Blog
       </label>
     </div>
+    <div className="flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+  <input
+    type="checkbox"
+    id="isPopular"
+    checked={blogForm.isPopular}
+    onChange={(e) => setBlogForm({ ...blogForm, isPopular: e.target.checked })}
+  />
+  <label htmlFor="isPopular" className="cursor-pointer">Popular Blog</label>
+</div>
+
+<div className="flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+  <input
+    type="checkbox"
+    id="isVoiceOfExperts"
+    checked={blogForm.isVoiceOfExperts}
+    onChange={(e) => setBlogForm({ ...blogForm, isVoiceOfExperts: e.target.checked })}
+  />
+  <label htmlFor="isVoiceOfExperts" className="cursor-pointer">Voice of Experts</label>
+</div>
   </div>
 );
 
