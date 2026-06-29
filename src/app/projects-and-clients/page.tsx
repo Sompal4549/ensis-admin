@@ -572,9 +572,9 @@ const ProjectAndClientManagement = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 gap-8">
         {/* Sidebar: Component List */}
-        <div className="lg:col-span-4 space-y-4">
+        {/* <div className="lg:col-span-4 space-y-4">
           <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
             <h3 className="text-sm font-bold  uppercase tracking-wider mb-4">Components</h3>
             <ComponentList 
@@ -586,10 +586,10 @@ const ProjectAndClientManagement = () => {
               knownKeys={knownKeys}
             />
           </div>
-        </div>
+        </div> */}
 
         {/* Main: Form Editor */}
-        <div className="lg:col-span-8 space-y-6">
+        <div className="space-y-6">
       {activeTab === 'banner' && (
         <form onSubmit={handleSave} className="bg-white border rounded-2xl shadow-sm overflow-hidden animate-in fade-in duration-300">
         <div className="bg-slate-50 border-b p-4 px-6 flex items-center justify-between">

@@ -9,9 +9,6 @@ import { fieldClass, labelClass } from "@/constants";
 import { ImageUploadField } from "@/components/common/ImageUploadField";
 import { buildEmptyContactContent, ContactPageContentKeys, contactPageKeys } from "@/app/homepage-content/contact/contactPageContent";
 
-
-
-
 const randomId = () => Math.random().toString(36).slice(2, 9);
 
 export default function ContactPageManager() {
@@ -103,6 +100,15 @@ export default function ContactPageManager() {
         <div className="grid grid-cols-2 gap-4">
           <label className={labelClass}>Title <input className={fieldClass} value={data.title} onChange={e => setForm({...form, data: {...data, title: e.target.value}})} /></label>
           <label className={labelClass}>Description <input className={fieldClass} value={data.description} onChange={e => setForm({...form, data: {...data, description: e.target.value}})} /></label>
+          <ImageUploadField
+  label="Form Image"
+  value={data.formImage || ""}
+  fieldKey="contact.getInTouch.formImage"
+  uploadingField={uploadingField}
+  onUploadingChange={setUploadingField}
+  onError={m => toast.error(m)}
+  onUpload={url => setForm({ ...form, data: { ...data, formImage: url } })}
+/>
         </div>
         <div className="space-y-4">
           <h4 className="font-bold">Contact Details</h4>
@@ -122,7 +128,7 @@ export default function ContactPageManager() {
             <input className={fieldClass} placeholder="Social Section Title" value={data.socialLinks.title} onChange={e => setForm({...form, data: {...data, socialLinks: {...data.socialLinks, title: e.target.value}}})} />
             <ImageUploadField label="Section Icon" value={data.socialLinks.iconImage} fieldKey="social.main" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => setForm({...form, data: {...data, socialLinks: {...data.socialLinks, iconImage: url}}})} />
           </div>
-          <div className="space-y-2">
+          {/* <div className="space-y-2">
             {data.socialLinks.links.map((link: any, idx: number) => (
               <div key={link.id} className="flex gap-2 items-end relative group p-2 border border-slate-100 rounded-lg">
                 <button type="button" onClick={() => { const nl = data.socialLinks.links.filter((_:any, i:number) => i !== idx); setForm({...form, data: {...data, socialLinks: {...data.socialLinks, links: nl}}})}} className="absolute -top-2 -right-2 bg-white shadow rounded-full p-1 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity z-10"><Trash2 size={12} /></button>
@@ -131,7 +137,7 @@ export default function ContactPageManager() {
               </div>
             ))}
             <button type="button" onClick={() => setForm({...form, data: {...data, socialLinks: {...data.socialLinks, links: [...data.socialLinks.links, {id: randomId(), iconImage: '', link: ''}]}}})} className="text-blue-600 font-bold text-sm flex items-center gap-1 mt-2">+ Add Social Link</button>
-          </div>
+          </div> */}
         </div>
       </div>
     );
@@ -155,7 +161,130 @@ export default function ContactPageManager() {
       </div>
     );
   };
+const renderCtaBanner = () => {
+  const data = form.data as any;
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <label className={labelClass}>
+          Title
+          <input
+            className={fieldClass}
+            value={data.title}
+            onChange={e => setForm({ ...form, data: { ...data, title: e.target.value } })}
+          />
+        </label>
+        <label className={labelClass}>
+          Available Time
+          <input
+            className={fieldClass}
+            placeholder="e.g. Mon–Sat, 9am–6pm"
+            value={data.availableTime}
+            onChange={e => setForm({ ...form, data: { ...data, availableTime: e.target.value } })}
+          />
+        </label>
+      </div>
+      <label className={labelClass}>
+        Description
+        <textarea
+          className={fieldClass}
+          rows={3}
+          value={data.description}
+          onChange={e => setForm({ ...form, data: { ...data, description: e.target.value } })}
+        />
+      </label>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <label className={labelClass}>
+          Phone
+          <input
+            className={fieldClass}
+            value={data.phone}
+            onChange={e => setForm({ ...form, data: { ...data, phone: e.target.value } })}
+          />
+        </label>
+        <label className={labelClass}>
+          WhatsApp Link
+          <input
+            className={fieldClass}
+            value={data.whatsappLink}
+            onChange={e => setForm({ ...form, data: { ...data, whatsappLink: e.target.value } })}
+          />
+        </label>
+      </div>
+      <ImageUploadField
+        label="Banner Image"
+        value={data.image}
+        fieldKey="contact.ctaBanner.image"
+        uploadingField={uploadingField}
+        onUploadingChange={setUploadingField}
+        onError={m => toast.error(m)}
+        onUpload={url => setForm({ ...form, data: { ...data, image: url } })}
+      />
+    </div>
+  );
+};
 
+const renderPremiumMap = () => {
+  const data = form.data as any;
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <label className={labelClass}>
+          Title
+          <input
+            className={fieldClass}
+            value={data.title}
+            onChange={e => setForm({ ...form, data: { ...data, title: e.target.value } })}
+          />
+        </label>
+        <label className={labelClass}>
+          Button Text
+          <input
+            className={fieldClass}
+            value={data.buttonText}
+            onChange={e => setForm({ ...form, data: { ...data, buttonText: e.target.value } })}
+          />
+        </label>
+      </div>
+      <label className={labelClass}>
+        Description
+        <textarea
+          className={fieldClass}
+          rows={3}
+          value={data.description}
+          onChange={e => setForm({ ...form, data: { ...data, description: e.target.value } })}
+        />
+      </label>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <label className={labelClass}>
+          Map Embed URL
+          <input
+            className={fieldClass}
+            value={data.mapUrl}
+            onChange={e => setForm({ ...form, data: { ...data, mapUrl: e.target.value } })}
+          />
+        </label>
+        <label className={labelClass}>
+          Directions URL
+          <input
+            className={fieldClass}
+            value={data.directionsUrl}
+            onChange={e => setForm({ ...form, data: { ...data, directionsUrl: e.target.value } })}
+          />
+        </label>
+      </div>
+      <ImageUploadField
+        label="Leaf / Decorative Image"
+        value={data.leafImage}
+        fieldKey="contact.premiumMap.leaf"
+        uploadingField={uploadingField}
+        onUploadingChange={setUploadingField}
+        onError={m => toast.error(m)}
+        onUpload={url => setForm({ ...form, data: { ...data, leafImage: url } })}
+      />
+    </div>
+  );
+};
   return (
     <div className="w-full">
       <section className="w-full">
@@ -188,9 +317,12 @@ export default function ContactPageManager() {
             {form.key === "contact.hero" && renderHeroForm()}
             {form.key === "contact.getInTouch" && renderGetInTouchForm()}
             {form.key === "contact.featuresStrip" && renderFeaturesStrip()}
+            {form.key === "contact.ctaBanner" && renderCtaBanner()}
+{form.key === "contact.premiumMap" && renderPremiumMap()}
           </div>
         </form>
       </section>
     </div>
   );
 }
+

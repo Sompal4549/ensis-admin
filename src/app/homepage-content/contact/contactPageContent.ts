@@ -3,12 +3,16 @@ import { ComponentContent } from "@/lib/api";
 export type ContactPageContentKeys =
   | "contact.hero"
   | "contact.getInTouch"
-  | "contact.featuresStrip";
+  | "contact.featuresStrip"
+  | "contact.ctaBanner"
+  | "contact.premiumMap";
 
 export const contactPageKeys: { key: ContactPageContentKeys; label: string; description: string }[] = [
   { key: "contact.hero", label: "Contact Hero", description: "Main banner with heading, highlighted text, and icon features." },
   { key: "contact.getInTouch", label: "Get In Touch", description: "Contact details grid and social media links." },
   { key: "contact.featuresStrip", label: "Features Strip", description: "Horizontal strip of icon-based features." },
+  { key: "contact.ctaBanner", label: "CTA Banner", description: "Call to action banner with phone and whatsapp link." },
+  { key: "contact.premiumMap", label: "Premium Map", description: "Map section with title, description and directions." },
 ];
 
 export const defaultContactData: Record<ContactPageContentKeys, any> = {
@@ -19,14 +23,27 @@ export const defaultContactData: Record<ContactPageContentKeys, any> = {
   "contact.getInTouch": {
     title: "", description: "",
     contactDetails: [{ id: "1", icon: "", title: "", description: "" }],
-    socialLinks: {
-      iconImage: "", title: "",
-      links: [{ id: "1", iconImage: "", link: "" }]
-    }
+    formImage: "", 
   },
   "contact.featuresStrip": {
     features: [{ id: "1", iconImage: "", title: "", description: "" }]
-  }
+  },
+ "contact.ctaBanner": {
+  title: "",
+  description: "",
+  availableTime: "",
+  phone: "",
+  whatsappLink: "",
+  image: "",
+},
+  "contact.premiumMap": {
+    mapUrl: "",
+    title: "",
+    description: "",
+    buttonText: "",
+    directionsUrl: "",
+    leafImage: "",
+  },
 };
 
 export const buildEmptyContactContent = (key: ContactPageContentKeys): Omit<ComponentContent, "_id"> & { key: ContactPageContentKeys } => {
@@ -41,9 +58,6 @@ export const buildEmptyContactContent = (key: ContactPageContentKeys): Omit<Comp
   }
   if (data.socialLinks?.links) {
     data.socialLinks.links = data.socialLinks.links.map((l: any) => ({ ...l, id: randomId() }));
-  }
-  if (key === "contact.featuresStrip") {
-    data.features = data.features.map((f: any) => ({ ...f, id: randomId() }));
   }
 
   const keyInfo = contactPageKeys.find(k => k.key === key);

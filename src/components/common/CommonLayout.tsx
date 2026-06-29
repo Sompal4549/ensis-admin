@@ -725,7 +725,7 @@ export function CommonLayout({
       "contact-page-management": { name: "contact", path: "/contact" },
       "career-page-management": { name: "career", path: "/career" },
       "enquiry-page-managment": { name: "enquiry", path: "enquiry" },
-      "projects-and-clients": { name: "projects-and-clients", path: "projects-and-clients" },
+      "projects-and-clients": { name: "projects", path: "projects-and-clients" },
     };
 
     const match = Object.keys(configMap).find((key) => pathname.includes(key));
