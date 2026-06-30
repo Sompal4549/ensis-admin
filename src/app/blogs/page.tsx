@@ -47,7 +47,14 @@ category?: string;
     image: string;
     alt: string;
   };
-
+ctaBanner: {
+    title: string;
+    lotusImage: string;
+    description: string;
+    buttonText: string;
+    buttonLink: string;
+    bannerImage:string;
+  };
   article: {
     content: string;
   };
@@ -90,7 +97,6 @@ category?: string;
     metaTitle: string;
     metaDescription: string;
     metaKeywords: string;
-    h1: string;
     canonical: string;
     ogJson: string;
     schema: string;
@@ -111,7 +117,7 @@ const TABS: { key: FormTab; label: string; icon: React.ReactNode }[] = [
   { key: "basic", label: "Basic Info", icon: <FileText size={14} /> },
   { key: "banner", label: "Banner", icon: <LayoutTemplate size={14} /> },
   // { key: "article",    label: "Article",      icon: <BookOpen size={14} /> },
-  { key: "newsletter", label: "Newsletter", icon: <Mail size={14} /> },
+  { key: "newsletter", label: "Newsletter / CTA Banner", icon: <Mail size={14} /> },
   { key: "seo", label: "SEO", icon: <Globe size={14} /> },
 ];
 const emptyBlogForm = (): BlogForm => ({
@@ -122,6 +128,14 @@ const emptyBlogForm = (): BlogForm => ({
   category: "",
 isPopular: false,
 isVoiceOfExperts: false,
+ctaBanner: {
+    title: "",
+    lotusImage: "",
+    description: "",
+    buttonText: "",
+    buttonLink: "",
+    bannerImage:"",
+  },
   banner: {
     title: "",
     highlight: "",
@@ -179,7 +193,6 @@ isVoiceOfExperts: false,
     metaTitle: "",
     metaDescription: "",
     metaKeywords: "",
-    h1: "",
     canonical: "",
     ogJson: "",
     schema: "",
@@ -244,6 +257,7 @@ const handleCreateBlog = async (e: React.FormEvent) => {
   banner: {...blogForm.banner, readingTime},
   blogImage: blogForm.blogImage,
   article: blogForm.article,
+  ctaBanner: blogForm.ctaBanner,
   aboutTheAuthor: blogForm.aboutTheAuthor,
   onThisPage: blogForm.onThisPage,
    expert: blogForm.expert,
@@ -283,6 +297,7 @@ isVoiceOfExperts: blog.isVoiceOfExperts || false,
 category: blog.category || "",
   slug: blog.slug || "",
   author: blog.author || "",
+  ctaBanner: blog.ctaBanner || emptyBlogForm().ctaBanner,
   isFeatured: blog.isFeatured || false,
   banner: blog.banner || emptyBlogForm().banner,
   blogImage: blog.blogImage || emptyBlogForm().blogImage,
@@ -821,6 +836,47 @@ const renderBannerTab = () => (
             </div>
           ))}
         </div>
+        <hr className="my-2" />
+        <h4 className="text-xs font-bold text-[#8d6a3a] uppercase tracking-wider">CTA Banner</h4>
+
+        <ImageUploadField
+          label="Lotus Image"
+          value={blogForm.ctaBanner.lotusImage}
+          fieldKey="blog.ctaBanner.lotus"
+          uploadingField={uploadingField}
+          onUploadingChange={setUploadingField}
+          onUpload={url => setBlogForm({ ...blogForm, ctaBanner: { ...blogForm.ctaBanner, lotusImage: url } })}
+          onError={m => toast.error(m)}
+        />
+   <ImageUploadField
+          label="Banner Image"
+          value={blogForm.ctaBanner.bannerImage}
+          fieldKey="blog.ctaBanner.bannerImage"
+          uploadingField={uploadingField}
+          onUploadingChange={setUploadingField}
+          onUpload={url => setBlogForm({ ...blogForm, ctaBanner: { ...blogForm.ctaBanner, bannerImage: url } })}
+          onError={m => toast.error(m)}
+        />
+        <label className={labelClass}>
+          Title
+          <input className={fieldClass} value={blogForm.ctaBanner.title} onChange={e => setBlogForm({ ...blogForm, ctaBanner: { ...blogForm.ctaBanner, title: e.target.value } })} />
+        </label>
+
+        <label className={labelClass}>
+          Description
+          <textarea className={`${fieldClass} h-20`} value={blogForm.ctaBanner.description} onChange={e => setBlogForm({ ...blogForm, ctaBanner: { ...blogForm.ctaBanner, description: e.target.value } })} />
+        </label>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <label className={labelClass}>
+            Button Text
+            <input className={fieldClass} value={blogForm.ctaBanner.buttonText} onChange={e => setBlogForm({ ...blogForm, ctaBanner: { ...blogForm.ctaBanner, buttonText: e.target.value } })} />
+          </label>
+          <label className={labelClass}>
+            Button Link
+            <input className={fieldClass} value={blogForm.ctaBanner.buttonLink} onChange={e => setBlogForm({ ...blogForm, ctaBanner: { ...blogForm.ctaBanner, buttonLink: e.target.value } })} />
+          </label>
+        </div>
       </div>
     );
   };
@@ -849,22 +905,6 @@ const renderBannerTab = () => (
         <Search size={18} />
         <h3 className="text-sm font-bold uppercase tracking-wider">Social Sharing (Open Graph)</h3>
       </div>
-<label className={labelClass}>
-  H1
-  <input
-    className={fieldClass}
-    value={blogForm.seo.h1}
-    onChange={(e) =>
-      setBlogForm({
-        ...blogForm,
-        seo: {
-          ...blogForm.seo,
-          h1: e.target.value,
-        },
-      })
-    }
-  />
-</label>
 
 <label className={labelClass}>
   OG Json

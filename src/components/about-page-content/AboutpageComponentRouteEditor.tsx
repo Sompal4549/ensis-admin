@@ -470,7 +470,7 @@ export default function AboutpageComponentRouteEditor({ componentKey, title }: {
           <label className={labelClass}>Company Description <textarea className={fieldClass} rows={2} value={data.company?.description || ""} onChange={e => setData({ ...data, company: { ...data.company, description: e.target.value } })} /></label>
           
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <ImageUploadField 
                 label="Design House Logo" 
                 value={typeof data.company?.designHouselogo === 'string' ? data.company.designHouselogo : data.company?.designHouselogo?.imageUrl} 
@@ -479,7 +479,7 @@ export default function AboutpageComponentRouteEditor({ componentKey, title }: {
                 onUpload={url => { const nc = structuredClone(data.company || {}); nc.designHouselogo = typeof nc.designHouselogo === 'object' ? { ...nc.designHouselogo, imageUrl: url } : { imageUrl: url, alt: '' }; setData({ ...data, company: nc }); }} 
               />
               <label className={labelClass}>Design Logo Alt <input className={fieldClass} value={data.company?.designHouselogo?.alt || ""} onChange={e => { const nc = structuredClone(data.company || {}); nc.designHouselogo = typeof nc.designHouselogo === 'object' ? { ...nc.designHouselogo, alt: e.target.value } : { imageUrl: '', alt: e.target.value }; setData({ ...data, company: nc }); }} /></label>
-            </div>
+            </div> */}
             <div className="space-y-2">
               <ImageUploadField 
                 label="Ensis Logo" 

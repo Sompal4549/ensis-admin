@@ -115,7 +115,7 @@ export type HeaderData = {
 export type FooterData = {
   company: {
     name: string;
-    designHouselogo: ImageData;
+    // designHouselogo: ImageData;
     description: string;
     ensisLogo: ImageData;
     socialLinks: { image: ImageData; url: string }[];
