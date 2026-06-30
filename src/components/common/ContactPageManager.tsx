@@ -122,13 +122,13 @@ export default function ContactPageManager() {
           ))}
           <button type="button" onClick={() => setForm({...form, data: {...data, contactDetails: [...data.contactDetails, {id: randomId(), icon: '', title: '', description: ''}]}})} className="text-sm font-bold text-blue-500">+ Add Detail Card</button>
         </div>
-        <div className="p-4 bg-slate-50 rounded-2xl border space-y-4">
+        {/* <div className="p-4 bg-slate-50 rounded-2xl border space-y-4">
           <h4 className="font-bold">Social Links Section</h4>
           <div className="grid grid-cols-2 gap-4">
             <input className={fieldClass} placeholder="Social Section Title" value={data.socialLinks.title} onChange={e => setForm({...form, data: {...data, socialLinks: {...data.socialLinks, title: e.target.value}}})} />
             <ImageUploadField label="Section Icon" value={data.socialLinks.iconImage} fieldKey="social.main" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => setForm({...form, data: {...data, socialLinks: {...data.socialLinks, iconImage: url}}})} />
           </div>
-          {/* <div className="space-y-2">
+          <div className="space-y-2">
             {data.socialLinks.links.map((link: any, idx: number) => (
               <div key={link.id} className="flex gap-2 items-end relative group p-2 border border-slate-100 rounded-lg">
                 <button type="button" onClick={() => { const nl = data.socialLinks.links.filter((_:any, i:number) => i !== idx); setForm({...form, data: {...data, socialLinks: {...data.socialLinks, links: nl}}})}} className="absolute -top-2 -right-2 bg-white shadow rounded-full p-1 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity z-10"><Trash2 size={12} /></button>
@@ -137,8 +137,8 @@ export default function ContactPageManager() {
               </div>
             ))}
             <button type="button" onClick={() => setForm({...form, data: {...data, socialLinks: {...data.socialLinks, links: [...data.socialLinks.links, {id: randomId(), iconImage: '', link: ''}]}}})} className="text-blue-600 font-bold text-sm flex items-center gap-1 mt-2">+ Add Social Link</button>
-          </div> */}
-        </div>
+          </div>
+        </div> */}
       </div>
     );
   };
