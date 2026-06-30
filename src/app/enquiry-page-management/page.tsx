@@ -423,224 +423,391 @@ const EnquaryPageManagement = () => {
               <div className="p-4 space-y-6">
 
                 {/* Hero Section */}
-               <div className="border-b border-slate-100 pb-4">
-            <h2 className="text-lg font-bold text-slate-700 mb-4">Hero Section</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className={labelClass}>Heading</label>
-                <input
-                  className={fieldClass}
-                  value={form.hero.heading}
-                  onChange={e => setForm({ ...form, hero: { ...form.hero, heading: e.target.value } })}
-                  placeholder="e.g. Get in Touch"
-                />
-                <label className={labelClass + " mt-4"}>Subheading</label>
-                <input
-                  className={fieldClass}
-                  value={form.hero.subheading}
-                  onChange={e => setForm({ ...form, hero: { ...form.hero, subheading: e.target.value } })}
-                  placeholder="e.g. We'd love to hear from you"
-                />
-              </div>
-              <ImageUploadField
-                label="Hero Image"
-                value={form.hero.imageSrc}
-                fieldKey="enquiry.hero.image"
-                uploadingField={uploadingField}
-                onUploadingChange={setUploadingField}
-                onUpload={url => setForm({ ...form, hero: { ...form.hero, imageSrc: url } })}
-                onError={m => toast.error(m)}
-              />     
-              
-              <div>
-                <label className={labelClass}>Hero Image Alt Text</label>
-                <input
-                  className={fieldClass}
-                  value={form.hero.imageAlt}
-                  onChange={e => setForm({ ...form, hero: { ...form.hero, imageAlt: e.target.value } })}
-                  placeholder="Alt text for hero image"
-                />
-              </div>
-               <ImageUploadField
-                label="Form Image"
-                value={form.hero.formImageSrc}
-                fieldKey="enquiry.hero.image"
-                uploadingField={uploadingField}
-                onUploadingChange={setUploadingField}
-                onUpload={url => setForm({ ...form, hero: { ...form.hero, formImageSrc: url } })}
-                onError={m => toast.error(m)}
-              />
-                 <div>
-                <label className={labelClass}>Form Image Alt Text</label>
-                <input
-                  className={fieldClass}
-                  value={form.hero.formImageAlt}
-                  onChange={e => setForm({ ...form, hero: { ...form.hero, formImageAlt: e.target.value } })}
-                  placeholder="Alt text for hero image"
-                />
-              </div>
-            </div>
-            <div className="mt-4">
-              <label className={labelClass}>Description</label>
-              <RichTextEditor
-                value={form.hero.description}
-                onChange={val => setForm({ ...form, hero: { ...form.hero, description: val } })}
-                placeholder="Enter a description for the hero section..."
-                minHeight="150px"
-              />
-            </div>
-          </div>
-
-          {/* Form Title */}
-          <div className="border-b border-slate-100 pb-4">
-            <h2 className="text-lg font-bold text-slate-700 mb-4">Form Section</h2>
-            <div>
-              <label className={labelClass}>Form Title</label>
-              <input
-                className={fieldClass}
-                value={form.formTitle}
-                onChange={e => setForm({ ...form, formTitle: e.target.value })}
-                placeholder="e.g. Send us an Enquiry"
-              />
-            </div>
-          </div>
-
-          {/* Dynamic Options Sections */}
-          {[
-            { key: 'projectTypeOptions', label: 'Project Type Options' },
-            { key: 'stateOptions', label: 'State Options' },
-            { key: 'cityOptions', label: 'City Options' },
-            { key: 'projectSizeOptions', label: 'Project Size Options' },
-            { key: 'budgetRangeOptions', label: 'Budget Range Options' },
-            { key: 'timelineOptions', label: 'Timeline Options' },
-          ].map((section) => (
-            <div key={section.key} className="border-b border-slate-100 pb-4">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-md font-bold text-slate-700">{section.label}</h3>
-                <button
-                  type="button"
-                  onClick={() => setForm({ ...form, [section.key]: [...(form as any)[section.key], { value: "", label: "" }] })}
-                  className="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-green-700 flex items-center gap-1"
-                >
-                  <PlusCircle size={14} /> Add Option
-                </button>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {(form as any)[section.key].map((option: SelectOption, index: number) => (
-                  <div key={option.value + index} className="p-3 border rounded-xl bg-slate-50 relative space-y-2">
-                    <button
-                      type="button"
-                      onClick={() => setForm({ ...form, [section.key]: (form as any)[section.key].filter((_: any, i: number) => i !== index) })}
-                      className="absolute top-2 right-2 text-red-500 hover:text-red-700"
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                <div className="border-b border-slate-100 pb-4">
+                  <h2 className="text-lg font-bold text-slate-700 mb-4">Hero Section</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className={labelClass}>Value</label>
+                      <label className={labelClass}>Heading</label>
                       <input
                         className={fieldClass}
-                        value={option.value}
-                    onChange={e =>
-  updateOption<SelectOption>(
-    (form as any)[section.key],
-    (newArr) => setForm({ ...form, [section.key]: newArr }),
-    index,
-    "label",
-    e.target.value
-  )
-}
-                        placeholder="e.g. residential"
+                        value={form.hero.heading}
+                        onChange={e => setForm({ ...form, hero: { ...form.hero, heading: e.target.value } })}
+                        placeholder="e.g. Get in Touch"
+                      />
+                      <label className={labelClass + " mt-4"}>Subheading</label>
+                      <input
+                        className={fieldClass}
+                        value={form.hero.subheading}
+                        onChange={e => setForm({ ...form, hero: { ...form.hero, subheading: e.target.value } })}
+                        placeholder="e.g. We'd love to hear from you"
                       />
                     </div>
+                    <ImageUploadField
+                      label="Hero Image"
+                      value={form.hero.imageSrc}
+                      fieldKey="enquiry.hero.image"
+                      uploadingField={uploadingField}
+                      onUploadingChange={setUploadingField}
+                      onUpload={url => setForm({ ...form, hero: { ...form.hero, imageSrc: url } })}
+                      onError={m => toast.error(m)}
+                    />
+
+                    <div>
+                      <label className={labelClass}>Hero Image Alt Text</label>
+                      <input
+                        className={fieldClass}
+                        value={form.hero.imageAlt}
+                        onChange={e => setForm({ ...form, hero: { ...form.hero, imageAlt: e.target.value } })}
+                        placeholder="Alt text for hero image"
+                      />
+                    </div>
+                    <ImageUploadField
+                      label="Form Image"
+                      value={form.hero.formImageSrc}
+                      fieldKey="enquiry.hero.formImage"
+                      uploadingField={uploadingField}
+                      onUploadingChange={setUploadingField}
+                      onUpload={url => setForm({ ...form, hero: { ...form.hero, formImageSrc: url } })}
+                      onError={m => toast.error(m)}
+                    />
+                    <div>
+                      <label className={labelClass}>Form Image Alt Text</label>
+                      <input
+                        className={fieldClass}
+                        value={form.hero.formImageAlt}
+                        onChange={e => setForm({ ...form, hero: { ...form.hero, formImageAlt: e.target.value } })}
+                        placeholder="Alt text for form image"
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <label className={labelClass}>Description</label>
+                    <RichTextEditor
+                      value={form.hero.description}
+                      onChange={val => setForm({ ...form, hero: { ...form.hero, description: val } })}
+                      placeholder="Enter a description for the hero section..."
+                      minHeight="150px"
+                    />
+                  </div>
+                </div>
+
+                {/* Form Title */}
+                <div className="border-b border-slate-100 pb-4">
+                  <h2 className="text-lg font-bold text-slate-700 mb-4">Form Section</h2>
+                  <div>
+                    <label className={labelClass}>Form Title</label>
+                    <input
+                      className={fieldClass}
+                      value={form.formTitle}
+                      onChange={e => setForm({ ...form, formTitle: e.target.value })}
+                      placeholder="e.g. Send us an Enquiry"
+                    />
+                  </div>
+                </div>
+
+                {/* Dynamic Options Sections */}
+                {[
+                  { key: 'projectTypeOptions', label: 'Project Type Options' },
+                  { key: 'stateOptions', label: 'State Options' },
+                  { key: 'cityOptions', label: 'City Options' },
+                  { key: 'projectSizeOptions', label: 'Project Size Options' },
+                  { key: 'budgetRangeOptions', label: 'Budget Range Options' },
+                  { key: 'timelineOptions', label: 'Timeline Options' },
+                ].map((section) => (
+                  <div key={section.key} className="border-b border-slate-100 pb-4">
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="text-md font-bold text-slate-700">{section.label}</h3>
+                      <button
+                        type="button"
+                        onClick={() => setForm({ ...form, [section.key]: [...(form as any)[section.key], { value: "", label: "" }] })}
+                        className="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-green-700 flex items-center gap-1"
+                      >
+                        <PlusCircle size={14} /> Add Option
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {(form as any)[section.key].map((option: SelectOption, index: number) => (
+                        <div key={option.value + index} className="p-3 border rounded-xl bg-slate-50 relative space-y-2">
+                          <button
+                            type="button"
+                            onClick={() => setForm({ ...form, [section.key]: (form as any)[section.key].filter((_: any, i: number) => i !== index) })}
+                            className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                          <div>
+                            <label className={labelClass}>Value</label>
+                            <input
+                              className={fieldClass}
+                              value={option.value}
+                              onChange={e =>
+                                updateOption<SelectOption>(
+                                  (form as any)[section.key],
+                                  (newArr) => setForm({ ...form, [section.key]: newArr }),
+                                  index,
+                                  "value",
+                                  e.target.value
+                                )
+                              }
+                              placeholder="e.g. residential"
+                            />
+                          </div>
+                          <div>
+                            <label className={labelClass}>Label</label>
+                            <input
+                              className={fieldClass}
+                              value={option.label}
+                              onChange={e =>
+                                updateOption<SelectOption>(
+                                  (form as any)[section.key],
+                                  (newArr) => setForm({ ...form, [section.key]: newArr }),
+                                  index,
+                                  "label",
+                                  e.target.value
+                                )
+                              }
+                              placeholder="e.g. Residential Project"
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+
+                {/* Services Options (Checkbox) */}
+                <div className="border-b border-slate-100 pb-4">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-md font-bold text-slate-700">Services Options</h3>
+                    <button
+                      type="button"
+                      onClick={() => setForm({ ...form, servicesOptions: [...form.servicesOptions, { id: randomId(), label: "" }] })}
+                      className="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-green-700 flex items-center gap-1"
+                    >
+                      <PlusCircle size={14} /> Add Service
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {form.servicesOptions.map((option, index) => (
+                      <div key={option.id} className="p-3 border rounded-xl bg-slate-50 relative space-y-2">
+                        <button
+                          type="button"
+                          onClick={() => setForm({ ...form, servicesOptions: form.servicesOptions.filter((_, i) => i !== index) })}
+                          className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                        <div>
+                          <label className={labelClass}>Label</label>
+                          <input
+                            className={fieldClass}
+                            value={option.label}
+                            onChange={e => updateOption(form.servicesOptions, (newArr) => setForm({ ...form, servicesOptions: newArr }), index, "label", e.target.value)}
+                            placeholder="e.g. Architectural Design"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Preferred Contact Options (Radio) */}
+                <div className="border-b border-slate-100 pb-4">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-md font-bold text-slate-700">Preferred Contact Options</h3>
+                    <button
+                      type="button"
+                      onClick={() => setForm({ ...form, preferredContactOptions: [...form.preferredContactOptions, { id: randomId(), label: "" }] })}
+                      className="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-green-700 flex items-center gap-1"
+                    >
+                      <PlusCircle size={14} /> Add Option
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {form.preferredContactOptions.map((option, index) => (
+                      <div key={option.id} className="p-3 border rounded-xl bg-slate-50 relative space-y-2">
+                        <button
+                          type="button"
+                          onClick={() => setForm({ ...form, preferredContactOptions: form.preferredContactOptions.filter((_, i) => i !== index) })}
+                          className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                        <div>
+                          <label className={labelClass}>Label</label>
+                          <input
+                            className={fieldClass}
+                            value={option.label}
+                            onChange={e => updateOption(form.preferredContactOptions, (newArr) => setForm({ ...form, preferredContactOptions: newArr }), index, "label", e.target.value)}
+                            placeholder="e.g. Email"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Why Choose Section */}
+                <div className="border-b border-slate-100 pb-4">
+                  <h2 className="text-lg font-bold text-slate-700 mb-4">Why Choose Section</h2>
+                  <div>
+                    <label className={labelClass}>Heading</label>
+                    <input
+                      className={fieldClass}
+                      value={form.whyChoose.heading}
+                      onChange={e => setForm({ ...form, whyChoose: { ...form.whyChoose, heading: e.target.value } })}
+                      placeholder="e.g. Why Choose Ensis"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <ImageUploadField
+                      label="Bottom Image"
+                      value={form.whyChoose.bottomImageSrc}
+                      fieldKey="enquiry.whyChoose.bottomImage"
+                      uploadingField={uploadingField}
+                      onUploadingChange={setUploadingField}
+                      onUpload={url => setForm({ ...form, whyChoose: { ...form.whyChoose, bottomImageSrc: url } })}
+                      onError={m => toast.error(m)}
+                    />
+                    <div>
+                      <label className={labelClass}>Bottom Image Alt</label>
+                      <input
+                        className={fieldClass}
+                        value={form.whyChoose.bottomImageAlt}
+                        onChange={e => setForm({ ...form, whyChoose: { ...form.whyChoose, bottomImageAlt: e.target.value } })}
+                        placeholder="Alt text"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-4 mt-4">
+                    <div className="flex justify-between items-center">
+                      <h3 className="text-md font-bold text-slate-700">Items</h3>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setForm({
+                            ...form,
+                            whyChoose: {
+                              ...form.whyChoose,
+                              items: [...form.whyChoose.items, { id: randomId(), iconSrc: "", iconAlt: "", title: "", description: "" }],
+                            },
+                          })
+                        }
+                        className="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-green-700 flex items-center gap-1"
+                      >
+                        <PlusCircle size={14} /> Add Item
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {form.whyChoose.items.map((item, index) => (
+                        <div key={item.id} className="p-4 border rounded-xl bg-slate-50 relative space-y-3">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setForm({
+                                ...form,
+                                whyChoose: { ...form.whyChoose, items: form.whyChoose.items.filter((_, i) => i !== index) },
+                              })
+                            }
+                            className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+
+                          <ImageUploadField
+                            label="Icon"
+                            value={item.iconSrc}
+                            fieldKey={`enquiry.whyChoose.item.${index}`}
+                            uploadingField={uploadingField}
+                            onUploadingChange={setUploadingField}
+                            onUpload={url => updateWhyChooseItem(index, "iconSrc", url)}
+                            onError={m => toast.error(m)}
+                          />
+
+                          <div>
+                            <label className={labelClass}>Icon Alt</label>
+                            <input
+                              className={fieldClass}
+                              value={item.iconAlt}
+                              onChange={e => updateWhyChooseItem(index, "iconAlt", e.target.value)}
+                              placeholder="Alt text"
+                            />
+                          </div>
+
+                          <div>
+                            <label className={labelClass}>Title</label>
+                            <input
+                              className={fieldClass}
+                              value={item.title}
+                              onChange={e => updateWhyChooseItem(index, "title", e.target.value)}
+                              placeholder="e.g. Expert Team"
+                            />
+                          </div>
+
+                          <div>
+                            <label className={labelClass}>Description</label>
+                            <textarea
+                              className={fieldClass}
+                              value={item.description}
+                              onChange={e => updateWhyChooseItem(index, "description", e.target.value)}
+                              rows={2}
+                              placeholder="Short description"
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Upload Section */}
+                <div className="border-b border-slate-100 pb-4">
+                  <h2 className="text-lg font-bold text-slate-700 mb-4">Upload Section</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className={labelClass}>Label</label>
                       <input
                         className={fieldClass}
-                        value={option.label}
-                        onChange={e => updateOption( (form as any)[section.key], (newArr) => setForm({ ...form, [section.key]: newArr }), index, "label", e.target.value)}
-                        placeholder="e.g. Residential Project"
+                        value={form.upload.label}
+                        onChange={e => setForm({ ...form, upload: { ...form.upload, label: e.target.value } })}
+                        placeholder="e.g. Upload Reference Files"
+                      />
+                    </div>
+                    <div>
+                      <label className={labelClass}>Helper Text</label>
+                      <input
+                        className={fieldClass}
+                        value={form.upload.helperText}
+                        onChange={e => setForm({ ...form, upload: { ...form.upload, helperText: e.target.value } })}
+                        placeholder="e.g. Max 5MB, PDF/JPG/PNG"
                       />
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
-          ))}
-
-          {/* Services Options (Checkbox) */}
-          <div className="border-b border-slate-100 pb-4">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-md font-bold text-slate-700">Services Options</h3>
-              <button
-                type="button"
-                onClick={() => setForm({ ...form, servicesOptions: [...form.servicesOptions, { id: randomId(), label: "" }] })}
-                className="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-green-700 flex items-center gap-1"
-              >
-                <PlusCircle size={14} /> Add Service
-              </button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {form.servicesOptions.map((option, index) => (
-                <div key={option.id} className="p-3 border rounded-xl bg-slate-50 relative space-y-2">
-                  <button
-                    type="button"
-                    onClick={() => setForm({ ...form, servicesOptions: form.servicesOptions.filter((_, i) => i !== index) })}
-                    className="absolute top-2 right-2 text-red-500 hover:text-red-700"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                  <div>
-                    <label className={labelClass}>Label</label>
-                    <input
-                      className={fieldClass}
-                      value={option.label}
-                      onChange={e => updateOption(form.servicesOptions, (newArr) => setForm({ ...form, servicesOptions: newArr }), index, "label", e.target.value)}
-                      placeholder="e.g. Architectural Design"
-                    />
-                  </div>
                 </div>
-              ))}
-            </div>
-          </div>
 
-          {/* Preferred Contact Options (Radio) */}
-          <div className="border-b border-slate-100 pb-4">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-md font-bold text-slate-700">Preferred Contact Options</h3>
-              <button
-                type="button"
-                onClick={() => setForm({ ...form, preferredContactOptions: [...form.preferredContactOptions, { id: randomId(), label: "" }] })}
-                className="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-green-700 flex items-center gap-1"
-              >
-                <PlusCircle size={14} /> Add Option
-              </button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {form.preferredContactOptions.map((option, index) => (
-                <div key={option.id} className="p-3 border rounded-xl bg-slate-50 relative space-y-2">
-                  <button
-                    type="button"
-                    onClick={() => setForm({ ...form, preferredContactOptions: form.preferredContactOptions.filter((_, i) => i !== index) })}
-                    className="absolute top-2 right-2 text-red-500 hover:text-red-700"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                  <div>
-                    <label className={labelClass}>Label</label>
-                    <input
-                      className={fieldClass}
-                      value={option.label}
-                      onChange={e => updateOption(form.preferredContactOptions, (newArr) => setForm({ ...form, preferredContactOptions: newArr }), index, "label", e.target.value)}
-                      placeholder="e.g. Email"
-                    />
-                  </div>
+                {/* Consent + Submit */}
+                <div>
+                  <label className={labelClass}>Consent Text</label>
+                  <textarea
+                    className={fieldClass}
+                    value={form.consentText}
+                    onChange={e => setForm({ ...form, consentText: e.target.value })}
+                    rows={2}
+                    placeholder="e.g. I agree to be contacted regarding my enquiry"
+                  />
+
+                  <label className={labelClass + " mt-4"}>Submit Button Text</label>
+                  <input
+                    className={fieldClass}
+                    value={form.submitButtonText}
+                    onChange={e => setForm({ ...form, submitButtonText: e.target.value })}
+                    placeholder="e.g. Submit Enquiry"
+                  />
                 </div>
-              ))}
-            </div>
-          </div>
 
-
-                {/* Dynamic Options Section Mapping ... (rest of the form fields) */}
               </div>
             </form>
           )}

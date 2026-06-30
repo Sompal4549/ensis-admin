@@ -32,7 +32,7 @@ interface BlogForm {
   viewCount?: number;
 isPopular: boolean;
 isVoiceOfExperts: boolean;
-
+category?: string;
   banner: {
     title: string;
     highlight: string;
@@ -62,7 +62,12 @@ isVoiceOfExperts: boolean;
   onThisPage: {
     title: string;
   };
-
+  expert: {
+    image: string;
+    name: string;
+    quote: string;
+    role: string;
+  };
   downloadMedia: {
     title: string;
     image: string;
@@ -114,6 +119,7 @@ const emptyBlogForm = (): BlogForm => ({
   slug: "",
   author: "",
   isFeatured: false,
+  category: "",
 isPopular: false,
 isVoiceOfExperts: false,
   banner: {
@@ -145,7 +151,12 @@ isVoiceOfExperts: false,
   onThisPage: {
     title: "",
   },
-
+ expert: {
+    image: "",
+    name: "",
+    quote: "",
+    role: "",
+  },
   downloadMedia: {
     title: "",
     image: "",
@@ -222,26 +233,25 @@ const handleCreateBlog = async (e: React.FormEvent) => {
   setLoading(true);
 
   try {
-    const payload = {
-      title: blogForm.title,
-      slug:
-        blogForm.slug ||
-        blogForm.title
-          .toLowerCase()
-          .replace(/\s+/g, "-")
-          .replace(/[^\w-]+/g, ""),
-      author: blogForm.author,
-      isFeatured: blogForm.isFeatured,
-      banner: {...blogForm.banner, readingTime},
-      blogImage: blogForm.blogImage,
-      article: blogForm.article,
-      aboutTheAuthor: blogForm.aboutTheAuthor,
-      onThisPage: blogForm.onThisPage,
-      downloadMedia: blogForm.downloadMedia,
-      newsletter: blogForm.newsletter,
-      seo: blogForm.seo,
-      robots: blogForm.robots,
-    };
+ const payload = {
+  title: blogForm.title,
+  slug: blogForm.slug || blogForm.title.toLowerCase().replace(/\s+/g, "-").replace(/[^\w-]+/g, ""),
+  author: blogForm.author,
+  isFeatured: blogForm.isFeatured,
+  isPopular: blogForm.isPopular,
+  isVoiceOfExperts: blogForm.isVoiceOfExperts,
+  category: blogForm.category,
+  banner: {...blogForm.banner, readingTime},
+  blogImage: blogForm.blogImage,
+  article: blogForm.article,
+  aboutTheAuthor: blogForm.aboutTheAuthor,
+  onThisPage: blogForm.onThisPage,
+   expert: blogForm.expert,
+  downloadMedia: blogForm.downloadMedia,
+  newsletter: blogForm.newsletter,
+  seo: blogForm.seo,
+  robots: blogForm.robots,
+};
 
     if (editingBlogId) {
       await api.put(`/blogs/${editingBlogId}`, payload);
@@ -268,12 +278,12 @@ const handleCreateBlog = async (e: React.FormEvent) => {
 
   setBlogForm({
   title: blog.title || "",
-  isPopular: blogForm.isPopular,
-isVoiceOfExperts: blogForm.isVoiceOfExperts,
+  isPopular: blog.isPopular || false,
+isVoiceOfExperts: blog.isVoiceOfExperts || false,
+category: blog.category || "",
   slug: blog.slug || "",
   author: blog.author || "",
   isFeatured: blog.isFeatured || false,
-
   banner: blog.banner || emptyBlogForm().banner,
   blogImage: blog.blogImage || emptyBlogForm().blogImage,
   article: blog.article || emptyBlogForm().article,
@@ -281,6 +291,8 @@ isVoiceOfExperts: blogForm.isVoiceOfExperts,
     blog.aboutTheAuthor || emptyBlogForm().aboutTheAuthor,
   onThisPage:
     blog.onThisPage || emptyBlogForm().onThisPage,
+     expert:
+    blog.expert || emptyBlogForm().expert,
   downloadMedia:
     blog.downloadMedia || emptyBlogForm().downloadMedia,
   newsletter:
@@ -344,7 +356,15 @@ const renderBasicTab = () => (
           }}
         />
       </label>
-
+<label className={labelClass}>
+  Category
+  <input
+    className={fieldClass}
+    value={blogForm.category || ""}
+    placeholder="e.g. Wellness, Ayurveda"
+    onChange={(e) => setBlogForm({ ...blogForm, category: e.target.value })}
+  />
+</label>
       <label className={labelClass}>
         Author
         <input
@@ -466,6 +486,71 @@ const renderBasicTab = () => (
   />
   <label htmlFor="isVoiceOfExperts" className="cursor-pointer">Voice of Experts</label>
 </div>
+
+{blogForm.isVoiceOfExperts && (
+  <div className="space-y-4 p-4 border rounded-xl bg-slate-50">
+    <h4 className="text-xs font-bold text-[#8d6a3a] uppercase tracking-wider">Expert Details</h4>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <ImageUploadField
+        label="Expert Image"
+        value={blogForm.expert?.image || ""}
+        fieldKey="blog.expert.image"
+        uploadingField={uploadingField}
+        onUploadingChange={setUploadingField}
+        onUpload={(url) =>
+          setBlogForm({
+            ...blogForm,
+            expert: { ...blogForm.expert, image: url },
+          })
+        }
+        onError={(m) => toast.error(m)}
+      />
+
+      <label className={labelClass}>
+        Expert Name
+        <input
+          className={fieldClass}
+          value={blogForm.expert?.name || ""}
+          onChange={(e) =>
+            setBlogForm({
+              ...blogForm,
+              expert: { ...blogForm.expert, name: e.target.value },
+            })
+          }
+        />
+      </label>
+    </div>
+
+    <label className={labelClass}>
+      Expert Role
+      <input
+        className={fieldClass}
+        value={blogForm.expert?.role || ""}
+        onChange={(e) =>
+          setBlogForm({
+            ...blogForm,
+            expert: { ...blogForm.expert, role: e.target.value },
+          })
+        }
+      />
+    </label>
+
+    <label className={labelClass}>
+      Expert Quote
+      <textarea
+        className={`${fieldClass} h-20`}
+        value={blogForm.expert?.quote || ""}
+        onChange={(e) =>
+          setBlogForm({
+            ...blogForm,
+            expert: { ...blogForm.expert, quote: e.target.value },
+          })
+        }
+      />
+    </label>
+  </div>
+)}
   </div>
 );
 

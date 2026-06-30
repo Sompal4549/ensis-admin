@@ -127,7 +127,7 @@ const NAV_ITEMS: NavItem[] = [
       },
       { label: "Turnkey", path: "/turnkey-page-content", icon: <Briefcase size={16} /> },
       { label: "Consultancy", path: "/consultancy-page-management", icon: <Users size={16} /> },
-      { label: "Blogs", path: "/blogs-page-management", icon: <MessageSquare size={16} /> },
+      { label: "Blogs Page Management", path: "/blogs-page-management", icon: <MessageSquare size={16} /> },
       { label: "Contact Us", path: "/contact-page-management", icon: <Headphones size={16} /> },
       { label: "Career Page", path: "/career-page-managment", icon: <UserRoundPlus size={16} /> },
       { label: "Product listing", path: "/product-listing", icon: <Boxes size={16} /> },
