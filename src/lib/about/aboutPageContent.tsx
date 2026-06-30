@@ -114,10 +114,10 @@ export type HeaderData = {
 
 export type FooterData = {
   company: {
+    ensisLogo: any;
     name: string;
     // designHouselogo: ImageData;
     description: string;
-    ensisLogo: ImageData;
     socialLinks: { image: ImageData; url: string }[];
     maplink:string;
   };
@@ -382,7 +382,6 @@ export const defaultAboutpageData :Record<AboutPageContentKeys, AboutPageData> =
         company: {
           name: "Design House India Pvt. Ltd.",
           maplink:"https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d7000.624411489639!2d77.38796300000001!3d28.680306000000005!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390cf1ead9e1d9e5%3A0x31a2384cd903039b!2sEnsis%20(Best%20Ayurvedic%2C%20Spa%20%26%20Panchkarma%20Equipment%20Manufacturer%20in%20Delhi%20NCR)!5e0!3m2!1sen!2sin!4v1782380646800!5m2!1sen!2sin",
-          designHouselogo: { imageUrl: "/images/design-house-logo.png", alt: "Design House Logo" },
           description: "Leading manufacturer of Ayurvedic, Spa & Wellness equipments. Crafting premium solutions for a healthier & better tomorrow.",
           ensisLogo: { imageUrl: "/images/ensis-logo.png", alt: "Ensis Logo" },
           socialLinks: [
