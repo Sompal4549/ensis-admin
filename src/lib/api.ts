@@ -331,6 +331,15 @@ export const adminApi = {
         role,
       },
     }),
+
+  addProductReview: (
+    productId: string,
+    payload: { customerId: string; rating: number; comment: string }
+  ) =>
+    request<unknown>(`/admin/reviews/${productId}`, {
+      method: "POST",
+      data: payload,
+    }),
 };
 
 export const categoryApi = {

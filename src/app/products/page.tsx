@@ -85,12 +85,18 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [users, setUsers] = useState<AuthUser[]>([]);
   const [productForm, setProductForm] = useState<ProductForm>(emptyProduct);
   // Review‑form state
+  const [selectedCustomerId, setSelectedCustomerId] = useState("");
   const [newRating, setNewRating] = useState<number | "">("");
   const [newComment, setNewComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const reviewCustomers = useMemo(
+    () => users.filter((user) => user.role !== "admin" && user.role !== "superadmin"),
+    [users]
+  );
 
   const selectedCategoryName = useMemo(() => {
     const category = categories.find((item) => item._id === productForm.category);
@@ -98,9 +104,14 @@ export default function ProductsPage() {
   }, [categories, productForm.category]);
 
   const refreshData = useCallback(async () => {
-    const [productResult, categoryResult] = await Promise.all([productApi.list(), categoryApi.list()]);
+    const [productResult, categoryResult, usersResult] = await Promise.all([
+      productApi.list(),
+      categoryApi.list(),
+      adminApi.listUsers(),
+    ]);
     setProducts(productResult.products);
     setCategories(categoryResult);
+    setUsers(usersResult);
     if (!productForm.category && categoryResult[0]) {
       setProductForm((current) => ({ ...current, category: categoryResult[0]._id }));
     }
@@ -301,25 +312,33 @@ export default function ProductsPage() {
   };
   const handleAddReview = async (e: FormEvent) => {
     e.preventDefault();
-    if (!newRating || !newComment) return;
+    if (!productForm.id) {
+      setMessage("Please select a saved product before adding a review.");
+      return;
+    }
+    if (!selectedCustomerId) {
+      setMessage("Please select a customer for this review.");
+      return;
+    }
+    if (!newRating || !newComment) {
+      setMessage("Please provide both rating and comment.");
+      return;
+    }
 
     setIsSubmitting(true);
     try {
-      // `productId` is whatever you already have available (e.g. from router params)
-      await adminApi.post(
-        `/reviews/${productId}`,
-        { rating: newRating, comment: newComment }
-      );
+      await adminApi.addProductReview(productForm.id, {
+        customerId: selectedCustomerId,
+        rating: Number(newRating),
+        comment: newComment,
+      });
 
-      // Show a toast – you probably already have a toast helper
-      // toast.success("Review added successfully");
-      // Reset the form
       setNewRating("");
       setNewComment("");
-      // Optionally refresh the product‑detail data / reviews list
-      // await fetchProduct();   // your existing loader
+      setSelectedCustomerId("");
+      setMessage("Review added for selected customer.");
     } catch (err: any) {
-      // toast.error(err?.response?.data?.message || "Failed to add review");
+      setMessage(err?.message || "Failed to add review");
       console.error(err);
     } finally {
       setIsSubmitting(false);
@@ -400,17 +419,43 @@ export default function ProductsPage() {
                 onSubmit={handleAddReview}
                 className="grid gap-4"
               >
+                <div>
+                  <label className={labelClass}>Product</label>
+                  <input
+                    className={fieldClass}
+                    value={productForm.title || "Select a product from the list"}
+                    disabled
+                  />
+                </div>
+
+                <div>
+                  <label className={labelClass}>Customer</label>
+                  <select
+                    value={selectedCustomerId}
+                    onChange={(e) => setSelectedCustomerId(e.target.value)}
+                    className={fieldClass}
+                    required
+                  >
+                    <option value="">Select a customer</option>
+                    {reviewCustomers.map((customer) => (
+                      <option key={customer._id} value={customer._id}>
+                        {customer.name} ({customer.email || customer.phone})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
                 {/* Rating selector – 5 stars */}
-                <div className="flex items-center">
+                <div className="flex items-center gap-3">
                   <label className={labelClass}>Rating</label>
                   <select
                     value={newRating}
-                    onChange={e => setNewRating(Number(e.target.value))}
+                    onChange={(e) => setNewRating(Number(e.target.value))}
                     className={fieldClass}
                     required
                   >
                     <option value="">Select…</option>
-                    {[1, 2, 3, 4, 5].map(v => (
+                    {[1, 2, 3, 4, 5].map((v) => (
                       <option key={v} value={v}>{v} ★</option>
                     ))}
                   </select>
@@ -421,7 +466,7 @@ export default function ProductsPage() {
                   <label className={labelClass}>Comment</label>
                   <textarea
                     value={newComment}
-                    onChange={e => setNewComment(e.target.value)}
+                    onChange={(e) => setNewComment(e.target.value)}
                     className={`${fieldClass} h-24`}
                     placeholder="Write a comment…"
                     required
@@ -431,7 +476,7 @@ export default function ProductsPage() {
                 <button
                   type="submit"
                   className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700 transition"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || !productForm.id}
                 >
                   {isSubmitting ? (
                     <Loader2 className="animate-spin w-4 h-4" />
