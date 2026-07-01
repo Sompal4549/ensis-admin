@@ -85,7 +85,18 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [users, setUsers] = useState<AuthUser[]>([]);
   const [productForm, setProductForm] = useState<ProductForm>(emptyProduct);
+  // Review‑form state
+  const [selectedCustomerId, setSelectedCustomerId] = useState("");
+  const [newRating, setNewRating] = useState<number | "">("");
+  const [newComment, setNewComment] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const reviewCustomers = useMemo(
+    () => users.filter((user) => user.role !== "admin" && user.role !== "superadmin"),
+    [users]
+  );
 
   const selectedCategoryName = useMemo(() => {
     const category = categories.find((item) => item._id === productForm.category);
@@ -93,9 +104,14 @@ export default function ProductsPage() {
   }, [categories, productForm.category]);
 
   const refreshData = useCallback(async () => {
-    const [productResult, categoryResult] = await Promise.all([productApi.list(), categoryApi.list()]);
+    const [productResult, categoryResult, usersResult] = await Promise.all([
+      productApi.list(),
+      categoryApi.list(),
+      adminApi.listUsers(),
+    ]);
     setProducts(productResult.products);
     setCategories(categoryResult);
+    setUsers(usersResult);
     if (!productForm.category && categoryResult[0]) {
       setProductForm((current) => ({ ...current, category: categoryResult[0]._id }));
     }
@@ -163,7 +179,7 @@ export default function ProductsPage() {
     }
   };
 
-const editProduct = (product: Product) => {
+  const editProduct = (product: Product) => {
     const categoryId = typeof product.category === "string" ? product.category : product.category?._id || "";
     const toArray = <T,>(val: T | T[] | undefined, fallback: T[]): T[] =>
       val ? (Array.isArray(val) ? val : [val]) : fallback;
@@ -294,6 +310,40 @@ const editProduct = (product: Product) => {
       setLoading(false);
     }
   };
+  const handleAddReview = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!productForm.id) {
+      setMessage("Please select a saved product before adding a review.");
+      return;
+    }
+    if (!selectedCustomerId) {
+      setMessage("Please select a customer for this review.");
+      return;
+    }
+    if (!newRating || !newComment) {
+      setMessage("Please provide both rating and comment.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await adminApi.addProductReview(productForm.id, {
+        customerId: selectedCustomerId,
+        rating: Number(newRating),
+        comment: newComment,
+      });
+
+      setNewRating("");
+      setNewComment("");
+      setSelectedCustomerId("");
+      setMessage("Review added for selected customer.");
+    } catch (err: any) {
+      setMessage(err?.message || "Failed to add review");
+      console.error(err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   if (!user) {
     return (
@@ -361,6 +411,83 @@ const editProduct = (product: Product) => {
             <Plus size={14} />
             {productForm.id ? "Edit Product Details" : "Add New Product"}
           </h3>
+          {/* ---------- Add Review (admin only) ---------- */}
+          {user?.role === "admin" || user?.role === "superadmin" ? (
+            <section className="mt-8 p-6 glassmorphism rounded-xl">
+              <h2 className="text-xl font-semibold mb-4">Add Review (Admin)</h2>
+              <form
+                onSubmit={handleAddReview}
+                className="grid gap-4"
+              >
+                <div>
+                  <label className={labelClass}>Product</label>
+                  <input
+                    className={fieldClass}
+                    value={productForm.title || "Select a product from the list"}
+                    disabled
+                  />
+                </div>
+
+                <div>
+                  <label className={labelClass}>Customer</label>
+                  <select
+                    value={selectedCustomerId}
+                    onChange={(e) => setSelectedCustomerId(e.target.value)}
+                    className={fieldClass}
+                    required
+                  >
+                    <option value="">Select a customer</option>
+                    {reviewCustomers.map((customer) => (
+                      <option key={customer._id} value={customer._id}>
+                        {customer.name} ({customer.email || customer.phone})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Rating selector – 5 stars */}
+                <div className="flex items-center gap-3">
+                  <label className={labelClass}>Rating</label>
+                  <select
+                    value={newRating}
+                    onChange={(e) => setNewRating(Number(e.target.value))}
+                    className={fieldClass}
+                    required
+                  >
+                    <option value="">Select…</option>
+                    {[1, 2, 3, 4, 5].map((v) => (
+                      <option key={v} value={v}>{v} ★</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Comment textarea */}
+                <div>
+                  <label className={labelClass}>Comment</label>
+                  <textarea
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    className={`${fieldClass} h-24`}
+                    placeholder="Write a comment…"
+                    required
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700 transition"
+                  disabled={isSubmitting || !productForm.id}
+                >
+                  {isSubmitting ? (
+                    <Loader2 className="animate-spin w-4 h-4" />
+                  ) : (
+                    <Plus className="w-4 h-4" />
+                  )}
+                  Add Review
+                </button>
+              </form>
+            </section>
+          ) : null}
 
           {/* Title & Code */}
           <div className="grid gap-3 sm:grid-cols-2">
@@ -373,7 +500,7 @@ const editProduct = (product: Product) => {
               <input className={fieldClass} value={productForm.code} onChange={(e) => setProductForm({ ...productForm, code: e.target.value })} placeholder="e.g. ENS-001" />
             </div>
           </div>
-{/* ────── Pricing Section ────── */}
+          {/* ────── Pricing Section ────── */}
           <fieldset className="border border-slate-200 rounded-xl p-4 space-y-4">
             <legend className="text-[10px] font-black uppercase text-blue-600 tracking-widest px-1">Pricing Section</legend>
 
@@ -839,7 +966,7 @@ const editProduct = (product: Product) => {
               <h5 className="text-[10px] font-bold  uppercase">Smart Design & Appearance</h5>
               <input className={fieldClass} placeholder="Highlight" value={productForm.overview.smartDesignAppearance.highlight} onChange={e => setProductForm({ ...productForm, overview: { ...productForm.overview, smartDesignAppearance: { ...productForm.overview.smartDesignAppearance, highlight: e.target.value } } })} />
               <input className={fieldClass} placeholder="Appearance Title" value={productForm.overview.smartDesignAppearance.title} onChange={e => setProductForm({ ...productForm, overview: { ...productForm.overview, smartDesignAppearance: { ...productForm.overview.smartDesignAppearance, title: e.target.value } } })} />
-             <div>
+              <div>
                 <label className={labelClass}>Wood Finishes</label>
                 <div className="space-y-2 mt-1">
                   {productForm.overview.smartDesignAppearance.woodFinish.map((item, idx) => (

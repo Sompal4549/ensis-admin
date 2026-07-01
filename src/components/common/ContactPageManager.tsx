@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation"; // Keep useSearchParams
+import { usePathname, useRouter, useSearchParams } from "next/navigation"; // Keep useSearchParams
 import { toast } from "react-toastify";
 import { Loader2, Plus, Save, Trash2 } from "lucide-react";
 import { componentContentApi, type ComponentContent } from "@/lib/api";
@@ -18,6 +18,8 @@ export default function ContactPageManager() {
   const [loading, setLoading] = useState(false);
   const [uploadingField, setUploadingField] = useState<string | null>(null);
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -299,17 +301,24 @@ const renderPremiumMap = () => {
           <div className="p-8 space-y-6">
             <div className="grid grid-cols-2 gap-4 p-4 bg-slate-50 rounded-xl">
               <label className={labelClass}>Template Selection
-                <select 
-                  className={fieldClass} 
-                  value={form.key || ""} 
-                  onChange={e => {
-                    const key = e.target.value as ContactPageContentKeys;
-                    setEditingId(null);
-                    setForm(buildEmptyContactContent(key));
-                  }}
-                >
-                  {contactPageKeys.map(k => <option key={k.key} value={k.key}>{k.label}</option>)}
-                </select>
+         <select 
+  className={fieldClass} 
+  value={form.key || ""} 
+  onChange={e => {
+    const key = e.target.value as ContactPageContentKeys;
+    const existing = records.find(r => r.key === key);
+    if (existing) {
+      setEditingId(existing._id);
+      setForm(existing);
+    } else {
+      setEditingId(null);
+      setForm(buildEmptyContactContent(key));
+    }
+    router.replace(`${pathname}?component=${key}`); // 👈 URL sync
+  }}
+>
+  {contactPageKeys.map(k => <option key={k.key} value={k.key}>{k.label}</option>)}
+</select>
               </label>
               <label className={labelClass}>Visible <div className="mt-2"><input type="checkbox" checked={form.isActive} onChange={e => setForm({...form, isActive: e.target.checked})} /></div></label>
             </div>

@@ -50,6 +50,7 @@ export type HomeWellnessService = {
   image: string;
   title: string;
   description: string;
+  link: string;
 };
 
 export type HomeWellnessData = {
@@ -174,7 +175,7 @@ export const defaultHomepageData: Record<HomepageComponentKey, HomepageData> = {
   },
   "home.wellnessSection": {
     welcomeImage: "", eyebrow: "", heading: "", description: "", buttonText: "", buttonHref: "",
-    services: [{ image: "", title: "", description: "" }, { image: "", title: "", description: "" }],
+    services: [{ image: "", title: "", description: "", link: "" }, { image: "", title: "", description: "", link: "" }],
   },
   "home.features": { features: [{ imgUrl: "", title: "", desc: "" }] },
   "home.turnkeySolutions": { eyebrow: "", heading: "", description: "", buttonText: "", buttonHref: "", backgroundImage: "", solutions: [{ imgUrl: "", title: "" }] },
@@ -284,6 +285,7 @@ export const validateHomepageContent = (content: Omit<ComponentContent, "_id">) 
       w.services?.forEach((s, i) => {
         if (!isNonEmptyString(s.image)) errors.push(`Service ${i + 1}: image is required.`);
         if (!isNonEmptyString(s.title)) errors.push(`Service ${i + 1}: title is required.`);
+        if (!isNonEmptyString(s.link)) errors.push(`Service ${i + 1}: link is required.`);
       });
       break;
     }
