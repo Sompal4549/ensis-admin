@@ -86,6 +86,11 @@ export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [productForm, setProductForm] = useState<ProductForm>(emptyProduct);
+  // Review‑form state
+  const [newRating, setNewRating] = useState<number | "">("");
+  const [newComment, setNewComment] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
 
   const selectedCategoryName = useMemo(() => {
     const category = categories.find((item) => item._id === productForm.category);
@@ -163,7 +168,7 @@ export default function ProductsPage() {
     }
   };
 
-const editProduct = (product: Product) => {
+  const editProduct = (product: Product) => {
     const categoryId = typeof product.category === "string" ? product.category : product.category?._id || "";
     const toArray = <T,>(val: T | T[] | undefined, fallback: T[]): T[] =>
       val ? (Array.isArray(val) ? val : [val]) : fallback;
@@ -294,6 +299,32 @@ const editProduct = (product: Product) => {
       setLoading(false);
     }
   };
+  const handleAddReview = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!newRating || !newComment) return;
+
+    setIsSubmitting(true);
+    try {
+      // `productId` is whatever you already have available (e.g. from router params)
+      await adminApi.post(
+        `/reviews/${productId}`,
+        { rating: newRating, comment: newComment }
+      );
+
+      // Show a toast – you probably already have a toast helper
+      // toast.success("Review added successfully");
+      // Reset the form
+      setNewRating("");
+      setNewComment("");
+      // Optionally refresh the product‑detail data / reviews list
+      // await fetchProduct();   // your existing loader
+    } catch (err: any) {
+      // toast.error(err?.response?.data?.message || "Failed to add review");
+      console.error(err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   if (!user) {
     return (
@@ -361,6 +392,57 @@ const editProduct = (product: Product) => {
             <Plus size={14} />
             {productForm.id ? "Edit Product Details" : "Add New Product"}
           </h3>
+          {/* ---------- Add Review (admin only) ---------- */}
+          {user?.role === "admin" || user?.role === "superadmin" ? (
+            <section className="mt-8 p-6 glassmorphism rounded-xl">
+              <h2 className="text-xl font-semibold mb-4">Add Review (Admin)</h2>
+              <form
+                onSubmit={handleAddReview}
+                className="grid gap-4"
+              >
+                {/* Rating selector – 5 stars */}
+                <div className="flex items-center">
+                  <label className={labelClass}>Rating</label>
+                  <select
+                    value={newRating}
+                    onChange={e => setNewRating(Number(e.target.value))}
+                    className={fieldClass}
+                    required
+                  >
+                    <option value="">Select…</option>
+                    {[1, 2, 3, 4, 5].map(v => (
+                      <option key={v} value={v}>{v} ★</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Comment textarea */}
+                <div>
+                  <label className={labelClass}>Comment</label>
+                  <textarea
+                    value={newComment}
+                    onChange={e => setNewComment(e.target.value)}
+                    className={`${fieldClass} h-24`}
+                    placeholder="Write a comment…"
+                    required
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700 transition"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <Loader2 className="animate-spin w-4 h-4" />
+                  ) : (
+                    <Plus className="w-4 h-4" />
+                  )}
+                  Add Review
+                </button>
+              </form>
+            </section>
+          ) : null}
 
           {/* Title & Code */}
           <div className="grid gap-3 sm:grid-cols-2">
@@ -373,7 +455,7 @@ const editProduct = (product: Product) => {
               <input className={fieldClass} value={productForm.code} onChange={(e) => setProductForm({ ...productForm, code: e.target.value })} placeholder="e.g. ENS-001" />
             </div>
           </div>
-{/* ────── Pricing Section ────── */}
+          {/* ────── Pricing Section ────── */}
           <fieldset className="border border-slate-200 rounded-xl p-4 space-y-4">
             <legend className="text-[10px] font-black uppercase text-blue-600 tracking-widest px-1">Pricing Section</legend>
 
@@ -839,7 +921,7 @@ const editProduct = (product: Product) => {
               <h5 className="text-[10px] font-bold  uppercase">Smart Design & Appearance</h5>
               <input className={fieldClass} placeholder="Highlight" value={productForm.overview.smartDesignAppearance.highlight} onChange={e => setProductForm({ ...productForm, overview: { ...productForm.overview, smartDesignAppearance: { ...productForm.overview.smartDesignAppearance, highlight: e.target.value } } })} />
               <input className={fieldClass} placeholder="Appearance Title" value={productForm.overview.smartDesignAppearance.title} onChange={e => setProductForm({ ...productForm, overview: { ...productForm.overview, smartDesignAppearance: { ...productForm.overview.smartDesignAppearance, title: e.target.value } } })} />
-             <div>
+              <div>
                 <label className={labelClass}>Wood Finishes</label>
                 <div className="space-y-2 mt-1">
                   {productForm.overview.smartDesignAppearance.woodFinish.map((item, idx) => (

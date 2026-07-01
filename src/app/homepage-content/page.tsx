@@ -416,7 +416,7 @@ data: normalizeHomepageData(form.key, form.data as HomepageData),
     );
   };
 
-  const renderWellnessSectionEditor = () => {
+const renderWellnessSectionEditor = () => {
     const wellnessData = form.data as {
       welcomeImage: string;
       eyebrow: string;
@@ -424,7 +424,7 @@ data: normalizeHomepageData(form.key, form.data as HomepageData),
       description: string;
       buttonText: string;
       buttonHref: string;
-      services: { image: string; title: string; description: string }[];
+      services: { image: string; title: string; description: string, link:string }[];
     };
     return (
       <div className={cardClass}>
@@ -433,7 +433,19 @@ data: normalizeHomepageData(form.key, form.data as HomepageData),
             <div className="text-xs uppercase tracking-[0.24em] text-[#8d6a3a]">Wellness Section</div>
             <p className="mt-1 text-sm text-[#5f5a50]">Manage welcome info, welcome image, and services list.</p>
           </div>
-          <button type="button" onClick={() => setData({ ...wellnessData, services: [...(wellnessData.services || []), { image: "", title: "", description: "" }] })} className="inline-flex items-center gap-2 rounded-md bg-[#263016] px-3 py-2 text-xs font-semibold uppercase tracking-wide text-white">
+          <button
+            type="button"
+            onClick={() =>
+              setData({
+                ...wellnessData,
+                services: [
+                  ...(wellnessData.services || []),
+                  { image: "", title: "", description: "", link: "" },
+                ],
+              })
+            }
+            className="inline-flex items-center gap-2 rounded-md bg-[#263016] px-3 py-2 text-xs font-semibold uppercase tracking-wide text-white"
+          >
             <Plus size={14} /> Add Service
           </button>
         </div>
@@ -470,7 +482,7 @@ data: normalizeHomepageData(form.key, form.data as HomepageData),
           onError={setStatusMessage}
           onUpload={(url) => setData({ ...wellnessData, welcomeImage: url })}
         />
-        
+
         <div className="mt-6 border-t border-[#f0e7d8] pt-6">
           <h3 className="text-sm font-bold uppercase tracking-wider text-[#263016] mb-4">Service Cards</h3>
           {(wellnessData.services || []).map((service, index) => (
@@ -507,6 +519,19 @@ data: normalizeHomepageData(form.key, form.data as HomepageData),
                   ...wellnessData,
                   services: wellnessData.services.map((item, itemIndex) => (itemIndex === index ? { ...item, title: event.target.value } : item))
                 })} />
+              </label>
+              <label className={labelClass}>
+                Link
+                <input
+                  className={`${fieldClass} mt-2 mb-3`}
+                  type="text"
+                  placeholder="/products/steam-chambers"
+                  value={service.link}
+                  onChange={(event) => setData({
+                    ...wellnessData,
+                    services: wellnessData.services.map((item, itemIndex) => (itemIndex === index ? { ...item, link: event.target.value } : item))
+                  })}
+                />
               </label>
               <label className={labelClass}>
                 Description

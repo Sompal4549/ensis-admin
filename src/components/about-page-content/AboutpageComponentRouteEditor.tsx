@@ -522,7 +522,7 @@ export default function AboutpageComponentRouteEditor({ componentKey, title }: {
           </div>
         </div>
 
-        {/* Navigation columns */}
+  {/* Navigation columns */}
         <div className="pt-4 border-t">
           <div className="flex justify-between items-center mb-3">
             <h4 className="text-xs font-bold text-[#8d6a3a] uppercase">Navigation Columns</h4>
@@ -539,6 +539,7 @@ export default function AboutpageComponentRouteEditor({ componentKey, title }: {
                    {(col.links || []).map((link, lIdx) => (
                      <div key={lIdx} className="flex gap-2">
                        <input className={fieldClass} placeholder="Label" value={link.label || ""} onChange={e => { const nn = structuredClone(data.navigation); nn[cIdx].links[lIdx].label = e.target.value; setData({ ...data, navigation: nn }); }} />
+                       <input className={fieldClass} placeholder="URL" value={link.href || ""} onChange={e => { const nn = structuredClone(data.navigation); nn[cIdx].links[lIdx].href = e.target.value; setData({ ...data, navigation: nn }); }} />
                        <button type="button" onClick={() => { const nn = structuredClone(data.navigation); nn[cIdx].links.splice(lIdx, 1); setData({ ...data, navigation: nn }); }} className="text-red-400"><Trash2 size={14} /></button>
                      </div>
                    ))}
