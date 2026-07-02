@@ -191,7 +191,7 @@ const handleRoleChange = async (
   >
     <option value="admin">Admin</option>
     <option value="superadmin">Super Admin</option>
-    <option value="editor">Editor</option>
+    <option value="user">User</option>
   </select>
 </td>
                     <td className="px-6 py-4 text-right space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">

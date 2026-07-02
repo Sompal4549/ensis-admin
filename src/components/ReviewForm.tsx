@@ -14,6 +14,7 @@ export const ReviewForm = ({ productId }: ReviewFormProps) => {
     const [rating, setRating] = useState<number>(0);
     const [comment, setComment] = useState<string>("");
     const [submitting, setSubmitting] = useState(false);
+    const [message, setMessage] = useState<string>("");
     const [customers, setCustomers] = useState<AuthUser[]>([]);
     const [customerId, setCustomerId] = useState<string>("");
 
@@ -74,13 +75,17 @@ export const ReviewForm = ({ productId }: ReviewFormProps) => {
                 }
             }
 
-            toast.success("Review added!");
+            const successMessage = isAdminReview ? "Customer review saved successfully." : "Review saved successfully.";
+            toast.success(successMessage);
+            setMessage(successMessage);
             setRating(0);
             setComment("");
             setCustomerId("");
             window.dispatchEvent(new Event("reviewsUpdated"));
         } catch (err: any) {
-            toast.error(err.message || "Something went wrong");
+            const errorMessage = err.message || "Something went wrong";
+            toast.error(errorMessage);
+            setMessage(errorMessage);
         } finally {
             setSubmitting(false);
         }
@@ -138,13 +143,20 @@ export const ReviewForm = ({ productId }: ReviewFormProps) => {
                 required
             />
 
-            <button
-                type="submit"
-                disabled={submitting}
-                className="w-full bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700 transition"
-            >
-                {submitting ? "Submitting…" : "Submit Review"}
-            </button>
+            {message && (
+                <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
+                    {message}
+                </div>
+            )}
+
+       <button
+  type="submit"
+  disabled={submitting}
+  style={{background:"blue"}}
+  className="w-full rounded-md bg-blue px-4 py-3 text-white font-medium transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+>
+  {submitting ? "Saving..." : "Save Review"}
+</button>
         </form>
     );
 };

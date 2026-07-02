@@ -13,6 +13,7 @@ export const BACKEND_URL = API_URL.replace(/\/api\/v1$/, "");
 export type Category = {
   _id: string;
   name: string;
+  image?: string;
 };
 
 export type Product = {

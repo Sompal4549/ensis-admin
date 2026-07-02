@@ -149,7 +149,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: "User Management", path: "/users-management", icon: <UserRoundCog size={16} /> },
   { label: "Enquaries", path: "/enquries", icon: <UserRoundCog size={16} /> },
   { label: "Applications", path: "/applications", icon: <UserRoundCog size={16} /> },
-
+{label: "Reviews Management", path:"/reviews-page", icon:<CheckCircle size={16}/>},
   {
     label: "SEO",
     path: "/seo",

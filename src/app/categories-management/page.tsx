@@ -11,6 +11,8 @@ import {
   Phone,
   Key,
 } from "lucide-react";
+import { toast } from "react-toastify";
+
 import {
   api,
   authStore,
@@ -19,16 +21,18 @@ import {
   type Category,
 } from "@/lib/api";
 import { fieldClass, labelClass } from "@/constants";
+import { ImageUploadField } from "@/components/common/ImageUploadField";
 
 type CategoryForm = {
   id?: string;
   name: string;
+  image: string;
 };
 
 const emptyCategory: CategoryForm = {
   name: "",
+  image: "",
 };
-
 
 export default function CategoriesPage() {
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -36,10 +40,10 @@ export default function CategoriesPage() {
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [timer, setTimer] = useState(0);
-  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoryForm, setCategoryForm] = useState<CategoryForm>(emptyCategory);
+  const [uploadingField, setUploadingField] = useState<string | null>(null);
 
   const refreshData = async () => {
     const categoryResult = await categoryApi.list();
@@ -52,7 +56,7 @@ export default function CategoriesPage() {
       const token = authStore.getToken();
       if (storedUser && token) {
         setUser(storedUser);
-        refreshData().catch((error) => setMessage(error.message));
+        refreshData().catch((error) => toast.error((error as Error).message));
       }
     });
   }, []);
@@ -69,11 +73,10 @@ export default function CategoriesPage() {
 
   const handleSendOtp = async () => {
     if (!phone) {
-      setMessage("Please enter your phone number.");
+      toast.error("Please enter your phone number.");
       return;
     }
     setLoading(true);
-    setMessage("");
     try {
       await api.post('/auth/whatsapp-otp/send', {
         phone,
@@ -81,9 +84,9 @@ export default function CategoriesPage() {
       });
       setOtpSent(true);
       setTimer(60);
-      setMessage("OTP sent successfully to WhatsApp.");
+      toast.success("OTP sent successfully to WhatsApp.");
     } catch (error: any) {
-      setMessage(error.response?.data?.message || (error as Error).message);
+      toast.error(error.response?.data?.message || (error as Error).message);
     } finally {
       setLoading(false);
     }
@@ -92,16 +95,15 @@ export default function CategoriesPage() {
   const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setLoading(true);
-    setMessage("");
     try {
       const response = await api.post('/admin/login', { phone, otp });
       const result = response.data?.data || response.data;
       authStore.setSession(result.accessToken, result.user);
       setUser(result.user);
       await refreshData();
-      setMessage("Signed in successfully.");
+      toast.success("Signed in successfully.");
     } catch (error: any) {
-      setMessage(error.response?.data?.message || (error as Error).message);
+      toast.error(error.response?.data?.message || (error as Error).message);
     } finally {
       setLoading(false);
     }
@@ -110,19 +112,18 @@ export default function CategoriesPage() {
   const submitCategory = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setLoading(true);
-    setMessage("");
     try {
       if (categoryForm.id) {
         await categoryApi.update(categoryForm.id, categoryForm);
-        setMessage("Category updated successfully.");
+        toast.success("Category updated successfully.");
       } else {
         await categoryApi.create(categoryForm);
-        setMessage("Category added successfully.");
+        toast.success("Category added successfully.");
       }
       setCategoryForm(emptyCategory);
       await refreshData();
     } catch (error) {
-      setMessage((error as Error).message);
+      toast.error((error as Error).message);
     } finally {
       setLoading(false);
     }
@@ -134,9 +135,9 @@ export default function CategoriesPage() {
     try {
       await categoryApi.remove(category._id);
       await refreshData();
-      setMessage("Category deleted.");
+      toast.success("Category deleted.");
     } catch (error) {
-      setMessage((error as Error).message);
+      toast.error((error as Error).message);
     } finally {
       setLoading(false);
     }
@@ -210,7 +211,7 @@ export default function CategoriesPage() {
                 >
                   {loading ? <Loader2 className="animate-spin" size={18} /> : "Sign In"}
                 </button>
-                
+
                 <button
                   type="button"
                   onClick={handleSendOtp}
@@ -225,19 +226,13 @@ export default function CategoriesPage() {
           </div>
 
           {otpSent && (
-            <button 
-              type="button" 
-              onClick={() => { setOtpSent(false); setOtp(""); setTimer(0); }} 
+            <button
+              type="button"
+              onClick={() => { setOtpSent(false); setOtp(""); setTimer(0); }}
               className="mt-3 text-center w-full text-xs font-semibold  hover:text-blue-600 underline"
             >
               Change Phone Number
             </button>
-          )}
-
-          {message && (
-            <p className="mt-4 text-xs font-semibold text-green-600 bg-rose-50/50 p-2.5 rounded-lg border border-rose-100">
-              {message}
-            </p>
           )}
         </form>
       </main>
@@ -252,11 +247,6 @@ export default function CategoriesPage() {
           <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600">Database Editor</span>
           <h2 className="text-lg font-bold ">Product Categories</h2>
         </div>
-        {message && (
-          <p className="text-xs font-semibold text-amber-600 bg-amber-50 px-3 py-1 rounded-lg border border-amber-100">
-            {message}
-          </p>
-        )}
       </div>
 
       <section className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
@@ -274,10 +264,19 @@ export default function CategoriesPage() {
               required
             />
           </div>
+          <ImageUploadField
+            label="Category Image"
+            value={categoryForm.image}
+            fieldKey="category.image"
+            uploadingField={uploadingField}
+            onUploadingChange={setUploadingField}
+            onError={(m) => toast.error(m)}
+            onUpload={(url) => setCategoryForm((prev) => ({ ...prev, image: url }))}
+          />
           <div className="flex gap-2.5 pt-2">
             <button
               className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 px-4 py-2 text-xs font-bold text-white transition-colors cursor-pointer"
-              disabled={loading}
+              disabled={loading || !!uploadingField}
             >
               <Save size={12} /> Save Category
             </button>
@@ -301,13 +300,21 @@ export default function CategoriesPage() {
           <div className="divide-y divide-slate-100 max-h-[65vh] overflow-y-auto">
             {categories.map((category) => (
               <article key={category._id} className="flex flex-col gap-4 p-4 md:flex-row md:items-center md:justify-between hover:bg-slate-50/20">
-                <div className="min-w-0">
+                <div className="flex min-w-0 items-center gap-3">
+                  {category.image ? (
+                    <img
+                      src={category.image}
+                      alt={category.name}
+                      className="h-10 w-10 shrink-0 rounded-lg object-cover border border-slate-100"
+                    />
+                  ) : (
+                    <div className="h-10 w-10 shrink-0 rounded-lg bg-slate-100" />
+                  )}
                   <h4 className="font-bold  text-xs">{category.name}</h4>
-                  {/* <p className="mt-0.5 text-[11px] ">{category.description || "No description provided"}</p> */}
                 </div>
                 <div className="flex gap-2">
                   <button
-                    onClick={() => setCategoryForm({ id: category._id, name: category.name, })}
+                    onClick={() => setCategoryForm({ id: category._id, name: category.name, image: category.image || "" })}
                     className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer"
                   >
                     <Pencil size={12} />
