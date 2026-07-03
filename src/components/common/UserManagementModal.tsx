@@ -101,7 +101,7 @@ export default function UserManagementModal({ isOpen, onClose }: UserManagementM
             >
               <option value="admin">Admin</option>
               <option value="superadmin">Super Admin</option>
-              <option value="editor">Editor</option>
+              <option value="user">User</option>
             </select>
           </div>
 

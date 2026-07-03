@@ -46,6 +46,7 @@ export type Product = {
     customSize?: boolean;
     specifications?: { title: string; specificationsList: { title: string; description: string }[] };
     keyFeatures?: { title: string; keyFeaturesList: string[] };
+    idealFor?: string;
     dimensions?: { title: string; dimensionsList: { title: string; description: string }[] };
     materialAndCare?: { title: string; description: string };
     productSpecifications?: { highlight: string; title: string; image: string; specifications: { title: string; description: string }[] }[];

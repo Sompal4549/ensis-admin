@@ -36,6 +36,7 @@ type ProductForm = {
     overviewList: string[];
     specifications: { title: string; specificationsList: { title: string; description: string }[] };
     keyFeatures: { title: string; keyFeaturesList: string[] };
+    idealFor: string;
     dimensions: { title: string; dimensionsList: { title: string; description: string }[] };
     materialAndCare: { title: string; description: string };
     productSpecifications: { highlight: string; title: string; image: string; specifications: { title: string; description: string }[] }[];
@@ -67,6 +68,7 @@ const emptyProduct: ProductForm = {
     overviewList: [""],
     specifications: { title: "", specificationsList: [{ title: "", description: "" }] },
     keyFeatures: { title: "", keyFeaturesList: [""] },
+    idealFor: "",
     dimensions: { title: "", dimensionsList: [{ title: "", description: "" }] },
     materialAndCare: { title: "", description: "" },
     productSpecifications: [{ highlight: "", title: "", image: "", specifications: [{ title: "", description: "" }] }],
@@ -226,7 +228,7 @@ export default function ProductsPage() {
             typeof item === "string" ? item : item?.title || item?.description || ""
           ),
         },
-
+      idealFor: product.overview?.idealFor || "",
         dimensions: {
           title: product.overview?.dimensions?.title || "",
           dimensionsList: (product.overview?.dimensions?.dimensionsList || [{ title: "", description: "" }]).map((item: any) => ({
@@ -334,7 +336,7 @@ export default function ProductsPage() {
         <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm h-fit">
           <div className="border-b border-slate-100 px-5 py-4 text-xs font-bold text-slate-800 flex items-center justify-between">
             <span>{products.length} Products Cataloged</span>
-            <Link href="/admin/reviews" className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-600 hover:text-blue-700">
+            <Link href="/reviews" className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-600 hover:text-blue-700">
               <MessageSquarePlus size={12} /> Manage Reviews
             </Link>
           </div>
@@ -354,7 +356,7 @@ export default function ProductsPage() {
                   </p>
                 </div>
                 <div className="flex gap-2">
-                  <Link href={`/admin/reviews?productId=${product._id}`} className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer" title="Add review">
+                  <Link href={`/reviews-page?productId=${product._id}`} className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer" title="Add review">
                     <MessageSquarePlus size={12} />
                   </Link>
                   <button onClick={() => editProduct(product)} className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer"><Pencil size={12} /></button>
@@ -674,7 +676,21 @@ export default function ProductsPage() {
                 <button type="button" onClick={() => { const list = [...productForm.overview.keyFeatures.keyFeaturesList, ""]; setProductForm({ ...productForm, overview: { ...productForm.overview, keyFeatures: { ...productForm.overview.keyFeatures, keyFeaturesList: list } } }); }} className="text-[10px] font-bold text-blue-600 flex items-center gap-1"><Plus size={11} /> Add Feature</button>
               </div>
             </div>
-
+{/* Ideal For */}
+            <div>
+              <label className={labelClass}>Ideal For</label>
+              <input
+                className={fieldClass}
+                placeholder="e.g. Clinics, Spas, Hotels"
+                value={productForm.overview.idealFor}
+                onChange={(e) =>
+                  setProductForm({
+                    ...productForm,
+                    overview: { ...productForm.overview, idealFor: e.target.value },
+                  })
+                }
+              />
+            </div>
             {/* Product Dimensions */}
             <div className="p-3 border border-slate-200 rounded-xl bg-slate-50 space-y-2">
               <label className="text-[10px] font-bold uppercase block">
