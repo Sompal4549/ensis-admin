@@ -1,7 +1,8 @@
 "use client";
 
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
-import { Plus, Save, Pencil, Trash2, Lock, X, Loader2, ImagePlus } from "lucide-react";
+import { Plus, Save, Pencil, Trash2, Lock, X, Loader2, ImagePlus, MessageSquarePlus } from "lucide-react";
+import Link from "next/link";
 import {
   adminApi, authStore, categoryApi, getImageUrl, productApi, uploadImage,
   type AuthUser, type Category, type Product,
@@ -35,6 +36,7 @@ type ProductForm = {
     overviewList: string[];
     specifications: { title: string; specificationsList: { title: string; description: string }[] };
     keyFeatures: { title: string; keyFeaturesList: string[] };
+    idealFor: string;
     dimensions: { title: string; dimensionsList: { title: string; description: string }[] };
     materialAndCare: { title: string; description: string };
     productSpecifications: { highlight: string; title: string; image: string; specifications: { title: string; description: string }[] }[];
@@ -66,6 +68,7 @@ const emptyProduct: ProductForm = {
     overviewList: [""],
     specifications: { title: "", specificationsList: [{ title: "", description: "" }] },
     keyFeatures: { title: "", keyFeaturesList: [""] },
+    idealFor: "",
     dimensions: { title: "", dimensionsList: [{ title: "", description: "" }] },
     materialAndCare: { title: "", description: "" },
     productSpecifications: [{ highlight: "", title: "", image: "", specifications: [{ title: "", description: "" }] }],
@@ -85,18 +88,7 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [users, setUsers] = useState<AuthUser[]>([]);
   const [productForm, setProductForm] = useState<ProductForm>(emptyProduct);
-  // Review‑form state
-  const [selectedCustomerId, setSelectedCustomerId] = useState("");
-  const [newRating, setNewRating] = useState<number | "">("");
-  const [newComment, setNewComment] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const reviewCustomers = useMemo(
-    () => users.filter((user) => user.role !== "admin" && user.role !== "superadmin"),
-    [users]
-  );
 
   const selectedCategoryName = useMemo(() => {
     const category = categories.find((item) => item._id === productForm.category);
@@ -104,14 +96,12 @@ export default function ProductsPage() {
   }, [categories, productForm.category]);
 
   const refreshData = useCallback(async () => {
-    const [productResult, categoryResult, usersResult] = await Promise.all([
+    const [productResult, categoryResult] = await Promise.all([
       productApi.list(),
       categoryApi.list(),
-      adminApi.listUsers(),
     ]);
     setProducts(productResult.products);
     setCategories(categoryResult);
-    setUsers(usersResult);
     if (!productForm.category && categoryResult[0]) {
       setProductForm((current) => ({ ...current, category: categoryResult[0]._id }));
     }
@@ -238,7 +228,7 @@ export default function ProductsPage() {
             typeof item === "string" ? item : item?.title || item?.description || ""
           ),
         },
-
+      idealFor: product.overview?.idealFor || "",
         dimensions: {
           title: product.overview?.dimensions?.title || "",
           dimensionsList: (product.overview?.dimensions?.dimensionsList || [{ title: "", description: "" }]).map((item: any) => ({
@@ -310,40 +300,6 @@ export default function ProductsPage() {
       setLoading(false);
     }
   };
-  const handleAddReview = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!productForm.id) {
-      setMessage("Please select a saved product before adding a review.");
-      return;
-    }
-    if (!selectedCustomerId) {
-      setMessage("Please select a customer for this review.");
-      return;
-    }
-    if (!newRating || !newComment) {
-      setMessage("Please provide both rating and comment.");
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      await adminApi.addProductReview(productForm.id, {
-        customerId: selectedCustomerId,
-        rating: Number(newRating),
-        comment: newComment,
-      });
-
-      setNewRating("");
-      setNewComment("");
-      setSelectedCustomerId("");
-      setMessage("Review added for selected customer.");
-    } catch (err: any) {
-      setMessage(err?.message || "Failed to add review");
-      console.error(err);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   if (!user) {
     return (
@@ -378,8 +334,11 @@ export default function ProductsPage() {
       <section className="grid gap-3 lg:grid-cols-[0.95fr_1.4fr]">
         {/* Product List */}
         <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm h-fit">
-          <div className="border-b border-slate-100 px-5 py-4 text-xs font-bold text-slate-800">
-            {products.length} Products Cataloged
+          <div className="border-b border-slate-100 px-5 py-4 text-xs font-bold text-slate-800 flex items-center justify-between">
+            <span>{products.length} Products Cataloged</span>
+            <Link href="/reviews" className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-600 hover:text-blue-700">
+              <MessageSquarePlus size={12} /> Manage Reviews
+            </Link>
           </div>
           <div className="divide-y divide-slate-100 max-h-[60vh] overflow-y-auto">
             {products.map((product) => (
@@ -397,6 +356,9 @@ export default function ProductsPage() {
                   </p>
                 </div>
                 <div className="flex gap-2">
+                  <Link href={`/reviews-page?productId=${product._id}`} className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer" title="Add review">
+                    <MessageSquarePlus size={12} />
+                  </Link>
                   <button onClick={() => editProduct(product)} className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer"><Pencil size={12} /></button>
                   <button onClick={() => deleteProduct(product)} className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"><Trash2 size={12} /></button>
                 </div>
@@ -411,83 +373,6 @@ export default function ProductsPage() {
             <Plus size={14} />
             {productForm.id ? "Edit Product Details" : "Add New Product"}
           </h3>
-          {/* ---------- Add Review (admin only) ---------- */}
-          {user?.role === "admin" || user?.role === "superadmin" ? (
-            <section className="mt-8 p-6 glassmorphism rounded-xl">
-              <h2 className="text-xl font-semibold mb-4">Add Review (Admin)</h2>
-              <form
-                onSubmit={handleAddReview}
-                className="grid gap-4"
-              >
-                <div>
-                  <label className={labelClass}>Product</label>
-                  <input
-                    className={fieldClass}
-                    value={productForm.title || "Select a product from the list"}
-                    disabled
-                  />
-                </div>
-
-                <div>
-                  <label className={labelClass}>Customer</label>
-                  <select
-                    value={selectedCustomerId}
-                    onChange={(e) => setSelectedCustomerId(e.target.value)}
-                    className={fieldClass}
-                    required
-                  >
-                    <option value="">Select a customer</option>
-                    {reviewCustomers.map((customer) => (
-                      <option key={customer._id} value={customer._id}>
-                        {customer.name} ({customer.email || customer.phone})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Rating selector – 5 stars */}
-                <div className="flex items-center gap-3">
-                  <label className={labelClass}>Rating</label>
-                  <select
-                    value={newRating}
-                    onChange={(e) => setNewRating(Number(e.target.value))}
-                    className={fieldClass}
-                    required
-                  >
-                    <option value="">Select…</option>
-                    {[1, 2, 3, 4, 5].map((v) => (
-                      <option key={v} value={v}>{v} ★</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Comment textarea */}
-                <div>
-                  <label className={labelClass}>Comment</label>
-                  <textarea
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    className={`${fieldClass} h-24`}
-                    placeholder="Write a comment…"
-                    required
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700 transition"
-                  disabled={isSubmitting || !productForm.id}
-                >
-                  {isSubmitting ? (
-                    <Loader2 className="animate-spin w-4 h-4" />
-                  ) : (
-                    <Plus className="w-4 h-4" />
-                  )}
-                  Add Review
-                </button>
-              </form>
-            </section>
-          ) : null}
 
           {/* Title & Code */}
           <div className="grid gap-3 sm:grid-cols-2">
@@ -791,7 +676,21 @@ export default function ProductsPage() {
                 <button type="button" onClick={() => { const list = [...productForm.overview.keyFeatures.keyFeaturesList, ""]; setProductForm({ ...productForm, overview: { ...productForm.overview, keyFeatures: { ...productForm.overview.keyFeatures, keyFeaturesList: list } } }); }} className="text-[10px] font-bold text-blue-600 flex items-center gap-1"><Plus size={11} /> Add Feature</button>
               </div>
             </div>
-
+{/* Ideal For */}
+            <div>
+              <label className={labelClass}>Ideal For</label>
+              <input
+                className={fieldClass}
+                placeholder="e.g. Clinics, Spas, Hotels"
+                value={productForm.overview.idealFor}
+                onChange={(e) =>
+                  setProductForm({
+                    ...productForm,
+                    overview: { ...productForm.overview, idealFor: e.target.value },
+                  })
+                }
+              />
+            </div>
             {/* Product Dimensions */}
             <div className="p-3 border border-slate-200 rounded-xl bg-slate-50 space-y-2">
               <label className="text-[10px] font-bold uppercase block">
