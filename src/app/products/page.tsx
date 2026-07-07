@@ -3,6 +3,7 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { Plus, Save, Pencil, Trash2, Lock, X, Loader2, ImagePlus, MessageSquarePlus } from "lucide-react";
 import Link from "next/link";
+import { toast } from "react-toastify";
 import {
   adminApi, authStore, categoryApi, getImageUrl, productApi, uploadImage,
   type AuthUser, type Category, type Product,
@@ -80,6 +81,15 @@ const emptyProduct: ProductForm = {
   isFeatured: false, isActive: true,
 };
 
+const slugify = (value: string) =>
+  value
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9\-]/g, "")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+
 export default function ProductsPage() {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [email, setEmail] = useState("");
@@ -113,7 +123,11 @@ export default function ProductsPage() {
       const token = authStore.getToken();
       if (storedUser && token) {
         setUser(storedUser);
-        refreshData().catch((error) => setMessage(error.message));
+        refreshData().catch((error) => {
+          const errorMessage = (error as Error).message;
+          setMessage(errorMessage);
+          toast.error(errorMessage);
+        });
       }
     });
   }, [refreshData]);
@@ -129,7 +143,9 @@ export default function ProductsPage() {
       await refreshData();
       setMessage("Signed in successfully.");
     } catch (error) {
-      setMessage((error as Error).message);
+      const errorMessage = (error as Error).message;
+      setMessage(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -156,14 +172,18 @@ export default function ProductsPage() {
       if (productForm.id) {
         await productApi.update(productForm.id, payload);
         setMessage("Product updated successfully.");
+        toast.success("Product updated successfully.");
       } else {
         await productApi.create(payload);
         setMessage("Product added successfully.");
+        toast.success("Product added successfully.");
       }
       setProductForm({ ...emptyProduct, category: categories[0]?._id || "" });
       await refreshData();
     } catch (error) {
-      setMessage((error as Error).message);
+      const errorMessage = (error as Error).message;
+      setMessage(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -294,8 +314,11 @@ export default function ProductsPage() {
       await productApi.remove(product._id);
       await refreshData();
       setMessage("Product deleted.");
+      toast.success("Product deleted.");
     } catch (error) {
-      setMessage((error as Error).message);
+      const errorMessage = (error as Error).message;
+      setMessage(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -378,7 +401,21 @@ export default function ProductsPage() {
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
               <label className={labelClass}>Title</label>
-              <input className={fieldClass} value={productForm.title} onChange={(e) => setProductForm({ ...productForm, title: e.target.value })} required />
+              <input
+                className={fieldClass}
+                value={productForm.title}
+                onChange={(e) => {
+                  const title = e.target.value;
+                  const autoSlug = slugify(title);
+                  const shouldUpdateSlug = productForm.slug === "" || productForm.slug === slugify(productForm.title);
+                  setProductForm({
+                    ...productForm,
+                    title,
+                    slug: shouldUpdateSlug ? autoSlug : productForm.slug,
+                  });
+                }}
+                required
+              />
             </div>
             <div>
               <label className={labelClass}>Product Code</label>
@@ -408,7 +445,18 @@ export default function ProductsPage() {
                         <input className={fieldClass} placeholder="Paste image URL" value={item.image} onChange={e => { const list = [...productForm.overview.seeItInRealSpaces.images]; list[idx].image = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, seeItInRealSpaces: { ...productForm.overview.seeItInRealSpaces, images: list } } }); }} />
                         <label className="cursor-pointer inline-flex items-center gap-1.5 bg-white border border-slate-200 px-2.5 py-1 rounded text-[10px] font-bold hover:bg-blue-50 transition-colors">
                           <ImagePlus size={11} /> Upload
-                          <input type="file" className="hidden" accept="image/*" onChange={async e => { const file = e.target.files?.[0]; if (!file) return; const url = await uploadImage(file, "products"); const list = [...productForm.overview.seeItInRealSpaces.images]; list[idx].image = url; setProductForm({ ...productForm, overview: { ...productForm.overview, seeItInRealSpaces: { ...productForm.overview.seeItInRealSpaces, images: list } } }); }} />
+                          <input type="file" className="hidden" accept="image/*" onChange={async e => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            try {
+                              const url = await uploadImage(file, "products");
+                              const list = [...productForm.overview.seeItInRealSpaces.images];
+                              list[idx].image = url;
+                              setProductForm({ ...productForm, overview: { ...productForm.overview, seeItInRealSpaces: { ...productForm.overview.seeItInRealSpaces, images: list } } });
+                            } catch (error) {
+                              toast.error((error as Error).message || "Image upload failed.");
+                            }
+                          }} />
                         </label>
                       </div>
                     </div>
@@ -434,7 +482,18 @@ export default function ProductsPage() {
                       <input className={fieldClass} placeholder="Paste image URL" value={pf.image} onChange={e => { const list = [...productForm.overview.productPricingFeatures]; list[idx].image = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, productPricingFeatures: list } }); }} />
                       <label className="cursor-pointer inline-flex items-center gap-1.5 bg-white border border-slate-200 px-2.5 py-1 rounded text-[10px] font-bold hover:bg-blue-50 transition-colors">
                         <ImagePlus size={11} /> Upload
-                        <input type="file" className="hidden" accept="image/*" onChange={async e => { const file = e.target.files?.[0]; if (!file) return; const url = await uploadImage(file, "products"); const list = [...productForm.overview.productPricingFeatures]; list[idx].image = url; setProductForm({ ...productForm, overview: { ...productForm.overview, productPricingFeatures: list } }); }} />
+                        <input type="file" className="hidden" accept="image/*" onChange={async e => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          try {
+                            const url = await uploadImage(file, "products");
+                            const list = [...productForm.overview.productPricingFeatures];
+                            list[idx].image = url;
+                            setProductForm({ ...productForm, overview: { ...productForm.overview, productPricingFeatures: list } });
+                          } catch (error) {
+                            toast.error((error as Error).message || "Image upload failed.");
+                          }
+                        }} />
                       </label>
                     </div>
                   </div>
@@ -547,8 +606,11 @@ export default function ProductsPage() {
                     const urls = await Promise.all(files.map(f => uploadImage(f, "products")));
                     setProductForm(prev => ({ ...prev, images: [...prev.images, ...urls] }));
                     setMessage(`${urls.length} image(s) uploaded successfully.`);
+                    toast.success(`${urls.length} image(s) uploaded successfully.`);
                   } catch (error) {
-                    setMessage("Failed to upload one or more images. " + error);
+                    const errorMessage = "Failed to upload one or more images.";
+                    setMessage(errorMessage);
+                    toast.error(errorMessage);
                   } finally {
                     setLoading(false);
                     e.target.value = "";
@@ -604,7 +666,18 @@ export default function ProductsPage() {
                         <input className={fieldClass} placeholder="Paste image URL" value={item.image} onChange={e => { const list = [...productForm.overview.items]; list[idx].image = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, items: list } }); }} />
                         <label className="cursor-pointer inline-flex items-center gap-1.5 bg-white border border-slate-200 px-2.5 py-1 rounded text-[10px] font-bold hover:bg-blue-50 transition-colors">
                           <ImagePlus size={11} /> Upload
-                          <input type="file" className="hidden" accept="image/*" onChange={async (e) => { const file = e.target.files?.[0]; if (!file) return; const url = await uploadImage(file, "products"); const list = [...productForm.overview.items]; list[idx].image = url; setProductForm({ ...productForm, overview: { ...productForm.overview, items: list } }); }} />
+                          <input type="file" className="hidden" accept="image/*" onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            try {
+                              const url = await uploadImage(file, "products");
+                              const list = [...productForm.overview.items];
+                              list[idx].image = url;
+                              setProductForm({ ...productForm, overview: { ...productForm.overview, items: list } });
+                            } catch (error) {
+                              toast.error((error as Error).message || "Image upload failed.");
+                            }
+                          }} />
                         </label>
                       </div>
                     </div>
@@ -838,7 +911,18 @@ export default function ProductsPage() {
                         <input className={fieldClass} placeholder="Paste image URL" value={ps.image} onChange={e => { const list = [...productForm.overview.productSpecifications]; list[psIdx].image = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, productSpecifications: list } }); }} />
                         <label className="cursor-pointer inline-flex items-center gap-1.5 bg-white border border-slate-200 px-2.5 py-1 rounded text-[10px] font-bold hover:bg-blue-50 transition-colors">
                           <ImagePlus size={11} /> Upload
-                          <input type="file" className="hidden" onChange={async (e) => { const file = e.target.files?.[0]; if (!file) return; const url = await uploadImage(file, "products"); const list = [...productForm.overview.productSpecifications]; list[psIdx].image = url; setProductForm({ ...productForm, overview: { ...productForm.overview, productSpecifications: list } }); }} />
+                          <input type="file" className="hidden" onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            try {
+                              const url = await uploadImage(file, "products");
+                              const list = [...productForm.overview.productSpecifications];
+                              list[psIdx].image = url;
+                              setProductForm({ ...productForm, overview: { ...productForm.overview, productSpecifications: list } });
+                            } catch (error) {
+                              toast.error((error as Error).message || "Image upload failed.");
+                            }
+                          }} />
                         </label>
                       </div>
                     </div>
@@ -878,7 +962,18 @@ export default function ProductsPage() {
                           <input className={fieldClass} placeholder="Paste image URL" value={item.image} onChange={e => { const list = [...productForm.overview.smartDesignAppearance.woodFinish]; list[idx] = { ...list[idx], image: e.target.value }; setProductForm({ ...productForm, overview: { ...productForm.overview, smartDesignAppearance: { ...productForm.overview.smartDesignAppearance, woodFinish: list } } }); }} />
                           <label className="cursor-pointer inline-flex items-center gap-1.5 bg-white border border-slate-200 px-2.5 py-1 rounded text-[10px] font-bold hover:bg-blue-50 transition-colors">
                             <ImagePlus size={11} /> Upload
-                            <input type="file" className="hidden" accept="image/*" onChange={async e => { const file = e.target.files?.[0]; if (!file) return; const url = await uploadImage(file, "products"); const list = [...productForm.overview.smartDesignAppearance.woodFinish]; list[idx] = { ...list[idx], image: url }; setProductForm({ ...productForm, overview: { ...productForm.overview, smartDesignAppearance: { ...productForm.overview.smartDesignAppearance, woodFinish: list } } }); }} />
+                            <input type="file" className="hidden" accept="image/*" onChange={async e => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+                              try {
+                                const url = await uploadImage(file, "products");
+                                const list = [...productForm.overview.smartDesignAppearance.woodFinish];
+                                list[idx] = { ...list[idx], image: url };
+                                setProductForm({ ...productForm, overview: { ...productForm.overview, smartDesignAppearance: { ...productForm.overview.smartDesignAppearance, woodFinish: list } } });
+                              } catch (error) {
+                                toast.error((error as Error).message || "Image upload failed.");
+                              }
+                            }} />
                           </label>
                         </div>
                       </div>
