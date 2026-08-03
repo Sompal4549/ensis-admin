@@ -6,10 +6,13 @@ import RichTextEditor from "@/components/common/RichTextEditor";
 import { componentContentApi, getImageUrl, uploadImage, type ComponentContent } from "@/lib/api";
 import { type HomepageComponentKey, type HomepageData } from "@/lib/homepageContent";
 import { HomepageContentProvider, useHomepageContent } from "./HomepageContentContext";
-import { fieldClass, labelClass, cardClass } from "@/constants";
 import Image from "next/image";
 
-
+// Compact local classes for this editor only
+const smallFieldClass =
+  "w-full rounded border border-slate-200 px-1.5 py-1 text-[11px] focus:border-[#8d6a3a] focus:ring-1 focus:ring-[#8d6a3a] outline-none";
+const smallLabelClass = "block text-[10px] font-semibold text-[#263016] mb-0.5";
+const smallCardClass = "rounded-lg border border-[#efe3d1] bg-white p-2.5 shadow-sm";
 
 type EditableValue = string | number | boolean | null | EditableValue[] | { [key: string]: EditableValue };
 
@@ -153,10 +156,10 @@ function ImageField({
 
   return (
     <div>
-      <div className="mb-2 flex items-center justify-between gap-3">
-        <label className={labelClass}>{label}</label>
-        <button type="button" onClick={() => fileRef.current?.click()} className="inline-flex items-center gap-2 rounded-md border border-[#d9cdbb] bg-white px-3 py-2 text-xs font-semibold text-[#263016]">
-          {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImagePlus className="h-4 w-4" />}
+      <div className="mb-0.5 flex items-center justify-between gap-2">
+        <label className={smallLabelClass}>{label}</label>
+        <button type="button" onClick={() => fileRef.current?.click()} className="inline-flex items-center gap-1 rounded-md border border-[#d9cdbb] bg-white px-1.5 py-0.5 text-[10px] font-semibold text-[#263016]">
+          {uploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <ImagePlus className="h-3 w-3" />}
           Upload
         </button>
       </div>
@@ -181,9 +184,9 @@ function ImageField({
           }
         }}
       />
-      <input className={fieldClass} value={value} onChange={(event) => onChange(event.target.value)} placeholder={`${path.join(".")} path`} />
-      {value ? <Image height={96} width={96} src={getImageUrl(value)} alt={label} className="mt-3 h-24 w-full max-w-xs rounded-md object-cover shadow-sm" unoptimized crossOrigin="anonymous" /> : null}
-      {error ? <p className="mt-2 text-xs font-semibold text-red-600">{error}</p> : null}
+      <input className={smallFieldClass} value={value} onChange={(event) => onChange(event.target.value)} placeholder={`${path.join(".")} path`} />
+      {value ? <Image height={64} width={64} src={getImageUrl(value)} alt={label} className="mt-1 h-12 w-full max-w-[120px] rounded-md object-cover shadow-sm" unoptimized crossOrigin="anonymous" /> : null}
+      {error ? <p className="mt-0.5 text-[10px] font-semibold text-red-600">{error}</p> : null}
     </div>
   );
 }
@@ -204,28 +207,30 @@ function StructuredField({
 
   if (Array.isArray(value)) {
     const sample = value[0] ?? "";
+    const lastKey = String(path[path.length - 1] || "").toLowerCase();
+    const isSlidesArray = lastKey === "slides";
     return (
-      <section className="rounded-lg border border-[#efe3d1] bg-[#fbf7ef] p-4">
-        <div className="mb-4 flex items-center justify-between gap-3">
-          <h3 className="text-sm font-bold uppercase tracking-wide text-[#263016]">{label}</h3>
-          <button type="button" onClick={() => setPathValue([...value, emptyArrayItemForPath(path, sample)])} className="inline-flex items-center gap-2 rounded-md bg-[#263016] px-3 py-2 text-xs font-semibold uppercase tracking-wide text-white">
-            <Plus size={14} /> Add
+      <section className="rounded-lg border border-[#efe3d1] bg-[#fbf7ef] p-2">
+        <div className="mb-1.5 flex items-center justify-between gap-2">
+          <h3 className="text-[11px] font-bold uppercase tracking-wide text-[#263016]">{label}</h3>
+          <button type="button" onClick={() => setPathValue([...value, emptyArrayItemForPath(path, sample)])} className="inline-flex items-center gap-1 rounded-md bg-[#263016] px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
+            <Plus size={10} /> Add
           </button>
         </div>
-        <div className="space-y-4">
+        <div className={isSlidesArray ? "grid grid-cols-1 gap-1.5" : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1.5"}>
           {value.map((item, index) => (
-            <div key={index} className="rounded-lg border border-[#e3d5bf] bg-white p-4">
-              <div className="mb-4 flex items-center justify-between gap-3">
-                <p className="text-sm font-semibold text-[#1f261b]">{label} {index + 1}</p>
-                <div className="flex items-center gap-2">
-                  <button type="button" disabled={index === 0} onClick={() => onRootChange(moveAtPath(root, path, index, -1))} className="rounded-md border border-[#d9cdbb] p-2 disabled:opacity-50">
-                    <ArrowUp size={15} />
+            <div key={index} className="rounded-lg border border-[#e3d5bf] bg-white p-1.5">
+              <div className="mb-1 flex items-center justify-between gap-2">
+                <p className="text-[10px] font-semibold text-[#1f261b]">{label} {index + 1}</p>
+                <div className="flex items-center gap-0.5">
+                  <button type="button" disabled={index === 0} onClick={() => onRootChange(moveAtPath(root, path, index, -1))} className="rounded-md border border-[#d9cdbb] p-0.5 disabled:opacity-50">
+                    <ArrowUp size={10} />
                   </button>
-                  <button type="button" disabled={index === value.length - 1} onClick={() => onRootChange(moveAtPath(root, path, index, 1))} className="rounded-md border border-[#d9cdbb] p-2 disabled:opacity-50">
-                    <ArrowDown size={15} />
+                  <button type="button" disabled={index === value.length - 1} onClick={() => onRootChange(moveAtPath(root, path, index, 1))} className="rounded-md border border-[#d9cdbb] p-0.5 disabled:opacity-50">
+                    <ArrowDown size={10} />
                   </button>
-                  <button type="button" onClick={() => onRootChange(removeAtPath(root, path, index))} className="rounded-md border border-[#e0b4a0] p-2 text-[#9b2e2e]">
-                    <Trash2 size={15} />
+                  <button type="button" onClick={() => onRootChange(removeAtPath(root, path, index))} className="rounded-md border border-[#e0b4a0] p-0.5 text-[#9b2e2e]">
+                    <Trash2 size={10} />
                   </button>
                 </div>
               </div>
@@ -238,12 +243,39 @@ function StructuredField({
   }
 
   if (isObject(value)) {
+    const parentKey = path.length > 1 ? String(path[path.length - 2] || "").toLowerCase() : "";
+    const isSlideItem = parentKey === "slides" && typeof path[path.length - 1] === "number";
+
+    if (!isSlideItem) {
+      return (
+        <div className="grid gap-1.5">
+          {Object.entries(value)
+            .filter(([key]) => key !== "id")
+            .map(([key, childValue]) => (
+              <StructuredField key={key} path={[...path, key]} value={childValue} root={root} onRootChange={onRootChange} />
+            ))}
+        </div>
+      );
+    }
+
+    const isWideField = (key: string, childValue: EditableValue) => {
+      if (Array.isArray(childValue) || isObject(childValue)) return true;
+      const childPath = [...path, key];
+      if (isImageField(childPath) || isRichTextField(childPath)) return true;
+      const lowerKey = key.toLowerCase();
+      const longKeys = ["description", "desc", "text", "content", "heading", "tagline", "address", "copyright"];
+      if (longKeys.some((k) => lowerKey.includes(k)) && !["button", "btn", "link"].some((k) => lowerKey.includes(k))) return true;
+      return typeof childValue === "string" && childValue.length > 90;
+    };
+
     return (
-      <div className="grid gap-4">
+      <div className="grid gap-1.5 sm:grid-cols-2">
         {Object.entries(value)
           .filter(([key]) => key !== "id")
           .map(([key, childValue]) => (
-            <StructuredField key={key} path={[...path, key]} value={childValue} root={root} onRootChange={onRootChange} />
+            <div key={key} className={isWideField(key, childValue) ? "sm:col-span-2" : ""}>
+              <StructuredField path={[...path, key]} value={childValue} root={root} onRootChange={onRootChange} />
+            </div>
           ))}
       </div>
     );
@@ -251,7 +283,7 @@ function StructuredField({
 
   if (typeof value === "boolean") {
     return (
-      <label className="flex items-center gap-3 text-sm font-semibold text-[#263016]">
+      <label className="flex items-center gap-1.5 text-[10px] font-semibold text-[#263016]">
         <input type="checkbox" checked={value} onChange={(event) => setPathValue(event.target.checked)} />
         {label}
       </label>
@@ -264,14 +296,14 @@ function StructuredField({
 
   if (isRatingField(path)) {
     return (
-      <label className={labelClass}>
+      <label className={smallLabelClass}>
         {label}
         <input
           type="number"
           min="0"
           max="5"
           step="0.5"
-          className={`${fieldClass} mt-2`}
+          className={`${smallFieldClass} mt-0.5`}
           value={typeof value === 'number' ? value : (Number(value) || 0)}
           onChange={(event) => setPathValue(Number(event.target.value))}
         />
@@ -283,13 +315,13 @@ function StructuredField({
 
   if (isRichTextField(path)) {
     return (
-      <div className="space-y-2">
-        <label className={labelClass}>{label}</label>
+      <div className="space-y-0.5">
+        <label className={smallLabelClass}>{label}</label>
         <RichTextEditor
           value={stringValue}
           onChange={setPathValue}
           placeholder={`Enter ${label}...`}
-          minHeight="200px"
+          minHeight="100px"
         />
       </div>
     );
@@ -302,12 +334,12 @@ function StructuredField({
     stringValue.length > 90;
 
   return (
-    <label className={labelClass}>
+    <label className={smallLabelClass}>
       {label}
       {isLong ? (
-        <textarea className={`${fieldClass} mt-2 min-h-24`} value={stringValue} onChange={(event) => setPathValue(event.target.value)} />
+        <textarea className={`${smallFieldClass} mt-0.5 min-h-12`} value={stringValue} onChange={(event) => setPathValue(event.target.value)} />
       ) : (
-        <input className={`${fieldClass} mt-2`} value={stringValue} onChange={(event) => setPathValue(event.target.value)} />
+        <input className={`${smallFieldClass} mt-0.5`} value={stringValue} onChange={(event) => setPathValue(event.target.value)} />
       )}
     </label>
   );
@@ -323,259 +355,69 @@ function EditorInner({ title }: { title: string }) {
   const isTestimonialsComponent = title.toLowerCase().includes("testimonials");
 
   return (
-    <div className="px-4 space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+    <div className="px-2 space-y-2">
+      <div className="flex flex-col gap-1.5 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#8d6a3a]">Homepage Component</p>
-          <h1 className="mt-2 text-2xl font-bold text-gray-900">{title}</h1>
-          <p className="mt-1 text-sm text-gray-500">{form.description}</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-[#8d6a3a]">Homepage Component</p>
+          <h1 className="mt-0.5 text-base font-bold text-gray-900">{title}</h1>
+          <p className="mt-0.5 text-[11px] text-gray-500">{form.description}</p>
         </div>
-        <button type="button" onClick={refresh} disabled={loading} className="inline-flex items-center gap-2 rounded-md border border-[#d9cdbb] bg-white px-4 py-2 text-sm font-semibold text-[#263016] disabled:opacity-60">
-          <RefreshCw size={16} className={loading ? "animate-spin" : ""} /> Refresh
+        <button type="button" onClick={refresh} disabled={loading} className="inline-flex items-center gap-1 rounded-md border border-[#d9cdbb] bg-white px-2 py-1 text-[11px] font-semibold text-[#263016] disabled:opacity-60">
+          <RefreshCw size={11} className={loading ? "animate-spin" : ""} /> Refresh
         </button>
       </div>
 
-      <section className={cardClass}>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <label className={labelClass}>
+      <section className={smallCardClass}>
+        <div className="grid gap-1.5 sm:grid-cols-2">
+          <label className={smallLabelClass}>
             Label
-            <input className={`${fieldClass} mt-2`} value={form.label} onChange={(event) => setForm((current) => ({ ...current, label: event.target.value }))} />
+            <input className={`${smallFieldClass} mt-0.5`} value={form.label} onChange={(event) => setForm((current) => ({ ...current, label: event.target.value }))} />
           </label>
-          <label className={labelClass}>
+          <label className={smallLabelClass}>
             Page
-            <input className={`${fieldClass} mt-2`} value={form.page} onChange={(event) => setForm((current) => ({ ...current, page: event.target.value }))} />
+            <input className={`${smallFieldClass} mt-0.5`} value={form.page} onChange={(event) => setForm((current) => ({ ...current, page: event.target.value }))} />
           </label>
         </div>
-        <label className="mt-4 flex items-center gap-3 text-sm font-semibold text-[#263016]">
+        <label className="mt-1.5 flex items-center gap-1.5 text-[10px] font-semibold text-[#263016]">
           <input type="checkbox" checked={form.isActive} onChange={(event) => setForm((current) => ({ ...current, isActive: event.target.checked }))} />
           Active on page
         </label>
       </section>
 
-      <section className={`${cardClass} space-y-5`}>
+      <section className={`${smallCardClass} space-y-1.5`}>
         {isBlogComponent && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-5 bg-[#fcfaf7] rounded-xl border border-[#efe3d1] mb-2">
-            <div className="col-span-full mb-1">
-              <h3 className="text-sm font-bold text-[#8d6a3a] uppercase tracking-wider">Button Configuration</h3>
-              <p className="text-[11px] text-gray-500">Configure the main call-to-action for the blog section.</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5 p-2 bg-[#fcfaf7] rounded-xl border border-[#efe3d1] mb-1.5">
+            <div className="col-span-full mb-0.5">
+              <h3 className="text-[10px] font-bold text-[#8d6a3a] uppercase tracking-wider">Button Configuration</h3>
+              <p className="text-[9px] text-gray-500">Configure the main call-to-action for the blog section.</p>
             </div>
-            <label className={labelClass}>CTA Text 
-              <input className={`${fieldClass} mt-2`} value={(form.data as any).ctaText || ""} onChange={e => setData({...form.data as any, ctaText: e.target.value})} placeholder="e.g. View All Blogs" />
+            <label className={smallLabelClass}>CTA Text 
+              <input className={`${smallFieldClass} mt-0.5`} value={(form.data as any).ctaText || ""} onChange={e => setData({...form.data as any, ctaText: e.target.value})} placeholder="e.g. View All Blogs" />
             </label>
-            <label className={labelClass}>CTA Link 
-              <input className={`${fieldClass} mt-2`} value={(form.data as any).ctaLink || ""} onChange={e => setData({...form.data as any, ctaLink: e.target.value})} placeholder="e.g. /blog" />
+            <label className={smallLabelClass}>CTA Link 
+              <input className={`${smallFieldClass} mt-0.5`} value={(form.data as any).ctaLink || ""} onChange={e => setData({...form.data as any, ctaLink: e.target.value})} placeholder="e.g. /blog" />
             </label>
           </div>
         )}
-
-        {/* {isManufacturingComponent && (
-          <div className="grid grid-cols-1 gap-6 p-5 bg-[#f7fcf9] rounded-xl border border-[#d1efe0] mb-2 shadow-sm">
-            <div className="flex items-center justify-between border-b border-[#d1efe0] pb-3">
-              <div>
-                <h3 className="text-sm font-bold text-[#2e7d32] uppercase tracking-wider">Manufacturing & Projects Config</h3>
-                <p className="text-[11px] text-gray-500">Manage specialized features, buttons, and image galleries.</p>
-              </div>
-              <button 
-                type="button"
-                onClick={() => {
-                  const d = (form.data as any) || {};
-                  setData({
-                    title: d.title || "",
-                    description: d.description || "",
-                    stats: d.stats || [{ value: "", label: "" }],
-                    mfgFeatures: d.mfgFeatures || [
-                      "Premium Quality Raw Materials",
-                      "Skilled Artisans & Modern Machinery",
-                      "Multi-Level Quality Testing",
-                      "International Export Packing",
-                    ],
-                    mfgButtonText: d.mfgButtonText || "OUR MANUFACTURING",
-                    mfgButtonHref: d.mfgButtonHref || "/manufacturing",
-                    mfgImages: d.mfgImages || [
-                      { image: "", title: "", location: "" },
-                      { image: "", title: "", location: "" },
-                      { image: "", title: "", location: "" },
-                    ],
-                    projSubtitle: d.projSubtitle || "",
-                    projHeading: d.projHeading || "",
-                    projDescription: d.projDescription || "",
-                    projButtonText: d.projButtonText || "VIEW ALL PROJECTS",
-                    projButtonHref: d.projButtonHref || "/projects",
-                    ...d
-                  });
-                }}
-                className="text-[10px] font-bold text-green-700 bg-white px-3 py-1.5 rounded-lg border border-green-200 hover:bg-green-50 transition-colors shadow-sm"
-              >
-                Initialize Manufacturing Data
-              </button>
-            </div>
-            <div className="space-y-4">
-              <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-4">Manufacturing Section Button</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <label className={labelClass}>Button Text <input className={`${fieldClass} mt-1.5`} value={(form.data as any).mfgButtonText || ""} onChange={e => setData({...form.data as any, mfgButtonText: e.target.value})} placeholder="e.g. OUR MANUFACTURING" /></label>
-                <label className={labelClass}>Button Href <input className={`${fieldClass} mt-1.5`} value={(form.data as any).mfgButtonHref || ""} onChange={e => setData({...form.data as any, mfgButtonHref: e.target.value})} placeholder="e.g. /manufacturing" /></label>
-              </div>
-              <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-6 pt-4 border-t border-dashed border-gray-200">Projects Section Details</h4>
-              <label className={labelClass}>Projects Subtitle <input className={`${fieldClass} mt-1.5`} value={(form.data as any).projSubtitle || ""} onChange={e => setData({...form.data as any, projSubtitle: e.target.value})} placeholder="e.g. Our Latest Creations" /></label>
-              <label className={labelClass}>Projects Heading <input className={`${fieldClass} mt-1.5`} value={(form.data as any).projHeading || ""} onChange={e => setData({...form.data as any, projHeading: e.target.value})} placeholder="e.g. Explore Our Projects" /></label>
-              <label className={labelClass}>Projects Description <textarea className={`${fieldClass} mt-1.5`} rows={3} value={(form.data as any).projDescription || ""} onChange={e => setData({...form.data as any, projDescription: e.target.value})} placeholder="e.g. Discover the breadth of our work..." /></label>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <label className={labelClass}>Projects Button Text <input className={`${fieldClass} mt-1.5`} value={(form.data as any).projButtonText || ""} onChange={e => setData({...form.data as any, projButtonText: e.target.value})} placeholder="e.g. VIEW ALL PROJECTS" /></label>
-                <label className={labelClass}>Projects Button Href <input className={`${fieldClass} mt-1.5`} value={(form.data as any).projButtonHref || ""} onChange={e => setData({...form.data as any, projButtonHref: e.target.value})} placeholder="e.g. /projects" /></label>
-              </div>
-            </div>
-          </div>
-        )} */}
-        
-        {/* {isRoomSetupsComponent && (
-          <div className="grid grid-cols-1 gap-6 p-5 bg-[#fcf7fd] rounded-xl border border-[#eed1ef] mb-2 shadow-sm">
-            <div className="flex items-center justify-between border-b border-[#eed1ef] pb-3">
-              <div>
-                <h3 className="text-sm font-bold text-[#7b2e8d] uppercase tracking-wider">Room Setups Configuration</h3>
-                <p className="text-[11px] text-gray-500">Manage section button and room card links.</p>
-              </div>
-              <button 
-                type="button"
-                onClick={() => {
-                  const d = (form.data as any) || {};
-                  const processed = { ...d };
-                  // Auto-inject cardLink to any array items found (e.g., individual rooms)
-                  Object.keys(processed).forEach(k => {
-                    if (Array.isArray(processed[k])) {
-                      processed[k] = processed[k].map((item: any) => 
-                        (typeof item === 'object' && item !== null) ? { cardLink: "", ...item } : item
-                      );
-                    }
-                  });
-                  setData({
-                    ...processed,
-                    sectionButtonText: d.sectionButtonText || "VIEW ALL ROOMS",
-                    sectionButtonPath: d.sectionButtonPath || "/rooms",
-                  });
-                }}
-                className="text-[10px] font-bold text-purple-700 bg-white px-3 py-1.5 rounded-lg border border-purple-200 hover:bg-purple-50 transition-colors shadow-sm"
-              >
-                Initialize Room Setups Data
-              </button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <label className={labelClass}>Section Button Text <input className={`${fieldClass} mt-1.5`} value={(form.data as any).sectionButtonText || ""} onChange={e => setData({...form.data as any, sectionButtonText: e.target.value})} placeholder="e.g. VIEW ALL ROOMS" /></label>
-              <label className={labelClass}>Section Button Path <input className={`${fieldClass} mt-1.5`} value={(form.data as any).sectionButtonPath || ""} onChange={e => setData({...form.data as any, sectionButtonPath: e.target.value})} placeholder="e.g. /rooms" /></label>
-            </div>
-          </div>
-        )} */}
-
-        
-        {/* {isReadyToBuildComponent && (
-          <div className="grid grid-cols-1 gap-6 p-5 bg-[#f7fafc] rounded-xl border border-[#d1e3ee] mb-2 shadow-sm">
-            <div className="flex items-center justify-between border-b border-[#d1e3ee] pb-3">
-              <div>
-                <h3 className="text-sm font-bold text-[#2e527d] uppercase tracking-wider">Ready to Build Configuration</h3>
-                <p className="text-[11px] text-gray-500">Manage heading, subheading, image and button actions.</p>
-              </div>
-              <button 
-                type="button"
-                onClick={() => {
-                  const d = (form.data as any) || {};
-                  setData({
-                    heading: d.heading || "Ready to Build?",
-                    subheading: d.subheading || "Let's turn your vision into reality.",
-                    buttonText: d.buttonText || "Get Started",
-                    buttonHref: d.buttonHref || "/contact",
-                    image: d.image || "",
-                    ...d
-                  });
-                }}
-                className="text-[10px] font-bold text-blue-700 bg-white px-3 py-1.5 rounded-lg border border-blue-200 hover:bg-blue-50 transition-colors shadow-sm"
-              >
-                Initialize Ready to Build Data
-              </button>
-            </div>
-            <label className={labelClass}>Heading
-              <textarea className={`${fieldClass} mt-1.5`} rows={2} value={(form.data as any).heading || ""} onChange={e => setData({...form.data as any, heading: e.target.value})} placeholder="e.g. Ready to Build?" />
-            </label>
-            <label className={labelClass}>Subheading
-              <input className={`${fieldClass} mt-1.5`} value={(form.data as any).subheading || ""} onChange={e => setData({...form.data as any, subheading: e.target.value})} placeholder="e.g. Let's turn your vision into reality." />
-            </label>
-            <div>
-              <ImageField
-                label="Image"
-                path={["image"]}
-                value={(form.data as any).image || ""}
-                onChange={(v: string) => setData({ ...form.data as any, image: v })}
-              />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <label className={labelClass}>Button Text 
-                <input className={`${fieldClass} mt-1.5`} value={(form.data as any).buttonText || ""} onChange={e => setData({...form.data as any, buttonText: e.target.value})} placeholder="e.g. Get Started" />
-              </label>
-              <label className={labelClass}>Button Href 
-                <input className={`${fieldClass} mt-1.5`} value={(form.data as any).buttonHref || ""} onChange={e => setData({...form.data as any, buttonHref: e.target.value})} placeholder="e.g. /contact" />
-              </label>
-            </div>
-          </div>
-        )} */}
-
-        {/* {isTestimonialsComponent && (
-          <div className="grid grid-cols-1 gap-6 p-5 bg-[#f7fcfb] rounded-xl border border-[#d1eee9] mb-2 shadow-sm">
-            <div className="flex items-center justify-between border-b border-[#d1eee9] pb-3">
-              <div>
-                <h3 className="text-sm font-bold text-[#2e7d71] uppercase tracking-wider">Testimonials Configuration</h3>
-                <p className="text-[11px] text-gray-500">Manage heading, sub-heading and individual reviews with ratings.</p>
-              </div>
-              <button 
-                type="button"
-                onClick={() => {
-                  const d = (form.data as any) || {};
-                  const existingTestimonials = Array.isArray(d.testimonials) ? d.testimonials : [];
-                  
-                  // Inject rating field into existing testimonials if missing
-                  const testimonials = existingTestimonials.length > 0 
-                    ? existingTestimonials.map((t: any) => ({
-                        rating: t.rating ?? 5,
-                        ...t
-                      }))
-                    : [{ id: `${Date.now()}`, name: "Client Name", role: "Designation", content: "Your feedback here...", rating: 5, image: "" }];
-
-                  setData({
-                    ...d,
-                    heading: d.heading || "Voices of Satisfaction",
-                    subheading: d.subheading || "What our clients are saying about us.",
-                    testimonials
-                  });
-                }}
-                className="text-[10px] font-bold text-teal-700 bg-white px-3 py-1.5 rounded-lg border border-teal-200 hover:bg-teal-50 transition-colors shadow-sm"
-              >
-                Initialize Testimonials Data
-              </button>
-            </div>
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <label className={labelClass}>Main Heading <input className={`${fieldClass} mt-1.5`} value={(form.data as any).heading || ""} onChange={e => setData({...form.data as any, heading: e.target.value})} placeholder="e.g. Testimonials" /></label>
-                <label className={labelClass}>Sub Heading <input className={`${fieldClass} mt-1.5`} value={(form.data as any).subheading || ""} onChange={e => setData({...form.data as any, subheading: e.target.value})} placeholder="e.g. Our Happy Clients" /></label>
-              </div>
-            </div>
-          </div>
-        )} */}
         
         <StructuredField path={[]} value={form.data as EditableValue} root={form.data as EditableValue} onRootChange={(value) => setData(value as HomepageData)} />
       </section>
 
       {errors.length ? (
-        <div className="rounded-lg border border-[#f0d6d8] bg-[#fff1f3] p-4 text-sm text-[#9b2e2e]">
+        <div className="rounded-lg border border-[#f0d6d8] bg-[#fff1f3] p-1.5 text-[10px] text-[#9b2e2e]">
           <p className="font-semibold">Please fix these fields:</p>
-          <ul className="mt-2 list-disc space-y-1 pl-5">
+          <ul className="mt-0.5 list-disc space-y-0.5 pl-3">
             {errors.map((error, index) => <li key={index}>{error}</li>)}
           </ul>
         </div>
       ) : null}
 
-      <div className="flex flex-wrap items-center gap-3">
-        <button type="button" onClick={save} disabled={loading} className="inline-flex items-center gap-2 rounded-md bg-[#6f542f] px-6 py-3 text-sm font-bold text-white disabled:opacity-60">
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save size={16} />}
+      <div className="flex flex-wrap items-center gap-1.5">
+        <button type="button" onClick={save} disabled={loading} className="inline-flex items-center gap-1 rounded-md bg-[#6f542f] px-3 py-1.5 text-[11px] font-bold text-white disabled:opacity-60">
+          {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save size={12} />}
           Save Changes
         </button>
-        {message ? <p className="text-sm font-semibold text-[#6f542f]">{message}</p> : null}
+        {message ? <p className="text-[11px] font-semibold text-[#6f542f]">{message}</p> : null}
       </div>
     </div>
   );
@@ -589,7 +431,7 @@ export default function HomepageComponentRouteEditor({
   title: string;
 }) {
   return (
-    <Suspense fallback={<div className="flex justify-center p-20"><Loader2 className="animate-spin text-[#8d6a3a]" size={40} /></div>}>
+    <Suspense fallback={<div className="flex justify-center p-6"><Loader2 className="animate-spin text-[#8d6a3a]" size={24} /></div>}>
     <HomepageContentProvider componentKey={componentKey}>
       <EditorInner title={title} />
     </HomepageContentProvider>

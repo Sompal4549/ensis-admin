@@ -108,8 +108,14 @@ ctaBanner: {
 interface Subscriber {
   _id: string;
   email: string;
+  type?: "blog" | "career";
   createdAt?: string;
 }
+
+const subscriberTypeLabel = (type?: string) => {
+  if (type === "career") return "Careers";
+  return "Newsletter";
+};
 
 type FormTab = "basic" | "banner" | "newsletter" | "seo";
 
@@ -1089,6 +1095,7 @@ const renderBannerTab = () => (
               <thead>
                 <tr className="border-b  text-xs uppercase font-bold">
                   <th className="pb-3 px-4">Email Address</th>
+                  <th className="pb-3 px-4">Type</th>
                   <th className="pb-3 px-4">Subscribed Date</th>
                 </tr>
               </thead>
@@ -1096,11 +1103,16 @@ const renderBannerTab = () => (
                 {subscribers.map(sub => (
                   <tr key={sub._id} className="hover:bg-slate-50 transition-colors">
                     <td className="py-3 px-4 text-sm font-medium ">{sub.email}</td>
+                    <td className="py-3 px-4">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${sub.type === "career" ? "bg-amber-100 text-amber-700 border-amber-200" : "bg-blue-100 text-blue-700 border-blue-200"}`}>
+                        {subscriberTypeLabel(sub.type)}
+                      </span>
+                    </td>
                     <td className="py-3 px-4 text-sm ">{sub.createdAt ? new Date(sub.createdAt).toLocaleDateString() : 'N/A'}</td>
                   </tr>
                 ))}
                 {subscribers.length === 0 && (
-                  <tr><td colSpan={2} className="py-8 text-center  italic">No subscribers yet</td></tr>
+                  <tr><td colSpan={3} className="py-8 text-center  italic">No subscribers yet</td></tr>
                 )}
               </tbody>
             </table>

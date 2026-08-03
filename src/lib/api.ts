@@ -474,6 +474,7 @@ export type Application = {
   phone: string;
   currentLocation: string;
   department: string;
+  experience: string;
   coverLetter?: string;
   resume: string;
   status: "pending" | "reviewed" | "shortlisted" | "rejected";
@@ -481,8 +482,7 @@ export type Application = {
   updatedAt: string;
 };
 
-export const applicationApi = {
-  list: () =>
+export const applicationApi = {  list: () =>
     request<Application[]>("/applications"),
 
   get: (id: string) =>
@@ -515,4 +515,49 @@ export const applicationApi = {
     request<null>(`/applications/${id}`, {
       method: "DELETE",
     }),
+};
+
+export type ActivityAction = "create" | "update" | "delete";
+
+export type ActivityLog = {
+  _id: string;
+  action: ActivityAction;
+  entity: string;
+  entityId?: string;
+  title?: string;
+  userId?: string;
+  userName?: string;
+  userRole?: string;
+  changes?: Record<string, { before: unknown; after: unknown }>;
+  snapshotBefore?: Record<string, unknown>;
+  snapshotAfter?: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ActivityLogListResponse = {
+  logs: ActivityLog[];
+  total: number;
+  page: number;
+  limit: number;
+  entities: string[];
+};
+
+export const activityLogApi = {
+  list: (params: {
+    page?: number;
+    limit?: number;
+    action?: ActivityAction | "";
+    entity?: string;
+    search?: string;
+  } = {}) => {
+    const searchParams = new URLSearchParams({
+      page: String(params.page || 1),
+      limit: String(params.limit || 50),
+    });
+    if (params.action) searchParams.set("action", params.action);
+    if (params.entity) searchParams.set("entity", params.entity);
+    if (params.search) searchParams.set("search", params.search);
+    return request<ActivityLogListResponse>(`/activity-logs?${searchParams.toString()}`);
+  },
 };
