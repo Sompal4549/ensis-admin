@@ -7,7 +7,8 @@ export type BlogPageContentKeys =
   | "blog.allBlogs"
   | "blog.mediaResources"
   | "blog.stayInspired"
-  | "blog.supportWellness";
+  | "blog.supportWellness"
+  | "blog.features_strip"
 
 export const blogPageKeys: { key: BlogPageContentKeys; label: string; description: string }[] = [
   { key: "blog.hero", label: "Blog Hero", description: "Main banner for the blog page." },
@@ -17,6 +18,7 @@ export const blogPageKeys: { key: BlogPageContentKeys; label: string; descriptio
   { key: "blog.mediaResources", label: "Media & Resources", description: "Blogs media list and report resources." },
   { key: "blog.stayInspired", label: "Stay Inspired", description: "Subscription CTA section." },
   { key: "blog.supportWellness", label: "Support Wellness", description: "Final footer CTA with icon and buttons." },
+  { key: "blog.features_strip", label: "Features Strip", description:"Features below the banner"}
 ];
 
 export const defaultBlogData: Record<BlogPageContentKeys, any> = {
@@ -44,7 +46,8 @@ export const defaultBlogData: Record<BlogPageContentKeys, any> = {
   },
   "blog.supportWellness": {
     iconImage: "", title: "", description: "", primaryButton: { label: "", href: "" }, bgImage: ""
-  }
+  },
+  "blog.features_strip": { items: [{ id: "", title: "", description: "", imageurl: { imageUrl: "", alt: "" } }] }
 };
 
 export const buildEmptyBlogContent = (key: BlogPageContentKeys): Omit<ComponentContent, "_id"> & { key: BlogPageContentKeys } => {
@@ -57,7 +60,7 @@ export const buildEmptyBlogContent = (key: BlogPageContentKeys): Omit<ComponentC
   if (data.experts) data.experts = data.experts.map((e: any) => ({ ...e, id: randomId() }));
   if (data.blogs) data.blogs = data.blogs.map((b: any) => ({ ...b, id: randomId() }));
   if (data.blogsMedia) data.blogsMedia = data.blogsMedia.map((m: any) => ({ ...m, id: randomId() }));
-
+if (data.items) data.items = data.items.map((it: any) => ({ id: randomId(), title: "", description: "", imageurl: { imageUrl: "", alt: "" }, ...it }));
   const keyInfo = blogPageKeys.find(k => k.key === key);
 
   return {

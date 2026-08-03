@@ -88,17 +88,26 @@ export type AuthUser = {
 
 export type Order = {
   _id: string;
-  orderNumber: string;
   user: string | AuthUser;
   items: Array<{
     product: string | Product;
+    name?: string;
     quantity: number;
     price: number;
   }>;
   totalAmount: number;
-  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled" | "returned";
-  paymentStatus: "pending" | "paid" | "failed" | "refunded";
-  shippingAddress: string;
+  paymentStatus: "pending" | "paid" | "failed";
+  orderStatus: "pending" | "confirmed" | "shipped" | "delivered" | "cancelled";
+  shippingAddress: {
+    label: string;
+    street: string;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+    phone: string;
+  };
+  trackingNumber?: string;
   createdAt: string;
   updatedAt: string;
 };

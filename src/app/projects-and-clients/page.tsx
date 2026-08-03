@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
-import { Loader2, Save, Trash2, Eye } from 'lucide-react';
+import { Loader2, Save, Trash2, Eye, Plus } from 'lucide-react';
 import { componentContentApi, type ComponentContent } from "@/lib/api";
 import { fieldClass, labelClass } from "@/constants";
 import { ImageUploadField } from "@/components/common/ImageUploadField";
@@ -115,6 +115,20 @@ export interface ContactSection {
   bottomText: string;
 }
 
+export interface FeatureStripItem {
+  id: string;
+  title: string;
+  description: string;
+  image: {
+    imageUrl: string;
+    alt: string;
+  };
+}
+
+export interface FeaturesStripContent {
+  items: FeatureStripItem[];
+}
+
 // Default width/height so a freshly-added logo never reaches an
 // <Image width={0} height={0} /> on the public-facing page before
 // the admin fills in real values.
@@ -167,26 +181,32 @@ const initialContactSectionForm: ContactSection = {
   rightImage: "",
   bottomText: ""
 };
+
+const initialFeaturesStripForm: FeaturesStripContent = {
+  items: [],
+};
+
 const ProjectAndClientManagement = () => {
   const [loading, setLoading] = useState(true);
   const [content, setContent] = useState<ComponentContent | null>(null);
   const [uploadingField, setUploadingField] = useState<string | null>(null);
 
   // Separate "saving" flags per-section so saving one form doesn't
-  // disable/spin the buttons on the other two forms.
+  // disable/spin the buttons on the other forms.
   const [savingBanner, setSavingBanner] = useState(false);
   const [savingOurClients, setSavingOurClients] = useState(false);
   const [savingWhyPartner, setSavingWhyPartner] = useState(false);
   const [savingContact, setSavingContact] = useState(false);
   const [savingOurProjects, setSavingOurProjects] = useState(false);
+  const [savingFeaturesStrip, setSavingFeaturesStrip] = useState(false);
 
   const [records, setRecords] = useState<ComponentContent[]>([]);
 
   const knownKeys = [
-    "projects.banner", "projects.whyPartner", "projects.ourProjects", "projects.ourClients", "projects.contactSection"
+    "projects.banner", "projects.whyPartner", "projects.ourProjects", "projects.ourClients", "projects.contactSection", "projects.features_strip"
   ];
 
-  const [activeTab, setActiveTab] = useState<'banner' | 'whyPartner' | 'ourClients' | 'contact' | 'ourProjects'>('banner');
+  const [activeTab, setActiveTab] = useState<'banner' | 'whyPartner' | 'ourClients' | 'contact' | 'ourProjects' | 'featuresStrip'>('banner');
 
   const [form, setForm] = useState<ProjectsBannerContent>({
     title: { line1: "", line2: "" },
@@ -204,15 +224,16 @@ const ProjectAndClientManagement = () => {
   const [ourProjectsForm, setOurProjectsForm] = useState<OurProjectsContent>(initialOurProjectsForm);
   const [contactContent, setContactContent] = useState<ComponentContent | null>(null);
   const [contactForm, setContactForm] = useState<ContactSection>(initialContactSectionForm);
+  const [featuresStripContent, setFeaturesStripContent] = useState<ComponentContent | null>(null);
+  const [featuresStripForm, setFeaturesStripForm] = useState<FeaturesStripContent>(initialFeaturesStripForm);
 
   const loadContent = useCallback(async () => {
     setLoading(true);
 
     // Each section is fetched independently with its own try/catch so
     // that one missing/failing key (e.g. "projects.whyPartner" not yet
-    // created in the backend) doesn't stop the other two sections from
-    // loading. Previously all three awaits were inside a single try
-    // block, so a failure on the first call silently skipped the rest.
+    // created in the backend) doesn't stop the other sections from
+    // loading.
 
     try {
       const allRecords = await componentContentApi.list();
@@ -314,6 +335,19 @@ const ProjectAndClientManagement = () => {
       }
     } catch (error) {
       console.error("Failed to load contact section:", error);
+    }
+
+    try {
+      const featuresStripItem = await componentContentApi.getByKey("projects.features_strip");
+      if (featuresStripItem) {
+        setFeaturesStripContent(featuresStripItem);
+        const d = (featuresStripItem.data || {}) as Partial<FeaturesStripContent>;
+        setFeaturesStripForm({
+          items: d?.items || [],
+        });
+      }
+    } catch (error) {
+      console.error("Failed to load features strip section:", error);
     }
 
     setLoading(false);
@@ -453,6 +487,32 @@ const ProjectAndClientManagement = () => {
     }
   };
 
+  const handleSaveFeaturesStrip = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingFeaturesStrip(true);
+    try {
+      const payload = {
+        key: "projects.features_strip",
+        label: "Projects Features Strip Section",
+        page: "projects",
+        isActive: true,
+        data: featuresStripForm as any
+      };
+
+      if (featuresStripContent) {
+        await componentContentApi.update(featuresStripContent._id, payload as any);
+      } else {
+        await componentContentApi.create(payload as any);
+      }
+      toast.success("Features Strip section saved successfully!");
+      loadContent();
+    } catch (error: any) {
+      toast.error(error.message || "Failed to save Features Strip section");
+    } finally {
+      setSavingFeaturesStrip(false);
+    }
+  };
+
   const updateClient = (index: number, field: keyof ClientLogo, value: any) => {
     const newClients = [...ourClientsForm.clients];
     newClients[index] = { ...newClients[index], [field]: value };
@@ -524,7 +584,8 @@ const ProjectAndClientManagement = () => {
       "projects.whyPartner": "whyPartner",
       "projects.ourProjects": "ourProjects",
       "projects.ourClients": "ourClients",
-      "projects.contactSection": "contact"
+      "projects.contactSection": "contact",
+      "projects.features_strip": "featuresStrip"
     };
 
     if (keyMap[record.key]) {
@@ -546,7 +607,8 @@ const ProjectAndClientManagement = () => {
     whyPartner: whyPartnerContent?._id,
     ourProjects: ourProjectsContent?._id,
     ourClients: ourClientsContent?._id,
-    contact: contactContent?._id
+    contact: contactContent?._id,
+    featuresStrip: featuresStripContent?._id
   }[activeTab];
 
   return (
@@ -568,6 +630,7 @@ const ProjectAndClientManagement = () => {
             <option value="ourProjects">Our Projects</option>
             <option value="ourClients">Our Clients</option>
             <option value="contact">Contact Section</option>
+            <option value="featuresStrip">Features Strip</option>
           </select>
         </div>
       </div>
@@ -1214,6 +1277,155 @@ const ProjectAndClientManagement = () => {
             <div className="pt-4 border-t border-slate-100">
               <label className={labelClass}>Bottom Text</label>
               <textarea className={fieldClass} value={contactForm.bottomText} onChange={e => setContactForm({...contactForm, bottomText: e.target.value})} rows={3} />
+            </div>
+          </div>
+        </form>
+      )}
+
+      {/* Features Strip Section */}
+      {activeTab === 'featuresStrip' && (
+        <form onSubmit={handleSaveFeaturesStrip} className="bg-white border rounded-2xl shadow-sm overflow-hidden animate-in fade-in duration-300">
+          <div className="bg-slate-50 border-b p-4 px-6 flex items-center justify-between">
+            <h2 className="font-bold  text-xs sm:text-sm uppercase tracking-wider">Features Strip Section</h2>
+            <button
+              type="submit"
+              disabled={savingFeaturesStrip}
+              className="bg-[#1d5af2] text-white px-5 py-2 rounded-xl font-bold text-xs flex items-center gap-2 hover:bg-[#154dc8] transition-all disabled:opacity-50 cursor-pointer shadow-lg shadow-blue-500/20"
+            >
+              {savingFeaturesStrip ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
+              <span className="hidden sm:inline">Save Features Strip</span>
+            </button>
+          </div>
+
+          <div className="p-4 space-y-4">
+            <h4 className="text-xs font-bold text-[#8d6a3a] uppercase">
+              Features Strip Items
+            </h4>
+
+            <div className="grid grid-cols-2 gap-4">
+              {featuresStripForm.items.map((item, idx) => (
+                <div
+                  key={item.id}
+                  className="p-4 border rounded bg-white relative space-y-3 shadow-sm"
+                >
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const ni = featuresStripForm.items.filter((_, i) => i !== idx);
+                      setFeaturesStripForm({ ...featuresStripForm, items: ni });
+                    }}
+                    className="absolute top-2 right-2 text-red-500 hover:bg-red-50 p-1 rounded transition-colors"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+
+                  <ImageUploadField
+                    label="Image"
+                    value={item.image.imageUrl}
+                    fieldKey={`fstrip.${idx}`}
+                    uploadingField={uploadingField}
+                    onUploadingChange={setUploadingField}
+                    onError={(m) => toast.error(m)}
+                    onUpload={(url) => {
+                      const ni = [...featuresStripForm.items];
+
+                      ni[idx] = {
+                        ...ni[idx],
+                        image: {
+                          ...ni[idx].image,
+                          imageUrl: url,
+                        },
+                      };
+
+                      setFeaturesStripForm({ ...featuresStripForm, items: ni });
+                    }}
+                  />
+
+                  {/* Image Alt Text */}
+                  <label className={labelClass}>
+                    Image Alt Text
+                    <input
+                      className={fieldClass}
+                      value={item.image.alt || ''}
+                      placeholder="Describe the image for accessibility and SEO"
+                      onChange={(e) => {
+                        const ni = [...featuresStripForm.items];
+
+                        ni[idx] = {
+                          ...ni[idx],
+                          image: {
+                            ...ni[idx].image,
+                            alt: e.target.value,
+                          },
+                        };
+
+                        setFeaturesStripForm({ ...featuresStripForm, items: ni });
+                      }}
+                    />
+                  </label>
+
+                  <label className={labelClass}>
+                    Title
+                    <input
+                      className={fieldClass}
+                      value={item.title}
+                      onChange={(e) => {
+                        const ni = [...featuresStripForm.items];
+
+                        ni[idx] = {
+                          ...ni[idx],
+                          title: e.target.value,
+                        };
+
+                        setFeaturesStripForm({ ...featuresStripForm, items: ni });
+                      }}
+                    />
+                  </label>
+
+                  <label className={labelClass}>
+                    Description
+                    <textarea
+                      className={fieldClass}
+                      rows={3}
+                      value={item.description}
+                      onChange={(e) => {
+                        const ni = [...featuresStripForm.items];
+
+                        ni[idx] = {
+                          ...ni[idx],
+                          description: e.target.value,
+                        };
+
+                        setFeaturesStripForm({ ...featuresStripForm, items: ni });
+                      }}
+                    />
+                  </label>
+                </div>
+              ))}
+
+              <button
+                type="button"
+                onClick={() =>
+                  setFeaturesStripForm({
+                    ...featuresStripForm,
+                    items: [
+                      ...featuresStripForm.items,
+                      {
+                        id: randomId(),
+                        title: '',
+                        description: '',
+                        image: {
+                          imageUrl: '',
+                          alt: '',
+                        },
+                      },
+                    ],
+                  })
+                }
+                className="border-2 border-dashed rounded-xl flex items-center justify-center text-gray-400 py-12 hover:bg-gray-50 transition-colors"
+              >
+                <Plus size={32} />
+              </button>
             </div>
           </div>
         </form>

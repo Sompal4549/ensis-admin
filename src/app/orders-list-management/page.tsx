@@ -14,8 +14,8 @@ export default function OrdersPage() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [updating, setUpdating] = useState(false);
 
-  const [formName, setFormName] = useState("");
   const [formStatus, setFormStatus] = useState<string>("pending");
+  const [formPayment, setFormPayment] = useState<string>("pending");
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -34,8 +34,8 @@ export default function OrdersPage() {
 
   useEffect(() => {
     if (selectedOrder) {
-      setFormName(typeof selectedOrder.user === "object" ? selectedOrder.user.name : "Guest User");
-      setFormStatus(selectedOrder.status);
+      setFormStatus(selectedOrder.orderStatus);
+      setFormPayment(selectedOrder.paymentStatus);
     }
   }, [selectedOrder]);
 
@@ -44,12 +44,12 @@ export default function OrdersPage() {
     setUpdating(true);
     try {
       const updated = await orderApi.update(selectedOrder._id, {
-        status: formStatus,
-        name: formName,
+        orderStatus: formStatus,
+        paymentStatus: formPayment,
       } as Partial<Order>);
       setOrders(prev => prev.map(o => o._id === updated._id ? updated : o));
       setSelectedOrder(null);
-      toast.success(`Order #${updated.orderNumber} updated!`);
+      toast.success(`Order #${updated._id.slice(-6).toUpperCase()} updated!`);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Failed to update order";
       toast.error(message);
@@ -58,14 +58,21 @@ export default function OrdersPage() {
     }
   };
 
-  const getStatusColor = (status: Order["status"]) => {
+  const getStatusColor = (status: Order["orderStatus"]) => {
     switch (status) {
       case "delivered": return "bg-green-100 text-green-800";
       case "cancelled": return "bg-red-100 text-red-800";
-      case "processing": return "bg-blue-100 text-blue-800";
+      case "confirmed": return "bg-blue-100 text-blue-800";
       case "shipped": return "bg-purple-100 text-purple-800";
-      case "returned": return "bg-orange-100 text-orange-800";
       default: return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const getPaymentColor = (status: Order["paymentStatus"]) => {
+    switch (status) {
+      case "paid": return "bg-green-100 text-green-800";
+      case "failed": return "bg-red-100 text-red-800";
+      default: return "bg-amber-100 text-amber-800";
     }
   };
 
@@ -107,17 +114,17 @@ export default function OrdersPage() {
               {orders.map((order) => (
                 <tr key={order._id} className={`hover:bg-gray-50 transition-colors ${selectedOrder?._id === order._id ? 'bg-indigo-50/50' : ''}`}>
                   <td className="px-6 py-4 whitespace-nowrap font-medium text-indigo-600">
-                    #{order.orderNumber}
+                    #{order._id.slice(-6).toUpperCase()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-gray-700">
                     {typeof order.user === "object" ? order.user.name : "Guest User"}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-gray-900 font-bold">
-                    ${order.totalAmount.toLocaleString()}
+                    ₹{order.totalAmount.toLocaleString("en-IN")}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(order.status)}`}>
-                      {order.status}
+                    <span className={`px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(order.orderStatus)}`}>
+                      {order.orderStatus}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-gray-500">
@@ -155,7 +162,7 @@ export default function OrdersPage() {
             <div className="flex items-center justify-between p-5 border-b border-gray-100">
               <div>
                 <h2 className="text-lg font-bold text-gray-900">Update Order</h2>
-                <p className="text-xs text-gray-500 font-medium mt-0.5">Order #{selectedOrder.orderNumber}</p>
+                <p className="text-xs text-gray-500 font-medium mt-0.5">Order #{selectedOrder._id.slice(-6).toUpperCase()}</p>
               </div>
               <button 
                 onClick={() => setSelectedOrder(null)}
@@ -168,17 +175,6 @@ export default function OrdersPage() {
             <div className="p-6 space-y-6">
               <div className="space-y-4">
                 <div>
-                  <label className={labelClass}>Customer Name</label>
-                  <input
-                    type="text"
-                    value={formName}
-                    onChange={(e) => setFormName(e.target.value)}
-                    className={`${fieldClass} mt-1.5`}
-                    placeholder="Enter customer name"
-                  />
-                </div>
-
-                <div>
                   <label className={labelClass}>Order Status</label>
                   <select
                     value={formStatus}
@@ -186,11 +182,23 @@ export default function OrdersPage() {
                     className={`${fieldClass} mt-1.5`}
                   >
                     <option value="pending">Pending</option>
-                    <option value="processing">Processing</option>
+                    <option value="confirmed">Confirmed</option>
                     <option value="shipped">Shipped</option>
                     <option value="delivered">Delivered</option>
                     <option value="cancelled">Cancelled</option>
-                    <option value="returned">Returned</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className={labelClass}>Payment Status</label>
+                  <select
+                    value={formPayment}
+                    onChange={(e) => setFormPayment(e.target.value)}
+                    className={`${fieldClass} mt-1.5`}
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="paid">Paid</option>
+                    <option value="failed">Failed</option>
                   </select>
                 </div>
               </div>

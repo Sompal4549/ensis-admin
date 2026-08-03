@@ -149,6 +149,99 @@ export default function BlogPageManager() {
       </div>
     );
   };
+  const renderFeaturesStripForm = () => {
+  const items = data.items || [];
+  return (
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h4 className="text-xs font-bold text-[#8d6a3a] uppercase tracking-wider">Stats Strip Items</h4>
+        <button
+          type="button"
+          className="text-xs bg-[#263016] text-white px-2 py-1 rounded"
+          onClick={() => updateData("items", [...items, { id: randomId(), title: "", description: "", imageurl: { imageUrl: "", alt: "" } }])}
+        >
+          Add Stat
+        </button>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        {items.map((item: any, idx: number) => (
+          <div key={item.id} className="p-3 border rounded bg-gray-50 space-y-1 relative">
+            <button
+              type="button"
+              onClick={() => updateData("items", items.filter((_: any, i: number) => i !== idx))}
+              className="absolute top-2 right-2 text-red-500"
+            >
+              <Trash2 size={14} />
+            </button>
+
+            <label className={labelClass}>
+              Value Label
+              <input
+                className={fieldClass}
+                value={item.title || ""}
+                onChange={(e) => {
+                  const ni = [...items];
+                  ni[idx] = { ...ni[idx], title: e.target.value };
+                  updateData("items", ni);
+                }}
+              />
+            </label>
+
+            <label className={labelClass}>
+              Subtitle
+              <input
+                className={fieldClass}
+                value={item.description || ""}
+                onChange={(e) => {
+                  const ni = [...items];
+                  ni[idx] = { ...ni[idx], description: e.target.value };
+                  updateData("items", ni);
+                }}
+              />
+            </label>
+
+            <label className={labelClass}>
+              Image Alt Text
+              <input
+                className={fieldClass}
+                value={item.imageurl?.alt || ""}
+                placeholder="Describe the image for accessibility"
+                onChange={(e) => {
+                  const ni = [...items];
+                  ni[idx] = { ...ni[idx], imageurl: { ...ni[idx].imageurl, alt: e.target.value } };
+                  updateData("items", ni);
+                }}
+              />
+            </label>
+
+            <ImageUploadField
+              label="Icon"
+              value={item.imageurl?.imageUrl}
+              fieldKey={`fstrip.${idx}`}
+              uploadingField={uploadingField}
+              onUploadingChange={setUploadingField}
+              onError={(m) => toast.error(m)}
+              onUpload={(url) => {
+                const ni = [...items];
+                ni[idx] = { ...ni[idx], imageurl: { ...ni[idx].imageurl, imageUrl: url } };
+                updateData("items", ni);
+              }}
+            />
+          </div>
+        ))}
+
+        <button
+          type="button"
+          onClick={() => updateData("items", [...items, { id: randomId(), title: "", description: "", imageurl: { imageUrl: "", alt: "" } }])}
+          className="border-2 border-dashed rounded-xl flex items-center justify-center text-gray-400 py-12 hover:bg-gray-50 transition-colors"
+        >
+          <Plus size={32} />
+        </button>
+      </div>
+    </div>
+  );
+};
 
   const renderHeroForm = () => (
     <div className="space-y-4">
@@ -316,8 +409,7 @@ export default function BlogPageManager() {
               {componentKey === "blog.mediaResources" && renderMediaForm()}
               {componentKey === "blog.stayInspired" && renderStayInspiredForm()}
               {componentKey === "blog.supportWellness" && renderSupportWellnessForm()}
-
-
+{componentKey === "blog.features_strip" && renderFeaturesStripForm()}
             </div>
           </form>
         </div>
