@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
-import { Loader2, Save, Trash2, Eye } from 'lucide-react';
+import { Loader2, Save, Trash2, Eye, Plus } from 'lucide-react';
 import { componentContentApi, type ComponentContent } from "@/lib/api";
 import { fieldClass, labelClass } from "@/constants";
 import { ImageUploadField } from "@/components/common/ImageUploadField";
@@ -115,6 +115,20 @@ export interface ContactSection {
   bottomText: string;
 }
 
+export interface FeatureStripItem {
+  id: string;
+  title: string;
+  description: string;
+  image: {
+    imageUrl: string;
+    alt: string;
+  };
+}
+
+export interface FeaturesStripContent {
+  items: FeatureStripItem[];
+}
+
 // Default width/height so a freshly-added logo never reaches an
 // <Image width={0} height={0} /> on the public-facing page before
 // the admin fills in real values.
@@ -122,6 +136,15 @@ const DEFAULT_LOGO_WIDTH = 120;
 const DEFAULT_LOGO_HEIGHT = 60;
 
 const randomId = () => Math.random().toString(36).substring(2, 9);
+
+// Compact shared styles
+const cardClass = "p-2 border rounded-lg bg-slate-50 relative space-y-1.5";
+const cardClassWhite = "p-2 border rounded-lg bg-white relative space-y-1.5 shadow-sm";
+const smallLabelClass = "text-[11px] text-[#5f5a50] font-semibold flex flex-col gap-0.5";
+const smallFieldClass = "px-2 py-1 text-xs border rounded w-full";
+const sectionSubHeaderClass = "text-xs font-bold";
+const addBtnClass = "bg-green-600 text-white px-2.5 py-1 rounded-lg text-[11px] hover:bg-green-700";
+const formHeaderBtnClass = "bg-[#1d5af2] text-white px-3.5 py-1.5 rounded-lg font-bold text-xs flex items-center gap-1.5 hover:bg-[#154dc8] transition-all disabled:opacity-50 cursor-pointer shadow shadow-blue-500/20";
 
 const initialOurClientsForm: OurClients = {
   heading: "",
@@ -167,26 +190,32 @@ const initialContactSectionForm: ContactSection = {
   rightImage: "",
   bottomText: ""
 };
+
+const initialFeaturesStripForm: FeaturesStripContent = {
+  items: [],
+};
+
 const ProjectAndClientManagement = () => {
   const [loading, setLoading] = useState(true);
   const [content, setContent] = useState<ComponentContent | null>(null);
   const [uploadingField, setUploadingField] = useState<string | null>(null);
 
   // Separate "saving" flags per-section so saving one form doesn't
-  // disable/spin the buttons on the other two forms.
+  // disable/spin the buttons on the other forms.
   const [savingBanner, setSavingBanner] = useState(false);
   const [savingOurClients, setSavingOurClients] = useState(false);
   const [savingWhyPartner, setSavingWhyPartner] = useState(false);
   const [savingContact, setSavingContact] = useState(false);
   const [savingOurProjects, setSavingOurProjects] = useState(false);
+  const [savingFeaturesStrip, setSavingFeaturesStrip] = useState(false);
 
   const [records, setRecords] = useState<ComponentContent[]>([]);
 
   const knownKeys = [
-    "projects.banner", "projects.whyPartner", "projects.ourProjects", "projects.ourClients", "projects.contactSection"
+    "projects.banner", "projects.whyPartner", "projects.ourProjects", "projects.ourClients", "projects.contactSection", "projects.features_strip"
   ];
 
-  const [activeTab, setActiveTab] = useState<'banner' | 'whyPartner' | 'ourClients' | 'contact' | 'ourProjects'>('banner');
+  const [activeTab, setActiveTab] = useState<'banner' | 'whyPartner' | 'ourClients' | 'contact' | 'ourProjects' | 'featuresStrip'>('banner');
 
   const [form, setForm] = useState<ProjectsBannerContent>({
     title: { line1: "", line2: "" },
@@ -204,15 +233,16 @@ const ProjectAndClientManagement = () => {
   const [ourProjectsForm, setOurProjectsForm] = useState<OurProjectsContent>(initialOurProjectsForm);
   const [contactContent, setContactContent] = useState<ComponentContent | null>(null);
   const [contactForm, setContactForm] = useState<ContactSection>(initialContactSectionForm);
+  const [featuresStripContent, setFeaturesStripContent] = useState<ComponentContent | null>(null);
+  const [featuresStripForm, setFeaturesStripForm] = useState<FeaturesStripContent>(initialFeaturesStripForm);
 
   const loadContent = useCallback(async () => {
     setLoading(true);
 
     // Each section is fetched independently with its own try/catch so
     // that one missing/failing key (e.g. "projects.whyPartner" not yet
-    // created in the backend) doesn't stop the other two sections from
-    // loading. Previously all three awaits were inside a single try
-    // block, so a failure on the first call silently skipped the rest.
+    // created in the backend) doesn't stop the other sections from
+    // loading.
 
     try {
       const allRecords = await componentContentApi.list();
@@ -314,6 +344,19 @@ const ProjectAndClientManagement = () => {
       }
     } catch (error) {
       console.error("Failed to load contact section:", error);
+    }
+
+    try {
+      const featuresStripItem = await componentContentApi.getByKey("projects.features_strip");
+      if (featuresStripItem) {
+        setFeaturesStripContent(featuresStripItem);
+        const d = (featuresStripItem.data || {}) as Partial<FeaturesStripContent>;
+        setFeaturesStripForm({
+          items: d?.items || [],
+        });
+      }
+    } catch (error) {
+      console.error("Failed to load features strip section:", error);
     }
 
     setLoading(false);
@@ -453,6 +496,32 @@ const ProjectAndClientManagement = () => {
     }
   };
 
+  const handleSaveFeaturesStrip = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingFeaturesStrip(true);
+    try {
+      const payload = {
+        key: "projects.features_strip",
+        label: "Projects Features Strip Section",
+        page: "projects",
+        isActive: true,
+        data: featuresStripForm as any
+      };
+
+      if (featuresStripContent) {
+        await componentContentApi.update(featuresStripContent._id, payload as any);
+      } else {
+        await componentContentApi.create(payload as any);
+      }
+      toast.success("Features Strip section saved successfully!");
+      loadContent();
+    } catch (error: any) {
+      toast.error(error.message || "Failed to save Features Strip section");
+    } finally {
+      setSavingFeaturesStrip(false);
+    }
+  };
+
   const updateClient = (index: number, field: keyof ClientLogo, value: any) => {
     const newClients = [...ourClientsForm.clients];
     newClients[index] = { ...newClients[index], [field]: value };
@@ -524,7 +593,8 @@ const ProjectAndClientManagement = () => {
       "projects.whyPartner": "whyPartner",
       "projects.ourProjects": "ourProjects",
       "projects.ourClients": "ourClients",
-      "projects.contactSection": "contact"
+      "projects.contactSection": "contact",
+      "projects.features_strip": "featuresStrip"
     };
 
     if (keyMap[record.key]) {
@@ -536,8 +606,8 @@ const ProjectAndClientManagement = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center p-20">
-        <Loader2 className="animate-spin text-[#8d6a3a]" size={40} />
+      <div className="flex justify-center p-12">
+        <Loader2 className="animate-spin text-[#8d6a3a]" size={32} />
       </div>
     );
   }
@@ -546,33 +616,35 @@ const ProjectAndClientManagement = () => {
     whyPartner: whyPartnerContent?._id,
     ourProjects: ourProjectsContent?._id,
     ourClients: ourClientsContent?._id,
-    contact: contactContent?._id
+    contact: contactContent?._id,
+    featuresStrip: featuresStripContent?._id
   }[activeTab];
 
   return (
-    <div className="max-w-7xl mx-auto space-y-4 px-2 sm:px-2 lg:px-2 pb-3">
-      <div className="flex flex-col gap-3 bg-white px-4 py-3 sm:px-6 sm:py-4 rounded-2xl border border-slate-100 shadow-sm md:flex-row md:items-center md:justify-between">
+    <div className="max-w-7xl mx-auto space-y-3 px-2 sm:px-2 lg:px-2 pb-3 text-sm">
+      <div className="flex flex-col gap-2 bg-white px-3 py-2 sm:px-4 sm:py-3 rounded-xl border border-slate-100 shadow-sm md:flex-row md:items-center md:justify-between">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold  tracking-tight">Projects & Clients</h2>
-          <p className=" text-xs sm:text-sm">Manage your portfolio and client testimonials</p>
+          <h2 className="text-base sm:text-lg font-bold tracking-tight">Projects & Clients</h2>
+          <p className="text-[11px]">Manage your portfolio and client testimonials</p>
         </div>
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
       
           <select
             value={activeTab}
             onChange={(e) => setActiveTab(e.target.value as any)}
-            className="block w-full sm:w-48 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold  shadow-sm focus:border-[#1d5af2] focus:ring-1 focus:ring-[#1d5af2] transition-all"
+            className="block w-full sm:w-44 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold shadow-sm focus:border-[#1d5af2] focus:ring-1 focus:ring-[#1d5af2] transition-all"
           >
             <option value="banner">Banner</option>
             <option value="whyPartner">Why Partner</option>
             <option value="ourProjects">Our Projects</option>
             <option value="ourClients">Our Clients</option>
             <option value="contact">Contact Section</option>
+            <option value="featuresStrip">Features Strip</option>
           </select>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-8">
+      <div className="grid grid-cols-1 gap-4">
         {/* Sidebar: Component List */}
         {/* <div className="lg:col-span-4 space-y-4">
           <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
@@ -589,96 +661,84 @@ const ProjectAndClientManagement = () => {
         </div> */}
 
         {/* Main: Form Editor */}
-        <div className="space-y-6">
+        <div className="space-y-4">
       {activeTab === 'banner' && (
-        <form onSubmit={handleSave} className="bg-white border rounded-2xl shadow-sm overflow-hidden animate-in fade-in duration-300">
-        <div className="bg-slate-50 border-b p-4 px-6 flex items-center justify-between">
-          <h2 className="font-bold  text-xs sm:text-sm uppercase tracking-wider">Banner Section</h2>
+        <form onSubmit={handleSave} className="bg-white border rounded-xl shadow-sm overflow-hidden animate-in fade-in duration-300">
+        <div className="bg-slate-50 border-b p-2.5 px-4 flex items-center justify-between">
+          <h2 className="font-bold text-xs uppercase tracking-wider">Banner Section</h2>
           <button 
             type="submit" 
             disabled={savingBanner} 
-            className="bg-[#1d5af2] text-white px-5 py-2 rounded-xl font-bold text-xs flex items-center gap-2 hover:bg-[#154dc8] transition-all disabled:opacity-50 cursor-pointer shadow-lg shadow-blue-500/20"
+            className={formHeaderBtnClass}
           >
-            {savingBanner ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />} 
+            {savingBanner ? <Loader2 className="animate-spin" size={14} /> : <Save size={14} />} 
             <span className="hidden sm:inline">Save Banner</span>
           </button>
         </div>
 
-        <div className="p-4 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className={labelClass}>Title Line 1</label>
-                  <input 
-                    className={fieldClass} 
-                    value={form.title.line1} 
-                    onChange={e => setForm({...form, title: {...form.title, line1: e.target.value}})} 
-                    placeholder="e.g. Our Trusted"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className={labelClass}>Title Line 2</label>
-                  <input 
-                    className={fieldClass} 
-                    value={form.title.line2} 
-                    onChange={e => setForm({...form, title: {...form.title, line2: e.target.value}})} 
-                    placeholder="e.g. Partners"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className={labelClass}>Subtitle</label>
-                <input 
-                  className={fieldClass} 
-                  value={form.subtitle} 
-                  onChange={e => setForm({...form, subtitle: e.target.value})} 
-                  placeholder="e.g. Delivering excellence across industries"
-                />
-              </div>
-               <div>
-                <label className={labelClass}>Background Image Alt</label>
-                <input 
-                  className={fieldClass} 
-                  value={form.bgImageAlt} 
-                  onChange={e => setForm({...form, bgImageAlt: e.target.value})} 
-                  placeholder="e.g. Delivering excellence across industries"
-                />
-              </div>
-              <div>
-                <label className={labelClass}>Section Title</label>
-                <input 
-                  className={fieldClass} 
-                  value={form.sectionTitle} 
-                  onChange={e => setForm({...form, sectionTitle: e.target.value})} 
-                  placeholder="e.g. CLIENTS"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <ImageUploadField 
-                label="Banner Hero Image" 
-                value={form.heroImage} 
-                fieldKey="projects.banner.hero" 
-                uploadingField={uploadingField} 
-                onUploadingChange={setUploadingField} 
-                onUpload={url => setForm({...form, heroImage: url})} 
-                onError={m => toast.error(m)} 
+        <div className="p-3 space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <label className={smallLabelClass}>Title Line 1
+              <input 
+                className={smallFieldClass} 
+                value={form.title.line1} 
+                onChange={e => setForm({...form, title: {...form.title, line1: e.target.value}})} 
+                placeholder="e.g. Our Trusted"
+                required
               />
-            </div>
+            </label>
+            <label className={smallLabelClass}>Title Line 2
+              <input 
+                className={smallFieldClass} 
+                value={form.title.line2} 
+                onChange={e => setForm({...form, title: {...form.title, line2: e.target.value}})} 
+                placeholder="e.g. Partners"
+              />
+            </label>
+            <label className={smallLabelClass}>Subtitle
+              <input 
+                className={smallFieldClass} 
+                value={form.subtitle} 
+                onChange={e => setForm({...form, subtitle: e.target.value})} 
+                placeholder="e.g. Delivering excellence across industries"
+              />
+            </label>
+            <label className={smallLabelClass}>Background Image Alt
+              <input 
+                className={smallFieldClass} 
+                value={form.bgImageAlt} 
+                onChange={e => setForm({...form, bgImageAlt: e.target.value})} 
+                placeholder="e.g. Delivering excellence across industries"
+              />
+            </label>
+            <label className={smallLabelClass}>Section Title
+              <input 
+                className={smallFieldClass} 
+                value={form.sectionTitle} 
+                onChange={e => setForm({...form, sectionTitle: e.target.value})} 
+                placeholder="e.g. CLIENTS"
+                required
+              />
+            </label>
+            <ImageUploadField 
+              label="Banner Hero Image" 
+              value={form.heroImage} 
+              fieldKey="projects.banner.hero" 
+              uploadingField={uploadingField} 
+              onUploadingChange={setUploadingField} 
+              onUpload={url => setForm({...form, heroImage: url})} 
+              onError={m => toast.error(m)} 
+            />
           </div>
 
-          <div className="pt-4 border-t border-slate-100">
-            <label className={labelClass}>Description / Introduction</label>
-            <div className="mt-2">
+          <div className="pt-2 border-t border-slate-100">
+            <label className={smallLabelClass}>Description / Introduction</label>
+            <div className="mt-1">
               <RichTextEditor 
                 value={form.description} 
                 onChange={val => setForm({...form, description: val})} 
                 placeholder="Describe the projects and clients overview..."
-                minHeight="200px" 
+                minHeight="140px" 
               />
             </div>
           </div>
@@ -688,31 +748,29 @@ const ProjectAndClientManagement = () => {
 
       {/* Why Partner Section */}
       {activeTab === 'whyPartner' && (
-        <form onSubmit={handleSaveWhyPartner} className="bg-white border rounded-2xl shadow-sm overflow-hidden animate-in fade-in duration-300">
-        <div className="bg-slate-50 border-b p-4 px-6 flex items-center justify-between">
-          <h2 className="font-bold  text-xs sm:text-sm uppercase tracking-wider">Why Partner Section</h2>
+        <form onSubmit={handleSaveWhyPartner} className="bg-white border rounded-xl shadow-sm overflow-hidden animate-in fade-in duration-300">
+        <div className="bg-slate-50 border-b p-2.5 px-4 flex items-center justify-between">
+          <h2 className="font-bold text-xs uppercase tracking-wider">Why Partner Section</h2>
           <button 
             type="submit" 
             disabled={savingWhyPartner} 
-            className="bg-[#1d5af2] text-white px-5 py-2 rounded-xl font-bold text-xs flex items-center gap-2 hover:bg-[#154dc8] transition-all disabled:opacity-50 cursor-pointer shadow-lg shadow-blue-500/20"
+            className={formHeaderBtnClass}
           >
-            {savingWhyPartner ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />} 
+            {savingWhyPartner ? <Loader2 className="animate-spin" size={14} /> : <Save size={14} />} 
             <span className="hidden sm:inline">Save Why Partner</span>
           </button>
         </div>
 
-        <div className="p-4 space-y-4">
-          <div>
-            <label className={labelClass}>Heading</label>
-            <input 
-              className={fieldClass} 
-              value={whyPartnerForm.heading} 
-              onChange={e => setWhyPartnerForm({...whyPartnerForm, heading: e.target.value})} 
-              placeholder="e.g. Why Partner With Ensis?"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="p-3 space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+            <label className={smallLabelClass}>Heading
+              <input 
+                className={smallFieldClass} 
+                value={whyPartnerForm.heading} 
+                onChange={e => setWhyPartnerForm({...whyPartnerForm, heading: e.target.value})} 
+                placeholder="e.g. Why Partner With Ensis?"
+              />
+            </label>
             <ImageUploadField 
               label="Decorative Image" 
               value={whyPartnerForm.decorativeImageSrc} 
@@ -722,61 +780,49 @@ const ProjectAndClientManagement = () => {
               onUpload={url => setWhyPartnerForm({...whyPartnerForm, decorativeImageSrc: url})} 
               onError={m => toast.error(m)} 
             />
-            <div>
-              <label className={labelClass}>Decorative Image Alt Text</label>
+            <label className={smallLabelClass}>Decorative Image Alt Text
               <input 
-                className={fieldClass} 
+                className={smallFieldClass} 
                 value={whyPartnerForm.decorativeImageAlt} 
                 onChange={e => setWhyPartnerForm({...whyPartnerForm, decorativeImageAlt: e.target.value})} 
                 placeholder="Alt text"
               />
-            </div>
+            </label>
           </div>
 
-          <div className="pt-4 border-t border-slate-100 space-y-4">
+          <div className="pt-2 border-t border-slate-100 space-y-2">
             <div className="flex justify-between items-center">
-              <h3 className="text-sm font-bold ">Partner Features</h3>
+              <h3 className={sectionSubHeaderClass}>Partner Features</h3>
               <button 
                 type="button" 
                 onClick={() => setWhyPartnerForm({...whyPartnerForm, features: [...whyPartnerForm.features, {id: randomId(), iconSrc: "", iconAlt: "", title: "", description: ""}]})}
-                className="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-green-700"
+                className={addBtnClass}
               >
-                Add Feature
+                + Add Feature
               </button>
             </div>
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
               {whyPartnerForm.features.map((feature, index) => (
-                <div key={feature.id} className="p-4 border rounded-xl bg-slate-50 relative space-y-3">
+                <div key={feature.id} className={cardClass}>
                   <button 
                     type="button" 
                     onClick={() => setWhyPartnerForm({...whyPartnerForm, features: whyPartnerForm.features.filter((_, i) => i !== index)})}
-                    className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                    className="absolute top-1 right-1 text-red-500 hover:text-red-700"
                   >
-                    <Trash2 size={16} />
+                    <Trash2 size={12} />
                   </button>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className={labelClass}>Feature Title</label>
-                      <input className={fieldClass} value={feature.title} onChange={e => updatePartnerFeature(index, "title", e.target.value)} placeholder="Title" />
-                    </div>
-                    <ImageUploadField 
-                      label="Feature Icon" 
-                      value={feature.iconSrc} 
-                      fieldKey={`projects.whyPartner.icon.${index}`} 
-                      uploadingField={uploadingField} 
-                      onUploadingChange={setUploadingField} 
-                      onUpload={url => updatePartnerFeature(index, "iconSrc", url)} 
-                      onError={m => toast.error(m)} 
-                    />
-                  </div>
-                  <div>
-                    <label className={labelClass}>Description</label>
-                    <textarea className={fieldClass} value={feature.description} onChange={e => updatePartnerFeature(index, "description", e.target.value)} placeholder="Description" rows={2} />
-                  </div>
-                  <div>
-                    <label className={labelClass}>Icon Alt Text</label>
-                    <input className={fieldClass} value={feature.iconAlt} onChange={e => updatePartnerFeature(index, "iconAlt", e.target.value)} placeholder="Alt text" />
-                  </div>
+                  <input className={smallFieldClass} value={feature.title} onChange={e => updatePartnerFeature(index, "title", e.target.value)} placeholder="Title" />
+                  <ImageUploadField 
+                    label="Feature Icon" 
+                    value={feature.iconSrc} 
+                    fieldKey={`projects.whyPartner.icon.${index}`} 
+                    uploadingField={uploadingField} 
+                    onUploadingChange={setUploadingField} 
+                    onUpload={url => updatePartnerFeature(index, "iconSrc", url)} 
+                    onError={m => toast.error(m)} 
+                  />
+                  <textarea className={smallFieldClass} value={feature.description} onChange={e => updatePartnerFeature(index, "description", e.target.value)} placeholder="Description" rows={2} />
+                  <input className={smallFieldClass} value={feature.iconAlt} onChange={e => updatePartnerFeature(index, "iconAlt", e.target.value)} placeholder="Icon Alt text" />
                 </div>
               ))}
             </div>
@@ -787,62 +833,61 @@ const ProjectAndClientManagement = () => {
 
       {/* Our Clients Section */}
       {activeTab === 'ourClients' && (
-        <form onSubmit={handleSaveOurClients} className="bg-white border rounded-2xl shadow-sm overflow-hidden animate-in fade-in duration-300">
-        <div className="bg-slate-50 border-b p-4 px-6 flex items-center justify-between">
-          <h2 className="font-bold  text-xs sm:text-sm uppercase tracking-wider">Our Clients Section</h2>
+        <form onSubmit={handleSaveOurClients} className="bg-white border rounded-xl shadow-sm overflow-hidden animate-in fade-in duration-300">
+        <div className="bg-slate-50 border-b p-2.5 px-4 flex items-center justify-between">
+          <h2 className="font-bold text-xs uppercase tracking-wider">Our Clients Section</h2>
           <button 
             type="submit" 
             disabled={savingOurClients} 
-            className="bg-[#1d5af2] text-white px-5 py-2 rounded-xl font-bold text-xs flex items-center gap-2 hover:bg-[#154dc8] transition-all disabled:opacity-50 cursor-pointer shadow-lg shadow-blue-500/20"
+            className={formHeaderBtnClass}
           >
-            {savingOurClients ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />} 
+            {savingOurClients ? <Loader2 className="animate-spin" size={14} /> : <Save size={14} />} 
             <span className="hidden sm:inline">Save Clients</span>
           </button>
         </div>
 
-        <div className="p-4 space-y-4">
-          <div>
-            <label className={labelClass}>Heading</label>
-            <input 
-              className={fieldClass} 
-              value={ourClientsForm.heading} 
-              onChange={e => setOurClientsForm({...ourClientsForm, heading: e.target.value})} 
-              placeholder="e.g. Our Valued Clients"
-            />
-          </div>
-          <div>
-            <label className={labelClass}>Subheading</label>
-            <input 
-              className={fieldClass} 
-              value={ourClientsForm.subheading} 
-              onChange={e => setOurClientsForm({...ourClientsForm, subheading: e.target.value})} 
-              placeholder="e.g. Trusted by leading brands"
-            />
+        <div className="p-3 space-y-3">
+          <div className="grid grid-cols-2 gap-3">
+            <label className={smallLabelClass}>Heading
+              <input 
+                className={smallFieldClass} 
+                value={ourClientsForm.heading} 
+                onChange={e => setOurClientsForm({...ourClientsForm, heading: e.target.value})} 
+                placeholder="e.g. Our Valued Clients"
+              />
+            </label>
+            <label className={smallLabelClass}>Subheading
+              <input 
+                className={smallFieldClass} 
+                value={ourClientsForm.subheading} 
+                onChange={e => setOurClientsForm({...ourClientsForm, subheading: e.target.value})} 
+                placeholder="e.g. Trusted by leading brands"
+              />
+            </label>
           </div>
 
-          <div className="pt-4 border-t border-slate-100 space-y-4">
+          <div className="pt-2 border-t border-slate-100 space-y-2">
             <div className="flex justify-between items-center">
-              <h3 className="text-sm font-bold ">Client Logos</h3>
+              <h3 className={sectionSubHeaderClass}>Client Logos</h3>
               <button 
                 type="button" 
                 onClick={() => setOurClientsForm({...ourClientsForm, clients: [...ourClientsForm.clients, {id: randomId(), name: "", imageSrc: "", imageAlt: "", width: DEFAULT_LOGO_WIDTH, height: DEFAULT_LOGO_HEIGHT}]})}
-                className="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-green-700"
+                className={addBtnClass}
               >
-                Add Client Logo
+                + Add Client Logo
               </button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
               {ourClientsForm.clients.map((client, index) => (
-                <div key={client.id} className="p-4 border rounded-xl bg-slate-50 relative space-y-2">
+                <div key={client.id} className={cardClass}>
                   <button 
                     type="button" 
                     onClick={() => setOurClientsForm({...ourClientsForm, clients: ourClientsForm.clients.filter((_, i) => i !== index)})}
-                    className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                    className="absolute top-1 right-1 text-red-500 hover:text-red-700"
                   >
-                    <Trash2 size={16} />
+                    <Trash2 size={12} />
                   </button>
-                  <label className={labelClass}>Client Name</label>
-                  <input className={fieldClass} value={client.name} onChange={e => updateClient(index, "name", e.target.value)} placeholder="e.g. Wellness Corp" />
+                  <input className={smallFieldClass} value={client.name} onChange={e => updateClient(index, "name", e.target.value)} placeholder="Client Name" />
                   <ImageUploadField 
                     label="Logo Image" 
                     value={client.imageSrc} 
@@ -852,13 +897,12 @@ const ProjectAndClientManagement = () => {
                     onUpload={url => updateClient(index, "imageSrc", url)} 
                     onError={m => toast.error(m)} 
                   />
-                  <label className={labelClass}>Image Alt Text</label>
-                  <input className={fieldClass} value={client.imageAlt} onChange={e => updateClient(index, "imageAlt", e.target.value)} placeholder="e.g. Wellness Corp Logo" />
+                  <input className={smallFieldClass} value={client.imageAlt} onChange={e => updateClient(index, "imageAlt", e.target.value)} placeholder="Image Alt Text" />
                   <div className="grid grid-cols-2 gap-2">
-                    <label className={labelClass}>Width</label>
                     <input
                       type="number"
-                      className={fieldClass}
+                      className={smallFieldClass}
+                      placeholder="Width"
                       value={client.width}
                       min={1}
                       onChange={e => {
@@ -866,10 +910,10 @@ const ProjectAndClientManagement = () => {
                         updateClient(index, "width", Number.isNaN(parsed) ? DEFAULT_LOGO_WIDTH : Math.max(1, parsed));
                       }}
                     />
-                    <label className={labelClass}>Height</label>
                     <input
                       type="number"
-                      className={fieldClass}
+                      className={smallFieldClass}
+                      placeholder="Height"
                       value={client.height}
                       min={1}
                       onChange={e => {
@@ -883,31 +927,29 @@ const ProjectAndClientManagement = () => {
             </div>
           </div>
 
-          <div className="pt-4 border-t border-slate-100 space-y-4">
+          <div className="pt-2 border-t border-slate-100 space-y-2">
             <div className="flex justify-between items-center">
-              <h3 className="text-sm font-bold ">Trust Stats</h3>
+              <h3 className={sectionSubHeaderClass}>Trust Stats</h3>
               <button 
                 type="button" 
                 onClick={() => setOurClientsForm({...ourClientsForm, stats: [...ourClientsForm.stats, {id: randomId(), iconSrc: "", iconAlt: "", value: "", label: ""}]})}
-                className="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-green-700"
+                className={addBtnClass}
               >
-                Add Trust Stat
+                + Add Trust Stat
               </button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
               {ourClientsForm.stats.map((stat, index) => (
-                <div key={stat.id} className="p-4 border rounded-xl bg-slate-50 relative space-y-2">
+                <div key={stat.id} className={cardClass}>
                   <button 
                     type="button" 
                     onClick={() => setOurClientsForm({...ourClientsForm, stats: ourClientsForm.stats.filter((_, i) => i !== index)})}
-                    className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                    className="absolute top-1 right-1 text-red-500 hover:text-red-700"
                   >
-                    <Trash2 size={16} />
+                    <Trash2 size={12} />
                   </button>
-                  <label className={labelClass}>Value</label>
-                  <input className={fieldClass} value={stat.value} onChange={e => updateStat(index, "value", e.target.value)} placeholder="e.g. 500+" />
-                  <label className={labelClass}>Label</label>
-                  <input className={fieldClass} value={stat.label} onChange={e => updateStat(index, "label", e.target.value)} placeholder="e.g. Projects Completed" />
+                  <input className={smallFieldClass} value={stat.value} onChange={e => updateStat(index, "value", e.target.value)} placeholder="Value e.g. 500+" />
+                  <input className={smallFieldClass} value={stat.label} onChange={e => updateStat(index, "label", e.target.value)} placeholder="Label" />
                   <ImageUploadField 
                     label="Icon Image" 
                     value={stat.iconSrc} 
@@ -917,8 +959,7 @@ const ProjectAndClientManagement = () => {
                     onUpload={url => updateStat(index, "iconSrc", url)} 
                     onError={m => toast.error(m)} 
                   />
-                  <label className={labelClass}>Icon Alt Text</label>
-                  <input className={fieldClass} value={stat.iconAlt} onChange={e => updateStat(index, "iconAlt", e.target.value)} placeholder="e.g. Projects Icon" />
+                  <input className={smallFieldClass} value={stat.iconAlt} onChange={e => updateStat(index, "iconAlt", e.target.value)} placeholder="Icon Alt Text" />
                 </div>
               ))}
             </div>
@@ -929,97 +970,93 @@ const ProjectAndClientManagement = () => {
 
       {/* Our Projects Section */}
       {activeTab === 'ourProjects' && (
-        <form onSubmit={handleSaveOurProjects} className="bg-white border rounded-2xl shadow-sm overflow-hidden animate-in fade-in duration-300">
-          <div className="bg-slate-50 border-b p-4 px-6 flex items-center justify-between">
-            <h2 className="font-bold  text-xs sm:text-sm uppercase tracking-wider">Our Projects Section</h2>
+        <form onSubmit={handleSaveOurProjects} className="bg-white border rounded-xl shadow-sm overflow-hidden animate-in fade-in duration-300">
+          <div className="bg-slate-50 border-b p-2.5 px-4 flex items-center justify-between">
+            <h2 className="font-bold text-xs uppercase tracking-wider">Our Projects Section</h2>
             <button 
               type="submit" 
               disabled={savingOurProjects} 
-              className="bg-[#1d5af2] text-white px-5 py-2 rounded-xl font-bold text-xs flex items-center gap-2 hover:bg-[#154dc8] transition-all disabled:opacity-50 cursor-pointer shadow-lg shadow-blue-500/20"
+              className={formHeaderBtnClass}
             >
-              {savingOurProjects ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />} 
+              {savingOurProjects ? <Loader2 className="animate-spin" size={14} /> : <Save size={14} />} 
               <span className="hidden sm:inline">Save Projects</span>
             </button>
           </div>
 
-          <div className="p-4 space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className={labelClass}>Section Title</label>
+          <div className="p-3 space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+              <label className={smallLabelClass}>Section Title
                 <input 
-                  className={fieldClass} 
+                  className={smallFieldClass} 
                   value={ourProjectsForm.title} 
                   onChange={e => setOurProjectsForm({...ourProjectsForm, title: e.target.value})} 
                   placeholder="e.g. Our Latest Projects"
                 />
-              </div>
-               <div>
-                <label className={labelClass}>Button Text</label>
+              </label>
+              <label className={smallLabelClass}>Button Text
                 <input 
-                  className={fieldClass} 
+                  className={smallFieldClass} 
                   value={ourProjectsForm.buttonText} 
                   onChange={e => setOurProjectsForm({...ourProjectsForm, buttonText: e.target.value})} 
                   placeholder="View All Projects"
                 />
-              </div>
-                <div>
-                <label className={labelClass}>Button Path</label>
+              </label>
+              <label className={smallLabelClass}>Button Path
                 <input 
-                  className={fieldClass} 
+                  className={smallFieldClass} 
                   value={ourProjectsForm.buttonPath} 
                   onChange={e => setOurProjectsForm({...ourProjectsForm, buttonPath: e.target.value})} 
                   placeholder="View All Projects"
                 />
-              </div>
-              <div>
-                <label className={labelClass}>Section Subtitle</label>
+              </label>
+              <label className={smallLabelClass}>Section Subtitle
                 <input 
-                  className={fieldClass} 
+                  className={smallFieldClass} 
                   value={ourProjectsForm.subtitle} 
                   onChange={e => setOurProjectsForm({...ourProjectsForm, subtitle: e.target.value})} 
                   placeholder="e.g. Innovative solutions for our clients"
                 />
-              </div>
+              </label>
             </div>
 
             {/* Projects Summary List */}
-            <div className="pt-4 border-t border-slate-100">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-sm font-bold  uppercase tracking-wider">Current Projects Summary</h3>
+            <div className="pt-2 border-t border-slate-100">
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="text-[11px] font-bold uppercase tracking-wider">Current Projects Summary</h3>
               </div>
-              <div className="overflow-x-auto rounded-xl border border-slate-100 bg-white">
+              <div className="overflow-x-auto rounded-lg border border-slate-100 bg-white">
                 <table className="w-full text-left text-[11px] min-w-[500px]">
                   <thead className="bg-slate-50  font-bold border-b border-slate-100 uppercase tracking-tighter">
                     <tr>
-                      <th className="px-4 py-3">Preview</th>
-                      <th className="px-4 py-3">Project Title</th>
-                      <th className="px-4 py-3">Location</th>
-                      <th className="px-4 py-3 text-right">Actions</th>
+                      <th className="px-3 py-2">Preview</th>
+                      <th className="px-3 py-2">Project Title</th>
+                      <th className="px-3 py-2">Location</th>
+                      <th className="px-3 py-2 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50">
                     {ourProjectsForm.cards.length === 0 ? (
                       <tr>
-                        <td colSpan={4} className="px-4 py-8 text-center  italic">No projects added yet. Use the button below to add your first project.</td>
+                        <td colSpan={4} className="px-3 py-4 text-center italic">No projects added yet. Use the button below to add your first project.</td>
                       </tr>
                     ) : (
                       ourProjectsForm.cards.map((card, index) => (
                         <tr key={card.id} className="hover:bg-slate-50/50 transition-all">
-                          <td className="px-4 py-2">
-                            <div className="h-10 w-16 rounded bg-slate-100 border border-slate-200 overflow-hidden shadow-sm">
-                              {card.image.imageUrl && <Image src={card.image.imageUrl} alt={card.image.alt} width={64} height={40} className="object-cover" unoptimized />}
+                          <td className="px-3 py-1.5">
+                            <div className="h-8 w-14 rounded bg-slate-100 border border-slate-200 overflow-hidden shadow-sm">
+                              {card.image.imageUrl && <Image src={card.image.imageUrl} alt={card.image.alt} width={56} height={32} className="object-cover" unoptimized />}
                             </div>
                           </td>
-                          <td className="px-4 py-2 font-bold ">{card.title || 'Untitled Project'}</td>
-                          <td className="px-4 py-2 ">{card.location || 'N/A'}</td>
-                          <td className="px-4 py-2 text-right">
+                          <td className="px-3 py-1.5 font-bold">{card.title || 'Untitled Project'}</td>
+                          <td className="px-3 py-1.5">{card.location || 'N/A'}</td>
+                          <td className="px-3 py-1.5 text-right">
                             <button 
                               type="button" 
                               onClick={() => setOurProjectsForm({...ourProjectsForm, cards: ourProjectsForm.cards.filter((_, i) => i !== index)})}
-                              className="text-red-500 hover:text-red-700 p-1.5 hover:bg-red-50 rounded-lg transition-colors"
+                              className="text-red-500 hover:text-red-700 p-1 hover:bg-red-50 rounded-lg transition-colors"
                               title="Remove Project"
                             >
-                              <Trash2 size={14} />
+                              <Trash2 size={12} />
                             </button>
                           </td>
                         </tr>
@@ -1030,48 +1067,39 @@ const ProjectAndClientManagement = () => {
               </div>
             </div>
 
-            <div className="pt-4 border-t border-slate-100 space-y-4">
+            <div className="pt-2 border-t border-slate-100 space-y-2">
               <div className="flex justify-between items-center">
-                <h3 className="text-sm font-bold ">Project Cards</h3>
+                <h3 className={sectionSubHeaderClass}>Project Cards</h3>
                 <button 
                   type="button" 
                   onClick={() => setOurProjectsForm({...ourProjectsForm, cards: [...ourProjectsForm.cards, {id: randomId(), title: "", location: "", image: {imageUrl: "", alt: ""}}]})}
-                  className="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-green-700"
+                  className={addBtnClass}
                 >
-                  Add Project Card
+                  + Add Project Card
                 </button>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                 {ourProjectsForm.cards.map((card, index) => (
-                  <div key={card.id} className="p-4 border rounded-xl bg-slate-50 relative space-y-2">
+                  <div key={card.id} className={cardClass}>
                     <button 
                       type="button" 
                       onClick={() => setOurProjectsForm({...ourProjectsForm, cards: ourProjectsForm.cards.filter((_, i) => i !== index)})}
-                      className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                      className="absolute top-1 right-1 text-red-500 hover:text-red-700"
                     >
-                      <Trash2 size={16} />
+                      <Trash2 size={12} />
                     </button>
-                    <div>
-                      <label className={labelClass}>Project Title</label>
-                      <input className={fieldClass} value={card.title} onChange={e => updateProjectCard(index, "title", e.target.value)} placeholder="Project Name" />
-                    </div>
-                    <div>
-                      <label className={labelClass}>Location</label>
-                      <input className={fieldClass} value={card.location} onChange={e => updateProjectCard(index, "location", e.target.value)} placeholder="Location" />
-                    </div>
-                    <div className="pt-2 border-t border-slate-200 mt-2">
-                      <ImageUploadField 
-                        label="Project Image" 
-                        value={card.image.imageUrl} 
-                        fieldKey={`projects.ourProjects.card.${index}`} 
-                        uploadingField={uploadingField} 
-                        onUploadingChange={setUploadingField} 
-                        onUpload={url => updateProjectCard(index, "image", {...card.image, imageUrl: url})} 
-                        onError={m => toast.error(m)} 
-                      />
-                      <label className={labelClass + " mt-2"}>Image Alt Text</label>
-                      <input className={fieldClass} value={card.image.alt} onChange={e => updateProjectCard(index, "image", {...card.image, alt: e.target.value})} placeholder="Alt text" />
-                    </div>
+                    <input className={smallFieldClass} value={card.title} onChange={e => updateProjectCard(index, "title", e.target.value)} placeholder="Project Name" />
+                    <input className={smallFieldClass} value={card.location} onChange={e => updateProjectCard(index, "location", e.target.value)} placeholder="Location" />
+                    <ImageUploadField 
+                      label="Project Image" 
+                      value={card.image.imageUrl} 
+                      fieldKey={`projects.ourProjects.card.${index}`} 
+                      uploadingField={uploadingField} 
+                      onUploadingChange={setUploadingField} 
+                      onUpload={url => updateProjectCard(index, "image", {...card.image, imageUrl: url})} 
+                      onError={m => toast.error(m)} 
+                    />
+                    <input className={smallFieldClass} value={card.image.alt} onChange={e => updateProjectCard(index, "image", {...card.image, alt: e.target.value})} placeholder="Image Alt text" />
                   </div>
                 ))}
               </div>
@@ -1082,21 +1110,21 @@ const ProjectAndClientManagement = () => {
 
       {/* Contact Section */}
       {activeTab === 'contact' && (
-        <form onSubmit={handleSaveContactSection} className="bg-white border rounded-2xl shadow-sm overflow-hidden animate-in fade-in duration-300">
-          <div className="bg-slate-50 border-b p-4 px-6 flex items-center justify-between">
-            <h2 className="font-bold  text-xs sm:text-sm uppercase tracking-wider">Contact Section</h2>
+        <form onSubmit={handleSaveContactSection} className="bg-white border rounded-xl shadow-sm overflow-hidden animate-in fade-in duration-300">
+          <div className="bg-slate-50 border-b p-2.5 px-4 flex items-center justify-between">
+            <h2 className="font-bold text-xs uppercase tracking-wider">Contact Section</h2>
             <button 
               type="submit" 
               disabled={savingContact} 
-              className="bg-[#1d5af2] text-white px-5 py-2 rounded-xl font-bold text-xs flex items-center gap-2 hover:bg-[#154dc8] transition-all disabled:opacity-50 cursor-pointer shadow-lg shadow-blue-500/20"
+              className={formHeaderBtnClass}
             >
-              {savingContact ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />} 
+              {savingContact ? <Loader2 className="animate-spin" size={14} /> : <Save size={14} />} 
               <span className="hidden sm:inline">Save Contact</span>
             </button>
           </div>
 
-          <div className="p-4 space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="p-3 space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <ImageUploadField 
                 label="Left Decorative Image" 
                 value={contactForm.leftImage} 
@@ -1117,103 +1145,208 @@ const ProjectAndClientManagement = () => {
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-100">
-              <div className="space-y-4">
-                <h3 className="text-sm font-bold ">Contact Information</h3>
-                <div>
-                  <label className={labelClass}>Office Name</label>
-                  <input className={fieldClass} value={contactForm.contact.officeName} onChange={e => setContactForm({...contactForm, contact: {...contactForm.contact, officeName: e.target.value}})} />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 border-t border-slate-100">
+              <div className="space-y-2">
+                <h3 className={sectionSubHeaderClass}>Contact Information</h3>
+                <input className={smallFieldClass} placeholder="Office Name" value={contactForm.contact.officeName} onChange={e => setContactForm({...contactForm, contact: {...contactForm.contact, officeName: e.target.value}})} />
+                <textarea className={smallFieldClass} placeholder="Address" value={contactForm.contact.address} onChange={e => setContactForm({...contactForm, contact: {...contactForm.contact, address: e.target.value}})} rows={2} />
+                <div className="grid grid-cols-2 gap-2">
+                  <input className={smallFieldClass} placeholder="Phone" value={contactForm.contact.phone} onChange={e => setContactForm({...contactForm, contact: {...contactForm.contact, phone: e.target.value}})} />
+                  <input className={smallFieldClass} placeholder="Email" value={contactForm.contact.email} onChange={e => setContactForm({...contactForm, contact: {...contactForm.contact, email: e.target.value}})} />
                 </div>
-                <div>
-                  <label className={labelClass}>Address</label>
-                  <textarea className={fieldClass} value={contactForm.contact.address} onChange={e => setContactForm({...contactForm, contact: {...contactForm.contact, address: e.target.value}})} rows={2} />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className={labelClass}>Phone</label>
-                    <input className={fieldClass} value={contactForm.contact.phone} onChange={e => setContactForm({...contactForm, contact: {...contactForm.contact, phone: e.target.value}})} />
-                  </div>
-                  <div>
-                    <label className={labelClass}>Email</label>
-                    <input className={fieldClass} value={contactForm.contact.email} onChange={e => setContactForm({...contactForm, contact: {...contactForm.contact, email: e.target.value}})} />
-                  </div>
-                </div>
-                <div>
-                  <label className={labelClass}>Website</label>
-                  <input className={fieldClass} value={contactForm.contact.website} onChange={e => setContactForm({...contactForm, contact: {...contactForm.contact, website: e.target.value}})} />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className={labelClass}>Working Days</label>
-                    <input className={fieldClass} value={contactForm.contact.workingDays} onChange={e => setContactForm({...contactForm, contact: {...contactForm.contact, workingDays: e.target.value}})} placeholder="e.g. Mon - Sat" />
-                  </div>
-                  <div>
-                    <label className={labelClass}>Working Hours</label>
-                    <input className={fieldClass} value={contactForm.contact.workingHours} onChange={e => setContactForm({...contactForm, contact: {...contactForm.contact, workingHours: e.target.value}})} placeholder="e.g. 09 AM - 06 PM" />
-                  </div>
+                <input className={smallFieldClass} placeholder="Website" value={contactForm.contact.website} onChange={e => setContactForm({...contactForm, contact: {...contactForm.contact, website: e.target.value}})} />
+                <div className="grid grid-cols-2 gap-2">
+                  <input className={smallFieldClass} value={contactForm.contact.workingDays} onChange={e => setContactForm({...contactForm, contact: {...contactForm.contact, workingDays: e.target.value}})} placeholder="e.g. Mon - Sat" />
+                  <input className={smallFieldClass} value={contactForm.contact.workingHours} onChange={e => setContactForm({...contactForm, contact: {...contactForm.contact, workingHours: e.target.value}})} placeholder="e.g. 09 AM - 06 PM" />
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <h3 className="text-sm font-bold ">Call to Action</h3>
-                <div>
-                  <label className={labelClass}>CTA Title</label>
-                  <input className={fieldClass} value={contactForm.ctaTitle} onChange={e => setContactForm({...contactForm, ctaTitle: e.target.value})} />
+              <div className="space-y-2">
+                <h3 className={sectionSubHeaderClass}>Call to Action</h3>
+                <input className={smallFieldClass} placeholder="CTA Title" value={contactForm.ctaTitle} onChange={e => setContactForm({...contactForm, ctaTitle: e.target.value})} />
+                <div className="grid grid-cols-2 gap-2">
+                  <input className={smallFieldClass} placeholder="CTA Button Text" value={contactForm.ctaButtonText} onChange={e => setContactForm({...contactForm, ctaButtonText: e.target.value})} />
+                  <input className={smallFieldClass} placeholder="CTA Button Path" value={contactForm.ctaButtonPath} onChange={e => setContactForm({...contactForm, ctaButtonPath: e.target.value})} />
                 </div>
-                <div>
-                  <label className={labelClass}>CTA Button Text</label>
-                  <input className={fieldClass} value={contactForm.ctaButtonText} onChange={e => setContactForm({...contactForm, ctaButtonText: e.target.value})} />
-                </div>
-                    <div>
-                  <label className={labelClass}>CTA Button Path</label>
-                  <input className={fieldClass} value={contactForm.ctaButtonPath} onChange={e => setContactForm({...contactForm, ctaButtonPath: e.target.value})} />
-                </div>
-                <div>
-                  <label className={labelClass}>CTA Description</label>
-                  <textarea className={fieldClass} value={contactForm.ctaDescription} onChange={e => setContactForm({...contactForm, ctaDescription: e.target.value})} rows={3} />
-                </div>
-                <div className="pt-2">
-                  <label className={labelClass}>Section Quote</label>
-                  <textarea className={fieldClass} value={contactForm.quote} onChange={e => setContactForm({...contactForm, quote: e.target.value})} rows={3} placeholder="Inspirational quote..." />
-                </div>
+                <textarea className={smallFieldClass} placeholder="CTA Description" value={contactForm.ctaDescription} onChange={e => setContactForm({...contactForm, ctaDescription: e.target.value})} rows={2} />
+                <textarea className={smallFieldClass} value={contactForm.quote} onChange={e => setContactForm({...contactForm, quote: e.target.value})} rows={2} placeholder="Section Quote / Inspirational quote..." />
               </div>
             </div>
 
-            <div className="pt-4 border-t border-slate-100 space-y-4">
+            <div className="pt-2 border-t border-slate-100 space-y-2">
               <div className="flex justify-between items-center">
-                <h3 className="text-sm font-bold ">Testimonials</h3>
+                <h3 className={sectionSubHeaderClass}>Testimonials</h3>
                 <button 
                   type="button" 
                   onClick={() => setContactForm({...contactForm, testimonials: [...contactForm.testimonials, {id: randomId(), logo: "", company: "", person: "", designation: ""}]})}
-                  className="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-green-700"
+                  className={addBtnClass}
                 >
-                  Add Testimonial
+                  + Add Testimonial
                 </button>
               </div>
-              <div className="grid grid-cols-1 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                 {contactForm.testimonials.map((t, idx) => (
-                  <div key={t.id} className="p-4 border rounded-xl bg-slate-50 relative grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div key={t.id} className={cardClass}>
                     <button 
                       type="button" 
                       onClick={() => setContactForm({...contactForm, testimonials: contactForm.testimonials.filter((_, i) => i !== idx)})}
-                      className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                      className="absolute top-1 right-1 text-red-500 hover:text-red-700"
                     >
-                      <Trash2 size={16} />
+                      <Trash2 size={12} />
                     </button>
                     <ImageUploadField label="Company Logo" value={t.logo} fieldKey={`projects.contact.testimonial.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onUpload={url => updateTestimonial(idx, "logo", url)} onError={m => toast.error(m)} />
-                    <div className="space-y-2">
-                      <input className={fieldClass} value={t.company} onChange={e => updateTestimonial(idx, "company", e.target.value)} placeholder="Company Name" />
-                      <input className={fieldClass} value={t.person} onChange={e => updateTestimonial(idx, "person", e.target.value)} placeholder="Person Name" />
-                      <input className={fieldClass} value={t.designation} onChange={e => updateTestimonial(idx, "designation", e.target.value)} placeholder="Designation" />
-                    </div>
+                    <input className={smallFieldClass} value={t.company} onChange={e => updateTestimonial(idx, "company", e.target.value)} placeholder="Company Name" />
+                    <input className={smallFieldClass} value={t.person} onChange={e => updateTestimonial(idx, "person", e.target.value)} placeholder="Person Name" />
+                    <input className={smallFieldClass} value={t.designation} onChange={e => updateTestimonial(idx, "designation", e.target.value)} placeholder="Designation" />
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="pt-4 border-t border-slate-100">
-              <label className={labelClass}>Bottom Text</label>
-              <textarea className={fieldClass} value={contactForm.bottomText} onChange={e => setContactForm({...contactForm, bottomText: e.target.value})} rows={3} />
+            <div className="pt-2 border-t border-slate-100">
+              <label className={smallLabelClass}>Bottom Text</label>
+              <textarea className={smallFieldClass} value={contactForm.bottomText} onChange={e => setContactForm({...contactForm, bottomText: e.target.value})} rows={2} />
+            </div>
+          </div>
+        </form>
+      )}
+
+      {/* Features Strip Section */}
+      {activeTab === 'featuresStrip' && (
+        <form onSubmit={handleSaveFeaturesStrip} className="bg-white border rounded-xl shadow-sm overflow-hidden animate-in fade-in duration-300">
+          <div className="bg-slate-50 border-b p-2.5 px-4 flex items-center justify-between">
+            <h2 className="font-bold text-xs uppercase tracking-wider">Features Strip Section</h2>
+            <button
+              type="submit"
+              disabled={savingFeaturesStrip}
+              className={formHeaderBtnClass}
+            >
+              {savingFeaturesStrip ? <Loader2 className="animate-spin" size={14} /> : <Save size={14} />}
+              <span className="hidden sm:inline">Save Features Strip</span>
+            </button>
+          </div>
+
+          <div className="p-3 space-y-2">
+            <h4 className="text-[11px] font-bold text-[#8d6a3a] uppercase">
+              Features Strip Items
+            </h4>
+
+            <div className="grid grid-cols-3 gap-2">
+              {featuresStripForm.items.map((item, idx) => (
+                <div
+                  key={item.id}
+                  className={cardClassWhite}
+                >
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const ni = featuresStripForm.items.filter((_, i) => i !== idx);
+                      setFeaturesStripForm({ ...featuresStripForm, items: ni });
+                    }}
+                    className="absolute top-1 right-1 text-red-500 hover:bg-red-50 p-1 rounded transition-colors"
+                  >
+                    <Trash2 size={12} />
+                  </button>
+
+                  <ImageUploadField
+                    label="Image"
+                    value={item.image.imageUrl}
+                    fieldKey={`fstrip.${idx}`}
+                    uploadingField={uploadingField}
+                    onUploadingChange={setUploadingField}
+                    onError={(m) => toast.error(m)}
+                    onUpload={(url) => {
+                      const ni = [...featuresStripForm.items];
+
+                      ni[idx] = {
+                        ...ni[idx],
+                        image: {
+                          ...ni[idx].image,
+                          imageUrl: url,
+                        },
+                      };
+
+                      setFeaturesStripForm({ ...featuresStripForm, items: ni });
+                    }}
+                  />
+
+                  <input
+                    className={smallFieldClass}
+                    value={item.image.alt || ''}
+                    placeholder="Image Alt Text"
+                    onChange={(e) => {
+                      const ni = [...featuresStripForm.items];
+
+                      ni[idx] = {
+                        ...ni[idx],
+                        image: {
+                          ...ni[idx].image,
+                          alt: e.target.value,
+                        },
+                      };
+
+                      setFeaturesStripForm({ ...featuresStripForm, items: ni });
+                    }}
+                  />
+
+                  <input
+                    className={smallFieldClass}
+                    value={item.title}
+                    placeholder="Title"
+                    onChange={(e) => {
+                      const ni = [...featuresStripForm.items];
+
+                      ni[idx] = {
+                        ...ni[idx],
+                        title: e.target.value,
+                      };
+
+                      setFeaturesStripForm({ ...featuresStripForm, items: ni });
+                    }}
+                  />
+
+                  <textarea
+                    className={smallFieldClass}
+                    rows={2}
+                    value={item.description}
+                    placeholder="Description"
+                    onChange={(e) => {
+                      const ni = [...featuresStripForm.items];
+
+                      ni[idx] = {
+                        ...ni[idx],
+                        description: e.target.value,
+                      };
+
+                      setFeaturesStripForm({ ...featuresStripForm, items: ni });
+                    }}
+                  />
+                </div>
+              ))}
+
+              <button
+                type="button"
+                onClick={() =>
+                  setFeaturesStripForm({
+                    ...featuresStripForm,
+                    items: [
+                      ...featuresStripForm.items,
+                      {
+                        id: randomId(),
+                        title: '',
+                        description: '',
+                        image: {
+                          imageUrl: '',
+                          alt: '',
+                        },
+                      },
+                    ],
+                  })
+                }
+                className="border-2 border-dashed rounded-xl flex items-center justify-center text-gray-400 py-6 hover:bg-gray-50 transition-colors"
+              >
+                <Plus size={20} />
+              </button>
             </div>
           </div>
         </form>

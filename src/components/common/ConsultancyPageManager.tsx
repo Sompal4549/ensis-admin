@@ -10,8 +10,10 @@ import { ImageUploadField } from "@/components/common/ImageUploadField";
 import RichTextEditor from "@/components/common/RichTextEditor";
 import { buildEmptyConsultancyContent, ConsultancyPageContentKeys, consultancyPageKeys } from "./consultancyPageContent";
 
-
-
+// Compact local classes for this manager only
+const smallFieldClass =
+  "w-full rounded-lg border border-slate-200 px-2 py-1 text-xs focus:border-[#1d5af2] focus:ring-1 focus:ring-[#1d5af2] outline-none";
+const smallLabelClass = "block text-[11px] font-semibold text-slate-600 mb-0.5";
 
 const randomId = () => Math.random().toString(36).slice(2, 9);
 
@@ -86,49 +88,51 @@ export default function ConsultancyPageManager() {
   const renderHeroForm = () => {
     const data = form.data as any;
     return (
-      <div className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <label className={labelClass}>Heading <input className={fieldClass} value={data.heading || ""} onChange={e => setForm({...form, data: {...data, heading: e.target.value}})} /></label>
-          <label className={labelClass}>Title Part 1 <input className={fieldClass} value={data.titlepart1 || ""} onChange={e => setForm({...form, data: {...data, titlepart1: e.target.value}})} /></label>
-          <label className={labelClass}>Title Part 2 <input className={fieldClass} value={data.titlepart2 || ""} onChange={e => setForm({...form, data: {...data, titlepart2: e.target.value}})} /></label>
-          <label className={labelClass}>Title Highlight<input className={fieldClass} value={data.titleHighlight || ""} onChange={e => setForm({...form, data: {...data, titleHighlight: e.target.value}})} /></label>
-          <label className={labelClass}>Title <input className={fieldClass} value={data.title || ""} onChange={e => setForm({...form, data: {...data, title: e.target.value}})} /></label>
-          <label className={labelClass}>Primary Button Label <input className={fieldClass} value={data.primaryButton?.label || ""} onChange={e => setForm({...form, data: {...data, primaryButton: { ...(data.primaryButton || {}), label: e.target.value }}})} /></label>
-          <label className={labelClass}>Primary Button URL <input className={fieldClass} value={data.primaryButton?.href || ""} onChange={e => setForm({...form, data: {...data, primaryButton: { ...(data.primaryButton || {}), href: e.target.value }}})} /></label>
-          <label className={labelClass}>Secondary Button Label <input className={fieldClass} value={data.secondaryButton?.label || ""} onChange={e => setForm({...form, data: {...data, secondaryButton: { ...(data.secondaryButton || {}), label: e.target.value }}})} /></label>
-          <label className={labelClass}>Secondary Button URL <input className={fieldClass} value={data.secondaryButton?.href || ""} onChange={e => setForm({...form, data: {...data, secondaryButton: { ...(data.secondaryButton || {}), href: e.target.value }}})} /></label>
+      <div className="space-y-2">
+        <div className="grid grid-cols-3 gap-2">
+          <label className={smallLabelClass}>Heading <input className={smallFieldClass} value={data.heading || ""} onChange={e => setForm({...form, data: {...data, heading: e.target.value}})} /></label>
+          <label className={smallLabelClass}>Title Part 1 <input className={smallFieldClass} value={data.titlepart1 || ""} onChange={e => setForm({...form, data: {...data, titlepart1: e.target.value}})} /></label>
+          <label className={smallLabelClass}>Title Part 2 <input className={smallFieldClass} value={data.titlepart2 || ""} onChange={e => setForm({...form, data: {...data, titlepart2: e.target.value}})} /></label>
+          <label className={smallLabelClass}>Title Highlight<input className={smallFieldClass} value={data.titleHighlight || ""} onChange={e => setForm({...form, data: {...data, titleHighlight: e.target.value}})} /></label>
+          <label className={smallLabelClass}>Title <input className={smallFieldClass} value={data.title || ""} onChange={e => setForm({...form, data: {...data, title: e.target.value}})} /></label>
+          <label className={smallLabelClass}>Primary Button Label <input className={smallFieldClass} value={data.primaryButton?.label || ""} onChange={e => setForm({...form, data: {...data, primaryButton: { ...(data.primaryButton || {}), label: e.target.value }}})} /></label>
+          <label className={smallLabelClass}>Primary Button URL <input className={smallFieldClass} value={data.primaryButton?.href || ""} onChange={e => setForm({...form, data: {...data, primaryButton: { ...(data.primaryButton || {}), href: e.target.value }}})} /></label>
+          <label className={smallLabelClass}>Secondary Button Label <input className={smallFieldClass} value={data.secondaryButton?.label || ""} onChange={e => setForm({...form, data: {...data, secondaryButton: { ...(data.secondaryButton || {}), label: e.target.value }}})} /></label>
+          <label className={smallLabelClass}>Secondary Button URL <input className={smallFieldClass} value={data.secondaryButton?.href || ""} onChange={e => setForm({...form, data: {...data, secondaryButton: { ...(data.secondaryButton || {}), href: e.target.value }}})} /></label>
         </div>
         <div>
-          <label className={labelClass}>Description</label>
+          <label className={smallLabelClass}>Description</label>
           <RichTextEditor 
             value={data.description || ""} 
             onChange={val => setForm({...form, data: {...data, description: val}})} 
             placeholder="Enter hero description..."
-            minHeight="120px" 
+            minHeight="90px" 
           />
         </div>
         <ImageUploadField label="Background Image" value={data.bgImage || ""} fieldKey="hero.bg" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => setForm({...form, data: {...data, bgImage: url}})} />
         
-        <div className="pt-4 border-t">
-          <div className="flex justify-between items-center mb-4"><h4 className="text-sm font-bold">Hero Features</h4><button type="button" onClick={() => setForm({...form, data: {...data, features: [...(data.features || []), {id: randomId(), title: '', description: '', image: ''}]}})} className="p-1 bg-slate-100 rounded "><Plus size={16} /></button></div>
-          {(data.features || []).map((feat: any, idx: number) => (
-            <div key={feat.id} className="p-4 border rounded-xl mb-4 bg-slate-50 relative space-y-3">
-              <button type="button" onClick={() => { const nf = data.features.filter((_:any, i:number) => i !== idx); setForm({...form, data: {...data, features: nf}})}} className="absolute top-2 right-2 text-red-500"><Trash2 size={14} /></button>
-              <div className="grid grid-cols-2 gap-4">
-                <input className={fieldClass} placeholder="Feature Title" value={feat.title || ""} onChange={e => { const nf = [...data.features]; nf[idx].title = e.target.value; setForm({...form, data: {...data, features: nf}}) }} />
-                <ImageUploadField label="Feature Image" value={feat.image || ""} fieldKey={`hero.feat.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => { const nf = [...data.features]; nf[idx].image = url; setForm({...form, data: {...data, features: nf}}) }} />
+        <div className="pt-2 border-t">
+          <div className="flex justify-between items-center mb-2"><h4 className="text-xs font-bold">Hero Features</h4><button type="button" onClick={() => setForm({...form, data: {...data, features: [...(data.features || []), {id: randomId(), title: '', description: '', image: ''}]}})} className="p-1 bg-slate-100 rounded "><Plus size={13} /></button></div>
+          <div className="grid grid-cols-1 gap-2">
+            {(data.features || []).map((feat: any, idx: number) => (
+              <div key={feat.id} className="p-2 border rounded-xl bg-slate-50 relative space-y-1.5">
+                <button type="button" onClick={() => { const nf = data.features.filter((_:any, i:number) => i !== idx); setForm({...form, data: {...data, features: nf}})}} className="absolute top-1.5 right-1.5 text-red-500"><Trash2 size={12} /></button>
+                <div className="grid grid-cols-2 gap-2 pr-4">
+                  <input className={smallFieldClass} placeholder="Feature Title" value={feat.title || ""} onChange={e => { const nf = [...data.features]; nf[idx].title = e.target.value; setForm({...form, data: {...data, features: nf}}) }} />
+                  <ImageUploadField label="Feature Image" value={feat.image || ""} fieldKey={`hero.feat.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => { const nf = [...data.features]; nf[idx].image = url; setForm({...form, data: {...data, features: nf}}) }} />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-gray-400 uppercase">Feature Description</label>
+                  <RichTextEditor 
+                    value={feat.description || ""} 
+                    onChange={val => { const nf = [...data.features]; nf[idx].description = val; setForm({...form, data: {...data, features: nf}}); }} 
+                    placeholder="Short feature description..."
+                    minHeight="80px" 
+                  />
+                </div>
               </div>
-              <div>
-                <label className="text-[10px] font-bold text-gray-400 uppercase">Feature Description</label>
-                <RichTextEditor 
-                  value={feat.description || ""} 
-                  onChange={val => { const nf = [...data.features]; nf[idx].description = val; setForm({...form, data: {...data, features: nf}}); }} 
-                  placeholder="Short feature description..."
-                  minHeight="100px" 
-                />
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -137,27 +141,29 @@ export default function ConsultancyPageManager() {
   const renderFeaturesForm = () => {
     const data = form.data as any;
     return (
-      <div className="space-y-4">
-        {data.items.map((item: any, idx: number) => (
-          <div key={item.id} className="p-4 border rounded-xl bg-white space-y-3 relative">
-            <button type="button" onClick={() => { const ni = data.items.filter((_:any, i:number) => i !== idx); setForm({...form, data: {...data, items: ni}})}} className="absolute top-2 right-2 text-red-400"><Trash2 size={16} /></button>
-            <div className="grid grid-cols-2 gap-4">
-                <label className={labelClass}>Title <input className={fieldClass} value={item.title} onChange={e => { const ni = [...data.items]; ni[idx].title = e.target.value; setForm({...form, data: {...data, items: ni}}) }} /></label>
-                <label className={labelClass}>Heading <input className={fieldClass} value={item.heading} onChange={e => { const ni = [...data.items]; ni[idx].heading = e.target.value; setForm({...form, data: {...data, items: ni}}) }} /></label>
-                <ImageUploadField label="Card Image" value={item.image || ""} fieldKey={`feat.card.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => { const ni = [...data.items]; ni[idx].image = url; setForm({...form, data: {...data, items: ni}}) }} />
+      <div className="space-y-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          {data.items.map((item: any, idx: number) => (
+            <div key={item.id} className="p-2 border rounded-xl bg-white space-y-1.5 relative">
+              <button type="button" onClick={() => { const ni = data.items.filter((_:any, i:number) => i !== idx); setForm({...form, data: {...data, items: ni}})}} className="absolute top-1.5 right-1.5 text-red-400"><Trash2 size={13} /></button>
+              <div className="grid grid-cols-2 gap-2 pr-4">
+                  <label className={smallLabelClass}>Title <input className={smallFieldClass} value={item.title} onChange={e => { const ni = [...data.items]; ni[idx].title = e.target.value; setForm({...form, data: {...data, items: ni}}) }} /></label>
+                  <label className={smallLabelClass}>Heading <input className={smallFieldClass} value={item.heading} onChange={e => { const ni = [...data.items]; ni[idx].heading = e.target.value; setForm({...form, data: {...data, items: ni}}) }} /></label>
+                  <ImageUploadField label="Card Image" value={item.image || ""} fieldKey={`feat.card.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => { const ni = [...data.items]; ni[idx].image = url; setForm({...form, data: {...data, items: ni}}) }} />
+              </div>
+              <div>
+                <label className="text-[10px] font-bold text-gray-400 uppercase">Description</label>
+                <RichTextEditor 
+                  value={item.description || ""} 
+                  onChange={val => { const ni = [...data.items]; ni[idx].description = val; setForm({...form, data: {...data, items: ni}}); }} 
+                  placeholder="Detail description..."
+                  minHeight="80px" 
+                />
+              </div>
             </div>
-            <div>
-              <label className="text-[10px] font-bold text-gray-400 uppercase">Description</label>
-              <RichTextEditor 
-                value={item.description || ""} 
-                onChange={val => { const ni = [...data.items]; ni[idx].description = val; setForm({...form, data: {...data, items: ni}}); }} 
-                placeholder="Detail description..."
-                minHeight="100px" 
-              />
-            </div>
-          </div>
-        ))}
-        <button type="button" onClick={() => setForm({...form, data: {...data, items: [...data.items, {id: randomId(), title: '', heading: '', description: '', image: ''}]}})} className="w-full py-4 border-2 border-dashed rounded-xl  flex items-center justify-center gap-2"><Plus size={20} /> Add Feature</button>
+          ))}
+        </div>
+        <button type="button" onClick={() => setForm({...form, data: {...data, items: [...data.items, {id: randomId(), title: '', heading: '', description: '', image: ''}]}})} className="w-full py-2 border-2 border-dashed rounded-xl  flex items-center justify-center gap-2"><Plus size={16} /> Add Feature</button>
       </div>
     );
   };
@@ -165,49 +171,55 @@ export default function ConsultancyPageManager() {
   const renderOfferForm = () => {
     const data = form.data as any;
     return (
-      <div className="space-y-4">
-        <label className={labelClass}>Subheading <input className={fieldClass} value={data.subheading || ""} onChange={e => setForm({...form, data: {...data, subheading: e.target.value}})} /></label>
-        <label className={labelClass}>Main Title <input className={fieldClass} value={data.title || ""} onChange={e => setForm({...form, data: {...data, title: e.target.value}})} /></label>
+      <div className="space-y-2">
+        <div className="grid grid-cols-2 gap-2">
+          <label className={smallLabelClass}>Subheading <input className={smallFieldClass} value={data.subheading || ""} onChange={e => setForm({...form, data: {...data, subheading: e.target.value}})} /></label>
+          <label className={smallLabelClass}>Main Title <input className={smallFieldClass} value={data.title || ""} onChange={e => setForm({...form, data: {...data, title: e.target.value}})} /></label>
+        </div>
         <div>
-          <label className={labelClass}>Description</label>
+          <label className={smallLabelClass}>Description</label>
           <RichTextEditor 
             value={data.description || ""} 
             onChange={val => setForm({...form, data: {...data, description: val}})} 
             placeholder="Service overview description..."
-            minHeight="120px" 
+            minHeight="90px" 
           />
         </div>
-        <div className="pt-4 border-t space-y-4">
-            <h4 className="text-sm font-bold">Service Cards</h4>
-            {(data.serviceCards || []).map((card: any, idx: number) => (
-                <div key={card.id} className="p-4 border rounded-lg bg-slate-50 space-y-3 relative group">
-                    <button type="button" onClick={() => { const nc = data.serviceCards.filter((_: any, i: number) => i !== idx); setForm({...form, data: {...data, serviceCards: nc}})}} className="absolute top-2 right-2 text-red-500 hover:text-red-700 transition-colors opacity-0 group-hover:opacity-100"><Trash2 size={16} /></button>
-                    <div className="grid grid-cols-2 gap-4">
-                        <label className={labelClass}>Card Title <input className={fieldClass} value={card.title || ""} onChange={e => { const nc = [...data.serviceCards]; nc[idx].title = e.target.value; setForm({...form, data: {...data, serviceCards: nc}}) }} /></label>
-                        <ImageUploadField 
-                            label="Card Image" 
-                            value={card.image || ""} 
-                            fieldKey={`offer.card.${idx}`} 
-                            uploadingField={uploadingField} 
-                            onUploadingChange={setUploadingField} 
-                            onError={m => toast.error(m)} 
-                            onUpload={url => { const nc = [...data.serviceCards]; nc[idx].image = url; setForm({...form, data: {...data, serviceCards: nc}}) }} 
+        <div className="pt-2 border-t space-y-2">
+            <h4 className="text-xs font-bold">Service Cards</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              {(data.serviceCards || []).map((card: any, idx: number) => (
+                  <div key={card.id} className="p-2 border rounded-lg bg-slate-50 space-y-1.5 relative group">
+                      <button type="button" onClick={() => { const nc = data.serviceCards.filter((_: any, i: number) => i !== idx); setForm({...form, data: {...data, serviceCards: nc}})}} className="absolute top-1.5 right-1.5 text-red-500 hover:text-red-700 transition-colors opacity-0 group-hover:opacity-100"><Trash2 size={13} /></button>
+                      <div className="grid grid-cols-2 gap-2 pr-4">
+                          <label className={smallLabelClass}>Card Title <input className={smallFieldClass} value={card.title || ""} onChange={e => { const nc = [...data.serviceCards]; nc[idx].title = e.target.value; setForm({...form, data: {...data, serviceCards: nc}}) }} /></label>
+                          <ImageUploadField 
+                              label="Card Image" 
+                              value={card.image || ""} 
+                              fieldKey={`offer.card.${idx}`} 
+                              uploadingField={uploadingField} 
+                              onUploadingChange={setUploadingField} 
+                              onError={m => toast.error(m)} 
+                              onUpload={url => { const nc = [...data.serviceCards]; nc[idx].image = url; setForm({...form, data: {...data, serviceCards: nc}}) }} 
+                          />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold text-gray-400 uppercase">Card Description</label>
+                        <RichTextEditor 
+                          value={card.description || ""} 
+                          onChange={val => { const nc = [...data.serviceCards]; nc[idx].description = val; setForm({...form, data: {...data, serviceCards: nc}}); }} 
+                          placeholder="Card description..."
+                          minHeight="80px" 
                         />
-                    </div>
-                    <div>
-                      <label className="text-[10px] font-bold text-gray-400 uppercase">Card Description</label>
-                      <RichTextEditor 
-                        value={card.description || ""} 
-                        onChange={val => { const nc = [...data.serviceCards]; nc[idx].description = val; setForm({...form, data: {...data, serviceCards: nc}}); }} 
-                        placeholder="Card description..."
-                        minHeight="100px" 
-                      />
-                    </div>
-                    <label className={labelClass}>Learn More Link <input className={fieldClass} placeholder="e.g. /services/wellness" value={card.learnMoreLink || ""} onChange={e => { const nc = [...data.serviceCards]; nc[idx].learnMoreLink = e.target.value; setForm({...form, data: {...data, serviceCards: nc}}) }} /></label>
-                    <label className={labelClass}>Learn More Text <input className={fieldClass} placeholder="e.g. Learn More" value={card.learnMoreText || ""} onChange={e => { const nc = [...data.serviceCards]; nc[idx].learnMoreText = e.target.value; setForm({...form, data: {...data, serviceCards: nc}}) }} /></label>
-                </div>
-            ))}
-            <button type="button" onClick={() => setForm({...form, data: {...data, serviceCards: [...(data.serviceCards || []), {id: randomId(), title: '', description: '', image: '', learnMoreLink: '', learnMoreText: ''}]}})} className="w-full py-4 border-2 border-dashed rounded-xl  flex items-center justify-center gap-2 hover:bg-slate-50 transition-colors"><Plus size={20} /> Add Service Card</button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <label className={smallLabelClass}>Learn More Link <input className={smallFieldClass} placeholder="e.g. /services/wellness" value={card.learnMoreLink || ""} onChange={e => { const nc = [...data.serviceCards]; nc[idx].learnMoreLink = e.target.value; setForm({...form, data: {...data, serviceCards: nc}}) }} /></label>
+                        <label className={smallLabelClass}>Learn More Text <input className={smallFieldClass} placeholder="e.g. Learn More" value={card.learnMoreText || ""} onChange={e => { const nc = [...data.serviceCards]; nc[idx].learnMoreText = e.target.value; setForm({...form, data: {...data, serviceCards: nc}}) }} /></label>
+                      </div>
+                  </div>
+              ))}
+            </div>
+            <button type="button" onClick={() => setForm({...form, data: {...data, serviceCards: [...(data.serviceCards || []), {id: randomId(), title: '', description: '', image: '', learnMoreLink: '', learnMoreText: ''}]}})} className="w-full py-2 border-2 border-dashed rounded-xl  flex items-center justify-center gap-2 hover:bg-slate-50 transition-colors"><Plus size={16} /> Add Service Card</button>
         </div>
       </div>
     );
@@ -218,56 +230,58 @@ const renderProcessForm = () => {
 
   if (!data.whyChoose || !data.ourProcess) {
     return (
-      <div className="p-4 italic ">
+      <div className="p-2 italic text-xs">
         Loading Process Structure...
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {/* Why Choose Us */}
-      <div className="p-4 bg-amber-50 rounded-2xl space-y-4">
-        <h4 className="font-bold text-amber-800">Why Choose Us</h4>
+      <div className="p-2 bg-amber-50 rounded-2xl space-y-2">
+        <h4 className="font-bold text-amber-800 text-xs">Why Choose Us</h4>
 
-        <input
-          className={fieldClass}
-          placeholder="Heading"
-          value={data.whyChoose.heading || ""}
-          onChange={(e) =>
-            setForm({
-              ...form,
-              data: {
-                ...data,
-                whyChoose: {
-                  ...data.whyChoose,
-                  heading: e.target.value,
+        <div className="grid grid-cols-2 gap-2">
+          <input
+            className={smallFieldClass}
+            placeholder="Heading"
+            value={data.whyChoose.heading || ""}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                data: {
+                  ...data,
+                  whyChoose: {
+                    ...data.whyChoose,
+                    heading: e.target.value,
+                  },
                 },
-              },
-            })
-          }
-        />
+              })
+            }
+          />
 
-        <input
-          className={fieldClass}
-          placeholder="Title"
-          value={data.whyChoose.title || ""}
-          onChange={(e) =>
-            setForm({
-              ...form,
-              data: {
-                ...data,
-                whyChoose: {
-                  ...data.whyChoose,
-                  title: e.target.value,
+          <input
+            className={smallFieldClass}
+            placeholder="Title"
+            value={data.whyChoose.title || ""}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                data: {
+                  ...data,
+                  whyChoose: {
+                    ...data.whyChoose,
+                    title: e.target.value,
+                  },
                 },
-              },
-            })
-          }
-        />
+              })
+            }
+          />
+        </div>
 
         <div>
-          <label className={labelClass}>Why Choose Description</label>
+          <label className={smallLabelClass}>Why Choose Description</label>
           <RichTextEditor
             value={data.whyChoose.description || ""}
             onChange={(val) =>
@@ -283,7 +297,7 @@ const renderProcessForm = () => {
               })
             }
             placeholder="Why choose us details..."
-            minHeight="120px"
+            minHeight="90px"
           />
         </div>
 
@@ -309,13 +323,13 @@ const renderProcessForm = () => {
         />
 
         {/* Choose List */}
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <label className={labelClass}>Choose List</label>
+            <label className={smallLabelClass}>Choose List</label>
 
             <button
               type="button"
-              className="px-3 py-1 text-xs bg-amber-200 rounded"
+              className="px-2 py-1 text-[11px] bg-amber-200 rounded"
               onClick={() =>
                 setForm({
                   ...form,
@@ -336,205 +350,241 @@ const renderProcessForm = () => {
             </button>
           </div>
 
-          {(data.whyChoose.chooseList || []).map(
-            (item: string, idx: number) => (
-              <div key={idx} className="flex gap-2">
-                <input
-                  className={fieldClass}
-                  placeholder={`Choose Item ${idx + 1}`}
-                  value={item}
-                  onChange={(e) => {
-                    const newList = [
-                      ...(data.whyChoose.chooseList || []),
-                    ];
-                    newList[idx] = e.target.value;
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5">
+            {(data.whyChoose.chooseList || []).map(
+              (item: string, idx: number) => (
+                <div key={idx} className="flex gap-1.5">
+                  <input
+                    className={smallFieldClass}
+                    placeholder={`Choose Item ${idx + 1}`}
+                    value={item}
+                    onChange={(e) => {
+                      const newList = [
+                        ...(data.whyChoose.chooseList || []),
+                      ];
+                      newList[idx] = e.target.value;
 
-                    setForm({
-                      ...form,
-                      data: {
-                        ...data,
-                        whyChoose: {
-                          ...data.whyChoose,
-                          chooseList: newList,
+                      setForm({
+                        ...form,
+                        data: {
+                          ...data,
+                          whyChoose: {
+                            ...data.whyChoose,
+                            chooseList: newList,
+                          },
                         },
-                      },
-                    });
-                  }}
-                />
+                      });
+                    }}
+                  />
 
-                <button
-                  type="button"
-                  className="px-3 py-2 border rounded text-red-500"
-                  onClick={() => {
-                    const newList = (
-                      data.whyChoose.chooseList || []
-                    ).filter((_: any, i: number) => i !== idx);
+                  <button
+                    type="button"
+                    className="px-2 py-1 border rounded text-red-500 text-xs"
+                    onClick={() => {
+                      const newList = (
+                        data.whyChoose.chooseList || []
+                      ).filter((_: any, i: number) => i !== idx);
 
-                    setForm({
-                      ...form,
-                      data: {
-                        ...data,
-                        whyChoose: {
-                          ...data.whyChoose,
-                          chooseList: newList,
+                      setForm({
+                        ...form,
+                        data: {
+                          ...data,
+                          whyChoose: {
+                            ...data.whyChoose,
+                            chooseList: newList,
+                          },
                         },
-                      },
-                    });
-                  }}
-                >
-                  Remove
-                </button>
-              </div>
-            )
-          )}
+                      });
+                    }}
+                  >
+                    Remove
+                  </button>
+                </div>
+              )
+            )}
+          </div>
         </div>
 
         {/* Primary Button */}
-        <div className="space-y-2">
-          <label className={labelClass}>Primary Button</label>
+        <div className="space-y-1.5">
+          <label className={smallLabelClass}>Primary Button</label>
 
-          <input
-            className={fieldClass}
-            placeholder="Button Label"
-            value={data.whyChoose.primaryButton?.label || ""}
-            onChange={(e) =>
-              setForm({
-                ...form,
-                data: {
-                  ...data,
-                  whyChoose: {
-                    ...data.whyChoose,
-                    primaryButton: {
-                      ...(data.whyChoose.primaryButton || {}),
-                      label: e.target.value,
+          <div className="grid grid-cols-2 gap-2">
+            <input
+              className={smallFieldClass}
+              placeholder="Button Label"
+              value={data.whyChoose.primaryButton?.label || ""}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  data: {
+                    ...data,
+                    whyChoose: {
+                      ...data.whyChoose,
+                      primaryButton: {
+                        ...(data.whyChoose.primaryButton || {}),
+                        label: e.target.value,
+                      },
                     },
                   },
-                },
-              })
-            }
-          />
+                })
+              }
+            />
 
-          <input
-            className={fieldClass}
-            placeholder="Button Link"
-            value={data.whyChoose.primaryButton?.href || ""}
-            onChange={(e) =>
-              setForm({
-                ...form,
-                data: {
-                  ...data,
-                  whyChoose: {
-                    ...data.whyChoose,
-                    primaryButton: {
-                      ...(data.whyChoose.primaryButton || {}),
-                      href: e.target.value,
+            <input
+              className={smallFieldClass}
+              placeholder="Button Link"
+              value={data.whyChoose.primaryButton?.href || ""}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  data: {
+                    ...data,
+                    whyChoose: {
+                      ...data.whyChoose,
+                      primaryButton: {
+                        ...(data.whyChoose.primaryButton || {}),
+                        href: e.target.value,
+                      },
                     },
                   },
-                },
-              })
-            }
-          />
+                })
+              }
+            />
+          </div>
         </div>
       </div>
 
       {/* Our Process */}
-      <div className="p-4 bg-blue-50 rounded-2xl space-y-4">
-        <h4 className="font-bold text-blue-800">Our Process</h4>
+      <div className="p-2 bg-blue-50 rounded-2xl space-y-2">
+        <h4 className="font-bold text-blue-800 text-xs">Our Process</h4>
 
-        <input
-          className={fieldClass}
-          placeholder="Heading"
-          value={data.ourProcess.heading}
-          onChange={(e) =>
-            setForm({
-              ...form,
-              data: {
-                ...data,
-                ourProcess: {
-                  ...data.ourProcess,
-                  heading: e.target.value,
+        <div className="grid grid-cols-2 gap-2">
+          <input
+            className={smallFieldClass}
+            placeholder="Heading"
+            value={data.ourProcess.heading}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                data: {
+                  ...data,
+                  ourProcess: {
+                    ...data.ourProcess,
+                    heading: e.target.value,
+                  },
                 },
-              },
-            })
-          }
-        />
+              })
+            }
+          />
 
-        <input
-          className={fieldClass}
-          placeholder="Title"
-          value={data.ourProcess.title}
-          onChange={(e) =>
-            setForm({
-              ...form,
-              data: {
-                ...data,
-                ourProcess: {
-                  ...data.ourProcess,
-                  title: e.target.value,
+          <input
+            className={smallFieldClass}
+            placeholder="Title"
+            value={data.ourProcess.title}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                data: {
+                  ...data,
+                  ourProcess: {
+                    ...data.ourProcess,
+                    title: e.target.value,
+                  },
                 },
-              },
-            })
-          }
-        />
+              })
+            }
+          />
+        </div>
 
-        {data.ourProcess.processList.map(
-          (proc: any, idx: number) => (
-            <div
-              key={proc.id}
-              className="p-3 border bg-white rounded-lg space-y-2"
-            >
-              <input
-                className={fieldClass}
-                placeholder="Step Title"
-                value={proc.title}
-                onChange={(e) => {
-                  const nl = [...data.ourProcess.processList];
-                  nl[idx].title = e.target.value;
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          {data.ourProcess.processList.map(
+            (proc: any, idx: number) => (
+              <div
+                key={proc.id}
+                className="p-2 border bg-white rounded-lg space-y-1.5"
+              >
+                <div className="grid grid-cols-2 gap-1.5">
+                  <input
+                    className={smallFieldClass}
+                    placeholder="Step Title"
+                    value={proc.title}
+                    onChange={(e) => {
+                      const nl = [...data.ourProcess.processList];
+                      nl[idx].title = e.target.value;
 
-                  setForm({
-                    ...form,
-                    data: {
-                      ...data,
-                      ourProcess: {
-                        ...data.ourProcess,
-                        processList: nl,
-                      },
-                    },
-                  });
-                }}
-              />
+                      setForm({
+                        ...form,
+                        data: {
+                          ...data,
+                          ourProcess: {
+                            ...data.ourProcess,
+                            processList: nl,
+                          },
+                        },
+                      });
+                    }}
+                  />
 
-              <input
-                className={fieldClass}
-                placeholder="Step Color"
-                value={proc.color}
-                onChange={(e) => {
-                  const nl = [...data.ourProcess.processList];
-                  nl[idx].color = e.target.value;
+                  <input
+                    className={smallFieldClass}
+                    placeholder="Step Color"
+                    value={proc.color}
+                    onChange={(e) => {
+                      const nl = [...data.ourProcess.processList];
+                      nl[idx].color = e.target.value;
 
-                  setForm({
-                    ...form,
-                    data: {
-                      ...data,
-                      ourProcess: {
-                        ...data.ourProcess,
-                        processList: nl,
-                      },
-                    },
-                  });
-                }}
-              />
+                      setForm({
+                        ...form,
+                        data: {
+                          ...data,
+                          ourProcess: {
+                            ...data.ourProcess,
+                            processList: nl,
+                          },
+                        },
+                      });
+                    }}
+                  />
+                </div>
 
-              <div>
-                <label className="text-[10px] font-bold text-gray-400 uppercase">
-                  Step Description
-                </label>
+                <div>
+                  <label className="text-[10px] font-bold text-gray-400 uppercase">
+                    Step Description
+                  </label>
 
-                <RichTextEditor
-                  value={proc.description || ""}
-                  onChange={(val) => {
+                  <RichTextEditor
+                    value={proc.description || ""}
+                    onChange={(val) => {
+                      const nl = [...data.ourProcess.processList];
+                      nl[idx].description = val;
+
+                      setForm({
+                        ...form,
+                        data: {
+                          ...data,
+                          ourProcess: {
+                            ...data.ourProcess,
+                            processList: nl,
+                          },
+                        },
+                      });
+                    }}
+                    placeholder="Describe this step..."
+                    minHeight="80px"
+                  />
+                </div>
+
+                <ImageUploadField
+                  label="Step Icon"
+                  value={proc.image}
+                  fieldKey={`proc.step.${idx}`}
+                  uploadingField={uploadingField}
+                  onUploadingChange={setUploadingField}
+                  onError={(m) => toast.error(m)}
+                  onUpload={(url) => {
                     const nl = [...data.ourProcess.processList];
-                    nl[idx].description = val;
+                    nl[idx].image = url;
 
                     setForm({
                       ...form,
@@ -547,60 +597,69 @@ const renderProcessForm = () => {
                       },
                     });
                   }}
-                  placeholder="Describe this step..."
-                  minHeight="100px"
                 />
               </div>
-
-              <ImageUploadField
-                label="Step Icon"
-                value={proc.image}
-                fieldKey={`proc.step.${idx}`}
-                uploadingField={uploadingField}
-                onUploadingChange={setUploadingField}
-                onError={(m) => toast.error(m)}
-                onUpload={(url) => {
-                  const nl = [...data.ourProcess.processList];
-                  nl[idx].image = url;
-
-                  setForm({
-                    ...form,
-                    data: {
-                      ...data,
-                      ourProcess: {
-                        ...data.ourProcess,
-                        processList: nl,
-                      },
-                    },
-                  });
-                }}
-              />
-            </div>
-          )
-        )}
+            )
+          )}
+        </div>
       </div>
     </div>
   );
 };
 
+  const renderFeaturesStripForm = () => {
+    const data = (form.data || { items: [] }) as any;
+    const items = data.items || [];
+    return (
+      <div className="space-y-2">
+        <div className="flex justify-between items-center">
+          <h4 className="text-[11px] font-bold text-[#8d6a3a] uppercase tracking-wide">Stats Strip Items</h4>
+          <button type="button" className="text-[11px] bg-[#263016] text-white px-2 py-1 rounded" onClick={() => setForm({...form, data: {...data, items: [...items, { id: randomId(), title: "", description: "", imageurl: { imageUrl: "", alt: "" } }]}})}><Plus size={13} /> Add Stat</button>
+        </div>
+
+        <div className="grid grid-cols-3 gap-2">
+          {items.map((item: any, idx: number) => (
+            <div key={item.id || idx} className="p-2 border rounded bg-gray-50 space-y-1.5 relative">
+              <button type="button" onClick={() => { const ni = items.filter((_: any, i: number) => i !== idx); setForm({...form, data: {...data, items: ni}}) }} className="absolute top-1 right-1 text-red-500"><Trash2 size={12} /></button>
+
+              <input className={smallFieldClass} placeholder="Value Label" value={item.title || ""} onChange={e => { const ni = [...items]; ni[idx] = { ...ni[idx], title: e.target.value }; setForm({...form, data: {...data, items: ni}}) }} />
+
+              <input className={smallFieldClass} placeholder="Subtitle" value={item.description || ""} onChange={e => { const ni = [...items]; ni[idx] = { ...ni[idx], description: e.target.value }; setForm({...form, data: {...data, items: ni}}) }} />
+
+              <input className={smallFieldClass} value={item.imageurl?.alt || ""} placeholder="Image Alt Text" onChange={e => { const ni = [...items]; ni[idx] = { ...ni[idx], imageurl: { ...(ni[idx].imageurl || {}), alt: e.target.value } }; setForm({...form, data: {...data, items: ni}}) }} />
+
+              <ImageUploadField label="Icon" value={item.imageurl?.imageUrl} fieldKey={`fstrip.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => { const ni = [...items]; ni[idx] = { ...ni[idx], imageurl: { ...(ni[idx].imageurl || {}), imageUrl: url } }; setForm({...form, data: {...data, items: ni}}) }} />
+            </div>
+          ))}
+
+          <button type="button" onClick={() => setForm({...form, data: {...data, items: [...items, { id: randomId(), title: "", description: "", imageurl: { imageUrl: "", alt: "" } }]}})} className="border-2 border-dashed rounded-xl flex items-center justify-center text-gray-400 py-6 hover:bg-gray-50 transition-colors">
+            <Plus size={20} />
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   const renderReadyForm = () => {
     const data = form.data as any;
     return (
-      <div className="space-y-4">
-        <input className={fieldClass} placeholder="Title" value={data.title} onChange={e => setForm({...form, data: {...data, title: e.target.value}})} />
-        <input className={fieldClass} placeholder="Heading" value={data.heading} onChange={e => setForm({...form, data: {...data, heading: e.target.value}})} />
+      <div className="space-y-2">
+        <div className="grid grid-cols-2 gap-2">
+          <input className={smallFieldClass} placeholder="Title" value={data.title} onChange={e => setForm({...form, data: {...data, title: e.target.value}})} />
+          <input className={smallFieldClass} placeholder="Heading" value={data.heading} onChange={e => setForm({...form, data: {...data, heading: e.target.value}})} />
+        </div>
         <div>
-          <label className={labelClass}>CTA Description</label>
+          <label className={smallLabelClass}>CTA Description</label>
           <RichTextEditor 
             value={data.description || ""} 
             onChange={val => setForm({...form, data: {...data, description: val}})} 
             placeholder="Final call to action description..."
-            minHeight="120px" 
+            minHeight="90px" 
           />
         </div>
-        <div className="grid grid-cols-2 gap-4">
-            <input className={fieldClass} placeholder="Button Label" value={data.primaryButton.label} onChange={e => setForm({...form, data: {...data, primaryButton: {...data.primaryButton, label: e.target.value}}})} />
-            <input className={fieldClass} placeholder="Button Href" value={data.primaryButton.href} onChange={e => setForm({...form, data: {...data, primaryButton: {...data.primaryButton, href: e.target.value}}})} />
+        <div className="grid grid-cols-2 gap-2">
+            <input className={smallFieldClass} placeholder="Button Label" value={data.primaryButton.label} onChange={e => setForm({...form, data: {...data, primaryButton: {...data.primaryButton, label: e.target.value}}})} />
+            <input className={smallFieldClass} placeholder="Button Href" value={data.primaryButton.href} onChange={e => setForm({...form, data: {...data, primaryButton: {...data.primaryButton, href: e.target.value}}})} />
         </div>
         <ImageUploadField label="Background Image" value={data.bgImage} fieldKey="ready.bg" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => setForm({...form, data: {...data, bgImage: url}})} />
       </div>
@@ -608,22 +667,22 @@ const renderProcessForm = () => {
   };
 
   return (
-    <Suspense fallback={<div className="flex justify-center p-20"><Loader2 className="animate-spin text-[#8d6a3a]" size={40} /></div>}>
+    <Suspense fallback={<div className="flex justify-center p-10"><Loader2 className="animate-spin text-[#8d6a3a]" size={32} /></div>}>
     <div className="w-full">
       <section className="w-full">
         <form onSubmit={handleSave} className="bg-white border rounded-2xl shadow-sm overflow-hidden">
-          <div className="bg-slate-50 border-b p-6 flex items-center justify-between">
-            <h2 className="text-xl font-bold">Consultancy Manager</h2>
-            <button type="submit" disabled={loading} className="bg-blue-600 text-white px-6 py-2 rounded-xl font-bold flex items-center gap-2">
-              {loading ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />} Save Changes
+          <div className="bg-slate-50 border-b p-3 flex items-center justify-between">
+            <h2 className="text-lg font-bold">Consultancy Manager</h2>
+            <button type="submit" disabled={loading} className="bg-blue-600 text-white px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5">
+              {loading ? <Loader2 className="animate-spin" size={14} /> : <Save size={14} />} Save Changes
             </button>
           </div>
 
-          <div className="p-8 space-y-6">
-            <div className="grid grid-cols-2 gap-4 p-4 bg-slate-50 rounded-xl">
-              <label className={labelClass}>Section Template
+          <div className="p-4 space-y-3">
+            <div className="grid grid-cols-2 gap-2 p-2 bg-slate-50 rounded-xl">
+              <label className={smallLabelClass}>Section Template
                 <select 
-                  className={fieldClass} 
+                  className={smallFieldClass} 
                 value={componentKey || form.key || ""} 
                   onChange={e => {
                   router.push(`?component=${e.target.value}`);
@@ -632,7 +691,7 @@ const renderProcessForm = () => {
                   {consultancyPageKeys.map(k => <option key={k.key} value={k.key}>{k.label}</option>)}
                 </select>
               </label>
-              <label className={labelClass}>Visibility <div className="mt-2"><input type="checkbox" checked={form.isActive} onChange={e => setForm({...form, isActive: e.target.checked})} /></div></label>
+              <label className={smallLabelClass}>Visibility <div className="mt-1"><input type="checkbox" checked={form.isActive} onChange={e => setForm({...form, isActive: e.target.checked})} /></div></label>
             </div>
 
             {form.key === "consultancy.hero" && renderHeroForm()}
@@ -640,6 +699,7 @@ const renderProcessForm = () => {
             {form.key === "consultancy.whatWeOffer" && renderOfferForm()}
             {form.key === "consultancy.whyChooseOurProcess" && renderProcessForm()}
             {form.key === "consultancy.readyToGetStarted" && renderReadyForm()}
+            {form.key === "consultancy.features_strip" && renderFeaturesStripForm()}
           </div>
         </form>
       </section>

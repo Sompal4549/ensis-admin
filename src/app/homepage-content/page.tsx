@@ -7,6 +7,7 @@ import {
   ArrowDown,
   ArrowUp,
   CheckCircle,
+  ChevronDown,
   ImagePlus,
   Loader2,
   Plus,
@@ -27,11 +28,20 @@ import {
   type HomeTurnkeySolution,
   validateHomepageContent,
 } from "@/lib/homepageContent";
-import { labelClass, fieldClass, cardClass } from "@/constants";
 import Image from "next/image";
 import RichTextEditor from "@/components/common/RichTextEditor";
 
 type ContentForm = Omit<ComponentContent, "_id"> & { key: HomepageComponentKey };
+
+const smallLabelClass = "mb-0 block text-[10px] font-medium";
+const smallFieldClass = "w-full rounded border border-slate-200 px-1.5 py-0.5 text-[10px] outline-none focus:ring-1 focus:ring-blue-500";
+const smallCardClass = "rounded-lg border border-[#ded3c4] bg-white p-1.5 shadow-sm";
+const smallBtnClass = "inline-flex items-center gap-1 rounded border border-[#d9cdbb] bg-white px-1.5 py-0.5 text-[10px] font-semibold text-[#263016]";
+const smallPrimaryBtnClass = "inline-flex items-center gap-1 rounded bg-[#263016] px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white";
+const smallDangerBtnClass = "rounded border border-[#e0b4a0] bg-white px-1.5 py-0.5 text-[10px] text-[#9b2e2e]";
+const smallIconBtnClass = "rounded border border-[#d9cdbb] bg-white p-0.5 text-[#263016] disabled:opacity-50";
+const summaryClass = "flex cursor-pointer select-none items-center justify-between gap-2 [&::-webkit-details-marker]:hidden";
+const cardBodyClass = "mt-1.5";
 
 const moveArrayItem = <T,>(items: T[], index: number, direction: number) => {
   const target = index + direction;
@@ -62,15 +72,15 @@ const ImageUploadField = ({
   const fileRef = useRef<HTMLInputElement | null>(null);
 
   return (
-    <div className="mb-4">
-      <div className="mb-2 flex items-center justify-between gap-3">
-        <label className={labelClass}>{label}</label>
+    <div className="mb-1">
+      <div className="mb-0.5 flex items-center justify-between gap-2">
+        <label className={smallLabelClass}>{label}</label>
         <button
           type="button"
           onClick={() => fileRef.current?.click()}
-          className="inline-flex items-center gap-2 rounded-md border border-[#d9cdbb] bg-white px-3 py-2 text-sm text-[#263016]"
+          className="inline-flex items-center gap-0.5 rounded border border-[#d9cdbb] bg-white px-1.5 py-0.5 text-[10px] text-[#263016]"
         >
-          {uploadingField === fieldKey ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImagePlus className="h-4 w-4" />}
+          {uploadingField === fieldKey ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> : <ImagePlus className="h-2.5 w-2.5" />}
           Upload
         </button>
       </div>
@@ -95,9 +105,9 @@ const ImageUploadField = ({
           }
         }}
       />
-      <input className={fieldClass} type="text" value={value} readOnly placeholder="Uploaded image URL" />
+      <input className={smallFieldClass} type="text" value={value} readOnly placeholder="Uploaded image URL" />
       {value ? (
-        <Image height={24} width={24} src={getImageUrl(value)} alt={label} className="mt-3 h-24 w-full max-w-xs rounded-md object-cover shadow-sm" />
+        <Image height={24} width={24} src={getImageUrl(value)} alt={label} className="mt-0.5 h-12 w-full max-w-[120px] rounded-md object-cover shadow-sm" />
       ) : null}
     </div>
   );
@@ -127,7 +137,7 @@ export default function HomepageContentAdminPage() {
       setLoading(false);
     }
   }, []);
- 
+
   const setData = (nextData: HomepageData) => setForm((current) => ({ ...current, data: nextData }));
 
   const resetForm = (key: HomepageComponentKey = "home.hero") => {
@@ -153,10 +163,10 @@ export default function HomepageContentAdminPage() {
       page: record.page || "home",
       description: record.description || "",
       isActive: record.isActive,
-    data: normalizeHomepageData(
-  record.key as HomepageComponentKey,
-  record.data as HomepageData  // ← yeh add karo
-),
+      data: normalizeHomepageData(
+        record.key as HomepageComponentKey,
+        record.data as HomepageData
+      ),
     });
   }, [knownKeys]);
 
@@ -187,8 +197,6 @@ export default function HomepageContentAdminPage() {
     });
   }, [refresh, handleSelectRecord, handleKeyChange, knownKeys]);
 
- 
-
   const handleSave = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setErrors([]);
@@ -199,7 +207,7 @@ export default function HomepageContentAdminPage() {
       page: form.page.trim() || "home",
       description: form.description?.trim() ?? "",
       isActive: form.isActive,
-data: normalizeHomepageData(form.key, form.data as HomepageData),
+      data: normalizeHomepageData(form.key, form.data as HomepageData),
     };
 
     let validationErrors = validateHomepageContent(payload);
@@ -248,175 +256,183 @@ data: normalizeHomepageData(form.key, form.data as HomepageData),
     const heroData = form.data as { slides: HomeHeroSlide[] };
     const defaultHeroSlide = (createHomepageData("home.hero") as { slides: HomeHeroSlide[] }).slides[0];
     return (
-      <div className={cardClass}>
-        <div className="mb-4 flex items-center justify-between gap-3">
+      <div className={smallCardClass}>
+        <div className="mb-1 flex items-center justify-between gap-2">
           <div>
-            <div className="text-xs uppercase tracking-[0.24em] text-[#8d6a3a]">Home Hero</div>
-            <p className="mt-1 text-sm text-[#5f5a50]">Manage slides, buttons, list items, and hero settings.</p>
+            <div className="text-[10px] uppercase tracking-[0.2em] text-[#8d6a3a]">Home Hero</div>
+            <p className="text-[10px] text-[#5f5a50]">Manage slides, buttons, list items, and hero settings.</p>
           </div>
-          <button type="button" onClick={() => setData({ slides: [...heroData.slides, defaultHeroSlide] })} className="inline-flex items-center gap-2 rounded-md bg-[#263016] px-3 py-2 text-xs font-semibold uppercase tracking-wide text-white">
-            <Plus size={14} /> Add slide
+          <button type="button" onClick={() => setData({ slides: [...heroData.slides, defaultHeroSlide] })} className={smallPrimaryBtnClass}>
+            <Plus size={10} /> Add slide
           </button>
         </div>
         {heroData.slides.map((slide, index) => (
-          <div key={slide.id} className="mb-4 rounded-lg border border-[#f0e7d8] bg-[#faf5ee] p-4">
-            <div className="mb-4 flex items-center justify-between gap-3">
-              <div className="font-semibold text-[#1f261b]">Slide {index + 1}</div>
-              <div className="flex items-center gap-2">
-                <button type="button" disabled={index === 0} onClick={() => setData({ slides: moveArrayItem(heroData.slides, index, -1) })} className="rounded-md border border-[#d9cdbb] bg-white p-2 disabled:opacity-50">
-                  <ArrowUp size={16} />
+          <details key={slide.id} className="mb-1 rounded-lg border border-[#f0e7d8] bg-[#faf5ee] p-1.5" open={index === 0}>
+            <summary className={summaryClass}>
+              <span className="flex items-center gap-1 text-[11px] font-semibold text-[#1f261b]">
+                <ChevronDown size={10} className="text-[#8d6a3a]" /> Slide {index + 1}
+              </span>
+              <span className="flex items-center gap-1">
+                <button type="button" disabled={index === 0} onClick={() => setData({ slides: moveArrayItem(heroData.slides, index, -1) })} className={smallIconBtnClass}>
+                  <ArrowUp size={10} />
                 </button>
-                <button type="button" disabled={index === heroData.slides.length - 1} onClick={() => setData({ slides: moveArrayItem(heroData.slides, index, 1) })} className="rounded-md border border-[#d9cdbb] bg-white p-2 disabled:opacity-50">
-                  <ArrowDown size={16} />
+                <button type="button" disabled={index === heroData.slides.length - 1} onClick={() => setData({ slides: moveArrayItem(heroData.slides, index, 1) })} className={smallIconBtnClass}>
+                  <ArrowDown size={10} />
                 </button>
-                <button type="button" onClick={() => setData({ slides: heroData.slides.filter((_, indexToRemove) => indexToRemove !== index) })} className="rounded-md border border-[#e0b4a0] bg-white px-3 py-2 text-sm text-[#9b2e2e]">
+                <button type="button" onClick={() => setData({ slides: heroData.slides.filter((_, indexToRemove) => indexToRemove !== index) })} className={smallDangerBtnClass}>
                   Remove
                 </button>
+              </span>
+            </summary>
+            <div className={cardBodyClass}>
+              <ImageUploadField
+                label="Slide image"
+                value={slide.image}
+                fieldKey={`hero-image-${slide.id}`}
+                uploadingField={uploadingField}
+                onUploadingChange={setUploadingField}
+                onError={setStatusMessage}
+                onUpload={(url) => setData({ slides: heroData.slides.map((item, itemIndex) => (itemIndex === index ? { ...item, image: url } : item)) })}
+              />
+              <div className="grid gap-1 md:grid-cols-2">
+                <label className={smallLabelClass}>
+                  Title
+                  <input className={smallFieldClass} type="text" value={slide.title} onChange={(event) => setData({ slides: heroData.slides.map((item, itemIndex) => (itemIndex === index ? { ...item, title: event.target.value } : item)) })} />
+                </label>
+                <label className={smallLabelClass}>
+                  Highlight
+                  <input className={smallFieldClass} type="text" value={slide.highlight || ""} onChange={(event) => setData({ slides: heroData.slides.map((item, itemIndex) => (itemIndex === index ? { ...item, highlight: event.target.value } : item)) })} />
+                </label>
               </div>
-            </div>
-            <ImageUploadField
-              label="Slide image"
-              value={slide.image}
-              fieldKey={`hero-image-${slide.id}`}
-              uploadingField={uploadingField}
-              onUploadingChange={setUploadingField}
-              onError={setStatusMessage}
-              onUpload={(url) => setData({ slides: heroData.slides.map((item, itemIndex) => (itemIndex === index ? { ...item, image: url } : item)) })}
-            />
-            <label className={labelClass}>
-              Title
-              <input className={`${fieldClass} mt-2`} type="text" value={slide.title} onChange={(event) => setData({ slides: heroData.slides.map((item, itemIndex) => (itemIndex === index ? { ...item, title: event.target.value } : item)) })} />
-            </label>
-            <label className={labelClass}>
-              Highlight
-              <input className={`${fieldClass} mt-2`} type="text" value={slide.highlight || ""} onChange={(event) => setData({ slides: heroData.slides.map((item, itemIndex) => (itemIndex === index ? { ...item, highlight: event.target.value } : item)) })} />
-            </label>
-            <label className={labelClass}>
-              Description
-              <textarea className={`${fieldClass} mt-2`} rows={3} value={slide.description || ""} onChange={(event) => setData({ slides: heroData.slides.map((item, itemIndex) => (itemIndex === index ? { ...item, description: event.target.value } : item)) })} />
-            </label>
-            <div className="grid gap-4 md:grid-cols-2">
-              <label className={labelClass}>
-                Primary button text
-                <input className={`${fieldClass} mt-2`} type="text" value={slide.primaryButtonText || ""} onChange={(event) => setData({ slides: heroData.slides.map((item, itemIndex) => (itemIndex === index ? { ...item, primaryButtonText: event.target.value } : item)) })} />
+              <label className={smallLabelClass}>
+                Description
+                <textarea className={smallFieldClass} rows={1} value={slide.description || ""} onChange={(event) => setData({ slides: heroData.slides.map((item, itemIndex) => (itemIndex === index ? { ...item, description: event.target.value } : item)) })} />
               </label>
-              <label className={labelClass}>
-                Primary button href
-                <input className={`${fieldClass} mt-2`} type="text" value={slide.primaryButtonHref || ""} onChange={(event) => setData({ slides: heroData.slides.map((item, itemIndex) => (itemIndex === index ? { ...item, primaryButtonHref: event.target.value } : item)) })} />
-              </label>
-            </div>
-            <div className="grid gap-4 md:grid-cols-2">
-              <label className={labelClass}>
-                Secondary button text
-                <input className={`${fieldClass} mt-2`} type="text" value={slide.secondaryButtonText || ""} onChange={(event) => setData({ slides: heroData.slides.map((item, itemIndex) => (itemIndex === index ? { ...item, secondaryButtonText: event.target.value } : item)) })} />
-              </label>
-              <label className={labelClass}>
-                Secondary button href
-                <input className={`${fieldClass} mt-2`} type="text" value={slide.secondaryButtonHref || ""} onChange={(event) => setData({ slides: heroData.slides.map((item, itemIndex) => (itemIndex === index ? { ...item, secondaryButtonHref: event.target.value } : item)) })} />
-              </label>
-            </div>
-            <div className="flex flex-wrap gap-4">
-              <label className="flex items-center gap-2 text-sm text-[#5f5a50]">
-                <input type="checkbox" checked={slide.showLutus || false} onChange={(event) => setData({ slides: heroData.slides.map((item, itemIndex) => (itemIndex === index ? { ...item, showLutus: event.target.checked } : item)) })} />
-                Show Lutus
-              </label>
-              <label className="flex items-center gap-2 text-sm text-[#5f5a50]">
-                <input type="checkbox" checked={slide.isCenter || false} onChange={(event) => setData({ slides: heroData.slides.map((item, itemIndex) => (itemIndex === index ? { ...item, isCenter: event.target.checked } : item)) })} />
-                Center layout
-              </label>
-            </div>
-            <div className="mt-4 rounded-xl bg-white p-3">
-              <div className="mb-2 flex items-center justify-between gap-2">
-                <p className="text-sm font-semibold text-[#1f261b]">List Items</p>
-                <button type="button" onClick={() => setData({ slides: heroData.slides.map((item, itemIndex) => itemIndex === index ? { ...item, listItems: [...(item.listItems || []), ""] } : item) })} className="inline-flex items-center gap-2 rounded-md border border-[#d9cdbb] bg-white px-3 py-2 text-xs font-semibold uppercase tracking-wide text-[#263016]">
-                  <Plus size={14} /> Add item
-                </button>
+              <div className="grid gap-1 md:grid-cols-2">
+                <label className={smallLabelClass}>
+                  Primary button text
+                  <input className={smallFieldClass} type="text" value={slide.primaryButtonText || ""} onChange={(event) => setData({ slides: heroData.slides.map((item, itemIndex) => (itemIndex === index ? { ...item, primaryButtonText: event.target.value } : item)) })} />
+                </label>
+                <label className={smallLabelClass}>
+                  Primary button href
+                  <input className={smallFieldClass} type="text" value={slide.primaryButtonHref || ""} onChange={(event) => setData({ slides: heroData.slides.map((item, itemIndex) => (itemIndex === index ? { ...item, primaryButtonHref: event.target.value } : item)) })} />
+                </label>
               </div>
-              {(slide.listItems || []).map((listItem, listIndex) => (
-                <div key={listIndex} className="mb-3 flex gap-2">
-                  <input
-                    className={`${fieldClass} flex-1`}
-                    type="text"
-                    value={listItem}
-                    onChange={(event) => setData({ slides: heroData.slides.map((item, itemIndex) => {
-                      if (itemIndex !== index) return item;
-                      const nextList = [...(item.listItems || [])];
-                      nextList[listIndex] = event.target.value;
-                      return { ...item, listItems: nextList };
-                    }) })}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setData({ slides: heroData.slides.map((item, itemIndex) => {
-                      if (itemIndex !== index) return item;
-                      return { ...item, listItems: (item.listItems || []).filter((_, listIdx) => listIdx !== listIndex) };
-                    }) })}
-                    className="rounded-md border border-[#e0b4a0] bg-white px-3 py-2 text-sm text-[#9b2e2e]"
-                  >
-                    Remove
+              <div className="grid gap-1 md:grid-cols-2">
+                <label className={smallLabelClass}>
+                  Secondary button text
+                  <input className={smallFieldClass} type="text" value={slide.secondaryButtonText || ""} onChange={(event) => setData({ slides: heroData.slides.map((item, itemIndex) => (itemIndex === index ? { ...item, secondaryButtonText: event.target.value } : item)) })} />
+                </label>
+                <label className={smallLabelClass}>
+                  Secondary button href
+                  <input className={smallFieldClass} type="text" value={slide.secondaryButtonHref || ""} onChange={(event) => setData({ slides: heroData.slides.map((item, itemIndex) => (itemIndex === index ? { ...item, secondaryButtonHref: event.target.value } : item)) })} />
+                </label>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <label className="flex items-center gap-1 text-[10px] text-[#5f5a50]">
+                  <input type="checkbox" checked={slide.showLutus || false} onChange={(event) => setData({ slides: heroData.slides.map((item, itemIndex) => (itemIndex === index ? { ...item, showLutus: event.target.checked } : item)) })} />
+                  Show Lutus
+                </label>
+                <label className="flex items-center gap-1 text-[10px] text-[#5f5a50]">
+                  <input type="checkbox" checked={slide.isCenter || false} onChange={(event) => setData({ slides: heroData.slides.map((item, itemIndex) => (itemIndex === index ? { ...item, isCenter: event.target.checked } : item)) })} />
+                  Center layout
+                </label>
+              </div>
+              <details className="mt-1 rounded-lg bg-white p-1.5">
+                <summary className={summaryClass}>
+                  <p className="text-[11px] font-semibold text-[#1f261b]">List Items</p>
+                  <button type="button" onClick={() => setData({ slides: heroData.slides.map((item, itemIndex) => itemIndex === index ? { ...item, listItems: [...(item.listItems || []), ""] } : item) })} className={smallBtnClass}>
+                    <Plus size={10} /> Add item
                   </button>
+                </summary>
+                <div className="mt-1 grid gap-1 sm:grid-cols-2 lg:grid-cols-3">
+                  {(slide.listItems || []).map((listItem, listIndex) => (
+                    <div key={listIndex} className="flex gap-1">
+                      <input
+                        className={`${smallFieldClass} flex-1`}
+                        type="text"
+                        value={listItem}
+                        onChange={(event) => setData({ slides: heroData.slides.map((item, itemIndex) => {
+                          if (itemIndex !== index) return item;
+                          const nextList = [...(item.listItems || [])];
+                          nextList[listIndex] = event.target.value;
+                          return { ...item, listItems: nextList };
+                        }) })}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setData({ slides: heroData.slides.map((item, itemIndex) => {
+                          if (itemIndex !== index) return item;
+                          return { ...item, listItems: (item.listItems || []).filter((_, listIdx) => listIdx !== listIndex) };
+                        }) })}
+                        className={smallDangerBtnClass}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-            <div className="mt-4 rounded-xl bg-white p-3">
-              <div className="mb-2 flex items-center justify-between gap-2">
-                <p className="text-sm font-semibold text-[#1f261b]">Features</p>
-                <button type="button" onClick={() => setData({ slides: heroData.slides.map((item, itemIndex) => itemIndex === index ? { ...item, features: [...(item.features || []), { imgUrl: "", title: "" }] } : item) })} className="inline-flex items-center gap-2 rounded-md border border-[#d9cdbb] bg-white px-3 py-2 text-xs font-semibold uppercase tracking-wide text-[#263016]">
-                  <Plus size={14} /> Add feature
-                </button>
-              </div>
-              {(slide.features || []).map((feature, featureIndex) => (
-                <div key={featureIndex} className="mb-4 rounded-lg border border-[#e5dfd5] bg-[#fbf8f3] p-3">
-                  <div className="mb-3 flex items-center justify-between gap-3">
-                    <p className="text-sm font-semibold text-[#1f261b]">Feature {featureIndex + 1}</p>
-                    <button
-                      type="button"
-                      onClick={() => setData({ slides: heroData.slides.map((item, itemIndex) => {
-                        if (itemIndex !== index) return item;
-                        const nextFeatures = [...(item.features || [])];
-                        nextFeatures.splice(featureIndex, 1);
-                        return { ...item, features: nextFeatures };
-                      }) })}
-                      className="rounded-md border border-[#e0b4a0] bg-white px-3 py-2 text-sm text-[#9b2e2e]"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <ImageUploadField
-                      label="Feature image"
-                      value={feature.imgUrl}
-                      fieldKey={`hero-slide-${slide.id}-feature-img-${featureIndex}`}
-                      uploadingField={uploadingField}
-                      onUploadingChange={setUploadingField}
-                      onError={setStatusMessage}
-                      onUpload={(url) => setData({ slides: heroData.slides.map((item, itemIndex) => {
-                        if (itemIndex !== index) return item;
-                        const nextFeatures = [...(item.features || [])];
-                        nextFeatures[featureIndex] = { ...nextFeatures[featureIndex], imgUrl: url };
-                        return { ...item, features: nextFeatures };
-                      }) })}
-                    />
-                    <label className={labelClass}>
-                      Feature title
-                      <input className={`${fieldClass} mt-2`} type="text" value={feature.title} onChange={(event) => setData({ slides: heroData.slides.map((item, itemIndex) => {
-                        if (itemIndex !== index) return item;
-                        const nextFeatures = [...(item.features || [])];
-                        nextFeatures[featureIndex] = { ...nextFeatures[featureIndex], title: event.target.value };
-                        return { ...item, features: nextFeatures };
-                      }) })} />
-                    </label>
-                  </div>
+              </details>
+              <details className="mt-1 rounded-lg bg-white p-1.5">
+                <summary className={summaryClass}>
+                  <p className="text-[11px] font-semibold text-[#1f261b]">Features</p>
+                  <button type="button" onClick={() => setData({ slides: heroData.slides.map((item, itemIndex) => itemIndex === index ? { ...item, features: [...(item.features || []), { imgUrl: "", title: "" }] } : item) })} className={smallBtnClass}>
+                    <Plus size={10} /> Add feature
+                  </button>
+                </summary>
+                <div className="mt-1 grid gap-1 md:grid-cols-2 lg:grid-cols-3">
+                  {(slide.features || []).map((feature, featureIndex) => (
+                    <div key={featureIndex} className="rounded-lg border border-[#e5dfd5] bg-[#fbf8f3] p-1.5">
+                      <div className="mb-1 flex items-center justify-between gap-2">
+                        <p className="text-[10px] font-semibold text-[#1f261b]">Feature {featureIndex + 1}</p>
+                        <button
+                          type="button"
+                          onClick={() => setData({ slides: heroData.slides.map((item, itemIndex) => {
+                            if (itemIndex !== index) return item;
+                            const nextFeatures = [...(item.features || [])];
+                            nextFeatures.splice(featureIndex, 1);
+                            return { ...item, features: nextFeatures };
+                          }) })}
+                          className={smallDangerBtnClass}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                      <ImageUploadField
+                        label="Feature image"
+                        value={feature.imgUrl}
+                        fieldKey={`hero-slide-${slide.id}-feature-img-${featureIndex}`}
+                        uploadingField={uploadingField}
+                        onUploadingChange={setUploadingField}
+                        onError={setStatusMessage}
+                        onUpload={(url) => setData({ slides: heroData.slides.map((item, itemIndex) => {
+                          if (itemIndex !== index) return item;
+                          const nextFeatures = [...(item.features || [])];
+                          nextFeatures[featureIndex] = { ...nextFeatures[featureIndex], imgUrl: url };
+                          return { ...item, features: nextFeatures };
+                        }) })}
+                      />
+                      <label className={smallLabelClass}>
+                        Feature title
+                        <input className={smallFieldClass} type="text" value={feature.title} onChange={(event) => setData({ slides: heroData.slides.map((item, itemIndex) => {
+                          if (itemIndex !== index) return item;
+                          const nextFeatures = [...(item.features || [])];
+                          nextFeatures[featureIndex] = { ...nextFeatures[featureIndex], title: event.target.value };
+                          return { ...item, features: nextFeatures };
+                        }) })} />
+                      </label>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </details>
             </div>
-          </div>
+          </details>
         ))}
       </div>
     );
   };
 
-const renderWellnessSectionEditor = () => {
+  const renderWellnessSectionEditor = () => {
     const wellnessData = form.data as {
       welcomeImage: string;
       eyebrow: string;
@@ -427,11 +443,11 @@ const renderWellnessSectionEditor = () => {
       services: { image: string; title: string; description: string, link:string }[];
     };
     return (
-      <div className={cardClass}>
-        <div className="mb-4 flex items-center justify-between gap-3">
+      <div className={smallCardClass}>
+        <div className="mb-1 flex items-center justify-between gap-2">
           <div>
-            <div className="text-xs uppercase tracking-[0.24em] text-[#8d6a3a]">Wellness Section</div>
-            <p className="mt-1 text-sm text-[#5f5a50]">Manage welcome info, welcome image, and services list.</p>
+            <div className="text-[10px] uppercase tracking-[0.2em] text-[#8d6a3a]">Wellness Section</div>
+            <p className="text-[10px] text-[#5f5a50]">Manage welcome info, welcome image, and services list.</p>
           </div>
           <button
             type="button"
@@ -444,33 +460,33 @@ const renderWellnessSectionEditor = () => {
                 ],
               })
             }
-            className="inline-flex items-center gap-2 rounded-md bg-[#263016] px-3 py-2 text-xs font-semibold uppercase tracking-wide text-white"
+            className={smallPrimaryBtnClass}
           >
-            <Plus size={14} /> Add Service
+            <Plus size={10} /> Add Service
           </button>
         </div>
-        <div className="grid gap-4 md:grid-cols-2">
-          <label className={labelClass}>
+        <div className="grid gap-1 md:grid-cols-2">
+          <label className={smallLabelClass}>
             Eyebrow
-            <input className={`${fieldClass} mt-2`} type="text" value={wellnessData.eyebrow} onChange={(event) => setData({ ...wellnessData, eyebrow: event.target.value })} />
+            <input className={smallFieldClass} type="text" value={wellnessData.eyebrow} onChange={(event) => setData({ ...wellnessData, eyebrow: event.target.value })} />
           </label>
-          <label className={labelClass}>
+          <label className={smallLabelClass}>
             Heading
-            <input className={`${fieldClass} mt-2`} type="text" value={wellnessData.heading} onChange={(event) => setData({ ...wellnessData, heading: event.target.value })} />
+            <input className={smallFieldClass} type="text" value={wellnessData.heading} onChange={(event) => setData({ ...wellnessData, heading: event.target.value })} />
           </label>
         </div>
-        <label className={labelClass}>
+        <label className={smallLabelClass}>
           Description
-          <textarea className={`${fieldClass} mt-2`} rows={3} value={wellnessData.description} onChange={(event) => setData({ ...wellnessData, description: event.target.value })} />
+          <textarea className={smallFieldClass} rows={1} value={wellnessData.description} onChange={(event) => setData({ ...wellnessData, description: event.target.value })} />
         </label>
-        <div className="grid gap-4 md:grid-cols-2">
-          <label className={labelClass}>
+        <div className="grid gap-1 md:grid-cols-2">
+          <label className={smallLabelClass}>
             Button Text
-            <input className={`${fieldClass} mt-2`} type="text" value={wellnessData.buttonText} onChange={(event) => setData({ ...wellnessData, buttonText: event.target.value })} />
+            <input className={smallFieldClass} type="text" value={wellnessData.buttonText} onChange={(event) => setData({ ...wellnessData, buttonText: event.target.value })} />
           </label>
-          <label className={labelClass}>
+          <label className={smallLabelClass}>
             Button Href
-            <input className={`${fieldClass} mt-2`} type="text" value={wellnessData.buttonHref} onChange={(event) => setData({ ...wellnessData, buttonHref: event.target.value })} />
+            <input className={smallFieldClass} type="text" value={wellnessData.buttonHref} onChange={(event) => setData({ ...wellnessData, buttonHref: event.target.value })} />
           </label>
         </div>
         <ImageUploadField
@@ -483,65 +499,73 @@ const renderWellnessSectionEditor = () => {
           onUpload={(url) => setData({ ...wellnessData, welcomeImage: url })}
         />
 
-        <div className="mt-6 border-t border-[#f0e7d8] pt-6">
-          <h3 className="text-sm font-bold uppercase tracking-wider text-[#263016] mb-4">Service Cards</h3>
-          {(wellnessData.services || []).map((service, index) => (
-            <div key={index} className="mb-4 rounded-lg border border-[#f0e7d8] bg-[#faf5ee] p-4">
-              <div className="mb-4 flex items-center justify-between gap-3">
-                <div className="font-semibold text-[#1f261b]">Service Card {index + 1}</div>
-                <div className="flex items-center gap-2">
-                  <button type="button" disabled={index === 0} onClick={() => setData({ ...wellnessData, services: moveArrayItem(wellnessData.services, index, -1) })} className="rounded-md border border-[#d9cdbb] bg-white p-2 disabled:opacity-50">
-                    <ArrowUp size={16} />
-                  </button>
-                  <button type="button" disabled={index === wellnessData.services.length - 1} onClick={() => setData({ ...wellnessData, services: moveArrayItem(wellnessData.services, index, 1) })} className="rounded-md border border-[#d9cdbb] bg-white p-2 disabled:opacity-50">
-                    <ArrowDown size={16} />
-                  </button>
-                  <button type="button" onClick={() => setData({ ...wellnessData, services: wellnessData.services.filter((_, indexToRemove) => indexToRemove !== index) })} className="rounded-md border border-[#e0b4a0] bg-white px-3 py-2 text-sm text-[#9b2e2e]">
-                    Remove
-                  </button>
+        <div className="mt-1 border-t border-[#f0e7d8] pt-1">
+          <h3 className="mb-1 text-[11px] font-bold uppercase tracking-wider text-[#263016]">Service Cards</h3>
+          <div className="grid gap-1 md:grid-cols-2 lg:grid-cols-3">
+            {(wellnessData.services || []).map((service, index) => (
+              <details key={index} className="rounded-lg border border-[#f0e7d8] bg-[#faf5ee] p-1.5" open={index === 0}>
+                <summary className={summaryClass}>
+                  <span className="flex items-center gap-1 text-[11px] font-semibold text-[#1f261b]">
+                    <ChevronDown size={10} className="text-[#8d6a3a]" /> Service Card {index + 1}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <button type="button" disabled={index === 0} onClick={() => setData({ ...wellnessData, services: moveArrayItem(wellnessData.services, index, -1) })} className={smallIconBtnClass}>
+                      <ArrowUp size={10} />
+                    </button>
+                    <button type="button" disabled={index === wellnessData.services.length - 1} onClick={() => setData({ ...wellnessData, services: moveArrayItem(wellnessData.services, index, 1) })} className={smallIconBtnClass}>
+                      <ArrowDown size={10} />
+                    </button>
+                    <button type="button" onClick={() => setData({ ...wellnessData, services: wellnessData.services.filter((_, indexToRemove) => indexToRemove !== index) })} className={smallDangerBtnClass}>
+                      Remove
+                    </button>
+                  </span>
+                </summary>
+                <div className={cardBodyClass}>
+                  <ImageUploadField
+                    label="Service Image"
+                    value={service.image}
+                    fieldKey={`wellness-service-image-${index}`}
+                    uploadingField={uploadingField}
+                    onUploadingChange={setUploadingField}
+                    onError={setStatusMessage}
+                    onUpload={(url) => setData({
+                      ...wellnessData,
+                      services: wellnessData.services.map((item, itemIndex) => (itemIndex === index ? { ...item, image: url } : item))
+                    })}
+                  />
+                  <div className="grid gap-1 md:grid-cols-2">
+                    <label className={smallLabelClass}>
+                      Title
+                      <input className={smallFieldClass} type="text" value={service.title} onChange={(event) => setData({
+                        ...wellnessData,
+                        services: wellnessData.services.map((item, itemIndex) => (itemIndex === index ? { ...item, title: event.target.value } : item))
+                      })} />
+                    </label>
+                    <label className={smallLabelClass}>
+                      Link
+                      <input
+                        className={smallFieldClass}
+                        type="text"
+                        placeholder="/products/steam-chambers"
+                        value={service.link}
+                        onChange={(event) => setData({
+                          ...wellnessData,
+                          services: wellnessData.services.map((item, itemIndex) => (itemIndex === index ? { ...item, link: event.target.value } : item))
+                        })}
+                      />
+                    </label>
+                  </div>
+                  <label className={smallLabelClass}>
+                    Description
+                    <textarea className={smallFieldClass} rows={1} value={service.description} onChange={(event) => setData({
+                      ...wellnessData,
+                      services: wellnessData.services.map((item, itemIndex) => (itemIndex === index ? { ...item, description: event.target.value } : item))
+                    })} />
+                  </label>
                 </div>
-              </div>
-              <ImageUploadField
-                label="Service Image"
-                value={service.image}
-                fieldKey={`wellness-service-image-${index}`}
-                uploadingField={uploadingField}
-                onUploadingChange={setUploadingField}
-                onError={setStatusMessage}
-                onUpload={(url) => setData({
-                  ...wellnessData,
-                  services: wellnessData.services.map((item, itemIndex) => (itemIndex === index ? { ...item, image: url } : item))
-                })}
-              />
-              <label className={labelClass}>
-                Title
-                <input className={`${fieldClass} mt-2 mb-3`} type="text" value={service.title} onChange={(event) => setData({
-                  ...wellnessData,
-                  services: wellnessData.services.map((item, itemIndex) => (itemIndex === index ? { ...item, title: event.target.value } : item))
-                })} />
-              </label>
-              <label className={labelClass}>
-                Link
-                <input
-                  className={`${fieldClass} mt-2 mb-3`}
-                  type="text"
-                  placeholder="/products/steam-chambers"
-                  value={service.link}
-                  onChange={(event) => setData({
-                    ...wellnessData,
-                    services: wellnessData.services.map((item, itemIndex) => (itemIndex === index ? { ...item, link: event.target.value } : item))
-                  })}
-                />
-              </label>
-              <label className={labelClass}>
-                Description
-                <textarea className={`${fieldClass} mt-2`} rows={2} value={service.description} onChange={(event) => setData({
-                  ...wellnessData,
-                  services: wellnessData.services.map((item, itemIndex) => (itemIndex === index ? { ...item, description: event.target.value } : item))
-                })} />
-              </label>
-            </div>
-          ))}
+              </details>
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -550,51 +574,57 @@ const renderWellnessSectionEditor = () => {
   const renderFeaturesEditor = () => {
     const featureData = form.data as { features: HomeFeaturesFeature[] };
     return (
-      <div className={cardClass}>
-        <div className="mb-4 flex items-center justify-between gap-3">
+      <div className={smallCardClass}>
+        <div className="mb-1 flex items-center justify-between gap-2">
           <div>
-            <div className="text-xs uppercase tracking-[0.24em] text-[#8d6a3a]">Home Features</div>
-            <p className="mt-1 text-sm text-[#5f5a50]">Manage feature cards for the homepage.</p>
+            <div className="text-[10px] uppercase tracking-[0.2em] text-[#8d6a3a]">Home Features</div>
+            <p className="text-[10px] text-[#5f5a50]">Manage feature cards for the homepage.</p>
           </div>
-          <button type="button" onClick={() => setData({ features: [...featureData.features, { imgUrl: "", title: "", desc: "" }] })} className="inline-flex items-center gap-2 rounded-md bg-[#263016] px-3 py-2 text-xs font-semibold uppercase tracking-wide text-white">
-            <Plus size={14} /> Add feature
+          <button type="button" onClick={() => setData({ features: [...featureData.features, { imgUrl: "", title: "", desc: "" }] })} className={smallPrimaryBtnClass}>
+            <Plus size={10} /> Add feature
           </button>
         </div>
-        {featureData.features.map((feature, index) => (
-          <div key={index} className="mb-4 rounded-lg border border-[#f0e7d8] bg-[#faf5ee] p-4">
-            <div className="mb-4 flex items-center justify-between gap-3">
-              <div className="font-semibold text-[#1f261b]">Feature {index + 1}</div>
-              <div className="flex items-center gap-2">
-                <button type="button" disabled={index === 0} onClick={() => setData({ features: moveArrayItem(featureData.features, index, -1) })} className="rounded-md border border-[#d9cdbb] bg-white p-2 disabled:opacity-50">
-                  <ArrowUp size={16} />
-                </button>
-                <button type="button" disabled={index === featureData.features.length - 1} onClick={() => setData({ features: moveArrayItem(featureData.features, index, 1) })} className="rounded-md border border-[#d9cdbb] bg-white p-2 disabled:opacity-50">
-                  <ArrowDown size={16} />
-                </button>
-                <button type="button" onClick={() => setData({ features: featureData.features.filter((_, indexToRemove) => indexToRemove !== index) })} className="rounded-md border border-[#e0b4a0] bg-white px-3 py-2 text-sm text-[#9b2e2e]">
-                  Remove
-                </button>
+        <div className="grid gap-1 md:grid-cols-2 lg:grid-cols-3">
+          {featureData.features.map((feature, index) => (
+            <details key={index} className="rounded-lg border border-[#f0e7d8] bg-[#faf5ee] p-1.5" open={index === 0}>
+              <summary className={summaryClass}>
+                <span className="flex items-center gap-1 text-[11px] font-semibold text-[#1f261b]">
+                  <ChevronDown size={10} className="text-[#8d6a3a]" /> Feature {index + 1}
+                </span>
+                <span className="flex items-center gap-1">
+                  <button type="button" disabled={index === 0} onClick={() => setData({ features: moveArrayItem(featureData.features, index, -1) })} className={smallIconBtnClass}>
+                    <ArrowUp size={10} />
+                  </button>
+                  <button type="button" disabled={index === featureData.features.length - 1} onClick={() => setData({ features: moveArrayItem(featureData.features, index, 1) })} className={smallIconBtnClass}>
+                    <ArrowDown size={10} />
+                  </button>
+                  <button type="button" onClick={() => setData({ features: featureData.features.filter((_, indexToRemove) => indexToRemove !== index) })} className={smallDangerBtnClass}>
+                    Remove
+                  </button>
+                </span>
+              </summary>
+              <div className={cardBodyClass}>
+                <ImageUploadField
+                  label="Feature image"
+                  value={feature.imgUrl}
+                  fieldKey={`feature-image-${index}`}
+                  uploadingField={uploadingField}
+                  onUploadingChange={setUploadingField}
+                  onError={setStatusMessage}
+                  onUpload={(url) => setData({ features: featureData.features.map((item, itemIndex) => (itemIndex === index ? { ...item, imgUrl: url } : item)) })}
+                />
+                <label className={smallLabelClass}>
+                  Title
+                  <input className={smallFieldClass} type="text" value={feature.title} onChange={(event) => setData({ features: featureData.features.map((item, itemIndex) => (itemIndex === index ? { ...item, title: event.target.value } : item)) })} />
+                </label>
+                <label className={smallLabelClass}>
+                  Description
+                  <textarea className={smallFieldClass} rows={1} value={feature.desc} onChange={(event) => setData({ features: featureData.features.map((item, itemIndex) => (itemIndex === index ? { ...item, desc: event.target.value } : item)) })} />
+                </label>
               </div>
-            </div>
-            <ImageUploadField
-              label="Feature image"
-              value={feature.imgUrl}
-              fieldKey={`feature-image-${index}`}
-              uploadingField={uploadingField}
-              onUploadingChange={setUploadingField}
-              onError={setStatusMessage}
-              onUpload={(url) => setData({ features: featureData.features.map((item, itemIndex) => (itemIndex === index ? { ...item, imgUrl: url } : item)) })}
-            />
-            <label className={labelClass}>
-              Title
-              <input className={`${fieldClass} mt-2`} type="text" value={feature.title} onChange={(event) => setData({ features: featureData.features.map((item, itemIndex) => (itemIndex === index ? { ...item, title: event.target.value } : item)) })} />
-            </label>
-            <label className={labelClass}>
-              Description
-              <textarea className={`${fieldClass} mt-2`} rows={3} value={feature.desc} onChange={(event) => setData({ features: featureData.features.map((item, itemIndex) => (itemIndex === index ? { ...item, desc: event.target.value } : item)) })} />
-            </label>
-          </div>
-        ))}
+            </details>
+          ))}
+        </div>
       </div>
     );
   };
@@ -610,36 +640,38 @@ const renderWellnessSectionEditor = () => {
       solutions: HomeTurnkeySolution[];
     };
     return (
-      <div className={cardClass}>
-        <div className="mb-4 flex items-center justify-between gap-3">
+      <div className={smallCardClass}>
+        <div className="mb-1 flex items-center justify-between gap-2">
           <div>
-            <div className="text-xs uppercase tracking-[0.24em] text-[#8d6a3a]">Turnkey Solutions</div>
-            <p className="mt-1 text-sm text-[#5f5a50]">Manage the turnkey solutions section and service cards.</p>
+            <div className="text-[10px] uppercase tracking-[0.2em] text-[#8d6a3a]">Turnkey Solutions</div>
+            <p className="text-[10px] text-[#5f5a50]">Manage the turnkey solutions section and service cards.</p>
           </div>
-          <button type="button" onClick={() => setData({ ...turnkeyData, solutions: [...turnkeyData.solutions, { imgUrl: "", title: "" }] })} className="inline-flex items-center gap-2 rounded-md bg-[#263016] px-3 py-2 text-xs font-semibold uppercase tracking-wide text-white">
-            <Plus size={14} /> Add solution
+          <button type="button" onClick={() => setData({ ...turnkeyData, solutions: [...turnkeyData.solutions, { imgUrl: "", title: "" }] })} className={smallPrimaryBtnClass}>
+            <Plus size={10} /> Add solution
           </button>
         </div>
-        <label className={labelClass}>
-          Eyebrow
-          <input className={`${fieldClass} mt-2`} type="text" value={turnkeyData.eyebrow} onChange={(event) => setData({ ...turnkeyData, eyebrow: event.target.value })} />
-        </label>
-        <label className={labelClass}>
-          Heading
-          <textarea className={`${fieldClass} mt-2`} rows={2} value={turnkeyData.heading} onChange={(event) => setData({ ...turnkeyData, heading: event.target.value })} />
-        </label>
-        <label className={labelClass}>
-          Description
-          <textarea className={`${fieldClass} mt-2`} rows={3} value={turnkeyData.description} onChange={(event) => setData({ ...turnkeyData, description: event.target.value })} />
-        </label>
-        <div className="grid gap-4 md:grid-cols-2">
-          <label className={labelClass}>
-            Button text
-            <input className={`${fieldClass} mt-2`} type="text" value={turnkeyData.buttonText} onChange={(event) => setData({ ...turnkeyData, buttonText: event.target.value })} />
+        <div className="grid gap-1 md:grid-cols-2">
+          <label className={smallLabelClass}>
+            Eyebrow
+            <input className={smallFieldClass} type="text" value={turnkeyData.eyebrow} onChange={(event) => setData({ ...turnkeyData, eyebrow: event.target.value })} />
           </label>
-          <label className={labelClass}>
+          <label className={smallLabelClass}>
+            Heading
+            <textarea className={smallFieldClass} rows={1} value={turnkeyData.heading} onChange={(event) => setData({ ...turnkeyData, heading: event.target.value })} />
+          </label>
+        </div>
+        <label className={smallLabelClass}>
+          Description
+          <textarea className={smallFieldClass} rows={1} value={turnkeyData.description} onChange={(event) => setData({ ...turnkeyData, description: event.target.value })} />
+        </label>
+        <div className="grid gap-1 md:grid-cols-2">
+          <label className={smallLabelClass}>
+            Button text
+            <input className={smallFieldClass} type="text" value={turnkeyData.buttonText} onChange={(event) => setData({ ...turnkeyData, buttonText: event.target.value })} />
+          </label>
+          <label className={smallLabelClass}>
             Button href
-            <input className={`${fieldClass} mt-2`} type="text" value={turnkeyData.buttonHref || ""} onChange={(event) => setData({ ...turnkeyData, buttonHref: event.target.value })} />
+            <input className={smallFieldClass} type="text" value={turnkeyData.buttonHref || ""} onChange={(event) => setData({ ...turnkeyData, buttonHref: event.target.value })} />
           </label>
         </div>
         <ImageUploadField
@@ -651,37 +683,43 @@ const renderWellnessSectionEditor = () => {
           onError={setStatusMessage}
           onUpload={(url) => setData({ ...turnkeyData, backgroundImage: url })}
         />
-        {turnkeyData.solutions.map((solution, index) => (
-          <div key={index} className="mb-4 rounded-lg border border-[#f0e7d8] bg-[#faf5ee] p-4">
-            <div className="mb-4 flex items-center justify-between gap-3">
-              <div className="font-semibold text-[#1f261b]">Solution {index + 1}</div>
-              <div className="flex items-center gap-2">
-                <button type="button" disabled={index === 0} onClick={() => setData({ ...turnkeyData, solutions: moveArrayItem(turnkeyData.solutions, index, -1) })} className="rounded-md border border-[#d9cdbb] bg-white p-2 disabled:opacity-50">
-                  <ArrowUp size={16} />
-                </button>
-                <button type="button" disabled={index === turnkeyData.solutions.length - 1} onClick={() => setData({ ...turnkeyData, solutions: moveArrayItem(turnkeyData.solutions, index, 1) })} className="rounded-md border border-[#d9cdbb] bg-white p-2 disabled:opacity-50">
-                  <ArrowDown size={16} />
-                </button>
-                <button type="button" onClick={() => setData({ ...turnkeyData, solutions: turnkeyData.solutions.filter((_, indexToRemove) => indexToRemove !== index) })} className="rounded-md border border-[#e0b4a0] bg-white px-3 py-2 text-sm text-[#9b2e2e]">
-                  Remove
-                </button>
+        <div className="grid gap-1 sm:grid-cols-2 lg:grid-cols-3">
+          {turnkeyData.solutions.map((solution, index) => (
+            <details key={index} className="rounded-lg border border-[#f0e7d8] bg-[#faf5ee] p-1.5" open={index === 0}>
+              <summary className={summaryClass}>
+                <span className="flex items-center gap-1 text-[11px] font-semibold text-[#1f261b]">
+                  <ChevronDown size={10} className="text-[#8d6a3a]" /> Solution {index + 1}
+                </span>
+                <span className="flex items-center gap-1">
+                  <button type="button" disabled={index === 0} onClick={() => setData({ ...turnkeyData, solutions: moveArrayItem(turnkeyData.solutions, index, -1) })} className={smallIconBtnClass}>
+                    <ArrowUp size={10} />
+                  </button>
+                  <button type="button" disabled={index === turnkeyData.solutions.length - 1} onClick={() => setData({ ...turnkeyData, solutions: moveArrayItem(turnkeyData.solutions, index, 1) })} className={smallIconBtnClass}>
+                    <ArrowDown size={10} />
+                  </button>
+                  <button type="button" onClick={() => setData({ ...turnkeyData, solutions: turnkeyData.solutions.filter((_, indexToRemove) => indexToRemove !== index) })} className={smallDangerBtnClass}>
+                    Remove
+                  </button>
+                </span>
+              </summary>
+              <div className={cardBodyClass}>
+                <ImageUploadField
+                  label="Solution image"
+                  value={solution.imgUrl}
+                  fieldKey={`turnkey-solution-image-${index}`}
+                  uploadingField={uploadingField}
+                  onUploadingChange={setUploadingField}
+                  onError={setStatusMessage}
+                  onUpload={(url) => setData({ ...turnkeyData, solutions: turnkeyData.solutions.map((item, itemIndex) => (itemIndex === index ? { ...item, imgUrl: url } : item)) })}
+                />
+                <label className={smallLabelClass}>
+                  Title
+                  <input className={smallFieldClass} type="text" value={solution.title} onChange={(event) => setData({ ...turnkeyData, solutions: turnkeyData.solutions.map((item, itemIndex) => (itemIndex === index ? { ...item, title: event.target.value } : item)) })} />
+                </label>
               </div>
-            </div>
-            <ImageUploadField
-              label="Solution image"
-              value={solution.imgUrl}
-              fieldKey={`turnkey-solution-image-${index}`}
-              uploadingField={uploadingField}
-              onUploadingChange={setUploadingField}
-              onError={setStatusMessage}
-              onUpload={(url) => setData({ ...turnkeyData, solutions: turnkeyData.solutions.map((item, itemIndex) => (itemIndex === index ? { ...item, imgUrl: url } : item)) })}
-            />
-            <label className={labelClass}>
-              Title
-              <input className={`${fieldClass} mt-2`} type="text" value={solution.title} onChange={(event) => setData({ ...turnkeyData, solutions: turnkeyData.solutions.map((item, itemIndex) => (itemIndex === index ? { ...item, title: event.target.value } : item)) })} />
-            </label>
-          </div>
-        ))}
+            </details>
+          ))}
+        </div>
       </div>
     );
   };
@@ -695,27 +733,29 @@ const renderWellnessSectionEditor = () => {
       stats: HomeGlobalPresenceStat[];
     };
     return (
-      <div className={cardClass}>
-        <div className="mb-4 flex items-center justify-between gap-3">
+      <div className={smallCardClass}>
+        <div className="mb-1 flex items-center justify-between gap-2">
           <div>
-            <div className="text-xs uppercase tracking-[0.24em] text-[#8d6a3a]">Global Presence</div>
-            <p className="mt-1 text-sm text-[#5f5a50]">Manage global presence text, image, and statistics.</p>
+            <div className="text-[10px] uppercase tracking-[0.2em] text-[#8d6a3a]">Global Presence</div>
+            <p className="text-[10px] text-[#5f5a50]">Manage global presence text, image, and statistics.</p>
           </div>
-          <button type="button" onClick={() => setData({ ...presenceData, stats: [...presenceData.stats, { value: "", label: "" }] })} className="inline-flex items-center gap-2 rounded-md bg-[#263016] px-3 py-2 text-xs font-semibold uppercase tracking-wide text-white">
-            <Plus size={14} /> Add stat
+          <button type="button" onClick={() => setData({ ...presenceData, stats: [...presenceData.stats, { value: "", label: "" }] })} className={smallPrimaryBtnClass}>
+            <Plus size={10} /> Add stat
           </button>
         </div>
-        <label className={labelClass}>
-          Eyebrow
-          <input className={`${fieldClass} mt-2`} type="text" value={presenceData.eyebrow} onChange={(event) => setData({ ...presenceData, eyebrow: event.target.value })} />
-        </label>
-        <label className={labelClass}>
-          Heading
-          <textarea className={`${fieldClass} mt-2`} rows={2} value={presenceData.heading} onChange={(event) => setData({ ...presenceData, heading: event.target.value })} />
-        </label>
-        <label className={labelClass}>
+        <div className="grid gap-1 md:grid-cols-2">
+          <label className={smallLabelClass}>
+            Eyebrow
+            <input className={smallFieldClass} type="text" value={presenceData.eyebrow} onChange={(event) => setData({ ...presenceData, eyebrow: event.target.value })} />
+          </label>
+          <label className={smallLabelClass}>
+            Heading
+            <textarea className={smallFieldClass} rows={1} value={presenceData.heading} onChange={(event) => setData({ ...presenceData, heading: event.target.value })} />
+          </label>
+        </div>
+        <label className={smallLabelClass}>
           Description
-          <textarea className={`${fieldClass} mt-2`} rows={3} value={presenceData.description} onChange={(event) => setData({ ...presenceData, description: event.target.value })} />
+          <textarea className={smallFieldClass} rows={1} value={presenceData.description} onChange={(event) => setData({ ...presenceData, description: event.target.value })} />
         </label>
         <ImageUploadField
           label="Main image"
@@ -726,99 +766,82 @@ const renderWellnessSectionEditor = () => {
           onError={setStatusMessage}
           onUpload={(url) => setData({ ...presenceData, image: url })}
         />
-        {presenceData.stats.map((stat, index) => (
-          <div key={index} className="mb-4 rounded-lg border border-[#f0e7d8] bg-[#faf5ee] p-4">
-            <div className="mb-4 flex items-center justify-between gap-3">
-              <div className="font-semibold text-[#1f261b]">Stat {index + 1}</div>
-              <div className="flex items-center gap-2">
-                <button type="button" disabled={index === 0} onClick={() => setData({ ...presenceData, stats: moveArrayItem(presenceData.stats, index, -1) })} className="rounded-md border border-[#d9cdbb] bg-white p-2 disabled:opacity-50">
-                  <ArrowUp size={16} />
-                </button>
-                <button type="button" disabled={index === presenceData.stats.length - 1} onClick={() => setData({ ...presenceData, stats: moveArrayItem(presenceData.stats, index, 1) })} className="rounded-md border border-[#d9cdbb] bg-white p-2 disabled:opacity-50">
-                  <ArrowDown size={16} />
-                </button>
-                <button type="button" onClick={() => setData({ ...presenceData, stats: presenceData.stats.filter((_, indexToRemove) => indexToRemove !== index) })} className="rounded-md border border-[#e0b4a0] bg-white px-3 py-2 text-sm text-[#9b2e2e]">
-                  Remove
-                </button>
+        <div className="grid gap-1 sm:grid-cols-2 lg:grid-cols-4">
+          {presenceData.stats.map((stat, index) => (
+            <details key={index} className="rounded-lg border border-[#f0e7d8] bg-[#faf5ee] p-1.5" open={index === 0}>
+              <summary className={summaryClass}>
+                <span className="flex items-center gap-1 text-[10px] font-semibold text-[#1f261b]">
+                  <ChevronDown size={10} className="text-[#8d6a3a]" /> Stat {index + 1}
+                </span>
+                <span className="flex items-center gap-1">
+                  <button type="button" disabled={index === 0} onClick={() => setData({ ...presenceData, stats: moveArrayItem(presenceData.stats, index, -1) })} className={smallIconBtnClass}>
+                    <ArrowUp size={10} />
+                  </button>
+                  <button type="button" disabled={index === presenceData.stats.length - 1} onClick={() => setData({ ...presenceData, stats: moveArrayItem(presenceData.stats, index, 1) })} className={smallIconBtnClass}>
+                    <ArrowDown size={10} />
+                  </button>
+                  <button type="button" onClick={() => setData({ ...presenceData, stats: presenceData.stats.filter((_, indexToRemove) => indexToRemove !== index) })} className={smallDangerBtnClass}>
+                    Remove
+                  </button>
+                </span>
+              </summary>
+              <div className={cardBodyClass}>
+                <label className={smallLabelClass}>
+                  Value
+                  <input className={smallFieldClass} type="text" value={stat.value} onChange={(event) => setData({ ...presenceData, stats: presenceData.stats.map((item, itemIndex) => (itemIndex === index ? { ...item, value: event.target.value } : item)) })} />
+                </label>
+                <label className={smallLabelClass}>
+                  Label
+                  <input className={smallFieldClass} type="text" value={stat.label} onChange={(event) => setData({ ...presenceData, stats: presenceData.stats.map((item, itemIndex) => (itemIndex === index ? { ...item, label: event.target.value } : item)) })} />
+                </label>
               </div>
-            </div>
-            <div className="grid gap-4 md:grid-cols-2">
-              <label className={labelClass}>
-                Value
-                <input className={`${fieldClass} mt-2`} type="text" value={stat.value} onChange={(event) => setData({ ...presenceData, stats: presenceData.stats.map((item, itemIndex) => (itemIndex === index ? { ...item, value: event.target.value } : item)) })} />
-              </label>
-              <label className={labelClass}>
-                Label
-                <input className={`${fieldClass} mt-2`} type="text" value={stat.label} onChange={(event) => setData({ ...presenceData, stats: presenceData.stats.map((item, itemIndex) => (itemIndex === index ? { ...item, label: event.target.value } : item)) })} />
-              </label>
-            </div>
-          </div>
-        ))}
+            </details>
+          ))}
+        </div>
       </div>
     );
   };
 
   return (
     <main className="min-h-screen bg-[#f6f1e8] text-[#1f261b]">
-      {/* <header className="border-b border-[#ded3c4] bg-white shadow-sm">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-5">
-          <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-[#8d6a3a]">Homepage Content Admin</p>
-            <h1 className="mt-2 text-3xl font-semibold">Manage Homepage Component Content</h1>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link href="/" className="inline-flex items-center gap-2 rounded-md border border-[#d9cdbb] bg-white px-4 py-2 text-sm font-semibold text-[#263016]">
-              <ArrowUp size={16} /> Back to Admin
-            </Link>
-            <button onClick={startNew} className="inline-flex items-center gap-2 rounded-md bg-[#263016] px-4 py-2 text-sm font-semibold text-white">
-              <FilePlus size={16} /> Create Component
-            </button>
-          </div>
-        </div>
-      </header> */}
-
-      <div className="mx-auto max-w-7xl px-5 py-8">
-        <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
-          {/* <div className="max-w-3xl">
-            <p className="text-sm leading-7 text-[#4a473f]">Create and update structured homepage component content records for known keys. Use the list on the left to edit an existing entry or create a new one with the button above.</p>
-          </div> */}
-          <div className="flex flex-wrap gap-3">
+      <div className="mx-auto max-w-7xl px-2 py-2">
+        <div className="mb-2 flex flex-wrap items-start justify-between gap-2">
+          <div className="flex flex-wrap gap-1">
             {statusMessage ? (
-              <div className="inline-flex items-center gap-2 rounded-md bg-[#eef7e8] px-4 py-3 text-sm text-[#2f5f31]">
-                <CheckCircle size={18} /> {statusMessage}
+              <div className="inline-flex items-center gap-1 rounded bg-[#eef7e8] px-1.5 py-0.5 text-[11px] text-[#2f5f31]">
+                <CheckCircle size={10} /> {statusMessage}
               </div>
             ) : null}
             {loading ? (
-              <div className="inline-flex items-center gap-2 rounded-md bg-[#fff8e4] px-4 py-3 text-sm text-[#6f542f]"><Loader2 className="h-4 w-4 animate-spin" /> Loading…</div>
+              <div className="inline-flex items-center gap-1 rounded bg-[#fff8e4] px-1.5 py-0.5 text-[11px] text-[#6f542f]"><Loader2 className="h-2.5 w-2.5 animate-spin" /> Loading…</div>
             ) : null}
           </div>
         </div>
 
         <div>
-
-          <section className="space-y-4">
-            <div className={cardClass}>
-              <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <section className="space-y-1.5">
+            <div className={smallCardClass}>
+              <div className="mb-1 flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <h2 className="text-lg font-semibold">{editingId ? "Edit component" : "Create component"}</h2>
-                  <p className="text-sm text-[#5f5a50]">Select a known homepage key and fill the structured form fields.</p>
+                  <h2 className="text-sm font-semibold">{editingId ? "Edit component" : "Create component"}</h2>
+                  <p className="text-[10px] text-[#5f5a50]">Select a known homepage key and fill the structured form fields.</p>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  <button type="button" onClick={startNew} className="inline-flex items-center gap-2 rounded-md border border-[#d9cdbb] bg-white px-4 py-2 text-sm font-semibold text-[#263016]">
-                    <Plus size={14} /> New
+                <div className="flex flex-wrap gap-1">
+                  <button type="button" onClick={startNew} className={smallBtnClass}>
+                    <Plus size={10} /> New
                   </button>
                   {editingId ? (
-                    <button type="button" onClick={() => handleDelete(editingId)} className="inline-flex items-center gap-2 rounded-md border border-[#e0b4a0] bg-white px-4 py-2 text-sm font-semibold text-[#9b2e2e]">
-                      <Trash2 size={14} /> Delete
+                    <button type="button" onClick={() => handleDelete(editingId)} className="inline-flex items-center gap-1 rounded border border-[#e0b4a0] bg-white px-1.5 py-0.5 text-[10px] font-semibold text-[#9b2e2e]">
+                      <Trash2 size={10} /> Delete
                     </button>
                   ) : null}
                 </div>
               </div>
-              <form onSubmit={handleSave} className="space-y-4">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <label className={labelClass}>
+              <form onSubmit={handleSave} className="space-y-1.5">
+                <div className="grid gap-1 sm:grid-cols-2">
+                  <label className={smallLabelClass}>
                     Component key
-                    <select className={`${fieldClass} mt-2`} value={form.key} onChange={(event) => handleKeyChange(event.target.value as HomepageComponentKey)}>
+                    <select className={smallFieldClass} value={form.key} onChange={(event) => handleKeyChange(event.target.value as HomepageComponentKey)}>
                       {homepageKeys.map((item) => (
                         <option key={item.key} value={item.key}>
                           {item.label}
@@ -826,29 +849,29 @@ const renderWellnessSectionEditor = () => {
                       ))}
                     </select>
                   </label>
-                  <label className={labelClass}>
+                  <label className={smallLabelClass}>
                     Label
-                    <input className={`${fieldClass} mt-2`} type="text" value={form.label} onChange={(event) => setForm((current) => ({ ...current, label: event.target.value }))} />
+                    <input className={smallFieldClass} type="text" value={form.label} onChange={(event) => setForm((current) => ({ ...current, label: event.target.value }))} />
                   </label>
                 </div>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <label className={labelClass}>
+                <div className="grid gap-1 sm:grid-cols-2">
+                  <label className={smallLabelClass}>
                     Page
-                    <input className={`${fieldClass} mt-2`} type="text" value={form.page} onChange={(event) => setForm((current) => ({ ...current, page: event.target.value }))} />
+                    <input className={smallFieldClass} type="text" value={form.page} onChange={(event) => setForm((current) => ({ ...current, page: event.target.value }))} />
                   </label>
-                  <label className="flex items-center gap-3 text-sm text-[#5f5a50]">
+                  <label className="flex items-center gap-1.5 text-[10px] text-[#5f5a50]">
                     <input type="checkbox" checked={form.isActive} onChange={(event) => setForm((current) => ({ ...current, isActive: event.target.checked }))} />
                     Active
                   </label>
                 </div>
-                <label className={labelClass}>
+                <label className={smallLabelClass}>
                   Description
-                  <div className="mt-2">
-                    <RichTextEditor 
-                      value={form.description || ""} 
-                      onChange={val => setForm((current) => ({ ...current, description: val }))} 
+                  <div>
+                    <RichTextEditor
+                      value={form.description || ""}
+                      onChange={val => setForm((current) => ({ ...current, description: val }))}
                       placeholder="Enter component description..."
-                      minHeight="120px" 
+                      minHeight="60px"
                     />
                   </div>
                 </label>
@@ -860,9 +883,9 @@ const renderWellnessSectionEditor = () => {
                 {form.key === "home.globalPresence" && renderGlobalPresenceEditor()}
 
                 {errors.length ? (
-                  <div className="rounded-lg border border-[#f0d6d8] bg-[#fff1f3] p-4 text-sm text-[#9b2e2e]">
+                  <div className="rounded-lg border border-[#f0d6d8] bg-[#fff1f3] p-1.5 text-[11px] text-[#9b2e2e]">
                     <p className="font-semibold">Please fix the following:</p>
-                    <ul className="mt-2 list-disc space-y-1 pl-5">
+                    <ul className="mt-0.5 list-disc space-y-0 pl-3">
                       {errors.map((error, index) => (
                         <li key={index}>{error}</li>
                       ))}
@@ -870,11 +893,11 @@ const renderWellnessSectionEditor = () => {
                   </div>
                 ) : null}
 
-                <div className="flex flex-wrap items-center gap-3">
-                  <button type="submit" disabled={loading} className="inline-flex items-center gap-2 rounded-md bg-[#263016] px-5 py-3 text-sm font-semibold text-white disabled:opacity-60">
-                    <Save size={16} /> {editingId ? "Save changes" : "Create component"}
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <button type="submit" disabled={loading} className="inline-flex items-center gap-1 rounded bg-[#263016] px-3 py-1 text-[11px] font-semibold text-white disabled:opacity-60">
+                    <Save size={12} /> {editingId ? "Save changes" : "Create component"}
                   </button>
-                  <button type="button" onClick={() => resetForm(form.key)} className="rounded-md border border-[#d9cdbb] bg-white px-5 py-3 text-sm font-semibold text-[#263016]">
+                  <button type="button" onClick={() => resetForm(form.key)} className="rounded border border-[#d9cdbb] bg-white px-3 py-1 text-[11px] font-semibold text-[#263016]">
                     Cancel
                   </button>
                 </div>

@@ -18,6 +18,7 @@ import {
   type TurnkeyCustomized,
   type TurnkeyFeaturedProjects,
   type TurnkeyReadyToBuild,
+  type TurnkeyFeaturesStrip,
 } from "@/lib/turnkey/turnkeyPageContent";
 import { fieldClass, labelClass } from "@/constants";
 import { ImageUploadField } from "@/components/common/ImageUploadField";
@@ -44,7 +45,13 @@ export default function TurnkeyPageManager() {
 
   const handleSelectRecord = useCallback((record: ComponentContent) => {
     setEditingId(record._id);
-    setForm({ ...record });
+    setForm({
+      ...record,
+      data: {
+        ...((defaultTurnkeyData[record.key as TurnkeyPageContentKeys] as Record<string, unknown>) || {}),
+        ...(record.data || {}),
+      },
+    });
   }, []);
 
   const refresh = useCallback(async () => {
@@ -59,7 +66,13 @@ export default function TurnkeyPageManager() {
 
       if (existing) {
         setEditingId(existing._id);
-        setForm(existing);
+        setForm({
+          ...existing,
+          data: {
+            ...((defaultTurnkeyData[existing.key as TurnkeyPageContentKeys] as Record<string, unknown>) || {}),
+            ...(existing.data || {}),
+          },
+        });
       } else {
         const keyInfo = turnkeyPageKeys.find(k => k.key === targetKey);
         setEditingId(null);
@@ -124,23 +137,23 @@ export default function TurnkeyPageManager() {
     return (
       <div className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
-          <label className={labelClass}>Subheading <input className={fieldClass} value={data.subheading} onChange={e => setForm({ ...form, data: { ...data, subheading: e.target.value } })} /></label>
-          <label className={labelClass}>Title <input className={fieldClass} value={data.title} onChange={e => setForm({ ...form, data: { ...data, title: e.target.value } })} /></label>
-          <label className={labelClass}>Highlight <input className={fieldClass} value={data.highlight} onChange={e => setForm({ ...form, data: { ...data, highlight: e.target.value } })} /></label>
+          <label className={labelClass}>Subheading <input className={fieldClass} value={data.subheading ?? ""} onChange={e => setForm({ ...form, data: { ...data, subheading: e.target.value } })} /></label>
+          <label className={labelClass}>Title <input className={fieldClass} value={data.title ?? ""} onChange={e => setForm({ ...form, data: { ...data, title: e.target.value } })} /></label>
+          <label className={labelClass}>Highlight <input className={fieldClass} value={data.highlight ?? ""} onChange={e => setForm({ ...form, data: { ...data, highlight: e.target.value } })} /></label>
         </div>
         <div className="space-y-1">
           <label className={labelClass}>Description</label>
           <RichTextEditor value={data.description || ""} onChange={val => setForm({ ...form, data: { ...data, description: val } })} placeholder="Enter description..." minHeight="120px" />
         </div>
         <ImageUploadField label="Background Image" value={data.backgroundImage?.imageUrl} fieldKey="turnkey.bannerbg" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => setForm({ ...form, data: { ...data, backgroundImage: { ...data.backgroundImage, imageUrl: url, title: data.backgroundImage?.title || 'Customized Facilities' } } })} />
-        <label className={labelClass}>Background Alt <input className={fieldClass} value={data.backgroundImage?.title} onChange={e => setForm({ ...form, data: { ...data, backgroundImage: { ...data.backgroundImage, title: e.target.value } } })} /></label>
+        <label className={labelClass}>Background Alt <input className={fieldClass} value={data.backgroundImage?.title ?? ""} onChange={e => setForm({ ...form, data: { ...data, backgroundImage: { ...data.backgroundImage, title: e.target.value } } })} /></label>
         <div className="pt-3 border-t">
           <h4 className="text-xs font-bold text-[#8d6a3a] mb-2 uppercase">Features Highlight</h4>
           <div className="grid grid-cols-2 gap-3">
             {data.features.map((feat, idx) => (
               <div key={feat.id} className="p-3 border rounded bg-gray-50 relative">
                 <button type="button" onClick={() => { const nf = data.features.filter((_, i) => i !== idx); setForm({ ...form, data: { ...data, features: nf } }) }} className="absolute top-2 right-2 text-red-500"><Trash2 size={14} /></button>
-                <input className={`${fieldClass} mb-2`} placeholder="Feature Title" value={feat.title} onChange={e => { const nf = [...data.features]; nf[idx].title = e.target.value; setForm({ ...form, data: { ...data, features: nf } }) }} />
+                <input className={`${fieldClass} mb-2`} placeholder="Feature Title" value={feat.title ?? ""} onChange={e => { const nf = [...data.features]; nf[idx].title = e.target.value; setForm({ ...form, data: { ...data, features: nf } }) }} />
                 <ImageUploadField label="Icon" value={feat.image.imageUrl} fieldKey={`feat.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => { const nf = [...data.features]; nf[idx].image.imageUrl = url; setForm({ ...form, data: { ...data, features: nf } }) }} />
               </div>
             ))}
@@ -150,8 +163,8 @@ export default function TurnkeyPageManager() {
         </div>
 
         <div className="grid grid-cols-2 gap-4 pt-3 border-t">
-          <div className="space-y-2"><label className={labelClass}>Primary Button Label</label><input className={fieldClass} value={data.primaryButton.label} onChange={e => setForm({ ...form, data: { ...data, primaryButton: { ...data.primaryButton, label: e.target.value } } })} /></div>
-          <div className="space-y-2"><label className={labelClass}>Secondary Button Label</label><input className={fieldClass} value={data.secondaryButton.label} onChange={e => setForm({ ...form, data: { ...data, secondaryButton: { ...data.secondaryButton, label: e.target.value } } })} /></div>
+          <div className="space-y-2"><label className={labelClass}>Primary Button Label</label><input className={fieldClass} value={data.primaryButton?.label ?? ""} onChange={e => setForm({ ...form, data: { ...data, primaryButton: { ...data.primaryButton, label: e.target.value } } })} /></div>
+          <div className="space-y-2"><label className={labelClass}>Secondary Button Label</label><input className={fieldClass} value={data.secondaryButton?.label ?? ""} onChange={e => setForm({ ...form, data: { ...data, secondaryButton: { ...data.secondaryButton, label: e.target.value } } })} /></div>
         </div>
       </div>
     );
@@ -428,6 +441,165 @@ export default function TurnkeyPageManager() {
     );
   };
 
+ const renderFeaturesStripForm = () => {
+  const data = (form.data || { items: [] }) as TurnkeyFeaturesStrip;
+  const items = data.items || [];
+
+  return (
+    <div className="space-y-4">
+      <div className="space-y-4">
+        <h4 className="text-xs font-bold text-[#8d6a3a] uppercase">
+          Features Strip Items
+        </h4>
+
+        <div className="grid grid-cols-2 gap-4">
+          {items.map((item, idx) => (
+            <div
+              key={item.id}
+              className="p-4 border rounded bg-white relative space-y-3 shadow-sm"
+            >
+              <button
+                type="button"
+                onClick={() => {
+                  const ni = items.filter((_, i) => i !== idx);
+                  setForm({
+                    ...form,
+                    data: { ...data, items: ni },
+                  });
+                }}
+                className="absolute top-2 right-2 text-red-500 hover:bg-red-50 p-1 rounded transition-colors"
+              >
+                <Trash2 size={16} />
+              </button>
+
+              <ImageUploadField
+                label="Image"
+                value={item.image.imageUrl}
+                fieldKey={`fstrip.${idx}`}
+                uploadingField={uploadingField}
+                onUploadingChange={setUploadingField}
+                onError={(m) => toast.error(m)}
+                onUpload={(url) => {
+                  const ni = [...items];
+
+                  ni[idx] = {
+                    ...ni[idx],
+                    image: {
+                      ...ni[idx].image,
+                      imageUrl: url,
+                    },
+                  };
+
+                  setForm({
+                    ...form,
+                    data: { ...data, items: ni },
+                  });
+                }}
+              />
+
+              {/* Image Alt Text */}
+              <label className={labelClass}>
+                Image Alt Text
+                <input
+                  className={fieldClass}
+                  value={item.image.alt || ''}
+                  placeholder="Describe the image for accessibility and SEO"
+                  onChange={(e) => {
+                    const ni = [...items];
+
+                    ni[idx] = {
+                      ...ni[idx],
+                      image: {
+                        ...ni[idx].image,
+                        alt: e.target.value,
+                      },
+                    };
+
+                    setForm({
+                      ...form,
+                      data: { ...data, items: ni },
+                    });
+                  }}
+                />
+              </label>
+
+              <label className={labelClass}>
+                Title
+                <input
+                  className={fieldClass}
+                  value={item.title}
+                  onChange={(e) => {
+                    const ni = [...items];
+
+                    ni[idx] = {
+                      ...ni[idx],
+                      title: e.target.value,
+                    };
+
+                    setForm({
+                      ...form,
+                      data: { ...data, items: ni },
+                    });
+                  }}
+                />
+              </label>
+
+              <label className={labelClass}>
+                Description
+                <textarea
+                  className={fieldClass}
+                  rows={3}
+                  value={item.description}
+                  onChange={(e) => {
+                    const ni = [...items];
+
+                    ni[idx] = {
+                      ...ni[idx],
+                      description: e.target.value,
+                    };
+
+                    setForm({
+                      ...form,
+                      data: { ...data, items: ni },
+                    });
+                  }}
+                />
+              </label>
+            </div>
+          ))}
+
+          <button
+            type="button"
+            onClick={() =>
+              setForm({
+                ...form,
+                data: {
+                  ...data,
+                  items: [
+                    ...items,
+                    {
+                      id: randomId(),
+                      title: '',
+                      description: '',
+                      image: {
+                        imageUrl: '',
+                        alt: '',
+                      },
+                    },
+                  ],
+                },
+              })
+            }
+            className="border-2 border-dashed rounded-xl flex items-center justify-center text-gray-400 py-12 hover:bg-gray-50 transition-colors"
+          >
+            <Plus size={32} />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
   return (
     <div className="w-full">
       <section className="w-full">
@@ -460,6 +632,7 @@ export default function TurnkeyPageManager() {
             {form.key === "turnkey.customized" && renderCustomizedForm()}
             {form.key === "turnkey.featuredProjects" && renderFeaturedProjectsForm()}
             {form.key === "turnkey.readyToBuild" && typeof renderReadyToBuildForm === 'function' && renderReadyToBuildForm()}
+            {form.key === "turnkey.features_strip" && renderFeaturesStripForm()}
           </div>
         </form>
       </section>

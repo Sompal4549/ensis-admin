@@ -6,6 +6,11 @@ import { Save } from "lucide-react";
 import { pageApi, type PageData } from "@/lib/api";
 import { fieldClass, labelClass } from "@/constants";
 
+// Compact local classes for this editor only
+const smallFieldClass =
+  "w-full rounded-lg border border-slate-200 px-2 py-1 text-xs focus:border-[#6f542f] focus:ring-1 focus:ring-[#6f542f] outline-none";
+const smallLabelClass = "block text-[11px] font-semibold text-[#5f5a50] mb-0.5";
+
 interface SEOEditorProps {
   slug: string;
   pageName?: string;
@@ -110,64 +115,64 @@ export default function SEOEditor({ slug, pageName, title }: SEOEditorProps) {
     }
   };
 
-  if (loading && !pageData) return <div className="p-10 text-center">Loading SEO Settings...</div>;
+  if (loading && !pageData) return <div className="p-6 text-center text-xs">Loading SEO Settings...</div>;
 
   return (
-    <div className="px-4">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-800">{title}</h1>
-        <p className="text-sm text-gray-500">Update metadata and social sharing settings.</p>
+    <div className="px-3">
+      <div className="mb-3">
+        <h1 className="text-xl font-bold text-gray-800">{title}</h1>
+        <p className="text-xs text-gray-500">Update metadata and social sharing settings.</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-8">
+      <form onSubmit={handleSubmit} className="space-y-3">
         {/* Core SEO */}
-        <section className="bg-white p-6 rounded-xl border border-[#ded3c4] shadow-sm space-y-4">
-          <h2 className="text-sm font-bold uppercase text-[#8d6a3a] mb-4 border-b pb-2">Core SEO Meta</h2>
-          <div className="grid gap-4 md:grid-cols-2">
-            <label className={labelClass}>
+        <section className="bg-white p-3 rounded-xl border border-[#ded3c4] shadow-sm space-y-2">
+          <h2 className="text-xs font-bold uppercase text-[#8d6a3a] mb-2 border-b pb-1">Core SEO Meta</h2>
+          <div className="grid gap-2 md:grid-cols-3">
+            <label className={smallLabelClass}>
               Page Name
               <input
-                className={`${fieldClass} mt-2 bg-gray-50 text-gray-400 cursor-not-allowed`}
+                className={`${smallFieldClass} mt-1 bg-gray-50 text-gray-400 cursor-not-allowed`}
                 value={form.pageName}
                 readOnly
               />
             </label>
-            <label className={labelClass}>
+            <label className={smallLabelClass}>
               Meta Title
               <input
-                className={`${fieldClass} mt-2`}
+                className={`${smallFieldClass} mt-1`}
                 value={form.seo.metaTitle}
                 maxLength={65}
                 onChange={(e) => setForm({ ...form, seo: { ...form.seo, metaTitle: e.target.value } })}
                 required
               />
-              <span className="text-xs text-[#5f5a50] mt-1 block">{form.seo.metaTitle.length}/65</span>
+              <span className="text-[10px] text-[#5f5a50] mt-0.5 block">{form.seo.metaTitle.length}/65</span>
             </label>
-            <label className={labelClass}>
+            <label className={smallLabelClass}>
               Meta Keywords
               <input
-                className={`${fieldClass} mt-2`}
+                className={`${smallFieldClass} mt-1`}
                 value={form.seo.metaKeywords}
                 onChange={(e) => setForm({ ...form, seo: { ...form.seo, metaKeywords: e.target.value } })}
               />
             </label>
           </div>
-          <label className={labelClass}>
+          <label className={smallLabelClass}>
             Meta Description
             <textarea
-              className={`${fieldClass} mt-2 h-24`}
+              className={`${smallFieldClass} mt-1 h-16`}
               value={form.seo.metaDescription}
               maxLength={155}
               onChange={(e) => setForm({ ...form, seo: { ...form.seo, metaDescription: e.target.value } })}
               required
             />
-            <span className="text-xs text-[#5f5a50] mt-1 block">{form.seo.metaDescription.length}/155</span>
+            <span className="text-[10px] text-[#5f5a50] mt-0.5 block">{form.seo.metaDescription.length}/155</span>
           </label>
-          <label className={labelClass}>
+          <label className={smallLabelClass}>
             Canonical URL
-            <div className="flex gap-2 mt-2">
+            <div className="flex gap-1.5 mt-1">
               <input
-                className={fieldClass}
+                className={smallFieldClass}
                 value={form.seo.canonical}
                 onChange={(e) => setForm({ ...form, seo: { ...form.seo, canonical: e.target.value } })}
                 placeholder="https://ensis.in/page-slug"
@@ -183,7 +188,7 @@ export default function SEOEditor({ slug, pageName, title }: SEOEditorProps) {
                     },
                   })
                 }
-                className="shrink-0 px-3 py-1.5 text-xs font-bold bg-[#faf6ef] border border-[#ded3c4] text-[#6f542f] rounded-md hover:bg-[#f0e8d8] transition-colors"
+                className="shrink-0 px-2 py-1 text-[11px] font-bold bg-[#faf6ef] border border-[#ded3c4] text-[#6f542f] rounded-md hover:bg-[#f0e8d8] transition-colors"
               >
                 Auto Fill
               </button>
@@ -192,44 +197,44 @@ export default function SEOEditor({ slug, pageName, title }: SEOEditorProps) {
         </section>
 
         {/* Open Graph */}
-        <section className="bg-white p-6 rounded-xl border border-[#ded3c4] shadow-sm space-y-4">
-          <h2 className="text-sm font-bold uppercase text-[#8d6a3a] mb-4 border-b pb-2">Open Graph (Social)</h2>
-          <label className={labelClass}>
+        <section className="bg-white p-3 rounded-xl border border-[#ded3c4] shadow-sm space-y-2">
+          <h2 className="text-xs font-bold uppercase text-[#8d6a3a] mb-2 border-b pb-1">Open Graph (Social)</h2>
+          <label className={smallLabelClass}>
             OG JSON
             <textarea
-              className={`${fieldClass} mt-2 font-mono text-xs h-48`}
+              className={`${smallFieldClass} mt-1 font-mono text-[11px] h-32`}
               value={form.seo.ogJson}
               placeholder={`{\n  "og:type": "website",\n  "og:url": "https://ensis.in/",\n  "og:site_name": "Ensis"\n}`}
               onChange={(e) => setForm({ ...form, seo: { ...form.seo, ogJson: e.target.value } })}
               spellCheck={false}
             />
           </label>
-          <p className="text-xs text-gray-400">OG properties as JSON. Will be injected as Open Graph meta tags.</p>
+          <p className="text-[11px] text-gray-400">OG properties as JSON. Will be injected as Open Graph meta tags.</p>
         </section>
 
         {/* Schema */}
-        <section className="bg-white p-6 rounded-xl border border-[#ded3c4] shadow-sm space-y-4">
-          <h2 className="text-sm font-bold uppercase text-[#8d6a3a] mb-4 border-b pb-2">Schema Markup (JSON-LD)</h2>
-          <label className={labelClass}>
+        <section className="bg-white p-3 rounded-xl border border-[#ded3c4] shadow-sm space-y-2">
+          <h2 className="text-xs font-bold uppercase text-[#8d6a3a] mb-2 border-b pb-1">Schema Markup (JSON-LD)</h2>
+          <label className={smallLabelClass}>
             Schema JSON
             <textarea
-              className={`${fieldClass} mt-2 font-mono text-xs h-48`}
+              className={`${smallFieldClass} mt-1 font-mono text-[11px] h-32`}
               value={form.seo.schema}
               placeholder={`{\n  "@context": "https://schema.org",\n  "@type": "Organization",\n  "name": "Ensis"\n}`}
               onChange={(e) => setForm({ ...form, seo: { ...form.seo, schema: e.target.value } })}
               spellCheck={false}
             />
           </label>
-          <p className="text-xs text-gray-400">Paste valid JSON-LD schema. Will be injected in &lt;script type="application/ld+json"&gt; tag.</p>
+          <p className="text-[11px] text-gray-400">Paste valid JSON-LD schema. Will be injected in &lt;script type="application/ld+json"&gt; tag.</p>
         </section>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <button
             type="submit"
             disabled={loading}
-            className="bg-[#6f542f] text-white px-10 py-3 rounded-lg font-bold flex items-center gap-2 hover:shadow-lg transition-all disabled:opacity-50"
+            className="bg-[#6f542f] text-white px-5 py-1.5 rounded-lg font-bold text-xs flex items-center gap-1.5 hover:shadow-lg transition-all disabled:opacity-50"
           >
-            <Save size={20} /> {loading ? "Saving..." : "Publish SEO Updates"}
+            <Save size={14} /> {loading ? "Saving..." : "Publish SEO Updates"}
           </button>
         </div>
       </form>

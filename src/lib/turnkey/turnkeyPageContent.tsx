@@ -7,7 +7,8 @@ export type TurnkeyPageContentKeys =
   | "turnkey.facilities"
   | "turnkey.customized"
   | "turnkey.featuredProjects"
-  | "turnkey.readyToBuild";
+  | "turnkey.readyToBuild"
+  |"turnkey.features_strip";
 
 export type TurnkeyBanner = {
   backgroundImage: { title: string; imageUrl: string; alt: string };
@@ -38,6 +39,10 @@ export type TurnkeySolutions = {
     title: string;
     details: string[]
   };
+};
+
+export type TurnkeyFeaturesStrip={
+items:{id:string; image:ImageData; title:string; description:string}[]
 };
 
 export type TurnkeyFacilities = {
@@ -75,6 +80,7 @@ export const turnkeyPageKeys: { key: TurnkeyPageContentKeys; label: string; desc
   { key: "turnkey.customized", label: "Customized Wellness Facilities", description: "Customized facilities with stats and features." },
   { key: "turnkey.featuredProjects", label: "Featured Turnkey Projects", description: "Highlighted turnkey project gallery." },
   { key: "turnkey.readyToBuild", label: "Ready to Build", description: "Final call to action section for wellness projects." },
+  { key: "turnkey.features_strip", label: "Features Strip", description: "Featured Strip that comes below the banner." },
 ];
 
 const randomId = () => Math.random().toString(36).slice(2, 9);
@@ -137,5 +143,8 @@ export const defaultTurnkeyData: Record<TurnkeyPageContentKeys, unknown> = {
     description: "Connect with our experts today to bring your vision to life.",
     leftImage: { imageUrl: "", alt: "" },
     buttons: [{ id: randomId(), title: "Inquiry", description: "Send us a message", image: { imageUrl: "", alt: "" } }]
+  },
+  "turnkey.features_strip": {
+    items: [{ id: randomId(), title: "", description: "", image: { imageUrl: "", alt: "" } }]
   }
 };

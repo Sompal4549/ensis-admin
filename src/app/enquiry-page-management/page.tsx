@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
-import { Loader2, Save, Trash2, PlusCircle, Eye } from 'lucide-react';
+import { Loader2, Save, Trash2, PlusCircle, Plus, Eye } from 'lucide-react';
 import { componentContentApi, type ComponentContent } from "@/lib/api";
 import { fieldClass, labelClass } from "@/constants";
 import { ImageUploadField } from "@/components/common/ImageUploadField";
@@ -51,6 +51,17 @@ export interface CtaBannerData {
   ctaHref: string;
   leftImage: CtaBannerImage;
   rightImage: CtaBannerImage;
+}
+
+export interface StatsStripItem {
+  id: string;
+  title: string;
+  description: string;
+  imageurl: CtaBannerImage;
+}
+
+export interface StatsStripData {
+  items: StatsStripItem[];
 }
 
 export interface WhyChooseItem {
@@ -134,6 +145,7 @@ const EnquaryPageManagement = () => {
   const [savingForm, setSavingForm] = useState(false);
   const [savingGetInTouch, setSavingGetInTouch] = useState(false);
   const [savingCtaBanner, setSavingCtaBanner] = useState(false);
+  const [savingStatsStrip, setSavingStatsStrip] = useState(false);
 
   const [content, setContent] = useState<ComponentContent | null>(null);
   const [form, setForm] = useState<EnquiryPageContent>(initialEnquiryPageContentForm);
@@ -154,11 +166,16 @@ const EnquaryPageManagement = () => {
     rightImage: { imageUrl: "", alt: "" },
   });
 
+  const [statsStripContent, setStatsStripContent] = useState<ComponentContent | null>(null);
+  const [statsStripForm, setStatsStripForm] = useState<StatsStripData>({
+    items: []
+  });
+
   const [uploadingField, setUploadingField] = useState<string | null>(null);
   const [records, setRecords] = useState<ComponentContent[]>([]);
-  const [activeTab, setActiveTab] = useState<'form' | 'getInTouch' | 'ctaBanner'>('form');
+  const [activeTab, setActiveTab] = useState<'form' | 'getInTouch' | 'ctaBanner' | 'statsStrip'>('form');
 
-  const knownKeys = ["enquiry.page", "enquiry.getInTouch", "enquiry.ctaBanner"];
+  const knownKeys = ["enquiry.page", "enquiry.getInTouch", "enquiry.ctaBanner", "enquiry.features_strip"];
 
   const loadContent = useCallback(async () => {
     setLoading(true);
@@ -225,6 +242,19 @@ const EnquaryPageManagement = () => {
       }
     } catch (error) {
       console.error("Failed to load cta banner content:", error);
+    }
+
+    try {
+      const statsItem = await componentContentApi.getByKey("enquiry.features_strip");
+      if (statsItem) {
+        setStatsStripContent(statsItem);
+        const d = (statsItem.data || {}) as Partial<StatsStripData>;
+        setStatsStripForm({
+          items: d.items || []
+        });
+      }
+    } catch (error) {
+      console.error("Failed to load stats strip content:", error);
     }
 
     setLoading(false);
@@ -312,6 +342,32 @@ const EnquaryPageManagement = () => {
     }
   };
 
+  const handleSaveStatsStrip = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingStatsStrip(true);
+    try {
+      const payload = {
+        key: "enquiry.features_strip",
+        label: "Enquiry Stats Strip",
+        page: "enquiry",
+        isActive: true,
+        data: statsStripForm as any,
+      };
+
+      if (statsStripContent) {
+        await componentContentApi.update(statsStripContent._id, payload as any);
+      } else {
+        await componentContentApi.create(payload as any);
+      }
+      toast.success("Stats Strip content saved!");
+      loadContent();
+    } catch (error: any) {
+      toast.error(error.message || "Failed to save content.");
+    } finally {
+      setSavingStatsStrip(false);
+    }
+  };
+
   const handleReorder = async (result: DropResult) => {
     if (!result.destination) return;
     const items = Array.from(records);
@@ -344,6 +400,7 @@ const EnquaryPageManagement = () => {
     if (record.key === "enquiry.page") setActiveTab("form");
     if (record.key === "enquiry.getInTouch") setActiveTab("getInTouch");
     if (record.key === "enquiry.ctaBanner") setActiveTab("ctaBanner");
+    if (record.key === "enquiry.features_strip") setActiveTab("statsStrip");
   };
 
   const updateWhyChooseItem = (index: number, field: keyof WhyChooseItem, value: any) => {
@@ -375,7 +432,8 @@ const EnquaryPageManagement = () => {
   const currentEditingId = {
     form: content?._id,
     getInTouch: getInTouchContent?._id,
-    ctaBanner: ctaBannerContent?._id
+    ctaBanner: ctaBannerContent?._id,
+    statsStrip: statsStripContent?._id
   }[activeTab];
 
   return (
@@ -393,6 +451,7 @@ const EnquaryPageManagement = () => {
           <option value="form">Enquiry Form</option>
           <option value="getInTouch">Get In Touch</option>
           <option value="ctaBanner">CTA Banner</option>
+          <option value="statsStrip">Stats Strip</option>
         </select>
       </div>
 
@@ -915,6 +974,78 @@ const EnquaryPageManagement = () => {
                     <label className={labelClass}>Right Image Alt</label>
                     <input className={fieldClass} value={ctaBannerForm.rightImage.alt} onChange={e => setCtaBannerForm({ ...ctaBannerForm, rightImage: { ...ctaBannerForm.rightImage, alt: e.target.value } })} placeholder="Alt text" />
                   </div>
+                </div>
+              </div>
+            </form>
+          )}
+
+          {activeTab === 'statsStrip' && (
+            <form onSubmit={handleSaveStatsStrip} className="bg-white border rounded-2xl shadow-sm overflow-hidden animate-in fade-in duration-300">
+              <div className="bg-slate-50 border-b p-4 px-6 flex items-center justify-between">
+                <h2 className="font-bold  text-xs sm:text-sm uppercase tracking-wider">Stats Strip Section</h2>
+                <button type="submit" disabled={savingStatsStrip} className="bg-[#1d5af2] text-white px-5 py-2 rounded-xl font-bold text-xs flex items-center gap-2 hover:bg-[#154dc8] transition-all disabled:opacity-50 shadow-lg shadow-blue-500/20">
+                  {savingStatsStrip ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />} Save Section
+                </button>
+              </div>
+              <div className="p-4 space-y-6">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-md font-bold ">Stats Strip Items</h3>
+                  <button type="button" onClick={() => setStatsStripForm({ ...statsStripForm, items: [...statsStripForm.items, { id: randomId(), title: "", description: "", imageurl: { imageUrl: "", alt: "" } }] })} className="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-green-700 flex items-center gap-1">
+                    <PlusCircle size={14} /> Add Stat
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {statsStripForm.items.map((item, index) => (
+                    <div key={item.id} className="p-4 border rounded-xl bg-slate-50 relative space-y-3">
+                      <button type="button" onClick={() => setStatsStripForm({ ...statsStripForm, items: statsStripForm.items.filter((_, i) => i !== index) })} className="absolute top-2 right-2 text-red-500 hover:text-red-700">
+                        <Trash2 size={16} />
+                      </button>
+                      <div>
+                        <label className={labelClass}>Value Label</label>
+                        <input className={fieldClass} value={item.title} onChange={e => {
+                          const ni = [...statsStripForm.items];
+                          ni[index] = { ...ni[index], title: e.target.value };
+                          setStatsStripForm({ ...statsStripForm, items: ni });
+                        }} placeholder="e.g. 20+" />
+                      </div>
+                      <div>
+                        <label className={labelClass}>Subtitle</label>
+                        <input className={fieldClass} value={item.description} onChange={e => {
+                          const ni = [...statsStripForm.items];
+                          ni[index] = { ...ni[index], description: e.target.value };
+                          setStatsStripForm({ ...statsStripForm, items: ni });
+                        }} placeholder="e.g. Years Experience" />
+                      </div>
+                      <div>
+                        <label className={labelClass}>Image Alt Text</label>
+                        <input className={fieldClass} value={item.imageurl.alt} onChange={e => {
+                          const ni = [...statsStripForm.items];
+                          ni[index] = { ...ni[index], imageurl: { ...ni[index].imageurl, alt: e.target.value } };
+                          setStatsStripForm({ ...statsStripForm, items: ni });
+                        }} placeholder="Describe the image for accessibility" />
+                      </div>
+                      <ImageUploadField
+                        label="Icon"
+                        value={item.imageurl.imageUrl}
+                        fieldKey={`enquiry.fstrip.${index}`}
+                        uploadingField={uploadingField}
+                        onUploadingChange={setUploadingField}
+                        onError={m => toast.error(m)}
+                        onUpload={url => {
+                          const ni = [...statsStripForm.items];
+                          ni[index] = { ...ni[index], imageurl: { ...ni[index].imageurl, imageUrl: url } };
+                          setStatsStripForm({ ...statsStripForm, items: ni });
+                        }}
+                      />
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => setStatsStripForm({ ...statsStripForm, items: [...statsStripForm.items, { id: randomId(), title: "", description: "", imageurl: { imageUrl: "", alt: "" } }] })}
+                    className="border-2 border-dashed rounded-xl flex items-center justify-center text-gray-400 py-12 hover:bg-gray-50 transition-colors"
+                  >
+                    <Plus size={32} />
+                  </button>
                 </div>
               </div>
             </form>

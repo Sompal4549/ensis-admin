@@ -36,6 +36,7 @@ import {
   UserRoundCog,
   X,
   TrendingUp,
+  ScrollText,
 } from "lucide-react";
 import { LoginForm, useAuth } from "@/components/auth/AuthContext";
 import sidebarBg from "@/assets/sidebarbg.webp";
@@ -146,6 +147,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Careers", path: "/careers-management", icon: <UserRoundPlus size={16} /> },
   { label: "Orders", path: "/orders-list-management", icon: <ArrowDownToLine size={16} /> },
   { label: "Projects", path: "/projects-management", icon: <FolderOpen size={16} /> },
+  { label: "Activity Logs", path: "/activity-logs", icon: <ScrollText size={16} /> },
   { label: "User Management", path: "/users-management", icon: <UserRoundCog size={16} /> },
   { label: "Enquaries", path: "/enquries", icon: <UserRoundCog size={16} /> },
   { label: "Applications", path: "/applications", icon: <UserRoundCog size={16} /> },
@@ -211,12 +213,12 @@ function MenuItem({
           <Link
             href={item.path}
             onClick={() => handleNavigate(item.path!)}
-            className={`flex min-h-8 flex-1 items-center gap-2.5 rounded-lg px-3 py-1.5 text-[13px] font-medium transition-all ${
+            className={`flex min-h-7 flex-1 items-center gap-1.5 rounded-lg px-2 py-1 text-[12px] font-medium transition-all ${
               isActive
                 ? "bg-[#1d5af2] text-white shadow-md shadow-blue-500/10"
                 : "text-slate-400 hover:text-white hover:bg-[#111e38]"
-            } ${collapsed ? "justify-center px-0" : "px-3"}`}
-            style={{ marginLeft: collapsed ? 0 : `${level * 12}px` }}
+            } ${collapsed ? "justify-center px-0" : "px-2"}`}
+            style={{ marginLeft: collapsed ? 0 : `${level * 10}px` }}
           >
             {item.icon && (
               <span className={`${isActive ? "text-white" : "text-slate-400 group-hover:text-white"} transition-colors`}>
@@ -227,10 +229,10 @@ function MenuItem({
           </Link>
         ) : (
           <div
-            className={`flex min-h-8 flex-1 cursor-default items-center gap-2.5 rounded-lg py-1.5 text-[13px] font-medium text-slate-400 ${
-              collapsed ? "justify-center px-0" : "px-3"
+            className={`flex min-h-7 flex-1 cursor-default items-center gap-1.5 rounded-lg py-1 text-[12px] font-medium text-slate-400 ${
+              collapsed ? "justify-center px-0" : "px-2"
             }`}
-            style={{ marginLeft: collapsed ? 0 : `${level * 12}px` }}
+            style={{ marginLeft: collapsed ? 0 : `${level * 10}px` }}
           >
             {item.icon && <span className="text-slate-400">{item.icon}</span>}
             {!collapsed && <span>{item.label}</span>}
@@ -243,10 +245,10 @@ function MenuItem({
             onClick={() =>
               setOpenMenus((prev) => ({ ...prev, [menuKey]: !prev[menuKey] }))
             }
-            className="p-1.5 text-slate-500 hover:text-white"
+            className="p-1 text-slate-500 hover:text-white"
           >
             <ChevronDown
-              size={14}
+              size={12}
               className={`transition-transform duration-200 ${isOpen ? "rotate-180" : "-rotate-90"}`}
             />
           </button>
@@ -254,7 +256,7 @@ function MenuItem({
       </div>
 
       {hasChildren && isOpen && !collapsed && (
-        <div className="ml-3 mt-0.5 space-y-0.5 border-l border-slate-800">
+        <div className="ml-2 space-y-0 border-l border-slate-800">
           {item.children!.map((child) => (
             <MenuItem
               key={child.label}
@@ -298,7 +300,7 @@ function SidebarContent({
   return (
     <>
       {/* Logo Header */}
-      <div className="flex items-center justify-between border-b border-[#162544] px-5 py-4">
+      <div className="flex items-center justify-between border-b border-[#162544] px-3 py-2">
         {!collapsed ? (
           <Image
             width={150}
@@ -329,27 +331,27 @@ function SidebarContent({
 
       {/* User Card */}
       {!collapsed && (
-        <div className="mx-3 my-3 flex items-center justify-between rounded-xl border border-[#162544] bg-[#111e38] p-2.5">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white">
-              <User size={18} />
+        <div className="mx-2 my-1.5 flex items-center justify-between rounded-xl border border-[#162544] bg-[#111e38] p-1.5">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white">
+              <User size={14} />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[13px] font-semibold text-white">{user?.name || "Admin User"}</p>
-              <p className="truncate text-[10px] text-slate-400 uppercase font-medium tracking-wider">
+              <p className="truncate text-[12px] font-semibold text-white">{user?.name || "Admin User"}</p>
+              <p className="truncate text-[9px] text-slate-400 uppercase font-medium tracking-wider">
                 {user?.role || "Admin"}
               </p>
             </div>
           </div>
-          <ChevronDown size={14} className="text-slate-400 shrink-0" />
+          <ChevronDown size={12} className="text-slate-400 shrink-0" />
         </div>
       )}
 
       {/* Nav */}
-      <nav className="scrollbar-none flex-1 space-y-2 overflow-y-auto px-3 py-2">
-        <div className="space-y-0.5">
+      <nav className="scrollbar-none flex-1 space-y-1 overflow-y-auto px-2 py-1.5">
+        <div className="space-y-0">
           {!collapsed && (
-            <p className="mb-1.5 px-3 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+            <p className="mb-1 px-2 text-[9px] font-bold uppercase tracking-wider text-slate-500">
               Navigation
             </p>
           )}
@@ -369,21 +371,21 @@ function SidebarContent({
 
       {/* Need Help */}
       {!collapsed ? (
-        <div className="mx-3 mb-4 mt-auto flex items-center justify-between rounded-xl bg-linear-to-r from-blue-600 to-blue-700 p-3 text-white shadow-lg shadow-blue-900/10">
-          <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/15 text-white">
-              <Headphones size={16} />
+        <div className="mx-2 mb-2 mt-auto flex items-center justify-between rounded-xl bg-linear-to-r from-blue-600 to-blue-700 p-2 text-white shadow-lg shadow-blue-900/10">
+          <div className="flex items-center gap-2">
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-white/15 text-white">
+              <Headphones size={12} />
             </div>
             <div>
-              <p className="text-xs font-semibold text-white/90">Need Help?</p>
-              <p className="text-[10px] text-white/75">Contact Support</p>
+              <p className="text-[11px] font-semibold text-white/90">Need Help?</p>
+              <p className="text-[9px] text-white/75">Contact Support</p>
             </div>
           </div>
-          <ArrowRight size={14} className="text-white/80" />
+          <ArrowRight size={12} className="text-white/80" />
         </div>
       ) : (
-        <div className="mx-auto mb-6 mt-auto flex h-9 w-9 items-center justify-center rounded-full bg-[#111e38] text-slate-400 hover:text-white cursor-pointer">
-          <Headphones size={16} />
+        <div className="mx-auto mb-3 mt-auto flex h-8 w-8 items-center justify-center rounded-full bg-[#111e38] text-slate-400 hover:text-white cursor-pointer">
+          <Headphones size={14} />
         </div>
       )}
     </>
@@ -430,7 +432,7 @@ export function Sidebar({
       {/* ── DESKTOP SIDEBAR ── */}
       <aside
         className={`fixed top-0 left-0 z-40 hidden lg:flex h-screen shrink-0 flex-col transition-all duration-300 ${
-          collapsed ? "w-16" : "w-64"
+          collapsed ? "w-14" : "w-56"
         }`}
         style={sidebarStyle}
       >
@@ -526,9 +528,9 @@ export function Topbar({
   const isSuperAdmin = user?.role?.toLowerCase() === "superadmin";
 
   return (
-    <header className="flex h-14 md:h-16 shrink-0 items-center justify-between border-b border-slate-100 bg-white px-3 md:px-6 z-30">
+    <header className="flex h-11 md:h-12 shrink-0 items-center justify-between border-b border-slate-100 bg-white px-2 md:px-4 z-30">
       {/* Left: hamburger + title */}
-      <div className="flex items-center gap-2 md:gap-4 min-w-0">
+      <div className="flex items-center gap-1.5 md:gap-3 min-w-0">
         {/* Mobile hamburger */}
         <button
           onClick={onMobileMenuToggle}
@@ -563,7 +565,7 @@ export function Topbar({
       </div>
 
       {/* Right actions */}
-      <div className="flex items-center gap-1.5 md:gap-3 shrink-0">
+      <div className="flex items-center gap-1 md:gap-2 shrink-0">
         {/* Search — desktop only */}
         <div className="relative hidden md:block">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
@@ -803,7 +805,7 @@ export function CommonLayout({
       {/* Main content — on desktop offset by sidebar width, on mobile full width */}
       <div
         className={`flex h-full flex-col transition-all duration-300 ${
-          collapsed ? "lg:ml-16" : "lg:ml-64"
+          collapsed ? "lg:ml-14" : "lg:ml-56"
         }`}
       >
         <Topbar
@@ -814,15 +816,15 @@ export function CommonLayout({
           onMobileMenuToggle={() => setMobileOpen(true)}
         />
 
-        <main className="flex-1 overflow-y-auto bg-[#f6f8fc] p-3">
+        <main className="flex-1 overflow-y-auto bg-[#f6f8fc] px-2 md:px-4 py-2">
           {!editingKey && !isComponentPage && (
-            <div className="mb-4">
+            <div className="mb-2">
               <PageStatsCards pageName={pageConfig.name} />
             </div>
           )}
 
           <div
-            className={`grid gap-6 ${
+            className={`grid gap-3 ${
               !editingKey && !isComponentPage
                 ? pageConfig.name !== "dashboard"
                   ? "xl:grid-cols-[320px_1fr_420px]"
@@ -831,20 +833,20 @@ export function CommonLayout({
             }`}
           >
             {pageConfig.name !== "dashboard" && !editingKey && !isComponentPage && (
-              <aside className="space-y-4">
-                <section className="space-y-4">
+              <aside className="space-y-2">
+                <section className="space-y-2">
                   <div className={cardClass}>
-                    <div className="mb-4 flex items-center justify-between gap-3">
+                    <div className="mb-2 flex items-center justify-between gap-2">
                       <div>
-                        <h2 className="text-lg font-semibold">Components</h2>
-                        <p className="text-sm text-[#5f5a50]">
+                        <h2 className="text-sm font-semibold">Components</h2>
+                        <p className="text-[11px] text-[#5f5a50]">
                           List of {pageConfig.name} component content records.
                         </p>
                       </div>
                       <button
                         type="button"
                         onClick={refreshComponents}
-                        className="rounded-md border border-[#d9cdbb] bg-white px-3 py-2 text-sm font-semibold text-[#263016]"
+                        className="rounded-md border border-[#d9cdbb] bg-white px-2 py-1 text-[11px] font-semibold text-[#263016]"
                       >
                         Refresh
                       </button>
@@ -864,13 +866,13 @@ export function CommonLayout({
               </aside>
             )}
 
-            <div className="space-y-4 min-w-0">{children}</div>
+            <div className="space-y-2 min-w-0">{children}</div>
 
             {!editingKey && !isComponentPage && (
-              <aside className="hidden xl:block space-y-4">
-                <div className="sticky top-4">
-                  <div className="mb-4">
-                    <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">
+              <aside className="hidden xl:block space-y-2">
+                <div className="sticky top-2">
+                  <div className="mb-2">
+                    <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
                       Live Preview
                     </h3>
                     <p className="text-[10px] text-slate-500 italic truncate">

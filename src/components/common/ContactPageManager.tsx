@@ -11,6 +11,14 @@ import { buildEmptyContactContent, ContactPageContentKeys, contactPageKeys } fro
 
 const randomId = () => Math.random().toString(36).slice(2, 9);
 
+// Compact shared styles
+const cardClass = "p-2 border rounded-lg bg-slate-50 relative space-y-1.5";
+const cardClassWhite = "p-2 border rounded-lg bg-white relative space-y-1.5 shadow-sm";
+const smallLabelClass = "text-[11px] text-[#5f5a50] font-semibold flex flex-col gap-0.5";
+const smallFieldClass = "px-2 py-1 text-xs border rounded w-full";
+const sectionSubHeaderClass = "text-xs font-bold uppercase";
+const addLinkBtnClass = "text-xs font-bold text-blue-600";
+
 export default function ContactPageManager() {
   const [records, setRecords] = useState<ComponentContent[]>([]);
   const [form, setForm] = useState<Partial<ComponentContent>>(buildEmptyContactContent("contact.hero"));
@@ -69,27 +77,31 @@ export default function ContactPageManager() {
   const renderHeroForm = () => {
     const data = form.data as any;
     return (
-      <div className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <label className={labelClass}>Heading <input className={fieldClass} value={data.heading} onChange={e => setForm({...form, data: {...data, heading: e.target.value}})} /></label>
-          <label className={labelClass}>Title <input className={fieldClass} value={data.title} onChange={e => setForm({...form, data: {...data, title: e.target.value}})} /></label>
+      <div className="space-y-2">
+        <div className="grid grid-cols-3 gap-2">
+          <label className={smallLabelClass}>Heading <input className={smallFieldClass} value={data.heading} onChange={e => setForm({...form, data: {...data, heading: e.target.value}})} /></label>
+          <label className={smallLabelClass}>Title <input className={smallFieldClass} value={data.title} onChange={e => setForm({...form, data: {...data, title: e.target.value}})} /></label>
+          <label className={smallLabelClass}>Highlighted Text <input className={smallFieldClass} value={data.highlightedText} onChange={e => setForm({...form, data: {...data, highlightedText: e.target.value}})} /></label>
         </div>
-        <label className={labelClass}>Highlighted Text <input className={fieldClass} value={data.highlightedText} onChange={e => setForm({...form, data: {...data, highlightedText: e.target.value}})} /></label>
-        <label className={labelClass}>Description <textarea className={fieldClass} rows={2} value={data.description} onChange={e => setForm({...form, data: {...data, description: e.target.value}})} /></label>
-        <ImageUploadField label="Background Image" value={data.bgImage} fieldKey="contact.hero.bg" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => setForm({...form, data: {...data, bgImage: url}})} />
-        
-        <div className="pt-4 border-t">
-          <h4 className="text-sm font-bold mb-4  uppercase">Hero Features Icons</h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-2 items-end">
+          <label className={smallLabelClass}>Description <textarea className={smallFieldClass} rows={2} value={data.description} onChange={e => setForm({...form, data: {...data, description: e.target.value}})} /></label>
+          <ImageUploadField label="Background Image" value={data.bgImage} fieldKey="contact.hero.bg" uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => setForm({...form, data: {...data, bgImage: url}})} />
+        </div>
+
+        <div className="pt-2 border-t">
+          <div className="flex justify-between items-center mb-2">
+            <h4 className={sectionSubHeaderClass}>Hero Features Icons</h4>
+            <button type="button" onClick={() => setForm({...form, data: {...data, features: [...data.features, {id: randomId(), iconImage: '', title: ''}]}})} className={addLinkBtnClass}>+ Add Hero Feature</button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
             {data.features.map((feat: any, idx: number) => (
-              <div key={feat.id} className="p-4 border rounded-xl bg-slate-50 relative space-y-2">
-                <button type="button" onClick={() => { const nf = data.features.filter((_:any, i:number) => i !== idx); setForm({...form, data: {...data, features: nf}})}} className="absolute top-2 right-2 text-red-500"><Trash2 size={14} /></button>
-                <input className={fieldClass} placeholder="Feature Title" value={feat.title} onChange={e => { const nf = [...data.features]; nf[idx].title = e.target.value; setForm({...form, data: {...data, features: nf}}) }} />
+              <div key={feat.id} className={cardClass}>
+                <button type="button" onClick={() => { const nf = data.features.filter((_:any, i:number) => i !== idx); setForm({...form, data: {...data, features: nf}})}} className="absolute top-1 right-1 text-red-500"><Trash2 size={12} /></button>
+                <input className={smallFieldClass} placeholder="Feature Title" value={feat.title} onChange={e => { const nf = [...data.features]; nf[idx].title = e.target.value; setForm({...form, data: {...data, features: nf}}) }} />
                 <ImageUploadField label="Icon" value={feat.iconImage} fieldKey={`hero.feat.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => { const nf = [...data.features]; nf[idx].iconImage = url; setForm({...form, data: {...data, features: nf}}) }} />
               </div>
             ))}
           </div>
-          <button type="button" onClick={() => setForm({...form, data: {...data, features: [...data.features, {id: randomId(), iconImage: '', title: ''}]}})} className="mt-4 text-blue-600 font-bold text-sm flex items-center gap-1">+ Add Hero Feature</button>
         </div>
       </div>
     );
@@ -98,10 +110,10 @@ export default function ContactPageManager() {
   const renderGetInTouchForm = () => {
     const data = form.data as any;
     return (
-      <div className="space-y-6">
-        <div className="grid grid-cols-2 gap-4">
-          <label className={labelClass}>Title <input className={fieldClass} value={data.title} onChange={e => setForm({...form, data: {...data, title: e.target.value}})} /></label>
-          <label className={labelClass}>Description <input className={fieldClass} value={data.description} onChange={e => setForm({...form, data: {...data, description: e.target.value}})} /></label>
+      <div className="space-y-2">
+        <div className="grid grid-cols-3 gap-2 items-end">
+          <label className={smallLabelClass}>Title <input className={smallFieldClass} value={data.title} onChange={e => setForm({...form, data: {...data, title: e.target.value}})} /></label>
+          <label className={smallLabelClass}>Description <input className={smallFieldClass} value={data.description} onChange={e => setForm({...form, data: {...data, description: e.target.value}})} /></label>
           <ImageUploadField
   label="Form Image"
   value={data.formImage || ""}
@@ -112,17 +124,21 @@ export default function ContactPageManager() {
   onUpload={url => setForm({ ...form, data: { ...data, formImage: url } })}
 />
         </div>
-        <div className="space-y-4">
-          <h4 className="font-bold">Contact Details</h4>
-          {data.contactDetails.map((detail: any, idx: number) => (
-            <div key={detail.id} className="p-4 border rounded-xl bg-white grid grid-cols-1 md:grid-cols-3 gap-4 relative">
-              <button type="button" onClick={() => { const nd = data.contactDetails.filter((_:any, i:number) => i !== idx); setForm({...form, data: {...data, contactDetails: nd}})}} className="absolute -top-2 -right-2 bg-white shadow rounded-full p-1 text-red-500"><Trash2 size={14} /></button>
-              <input className={fieldClass} placeholder="Title" value={detail.title} onChange={e => { const nd = [...data.contactDetails]; nd[idx].title = e.target.value; setForm({...form, data: {...data, contactDetails: nd}}) }} />
-              <input className={fieldClass} placeholder="Description" value={detail.description} onChange={e => { const nd = [...data.contactDetails]; nd[idx].description = e.target.value; setForm({...form, data: {...data, contactDetails: nd}}) }} />
-              <ImageUploadField label="Icon" value={detail.icon} fieldKey={`detail.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => { const nd = [...data.contactDetails]; nd[idx].icon = url; setForm({...form, data: {...data, contactDetails: nd}}) }} />
-            </div>
-          ))}
-          <button type="button" onClick={() => setForm({...form, data: {...data, contactDetails: [...data.contactDetails, {id: randomId(), icon: '', title: '', description: ''}]}})} className="text-sm font-bold text-blue-500">+ Add Detail Card</button>
+        <div className="pt-2 border-t space-y-2">
+          <div className="flex justify-between items-center">
+            <h4 className={sectionSubHeaderClass}>Contact Details</h4>
+            <button type="button" onClick={() => setForm({...form, data: {...data, contactDetails: [...data.contactDetails, {id: randomId(), icon: '', title: '', description: ''}]}})} className={addLinkBtnClass}>+ Add Detail Card</button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+            {data.contactDetails.map((detail: any, idx: number) => (
+              <div key={detail.id} className={cardClassWhite}>
+                <button type="button" onClick={() => { const nd = data.contactDetails.filter((_:any, i:number) => i !== idx); setForm({...form, data: {...data, contactDetails: nd}})}} className="absolute top-1 right-1 text-red-500"><Trash2 size={12} /></button>
+                <input className={smallFieldClass} placeholder="Title" value={detail.title} onChange={e => { const nd = [...data.contactDetails]; nd[idx].title = e.target.value; setForm({...form, data: {...data, contactDetails: nd}}) }} />
+                <input className={smallFieldClass} placeholder="Description" value={detail.description} onChange={e => { const nd = [...data.contactDetails]; nd[idx].description = e.target.value; setForm({...form, data: {...data, contactDetails: nd}}) }} />
+                <ImageUploadField label="Icon" value={detail.icon} fieldKey={`detail.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => { const nd = [...data.contactDetails]; nd[idx].icon = url; setForm({...form, data: {...data, contactDetails: nd}}) }} />
+              </div>
+            ))}
+          </div>
         </div>
         {/* <div className="p-4 bg-slate-50 rounded-2xl border space-y-4">
           <h4 className="font-bold">Social Links Section</h4>
@@ -148,80 +164,80 @@ export default function ContactPageManager() {
   const renderFeaturesStrip = () => {
     const data = form.data as any;
     return (
-      <div className="space-y-4">
-        {data.features.map((feat: any, idx: number) => (
-          <div key={feat.id} className="p-4 border rounded-xl bg-white space-y-3 relative shadow-sm">
-            <button type="button" onClick={() => { const nf = data.features.filter((_:any, i:number) => i !== idx); setForm({...form, data: {...data, features: nf}})}} className="absolute top-2 right-2 text-red-400"><Trash2 size={16} /></button>
-            <div className="grid grid-cols-2 gap-4">
-              <input className={fieldClass} placeholder="Title" value={feat.title} onChange={e => { const nf = [...data.features]; nf[idx].title = e.target.value; setForm({...form, data: {...data, features: nf}}) }} />
+      <div className="space-y-2">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+          {data.features.map((feat: any, idx: number) => (
+            <div key={feat.id} className={cardClassWhite}>
+              <button type="button" onClick={() => { const nf = data.features.filter((_:any, i:number) => i !== idx); setForm({...form, data: {...data, features: nf}})}} className="absolute top-1 right-1 text-red-400"><Trash2 size={12} /></button>
+              <input className={smallFieldClass} placeholder="Title" value={feat.title} onChange={e => { const nf = [...data.features]; nf[idx].title = e.target.value; setForm({...form, data: {...data, features: nf}}) }} />
               <ImageUploadField label="Icon" value={feat.iconImage} fieldKey={`strip.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => { const nf = [...data.features]; nf[idx].iconImage = url; setForm({...form, data: {...data, features: nf}}) }} />
+              <textarea className={smallFieldClass} placeholder="Description" value={feat.description} onChange={e => { const nf = [...data.features]; nf[idx].description = e.target.value; setForm({...form, data: {...data, features: nf}}) }} />
             </div>
-            <textarea className={fieldClass} placeholder="Description" value={feat.description} onChange={e => { const nf = [...data.features]; nf[idx].description = e.target.value; setForm({...form, data: {...data, features: nf}}) }} />
-          </div>
-        ))}
-        <button type="button" onClick={() => setForm({...form, data: {...data, features: [...data.features, {id: randomId(), iconImage: '', title: '', description: ''}]}})} className="w-full py-4 border-2 border-dashed rounded-xl  flex items-center justify-center gap-2"><Plus size={20} /> Add Strip Item</button>
+          ))}
+        </div>
+        <button type="button" onClick={() => setForm({...form, data: {...data, features: [...data.features, {id: randomId(), iconImage: '', title: '', description: ''}]}})} className="w-full py-2.5 border-2 border-dashed rounded-xl flex items-center justify-center gap-2 text-xs font-bold text-gray-500"><Plus size={16} /> Add Strip Item</button>
       </div>
     );
   };
 const renderCtaBanner = () => {
   const data = form.data as any;
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <label className={labelClass}>
+    <div className="space-y-2">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-2 items-end">
+        <label className={smallLabelClass}>
           Title
           <input
-            className={fieldClass}
+            className={smallFieldClass}
             value={data.title}
             onChange={e => setForm({ ...form, data: { ...data, title: e.target.value } })}
           />
         </label>
-        <label className={labelClass}>
+        <label className={smallLabelClass}>
           Available Time
           <input
-            className={fieldClass}
+            className={smallFieldClass}
             placeholder="e.g. Mon–Sat, 9am–6pm"
             value={data.availableTime}
             onChange={e => setForm({ ...form, data: { ...data, availableTime: e.target.value } })}
           />
         </label>
-      </div>
-      <label className={labelClass}>
-        Description
-        <textarea
-          className={fieldClass}
-          rows={3}
-          value={data.description}
-          onChange={e => setForm({ ...form, data: { ...data, description: e.target.value } })}
-        />
-      </label>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <label className={labelClass}>
+        <label className={smallLabelClass}>
           Phone
           <input
-            className={fieldClass}
+            className={smallFieldClass}
             value={data.phone}
             onChange={e => setForm({ ...form, data: { ...data, phone: e.target.value } })}
           />
         </label>
-        <label className={labelClass}>
+        <label className={smallLabelClass}>
           WhatsApp Link
           <input
-            className={fieldClass}
+            className={smallFieldClass}
             value={data.whatsappLink}
             onChange={e => setForm({ ...form, data: { ...data, whatsappLink: e.target.value } })}
           />
         </label>
       </div>
-      <ImageUploadField
-        label="Banner Image"
-        value={data.image}
-        fieldKey="contact.ctaBanner.image"
-        uploadingField={uploadingField}
-        onUploadingChange={setUploadingField}
-        onError={m => toast.error(m)}
-        onUpload={url => setForm({ ...form, data: { ...data, image: url } })}
-      />
+      <div className="grid grid-cols-2 gap-2 items-end">
+        <label className={smallLabelClass}>
+          Description
+          <textarea
+            className={smallFieldClass}
+            rows={2}
+            value={data.description}
+            onChange={e => setForm({ ...form, data: { ...data, description: e.target.value } })}
+          />
+        </label>
+        <ImageUploadField
+          label="Banner Image"
+          value={data.image}
+          fieldKey="contact.ctaBanner.image"
+          uploadingField={uploadingField}
+          onUploadingChange={setUploadingField}
+          onError={m => toast.error(m)}
+          onUpload={url => setForm({ ...form, data: { ...data, image: url } })}
+        />
+      </div>
     </div>
   );
 };
@@ -229,80 +245,80 @@ const renderCtaBanner = () => {
 const renderPremiumMap = () => {
   const data = form.data as any;
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <label className={labelClass}>
+    <div className="space-y-2">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-2 items-end">
+        <label className={smallLabelClass}>
           Title
           <input
-            className={fieldClass}
+            className={smallFieldClass}
             value={data.title}
             onChange={e => setForm({ ...form, data: { ...data, title: e.target.value } })}
           />
         </label>
-        <label className={labelClass}>
+        <label className={smallLabelClass}>
           Button Text
           <input
-            className={fieldClass}
+            className={smallFieldClass}
             value={data.buttonText}
             onChange={e => setForm({ ...form, data: { ...data, buttonText: e.target.value } })}
           />
         </label>
-      </div>
-      <label className={labelClass}>
-        Description
-        <textarea
-          className={fieldClass}
-          rows={3}
-          value={data.description}
-          onChange={e => setForm({ ...form, data: { ...data, description: e.target.value } })}
-        />
-      </label>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <label className={labelClass}>
+        <label className={smallLabelClass}>
           Map Embed URL
           <input
-            className={fieldClass}
+            className={smallFieldClass}
             value={data.mapUrl}
             onChange={e => setForm({ ...form, data: { ...data, mapUrl: e.target.value } })}
           />
         </label>
-        <label className={labelClass}>
+        <label className={smallLabelClass}>
           Directions URL
           <input
-            className={fieldClass}
+            className={smallFieldClass}
             value={data.directionsUrl}
             onChange={e => setForm({ ...form, data: { ...data, directionsUrl: e.target.value } })}
           />
         </label>
       </div>
-      <ImageUploadField
-        label="Leaf / Decorative Image"
-        value={data.leafImage}
-        fieldKey="contact.premiumMap.leaf"
-        uploadingField={uploadingField}
-        onUploadingChange={setUploadingField}
-        onError={m => toast.error(m)}
-        onUpload={url => setForm({ ...form, data: { ...data, leafImage: url } })}
-      />
+      <div className="grid grid-cols-2 gap-2 items-end">
+        <label className={smallLabelClass}>
+          Description
+          <textarea
+            className={smallFieldClass}
+            rows={2}
+            value={data.description}
+            onChange={e => setForm({ ...form, data: { ...data, description: e.target.value } })}
+          />
+        </label>
+        <ImageUploadField
+          label="Leaf / Decorative Image"
+          value={data.leafImage}
+          fieldKey="contact.premiumMap.leaf"
+          uploadingField={uploadingField}
+          onUploadingChange={setUploadingField}
+          onError={m => toast.error(m)}
+          onUpload={url => setForm({ ...form, data: { ...data, leafImage: url } })}
+        />
+      </div>
     </div>
   );
 };
   return (
-    <div className="w-full">
+    <div className="w-full text-sm">
       <section className="w-full">
-        <form onSubmit={handleSave} className="bg-white border rounded-2xl shadow-sm overflow-hidden">
-          <div className="bg-slate-50 border-b p-6 flex items-center justify-between">
-            <h2 className="text-xl font-bold ">Contact Page Manager</h2>
-            <button type="submit" disabled={loading} className="bg-blue-600 text-white px-6 py-2 rounded-xl font-bold flex items-center gap-2 transition-all hover:bg-blue-700">
-              {loading ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />} Save Changes
+        <form onSubmit={handleSave} className="bg-white border rounded-xl shadow-sm overflow-hidden">
+          <div className="bg-slate-50 border-b p-3 flex items-center justify-between">
+            <h2 className="text-base font-bold">Contact Page Manager</h2>
+            <button type="submit" disabled={loading} className="bg-blue-600 text-white px-4 py-1.5 rounded-lg font-bold text-xs flex items-center gap-1.5 transition-all hover:bg-blue-700">
+              {loading ? <Loader2 className="animate-spin" size={14} /> : <Save size={14} />} Save Changes
             </button>
           </div>
 
-          <div className="p-8 space-y-6">
-            <div className="grid grid-cols-2 gap-4 p-4 bg-slate-50 rounded-xl">
-              <label className={labelClass}>Template Selection
+          <div className="p-4 space-y-3">
+            <div className="grid grid-cols-2 gap-3 p-2 bg-slate-50 rounded-lg items-end">
+              <label className={smallLabelClass}>Template Selection
          <select 
-  className={fieldClass} 
+  className={smallFieldClass} 
   value={form.key || ""} 
   onChange={e => {
     const key = e.target.value as ContactPageContentKeys;
@@ -320,7 +336,7 @@ const renderPremiumMap = () => {
   {contactPageKeys.map(k => <option key={k.key} value={k.key}>{k.label}</option>)}
 </select>
               </label>
-              <label className={labelClass}>Visible <div className="mt-2"><input type="checkbox" checked={form.isActive} onChange={e => setForm({...form, isActive: e.target.checked})} /></div></label>
+              <label className="flex items-center gap-1.5 text-[11px] text-[#5f5a50] font-semibold pb-1"><input type="checkbox" checked={form.isActive} onChange={e => setForm({...form, isActive: e.target.checked})} /> Visible</label>
             </div>
 
             {form.key === "contact.hero" && renderHeroForm()}
@@ -334,4 +350,3 @@ const renderPremiumMap = () => {
     </div>
   );
 }
-
