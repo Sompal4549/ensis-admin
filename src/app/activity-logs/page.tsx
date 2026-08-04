@@ -12,6 +12,8 @@ import {
   History,
   ShieldPlus,
   PencilLine,
+  ShieldCheck,
+  Users,
 } from "lucide-react";
 import { activityLogApi, type ActivityLog, type ActivityAction } from "@/lib/api";
 
@@ -36,6 +38,11 @@ const ACTION_META: Record<ActivityAction, { label: string; badge: string; icon: 
     icon: <Trash2 size={12} />,
   },
 };
+
+const ROLE_TABS: { key: "admin" | "customer"; label: string; icon: React.ReactNode }[] = [
+  { key: "admin", label: "Admin Activity", icon: <ShieldCheck size={13} /> },
+  { key: "customer", label: "Customer Activity", icon: <Users size={13} /> },
+];
 
 const formatTime = (iso: string) => {
   const date = new Date(iso);
@@ -74,6 +81,7 @@ export default function ActivityLogsPage() {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [limit] = useState(50);
+  const [role, setRole] = useState<"admin" | "customer">("admin");
   const [action, setAction] = useState<ActivityAction | "">("");
   const [entity, setEntity] = useState("");
   const [search, setSearch] = useState("");
@@ -83,7 +91,7 @@ export default function ActivityLogsPage() {
   const fetchLogs = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await activityLogApi.list({ page, limit, action, entity, search });
+      const data = await activityLogApi.list({ page, limit, role, action, entity, search });
       setLogs(data.logs || []);
       setTotal(data.total || 0);
       if (data.entities?.length) setEntities(data.entities);
@@ -93,7 +101,7 @@ export default function ActivityLogsPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, limit, action, entity, search]);
+  }, [page, limit, role, action, entity, search]);
 
   useEffect(() => {
     fetchLogs();
@@ -160,6 +168,27 @@ export default function ActivityLogsPage() {
         </div>
       </div>
 
+      <div className="mb-3 flex rounded-xl border border-slate-200 bg-white p-1 shadow-sm">
+        {ROLE_TABS.map((tab) => (
+          <button
+            key={tab.key}
+            type="button"
+            onClick={() => {
+              setRole(tab.key);
+              setPage(1);
+            }}
+            className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+              role === tab.key
+                ? "bg-blue-600 text-white shadow-sm"
+                : "text-slate-500 hover:bg-slate-50"
+            }`}
+          >
+            {tab.icon}
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
       <div className="mb-2 flex flex-wrap items-center gap-2">
         <select
           value={action}
@@ -206,7 +235,9 @@ export default function ActivityLogsPage() {
             <History size={32} className="mb-2 text-slate-300" />
             <p className="text-xs font-medium">No activity logged yet</p>
             <p className="text-[11px]">
-              Create, update or delete something as an admin to see it here
+              {role === "admin"
+                ? "Create, update or delete something as an admin to see it here"
+                : "Customer actions like registrations, orders and enquiries will appear here"}
             </p>
           </div>
         ) : (
