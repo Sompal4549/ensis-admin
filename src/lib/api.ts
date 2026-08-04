@@ -550,6 +550,7 @@ export const activityLogApi = {
     action?: ActivityAction | "";
     entity?: string;
     search?: string;
+    role?: "admin" | "customer";
   } = {}) => {
     const searchParams = new URLSearchParams({
       page: String(params.page || 1),
@@ -558,6 +559,7 @@ export const activityLogApi = {
     if (params.action) searchParams.set("action", params.action);
     if (params.entity) searchParams.set("entity", params.entity);
     if (params.search) searchParams.set("search", params.search);
+    if (params.role) searchParams.set("role", params.role);
     return request<ActivityLogListResponse>(`/activity-logs?${searchParams.toString()}`);
   },
 };
