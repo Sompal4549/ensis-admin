@@ -17,6 +17,11 @@ export interface SelectOption {
   label: string;
 }
 
+export interface TrustIndicatorItem {
+  id: string;
+  label: string;
+}
+
 export interface CheckboxOption {
   id: string;
   label: string;
@@ -81,6 +86,15 @@ export interface EnquiryPageContent {
     imageAlt: string;
     formImageSrc: string;
     formImageAlt: string;
+    ctaPrimary: {
+      label: string;
+      href: string;
+    };
+    ctaSecondary: {
+      label: string;
+      href: string;
+    };
+    trustIndicators: TrustIndicatorItem[];
   };
   formTitle: string;
   projectTypeOptions: SelectOption[];
@@ -116,6 +130,15 @@ const initialEnquiryPageContentForm: EnquiryPageContent = {
     imageAlt: "",
     formImageSrc: "",
     formImageAlt: "",
+    ctaPrimary: {
+      label: "",
+      href: "",
+    },
+    ctaSecondary: {
+      label: "",
+      href: "",
+    },
+    trustIndicators: [],
   },
   formTitle: "",
   projectTypeOptions: [],
@@ -192,7 +215,21 @@ const EnquaryPageManagement = () => {
         setContent(item);
         const d = (item.data || {}) as Partial<EnquiryPageContent>;
         setForm({
-          hero: d.hero || initialEnquiryPageContentForm.hero,
+          hero: {
+            ...initialEnquiryPageContentForm.hero,
+            ...d.hero,
+            ctaPrimary: {
+              ...initialEnquiryPageContentForm.hero.ctaPrimary,
+              ...(d.hero?.ctaPrimary || {}),
+            },
+            ctaSecondary: {
+              ...initialEnquiryPageContentForm.hero.ctaSecondary,
+              ...(d.hero?.ctaSecondary || {}),
+            },
+            trustIndicators:
+              (d.hero?.trustIndicators as TrustIndicatorItem[]) ||
+              initialEnquiryPageContentForm.hero.trustIndicators,
+          },
           formTitle: d.formTitle || initialEnquiryPageContentForm.formTitle,
           projectTypeOptions: d.projectTypeOptions || initialEnquiryPageContentForm.projectTypeOptions,
           stateOptions: d.stateOptions || initialEnquiryPageContentForm.stateOptions,
@@ -510,6 +547,80 @@ const EnquaryPageManagement = () => {
                       onUpload={url => setForm({ ...form, hero: { ...form.hero, imageSrc: url } })}
                       onError={m => toast.error(m)}
                     />
+
+                    <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                      <div>
+                        <h3 className="text-md font-bold text-slate-700 mb-3">Primary CTA Button</h3>
+                        <label className={labelClass}>Label</label>
+                        <input
+                          className={fieldClass}
+                          value={form.hero.ctaPrimary.label}
+                          onChange={e => setForm({ ...form, hero: { ...form.hero, ctaPrimary: { ...form.hero.ctaPrimary, label: e.target.value } } })}
+                          placeholder="e.g. Start Your Project"
+                        />
+                        <label className={labelClass + " mt-4"}>Href</label>
+                        <input
+                          className={fieldClass}
+                          value={form.hero.ctaPrimary.href}
+                          onChange={e => setForm({ ...form, hero: { ...form.hero, ctaPrimary: { ...form.hero.ctaPrimary, href: e.target.value } } })}
+                          placeholder="e.g. #enquiry-form or /contact"
+                        />
+                      </div>
+                      <div>
+                        <h3 className="text-md font-bold text-slate-700 mb-3">Secondary CTA Link</h3>
+                        <label className={labelClass}>Label</label>
+                        <input
+                          className={fieldClass}
+                          value={form.hero.ctaSecondary.label}
+                          onChange={e => setForm({ ...form, hero: { ...form.hero, ctaSecondary: { ...form.hero.ctaSecondary, label: e.target.value } } })}
+                          placeholder="e.g. Book Free Consultation"
+                        />
+                        <label className={labelClass + " mt-4"}>Href</label>
+                        <input
+                          className={fieldClass}
+                          value={form.hero.ctaSecondary.href}
+                          onChange={e => setForm({ ...form, hero: { ...form.hero, ctaSecondary: { ...form.hero.ctaSecondary, href: e.target.value } } })}
+                          placeholder="e.g. /consultancy"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="md:col-span-2 mt-4">
+                      <div className="flex justify-between items-center mb-3">
+                        <h3 className="text-md font-bold text-slate-700">Trust Indicators</h3>
+                        <button
+                          type="button"
+                          onClick={() => setForm({ ...form, hero: { ...form.hero, trustIndicators: [...(form.hero.trustIndicators || []), { id: randomId(), label: "" }] } })}
+                          className="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-green-700 flex items-center gap-1"
+                        >
+                          <PlusCircle size={14} /> Add Indicator
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {(form.hero.trustIndicators || []).map((item, index) => (
+                          <div key={item.id} className="p-3 border rounded-xl bg-slate-50 relative space-y-2">
+                            <button
+                              type="button"
+                              onClick={() => setForm({ ...form, hero: { ...form.hero, trustIndicators: (form.hero.trustIndicators || []).filter((_, i) => i !== index) } })}
+                              className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                            <label className={labelClass}>Label</label>
+                            <input
+                              className={fieldClass}
+                              value={item.label}
+                              onChange={e => {
+                                const nt = [...(form.hero.trustIndicators || [])];
+                                nt[index] = { ...nt[index], label: e.target.value };
+                                setForm({ ...form, hero: { ...form.hero, trustIndicators: nt } });
+                              }}
+                              placeholder="e.g. 100% Confidential"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
 
                     <div>
                       <label className={labelClass}>Hero Image Alt Text</label>

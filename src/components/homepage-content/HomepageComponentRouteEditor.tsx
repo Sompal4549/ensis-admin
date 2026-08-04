@@ -76,8 +76,14 @@ const emptyFromSample = (sample: EditableValue): EditableValue => {
 
 const emptyArrayItemForPath = (path: Array<string | number>, sample: EditableValue): EditableValue => {
   const lastKey = String(path[path.length - 1] || "").toLowerCase();
+  if (isObject(sample)) {
+    return emptyFromSample(sample);
+  }
   if (lastKey === "projects" || lastKey === "mfgimages") {
     return { image: "", title: "" };
+  }
+  if (lastKey === "features") {
+    return { imgUrl: "", title: "" };
   }
   return emptyFromSample(sample);
 };

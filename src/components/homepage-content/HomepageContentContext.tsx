@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type Dispatch, type ReactNode, type SetStateAction } from "react";
+import { toast } from "react-toastify";
 import { componentContentApi, type ComponentContent } from "@/lib/api";
 import {
   buildEmptyHomepageContent,
@@ -109,6 +110,7 @@ export function HomepageContentProvider({
     if (nextErrors.length) {
       setErrors(nextErrors);
       setLoading(false);
+      toast.error(nextErrors[0]);
       return;
     }
 
@@ -122,8 +124,11 @@ export function HomepageContentProvider({
         setMessage("Component created successfully.");
       }
       await refresh();
+      toast.success(`${payload.label} saved successfully.`);
     } catch (error) {
-      setMessage((error as Error).message);
+      const errorMessage = (error as Error).message || "Failed to save component.";
+      setMessage(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
