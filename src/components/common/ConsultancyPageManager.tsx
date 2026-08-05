@@ -8,6 +8,7 @@ import { componentContentApi, type ComponentContent } from "@/lib/api";
 import { fieldClass, labelClass } from "@/constants";
 import { ImageUploadField } from "@/components/common/ImageUploadField";
 import RichTextEditor from "@/components/common/RichTextEditor";
+import ConfirmDialog from "@/components/common/ConfirmDialog";
 import { buildEmptyConsultancyContent, ConsultancyPageContentKeys, consultancyPageKeys } from "./consultancyPageContent";
 
 // Compact local classes for this manager only
@@ -22,6 +23,7 @@ export default function ConsultancyPageManager() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [uploadingField, setUploadingField] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<{ label: string; action: () => void } | null>(null);
   const searchParams = useSearchParams();
   const router = useRouter();
   const componentKey = searchParams.get("component");
@@ -339,7 +341,7 @@ const renderProcessForm = () => {
                       ...data.whyChoose,
                       chooseList: [
                         ...(data.whyChoose.chooseList || []),
-                        "",
+                        { text: "" },
                       ],
                     },
                   },
@@ -352,17 +354,17 @@ const renderProcessForm = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5">
             {(data.whyChoose.chooseList || []).map(
-              (item: string, idx: number) => (
+              (item: any, idx: number) => (
                 <div key={idx} className="flex gap-1.5">
                   <input
                     className={smallFieldClass}
                     placeholder={`Choose Item ${idx + 1}`}
-                    value={item}
+                    value={typeof item === "string" ? item : item.text || ""}
                     onChange={(e) => {
                       const newList = [
                         ...(data.whyChoose.chooseList || []),
                       ];
-                      newList[idx] = e.target.value;
+                      newList[idx] = { text: e.target.value };
 
                       setForm({
                         ...form,
@@ -380,22 +382,27 @@ const renderProcessForm = () => {
                   <button
                     type="button"
                     className="px-2 py-1 border rounded text-red-500 text-xs"
-                    onClick={() => {
-                      const newList = (
-                        data.whyChoose.chooseList || []
-                      ).filter((_: any, i: number) => i !== idx);
+                    onClick={() =>
+                      setPendingDelete({
+                        label: "Remove this choose item?",
+                        action: () => {
+                          const newList = (
+                            data.whyChoose.chooseList || []
+                          ).filter((_: any, i: number) => i !== idx);
 
-                      setForm({
-                        ...form,
-                        data: {
-                          ...data,
-                          whyChoose: {
-                            ...data.whyChoose,
-                            chooseList: newList,
-                          },
+                          setForm({
+                            ...form,
+                            data: {
+                              ...data,
+                              whyChoose: {
+                                ...data.whyChoose,
+                                chooseList: newList,
+                              },
+                            },
+                          });
                         },
-                      });
-                    }}
+                      })
+                    }
                   >
                     Remove
                   </button>
@@ -502,8 +509,34 @@ const renderProcessForm = () => {
             (proc: any, idx: number) => (
               <div
                 key={proc.id}
-                className="p-2 border bg-white rounded-lg space-y-1.5"
+                className="p-2 border bg-white rounded-lg space-y-1.5 relative"
               >
+                <button
+                  type="button"
+                  className="absolute top-1.5 right-1.5 text-red-500 hover:text-red-700"
+                  onClick={() =>
+                    setPendingDelete({
+                      label: "Delete this process step?",
+                      action: () => {
+                        const nl = data.ourProcess.processList.filter(
+                          (_: any, i: number) => i !== idx
+                        );
+                        setForm({
+                          ...form,
+                          data: {
+                            ...data,
+                            ourProcess: {
+                              ...data.ourProcess,
+                              processList: nl,
+                            },
+                          },
+                        });
+                      },
+                    })
+                  }
+                >
+                  <Trash2 size={13} />
+                </button>
                 <div className="grid grid-cols-2 gap-1.5">
                   <input
                     className={smallFieldClass}
@@ -602,6 +635,28 @@ const renderProcessForm = () => {
             )
           )}
         </div>
+
+        <button
+          type="button"
+          className="w-full py-2 border-2 border-dashed rounded-xl flex items-center justify-center gap-2 text-xs font-bold text-blue-600 hover:bg-blue-50 transition-colors"
+          onClick={() =>
+            setForm({
+              ...form,
+              data: {
+                ...data,
+                ourProcess: {
+                  ...data.ourProcess,
+                  processList: [
+                    ...(data.ourProcess.processList || []),
+                    { id: randomId(), title: "", description: "", image: "", color: "" },
+                  ],
+                },
+              },
+            })
+          }
+        >
+          <Plus size={16} /> Add Process Step
+        </button>
       </div>
     </div>
   );
@@ -703,6 +758,16 @@ const renderProcessForm = () => {
           </div>
         </form>
       </section>
+
+      <ConfirmDialog
+        isOpen={!!pendingDelete}
+        title="Confirm Delete"
+        message={pendingDelete?.label}
+        onConfirm={async () => {
+          pendingDelete?.action();
+        }}
+        onClose={() => setPendingDelete(null)}
+      />
     </div>
     </Suspense>
   );

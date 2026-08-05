@@ -8,6 +8,8 @@ import { fieldClass, labelClass } from "@/constants";
 
 const SLUG = "advanced-seo";
 
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/+$/, "");
+
 interface AdvancedSeoForm {
     sitemap: {
         url: string;
@@ -59,7 +61,7 @@ export default function AdvancedSeo() {
     const loadData = useCallback(async () => {
         try {
             setLoading(true);
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}api/v1/seo/advanced`, {
+            const res = await fetch(`${API_BASE}/api/v1/seo/advanced`, {
                 credentials: "include",
             });
             const json = await res.json();
@@ -85,7 +87,7 @@ export default function AdvancedSeo() {
         e.preventDefault();
         try {
             setLoading(true);
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}api/v1/seo/advanced`, {
+            const res = await fetch(`${API_BASE}/api/v1/seo/advanced`, {
                 method: "PUT",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },

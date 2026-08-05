@@ -32,7 +32,7 @@ export const defaultConsultancyData: Record<ConsultancyPageContentKeys, any> = {
     serviceCards: [{ id: randomId(), title: "", description: "", learnMoreLink: "", image: "", learnMoreText: "" }]
   },
   "consultancy.whyChooseOurProcess": {
-    whyChoose: { heading: "", title: "", description: "", bgImage: "", chooseList: [""], primaryButton: { label: "", href: "" } },
+    whyChoose: { heading: "", title: "", description: "", bgImage: "", chooseList: [{ text: "" }], primaryButton: { label: "", href: "" } },
     ourProcess: { heading: "", title: "", processList: [{ id: randomId(), title: "", description: "", image: "", color: "" }] }
   },
   "consultancy.readyToGetStarted": {
