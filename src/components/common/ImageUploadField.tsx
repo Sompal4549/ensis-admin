@@ -82,7 +82,7 @@ export const ImageUploadField = ({
       />
 
       <input
-        className={fieldClass}
+        className={`${fieldClass} break-all`}
         type="text"
         value={displayValue}
         onChange={(e) => {

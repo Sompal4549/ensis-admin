@@ -5,6 +5,7 @@ import { FormEvent, useCallback, useEffect, useState } from "react";
 import { Save } from "lucide-react";
 import { pageApi, type PageData } from "@/lib/api";
 import { fieldClass, labelClass } from "@/constants";
+import { ImageUploadField } from "./ImageUploadField";
 
 // Compact local classes for this editor only
 const smallFieldClass =
@@ -20,6 +21,7 @@ interface SEOEditorProps {
 export default function SEOEditor({ slug, pageName, title }: SEOEditorProps) {
   const [loading, setLoading] = useState(false);
   const [pageData, setPageData] = useState<PageData | null>(null);
+  const [uploadingField, setUploadingField] = useState<string | null>(null);
 
   const generatePageName = (slugValue: string) =>
     slugValue
@@ -34,10 +36,26 @@ export default function SEOEditor({ slug, pageName, title }: SEOEditorProps) {
       metaDescription: "",
       metaKeywords: "",
       canonical: "",
+      ogImage: "",
       ogJson: "",
       schema: "",
     },
   });
+
+  const parseOgJson = (raw: string) => {
+    try {
+      const parsed: unknown = JSON.parse(raw);
+      return parsed && typeof parsed === "object" ? (parsed as Record<string, string>) : {};
+    } catch {
+      return {};
+    }
+  };
+
+  const setOgImage = (url: string) => {
+    const ogExtra = parseOgJson(form.seo.ogJson);
+    ogExtra["og:image"] = url;
+    setForm({ ...form, seo: { ...form.seo, ogImage: url, ogJson: JSON.stringify(ogExtra, null, 2) } });
+  };
 
   const loadData = useCallback(async () => {
     try {
@@ -45,6 +63,7 @@ export default function SEOEditor({ slug, pageName, title }: SEOEditorProps) {
       const data = await pageApi.get(slug);
       if (data && Object.keys(data).length > 0) {
         setPageData(data);
+        const ogExtra = parseOgJson(data.seo?.ogJson || "");
         setForm({
           pageName: data.pageName || "",
           seo: {
@@ -52,6 +71,7 @@ export default function SEOEditor({ slug, pageName, title }: SEOEditorProps) {
             metaDescription: data.seo?.metaDescription || "",
             metaKeywords: data.seo?.metaKeywords || "",
             canonical: data.seo?.canonical || "",
+            ogImage: ogExtra["og:image"] || "",
             ogJson: data.seo?.ogJson || "",
             schema: data.seo?.schema || "",
           },
@@ -199,12 +219,24 @@ export default function SEOEditor({ slug, pageName, title }: SEOEditorProps) {
         {/* Open Graph */}
         <section className="bg-white p-3 rounded-xl border border-[#ded3c4] shadow-sm space-y-2">
           <h2 className="text-xs font-bold uppercase text-[#8d6a3a] mb-2 border-b pb-1">Open Graph (Social)</h2>
+          <ImageUploadField
+            label="OG Image"
+            value={form.seo.ogImage}
+            fieldKey="ogImage"
+            onUpload={(url) => {
+              setOgImage(url);
+              toast.success("OG image URL saved. Publish to apply.");
+            }}
+            uploadingField={uploadingField}
+            onUploadingChange={setUploadingField}
+            onError={(message) => toast.error(message)}
+          />
           <label className={smallLabelClass}>
             OG JSON
             <textarea
               className={`${smallFieldClass} mt-1 font-mono text-[11px] h-32`}
               value={form.seo.ogJson}
-              placeholder={`{\n  "og:type": "website",\n  "og:url": "https://ensis.in/",\n  "og:site_name": "Ensis"\n}`}
+              placeholder={`{\n  "og:type": "website",\n  "og:url": "https://ensis.in/",\n  "og:site_name": "Ensis"\n  "og:image": "https://...webp"\n}`}
               onChange={(e) => setForm({ ...form, seo: { ...form.seo, ogJson: e.target.value } })}
               spellCheck={false}
             />

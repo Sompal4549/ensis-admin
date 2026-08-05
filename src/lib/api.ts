@@ -451,7 +451,8 @@ export const apiClient = {
 export const mediaApi = {
   list: (subDir: string = "") => {
     const query = subDir ? `?subDir=${encodeURIComponent(subDir)}` : "";
-    return request<MediaFile[]>(`/uploads/list${query}`);
+    const cacheBust = (query ? "&" : "?") + `_t=${Date.now()}`;
+    return request<MediaFile[]>(`/uploads/list${query}${cacheBust}`);
   }
 };
 

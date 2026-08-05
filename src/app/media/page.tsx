@@ -12,6 +12,7 @@ import {
   ChevronDown
 } from "lucide-react";
 import {  uploadImage } from "@/lib/api";
+import MediaGrid from "@/lib/MediaGrid";
 import Image from "next/image";
 
 type UploadStatus = "idle" | "uploading" | "success" | "error";
@@ -31,6 +32,7 @@ export default function BulkImageUploadPage() {
   const [selectedPage, setSelectedPage] = useState("home");
   const [isUploadingGlobal, setIsUploadingGlobal] = useState(false);
   const [copyFeedback, setCopyFeedback] = useState<number | null>(null);
+  const [gridRefreshKey, setGridRefreshKey] = useState(0);
 
   // Cleanup object URLs to avoid memory leaks
   useEffect(() => {
@@ -80,6 +82,7 @@ export default function BulkImageUploadPage() {
         next[index].url = url; 
         return next;
       });
+      setGridRefreshKey((k) => k + 1);
     } catch (error) {
       setFileStates((prev) => {
         const next = [...prev];
@@ -246,7 +249,7 @@ export default function BulkImageUploadPage() {
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <h4 className="text-sm font-bold text-[#1f261b] truncate">{state.file.name}</h4>
+                      <h4 className="text-sm font-bold text-[#1f261b] break-all leading-snug">{state.file.name}</h4>
                       <div className="flex items-center gap-3 mt-1">
                         <span className="text-[10px] font-bold text-[#8d6a3a] uppercase tracking-tighter">{(state.file.size / 1024).toFixed(0)} KB</span>
                         {state.status === "success" && <span className="flex items-center gap-1 text-[10px] font-bold text-green-600 uppercase tracking-widest"><CheckCircle2 size={12}/> Success</span>}
@@ -255,7 +258,7 @@ export default function BulkImageUploadPage() {
                       
                       {state.status === "success" && state.url && (
                         <div className="mt-3 flex items-center bg-gray-50 rounded-lg border border-[#eee5d9] overflow-hidden">
-                          <code className="flex-1 text-[11px] px-3 py-2 text-[#5f5a50] truncate font-mono">{state.url}</code>
+                          <code className="flex-1 text-[11px] px-3 py-2 text-[#5f5a50] truncate font-mono break-all line-clamp-1 whitespace-normal">{state.url}</code>
                           <button 
                             onClick={() => copyToClipboard(state.url || "", index)}
                             className={`px-4 py-2 text-[10px] font-bold uppercase transition-all ${copyFeedback === index ? 'bg-green-600 text-white' : 'bg-[#f3eee6] text-[#6f542f] hover:bg-[#eadfce]'}`}
@@ -300,6 +303,15 @@ export default function BulkImageUploadPage() {
           )}
         </section>
       </div>
+
+      <section className="mt-12">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="h-px flex-1 bg-[#ded3c4]" />
+          <h2 className="text-sm font-bold uppercase tracking-widest text-[#8d6a3a] whitespace-nowrap">Uploaded Library</h2>
+          <div className="h-px flex-1 bg-[#ded3c4]" />
+        </div>
+        <MediaGrid refreshKey={gridRefreshKey} />
+      </section>
     </div>
   );
 }

@@ -1,36 +1,49 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { mediaApi, getImageUrl, type MediaFile } from "@/lib/api";
-import { Copy, Loader2, Image as ImageIcon, Search } from "lucide-react";
+import { Copy, Loader2, Image as ImageIcon, RefreshCw, Search } from "lucide-react";
 import Image from "next/image";
 
 interface MediaGridProps {
   subDir?: string;
+  refreshKey?: number | string;
 }
 
-export default function MediaGrid({ subDir = "" }: MediaGridProps) {
+export default function MediaGrid({ subDir = "", refreshKey = 0 }: MediaGridProps) {
   const [images, setImages] = useState<MediaFile[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [copyFeedback, setCopyFeedback] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchImages = async () => {
-      setLoading(true);
-      try {
-        const data = await mediaApi.list(subDir);
-        setImages(data);
-      } catch (err) {
-        setError("Failed to load images");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchImages();
+  const fetchImages = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const data = await mediaApi.list(subDir);
+      setImages(data);
+    } catch (err) {
+      setError("Failed to load images");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   }, [subDir]);
+
+  useEffect(() => {
+    fetchImages();
+  }, [fetchImages, refreshKey]);
+
+  useEffect(() => {
+    const onFocus = () => fetchImages();
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onFocus);
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onFocus);
+    };
+  }, [fetchImages]);
 
   const copyToClipboard = (url: string) => {
     navigator.clipboard.writeText(url);
@@ -73,6 +86,20 @@ export default function MediaGrid({ subDir = "" }: MediaGridProps) {
         />
       </div>
 
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-xs font-bold uppercase tracking-widest text-[#8d6a3a]">
+          {images.length} {images.length === 1 ? "image" : "images"}
+        </p>
+        <button
+          onClick={fetchImages}
+          disabled={loading}
+          className="flex items-center gap-2 rounded-xl border border-[#d9cdbb] bg-white px-4 py-2 text-[11px] font-bold uppercase tracking-widest text-[#6f542f] hover:bg-[#fcfaf7] transition-all disabled:opacity-50"
+        >
+          <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
+          Refresh
+        </button>
+      </div>
+
       {filteredImages.length === 0 ? (
         <div className="bg-[#fcfaf7] border border-[#ded3c4] rounded-2xl p-20 text-center">
           <ImageIcon className="mx-auto text-[#d9cdbb] mb-4" size={48} />
@@ -106,7 +133,14 @@ export default function MediaGrid({ subDir = "" }: MediaGridProps) {
                   </div>
                 </div>
                 <div className="p-4">
-                  <p className="text-xs font-bold text-[#1f261b] truncate mb-1" title={fileName}>{fileName}</p>
+                <div className="p-4 min-w-0">
+  <p
+    className="text-xs font-bold text-[#1f261b] break-all whitespace-normal"
+    title={fileName}
+  >
+    {fileName}
+  </p>
+</div>
                   <button 
                     onClick={() => copyToClipboard(img.url)}
                     className={`w-full text-[10px] font-bold uppercase tracking-widest py-2 rounded-lg transition-all ${
