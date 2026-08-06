@@ -8,6 +8,7 @@ import { fieldClass, labelClass } from "@/constants";
 import { ImageUploadField } from "@/components/common/ImageUploadField";
 import RichTextEditor from "@/components/common/RichTextEditor";
 import ComponentList from "@/components/common/ComponentList";
+import ConfirmDialog from "@/components/common/ConfirmDialog";
 import { DropResult } from "@hello-pangea/dnd";
 
 // Options shown in selects / checkboxes / radios
@@ -197,6 +198,7 @@ const EnquaryPageManagement = () => {
   const [uploadingField, setUploadingField] = useState<string | null>(null);
   const [records, setRecords] = useState<ComponentContent[]>([]);
   const [activeTab, setActiveTab] = useState<'form' | 'getInTouch' | 'ctaBanner' | 'statsStrip'>('form');
+  const [pendingDelete, setPendingDelete] = useState<{ message: string; id: string } | null>(null);
 
   const knownKeys = ["enquiry.page", "enquiry.getInTouch", "enquiry.ctaBanner", "enquiry.features_strip"];
 
@@ -424,7 +426,6 @@ const EnquaryPageManagement = () => {
   };
 
   const handleDeleteComponent = async (id: string) => {
-    if (!window.confirm("Delete this component?")) return;
     try {
       await componentContentApi.remove(id);
       loadContent();
@@ -432,6 +433,8 @@ const EnquaryPageManagement = () => {
       toast.error("Delete failed");
     }
   };
+
+  const confirmDeleteClick = (id: string, message: string) => setPendingDelete({ id, message });
 
   const handleEditComponent = (record: ComponentContent) => {
     if (record.key === "enquiry.page") setActiveTab("form");
@@ -499,7 +502,7 @@ const EnquaryPageManagement = () => {
             <ComponentList
               records={records}
               onEdit={handleEditComponent}
-              onDelete={handleDeleteComponent}
+              onDelete={(id) => confirmDeleteClick(id, "Delete this component?")}
               onReorder={handleReorder}
               editingId={currentEditingId}
               knownKeys={knownKeys}
@@ -1163,6 +1166,17 @@ const EnquaryPageManagement = () => {
           )}
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={!!pendingDelete}
+        title="Confirm Delete"
+        message={pendingDelete?.message}
+        onConfirm={async () => {
+          if (!pendingDelete) return;
+          await handleDeleteComponent(pendingDelete.id);
+        }}
+        onClose={() => setPendingDelete(null)}
+      />
     </div>
   );
 };

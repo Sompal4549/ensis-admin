@@ -16,6 +16,7 @@ import {
 import { fieldClass, labelClass } from "@/constants";
 import { adminApi, type AuthUser } from "@/lib/api";
 import { withRole } from "@/lib/withRole";
+import ConfirmDialog from "@/components/common/ConfirmDialog";
 
 function UsersManagementPage() {
   const [users, setUsers] = useState<AuthUser[]>([]);
@@ -24,6 +25,7 @@ function UsersManagementPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [currentId, setCurrentId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [pendingDelete, setPendingDelete] = useState<{ message: string; id: string } | null>(null);
 
   const [form, setForm] = useState({ name: "", email: "", phone: "", role: "admin" });
 
@@ -90,7 +92,6 @@ function UsersManagementPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this user?")) return;
     try {
       await adminApi.deleteUser(id);
       toast.success("User deleted");
@@ -100,6 +101,8 @@ function UsersManagementPage() {
       toast.error(message);
     }
   };
+
+  const confirmDeleteClick = (id: string, message: string) => setPendingDelete({ id, message });
 const handleRoleChange = async (
   userId: string,
   role: string
@@ -198,7 +201,7 @@ const handleRoleChange = async (
                       <button onClick={() => handleEdit(user)} className="p-1.5  hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer">
                         <Edit size={16} />
                       </button>
-                      <button onClick={() => handleDelete(user._id)} className="p-1.5  hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer">
+                      <button onClick={() => confirmDeleteClick(user._id, "Are you sure you want to delete this user?")} className="p-1.5  hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer">
                         <Trash2 size={16} />
                       </button>
                     </td>
@@ -270,6 +273,17 @@ const handleRoleChange = async (
           </form>
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={!!pendingDelete}
+        title="Confirm Delete"
+        message={pendingDelete?.message}
+        onConfirm={async () => {
+          if (!pendingDelete) return;
+          await handleDelete(pendingDelete.id);
+        }}
+        onClose={() => setPendingDelete(null)}
+      />
     </div>
   );
 }

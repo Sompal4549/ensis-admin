@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { toast } from "react-toastify";
 import { Loader2, RefreshCw, Mail, Phone, MapPin, FileText, Trash2, Briefcase, Clock } from "lucide-react";
 import { applicationApi, Application } from "@/lib/api";
+import ConfirmDialog from "@/components/common/ConfirmDialog";
 
 const STATUS_STYLES: Record<Application["status"], string> = {
   pending: "bg-amber-100 text-amber-700 border-amber-200",
@@ -17,6 +18,7 @@ export default function ApplicationsPage() {
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<{ message: string; id: string } | null>(null);
 
   const fetchApplications = useCallback(async () => {
     setLoading(true);
@@ -49,12 +51,11 @@ export default function ApplicationsPage() {
     }
   };
 
-  const handleDelete = async (application: Application) => {
-    if (!window.confirm(`Delete application from ${application.fullName}?`)) return;
-    setDeletingId(application._id);
+  const handleDelete = async (id: string) => {
+    setDeletingId(id);
     try {
-      await applicationApi.remove(application._id);
-      setApplications((prev) => prev.filter((item) => item._id !== application._id));
+      await applicationApi.remove(id);
+      setApplications((prev) => prev.filter((item) => item._id !== id));
       toast.success("Application deleted");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to delete application");
@@ -62,6 +63,8 @@ export default function ApplicationsPage() {
       setDeletingId(null);
     }
   };
+
+  const confirmDeleteClick = (id: string, message: string) => setPendingDelete({ id, message });
 
   return (
     <div className="max-w-7xl mx-auto space-y-4 px-4 sm:px-6 lg:px-8 pb-8">
@@ -186,7 +189,7 @@ export default function ApplicationsPage() {
                       </td>
                       <td className="px-3 py-2.5 text-right">
                         <button
-                          onClick={() => handleDelete(application)}
+                          onClick={() => confirmDeleteClick(application._id, `Delete application from ${application.fullName}?`)}
                           disabled={deletingId === application._id}
                           className="inline-flex items-center justify-center p-1.5 rounded-lg text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50"
                           title="Delete application"
@@ -206,6 +209,17 @@ export default function ApplicationsPage() {
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        isOpen={!!pendingDelete}
+        title="Confirm Delete"
+        message={pendingDelete?.message}
+        onConfirm={async () => {
+          if (!pendingDelete) return;
+          await handleDelete(pendingDelete.id);
+        }}
+        onClose={() => setPendingDelete(null)}
+      />
     </div>
   );
 }

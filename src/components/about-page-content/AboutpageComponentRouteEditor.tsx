@@ -2,6 +2,7 @@
 
 import { ImageUploadField } from "@/components/common/ImageUploadField";
 import RichTextEditor from "@/components/common/RichTextEditor";
+import ConfirmDialog from "@/components/common/ConfirmDialog";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import {
@@ -56,6 +57,7 @@ export default function AboutpageComponentRouteEditor({ componentKey, title }: {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [uploadingField, setUploadingField] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<{ message: string; id: string } | null>(null);
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -127,7 +129,6 @@ export default function AboutpageComponentRouteEditor({ componentKey, title }: {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure?")) return;
     try {
       await componentContentApi.remove(id);
       toast.success("Component deleted");
@@ -137,6 +138,8 @@ export default function AboutpageComponentRouteEditor({ componentKey, title }: {
     setEditingId(null);
     refresh();
   };
+
+  const confirmDeleteClick = (id: string, message: string) => setPendingDelete({ id, message });
 
   // Sub-forms for specific component types
   const renderHeroForm = () => {
@@ -657,7 +660,7 @@ export default function AboutpageComponentRouteEditor({ componentKey, title }: {
               </div>
               <div className="flex items-center gap-2">
                 {editingId && (
-                  <button type="button" onClick={() => handleDelete(editingId)} className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                  <button type="button" onClick={() => confirmDeleteClick(editingId, "Are you sure?")} className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
                     <Trash2 size={16} />
                   </button>
                 )}
@@ -735,6 +738,17 @@ export default function AboutpageComponentRouteEditor({ componentKey, title }: {
           </form>
         </section>
       </div>
+
+      <ConfirmDialog
+        isOpen={!!pendingDelete}
+        title="Confirm Delete"
+        message={pendingDelete?.message}
+        onConfirm={async () => {
+          if (!pendingDelete) return;
+          await handleDelete(pendingDelete.id);
+        }}
+        onClose={() => setPendingDelete(null)}
+      />
     </div>
   );
 }

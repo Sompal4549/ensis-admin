@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { fieldClass, labelClass } from "@/constants";
 import { api} from "@/lib/api";
+import ConfirmDialog from "@/components/common/ConfirmDialog";
 
 interface Career {
   _id: string;
@@ -86,6 +87,7 @@ export default function CareerManagementPage() {
   const [formLoading, setFormLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [currentId, setCurrentId] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<{ message: string; id: string } | null>(null);
   
   const [form, setForm] = useState(initialCareerForm);
   const [currentPage, setCurrentPage] = useState(1);
@@ -154,8 +156,6 @@ export default function CareerManagementPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this career opportunity?")) return;
-
     try {
       await careerRequest("delete", `/${id}`);
       fetchCareers();
@@ -167,6 +167,8 @@ export default function CareerManagementPage() {
       toast.error(errMsg || "Delete failed");
     }
   };
+
+  const confirmDeleteClick = (id: string, message: string) => setPendingDelete({ id, message });
 
   const resetForm = () => {
     setForm(initialCareerForm);
@@ -228,7 +230,7 @@ export default function CareerManagementPage() {
                       <button onClick={() => handleEdit(career)} className="p-2  hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer">
                         <Edit size={16} />
                       </button>
-                      <button onClick={() => handleDelete(career._id)} className="p-2  hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer">
+                      <button onClick={() => confirmDeleteClick(career._id, "Are you sure you want to delete this career opportunity?")} className="p-2  hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer">
                         <Trash2 size={16} />
                       </button>
                     </div>
@@ -328,6 +330,17 @@ export default function CareerManagementPage() {
           </form>
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={!!pendingDelete}
+        title="Confirm Delete"
+        message={pendingDelete?.message}
+        onConfirm={async () => {
+          if (!pendingDelete) return;
+          await handleDelete(pendingDelete.id);
+        }}
+        onClose={() => setPendingDelete(null)}
+      />
     </div>
   );
 }

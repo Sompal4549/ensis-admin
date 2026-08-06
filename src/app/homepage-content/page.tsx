@@ -30,6 +30,7 @@ import {
 } from "@/lib/homepageContent";
 import Image from "next/image";
 import RichTextEditor from "@/components/common/RichTextEditor";
+import ConfirmDialog from "@/components/common/ConfirmDialog";
 
 type ContentForm = Omit<ComponentContent, "_id"> & { key: HomepageComponentKey };
 
@@ -121,6 +122,7 @@ export default function HomepageContentAdminPage() {
   const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [uploadingField, setUploadingField] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<{ message: string; id: string } | null>(null);
 
   const knownKeys = useMemo(() => homepageKeys.map((item) => item.key), []);
 
@@ -236,8 +238,6 @@ export default function HomepageContentAdminPage() {
   };
 
   const handleDelete = async (id: string) => {
-    const confirmed = window.confirm("Delete this component? This cannot be undone.");
-    if (!confirmed) return;
     setLoading(true);
     setStatusMessage("");
     try {
@@ -251,6 +251,8 @@ export default function HomepageContentAdminPage() {
       setLoading(false);
     }
   };
+
+  const confirmDeleteClick = (id: string, message: string) => setPendingDelete({ id, message });
 
   const renderHeroEditor = () => {
     const heroData = form.data as { slides: HomeHeroSlide[] };
@@ -831,7 +833,7 @@ export default function HomepageContentAdminPage() {
                     <Plus size={10} /> New
                   </button>
                   {editingId ? (
-                    <button type="button" onClick={() => handleDelete(editingId)} className="inline-flex items-center gap-1 rounded border border-[#e0b4a0] bg-white px-1.5 py-0.5 text-[10px] font-semibold text-[#9b2e2e]">
+                    <button type="button" onClick={() => confirmDeleteClick(editingId, "Delete this component? This cannot be undone.")} className="inline-flex items-center gap-1 rounded border border-[#e0b4a0] bg-white px-1.5 py-0.5 text-[10px] font-semibold text-[#9b2e2e]">
                       <Trash2 size={10} /> Delete
                     </button>
                   ) : null}
@@ -906,6 +908,17 @@ export default function HomepageContentAdminPage() {
           </section>
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={!!pendingDelete}
+        title="Confirm Delete"
+        message={pendingDelete?.message}
+        onConfirm={async () => {
+          if (!pendingDelete) return;
+          await handleDelete(pendingDelete.id);
+        }}
+        onClose={() => setPendingDelete(null)}
+      />
     </main>
   );
 }

@@ -9,6 +9,7 @@ import { ImageUploadField } from "@/components/common/ImageUploadField";
 import RichTextEditor from "@/components/common/RichTextEditor";
 import Image from 'next/image';
 import ComponentList from "@/components/common/ComponentList";
+import ConfirmDialog from "@/components/common/ConfirmDialog";
 import { DropResult } from "@hello-pangea/dnd";
 
 export interface ClientLogo {
@@ -210,6 +211,7 @@ const ProjectAndClientManagement = () => {
   const [savingFeaturesStrip, setSavingFeaturesStrip] = useState(false);
 
   const [records, setRecords] = useState<ComponentContent[]>([]);
+  const [pendingDelete, setPendingDelete] = useState<{ message: string; id: string } | null>(null);
 
   const knownKeys = [
     "projects.banner", "projects.whyPartner", "projects.ourProjects", "projects.ourClients", "projects.contactSection", "projects.features_strip"
@@ -549,7 +551,6 @@ const ProjectAndClientManagement = () => {
   };
 
   const handleDeleteComponent = async (id: string) => {
-    if (!window.confirm("Are you sure you want to delete this component?")) return;
     try {
       await componentContentApi.remove(id);
       toast.success("Component deleted successfully");
@@ -558,6 +559,8 @@ const ProjectAndClientManagement = () => {
       toast.error(error.message || "Failed to delete component");
     }
   };
+
+  const confirmDeleteClick = (id: string, message: string) => setPendingDelete({ id, message });
 
   const handleReorder = async (result: DropResult) => {
     if (!result.destination) return;
@@ -1353,6 +1356,17 @@ const ProjectAndClientManagement = () => {
       )}
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={!!pendingDelete}
+        title="Confirm Delete"
+        message={pendingDelete?.message}
+        onConfirm={async () => {
+          if (!pendingDelete) return;
+          await handleDeleteComponent(pendingDelete.id);
+        }}
+        onClose={() => setPendingDelete(null)}
+      />
     </div>
   );
 };

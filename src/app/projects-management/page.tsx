@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { fieldClass, labelClass } from "@/constants";
 import { api, categoryApi, type Category, getImageUrl } from "@/lib/api";
+import ConfirmDialog from "@/components/common/ConfirmDialog";
 
 interface Project {
   _id: string;
@@ -38,6 +39,7 @@ export default function ProjectManagementPage() {
   const [currentId, setCurrentId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [imageUploading, setImageUploading] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<{ message: string; id: string } | null>(null);
   
   const initialForm = {
     title: "",
@@ -146,8 +148,6 @@ export default function ProjectManagementPage() {
   };
 
   const handleBulkDelete = async () => {
-    if (!confirm(`Delete ${selectedIds.length} projects?`)) return;
-
     try {
       await Promise.all(
         selectedIds.map(id => 
@@ -161,6 +161,8 @@ export default function ProjectManagementPage() {
       toast.error("Bulk delete failed"+" "+error);
     }
   };
+
+  const confirmDeleteClick = (id: string, message: string) => setPendingDelete({ id, message });
 
   const toggleSelect = (id: string) => {
     setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
@@ -187,7 +189,7 @@ console.log(form)
             </div>
             <div className="flex items-center gap-2">
               {selectedIds.length > 0 && (
-                <button onClick={handleBulkDelete} className="flex items-center gap-1.5 px-3 py-1 bg-rose-50 text-rose-600 rounded-lg text-[10px] font-bold uppercase hover:bg-rose-100 transition-colors">
+                <button onClick={() => confirmDeleteClick("bulk", `Delete ${selectedIds.length} projects?`)} className="flex items-center gap-1.5 px-3 py-1 bg-rose-50 text-rose-600 rounded-lg text-[10px] font-bold uppercase hover:bg-rose-100 transition-colors">
                   <Trash2 size={14} /> Delete ({selectedIds.length})
                 </button>
               )}
@@ -302,6 +304,17 @@ console.log(form)
           </form>
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={!!pendingDelete}
+        title="Confirm Delete"
+        message={pendingDelete?.message}
+        onConfirm={async () => {
+          if (!pendingDelete) return;
+          await handleBulkDelete();
+        }}
+        onClose={() => setPendingDelete(null)}
+      />
     </div>
   );
 }

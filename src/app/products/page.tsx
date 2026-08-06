@@ -8,6 +8,7 @@ import {
   type AuthUser, type Category, type Product,
 } from "@/lib/api";
 import { fieldClass, labelClass } from "@/constants";
+import ConfirmDialog from "@/components/common/ConfirmDialog";
 import Image from "next/image";
 
 type ProductForm = {
@@ -89,6 +90,7 @@ export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [productForm, setProductForm] = useState<ProductForm>(emptyProduct);
+  const [pendingDelete, setPendingDelete] = useState<{ message: string; id: string } | null>(null);
 
   const selectedCategoryName = useMemo(() => {
     const category = categories.find((item) => item._id === productForm.category);
@@ -287,11 +289,10 @@ export default function ProductsPage() {
       isActive: product.isActive !== false,
     });
   };
-  const deleteProduct = async (product: Product) => {
-    if (!confirm(`Delete ${product.title}?`)) return;
+  const deleteProduct = async (id: string) => {
     setLoading(true);
     try {
-      await productApi.remove(product._id);
+      await productApi.remove(id);
       await refreshData();
       setMessage("Product deleted.");
     } catch (error) {
@@ -300,6 +301,8 @@ export default function ProductsPage() {
       setLoading(false);
     }
   };
+
+  const confirmDeleteClick = (id: string, message: string) => setPendingDelete({ id, message });
 
   if (!user) {
     return (
@@ -360,7 +363,7 @@ export default function ProductsPage() {
                     <MessageSquarePlus size={12} />
                   </Link>
                   <button onClick={() => editProduct(product)} className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer"><Pencil size={12} /></button>
-                  <button onClick={() => deleteProduct(product)} className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"><Trash2 size={12} /></button>
+                  <button onClick={() => confirmDeleteClick(product._id, `Delete ${product.title}?`)} className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"><Trash2 size={12} /></button>
                 </div>
               </article>
             ))}
@@ -936,6 +939,17 @@ export default function ProductsPage() {
           </div>
         </form>
       </section>
+
+      <ConfirmDialog
+        isOpen={!!pendingDelete}
+        title="Confirm Delete"
+        message={pendingDelete?.message}
+        onConfirm={async () => {
+          if (!pendingDelete) return;
+          await deleteProduct(pendingDelete.id);
+        }}
+        onClose={() => setPendingDelete(null)}
+      />
     </div>
   );
 }
