@@ -47,6 +47,7 @@ import { api, ComponentContent, componentContentApi } from "@/lib/api";
 import { cardClass, frontendUrl } from "@/constants";
 import Image from "next/image";
 import ComponentList from "./ComponentList";
+import ConfirmDialog from "@/components/common/ConfirmDialog";
 
 interface NavItem {
   label: string;
@@ -715,6 +716,7 @@ export function CommonLayout({
   const searchParams = useSearchParams();
 
   const [records, setRecords] = useState<ComponentContent[]>([]);
+  const [pendingDelete, setPendingDelete] = useState<{ message: string; id: string } | null>(null);
   const editingKey = searchParams.get("component");
 
   const getPageConfig = () => {
@@ -760,7 +762,6 @@ export function CommonLayout({
   }, [refreshComponents]);
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm("Delete this component?")) return;
     try {
       await componentContentApi.remove(id);
       toast.success("Component deleted");
@@ -769,6 +770,8 @@ export function CommonLayout({
       toast.error("Delete failed");
     }
   };
+
+  const confirmDeleteClick = (id: string, message: string) => setPendingDelete({ id, message });
 
   const onReorder = async (result: any) => {
     if (!result.destination) return;
@@ -857,7 +860,7 @@ export function CommonLayout({
                       <ComponentList
                         records={records}
                         onEdit={(r) => router.push(`?component=${r.key}`)}
-                        onDelete={handleDelete}
+                        onDelete={(id) => confirmDeleteClick(id, "Delete this component?")}
                         onReorder={onReorder}
                         editingId={records.find((r) => r.key === editingKey)?._id || null}
                         knownKeys={records.map((r) => r.key)}
@@ -898,6 +901,17 @@ export function CommonLayout({
         autoClose={4000}
         hideProgressBar={false}
         theme="light"
+      />
+
+      <ConfirmDialog
+        isOpen={!!pendingDelete}
+        title="Confirm Delete"
+        message={pendingDelete?.message}
+        onConfirm={async () => {
+          if (!pendingDelete) return;
+          await handleDelete(pendingDelete.id);
+        }}
+        onClose={() => setPendingDelete(null)}
       />
     </div>
   );

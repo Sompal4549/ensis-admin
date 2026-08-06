@@ -9,10 +9,14 @@ import { componentContentApi, type ComponentContent } from "@/lib/api";
 import { fieldClass, labelClass } from "@/constants";
 import { ImageUploadField } from "@/components/common/ImageUploadField";
 import RichTextEditor from "@/components/common/RichTextEditor";
+import ConfirmDialog from "@/components/common/ConfirmDialog";
 import ComponentList from "./ComponentList";
 import { buildEmptyProductContent, ProductPageContentKeys, productPageKeys } from "./productPageContent";
 
 const randomId = () => Math.random().toString(36).slice(2, 9);
+
+const smallLabelClass = "text-[11px] text-[#5f5a50] font-semibold flex flex-col gap-0.5";
+const smallFieldClass = "px-2 py-1 text-xs border rounded w-full";
 
 function ProductManagerInner() {
   const [records, setRecords] = useState<ComponentContent[]>([]);
@@ -20,6 +24,7 @@ function ProductManagerInner() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [uploadingField, setUploadingField] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<{ message: string; id: string } | null>(null);
   const searchParams = useSearchParams();
   const router = useRouter();
   const componentKey = searchParams.get("component");
@@ -59,7 +64,6 @@ function ProductManagerInner() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this section?")) return;
     try {
       await componentContentApi.remove(id);
       toast.success("Deleted successfully");
@@ -69,6 +73,8 @@ function ProductManagerInner() {
       toast.error("Delete failed");
     }
   };
+
+  const confirmDeleteClick = (id: string, message: string) => setPendingDelete({ id, message });
 
   const onReorder = async (result: DropResult) => {
     if (!result.destination) return;
@@ -116,31 +122,41 @@ function ProductManagerInner() {
   const data = (form.data || {}) as any;
 
   const renderHeroForm = () => (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {(data.slides || []).map((slide: any, idx: number) => (
-        <div key={slide.id} className="p-4 border rounded-2xl bg-slate-50 relative space-y-4 shadow-sm">
-          <button type="button" onClick={() => { const ns = data.slides.filter((_: any, i: number) => i !== idx); setForm({...form, data: {...data, slides: ns}}) }} className="absolute top-2 right-2 text-red-500 p-1 hover:bg-red-50 rounded"><Trash2 size={16} /></button>
-          <div className="grid grid-cols-2 gap-4">
-            <label className={labelClass}>Slide Title <input className={fieldClass} value={slide.title} onChange={e => { const ns = [...data.slides]; ns[idx].title = e.target.value; setForm({...form, data: {...data, slides: ns}}) }} /></label>
-            <label className={labelClass}>Highlight <input className={fieldClass} value={slide.highlight} onChange={e => { const ns = [...data.slides]; ns[idx].highlight = e.target.value; setForm({...form, data: {...data, slides: ns}}) }} /></label>
+        <div key={slide.id} className="relative rounded-lg border border-[#ded3c4] bg-[#fbf9f5] p-3 shadow-sm">
+          <div className="mb-2 flex items-center justify-between">
+            <h5 className="text-[10px] font-bold uppercase tracking-wide text-[#8d6a3a]">Slide {idx + 1}</h5>
+            <button type="button" onClick={() => { const ns = data.slides.filter((_: any, i: number) => i !== idx); setForm({...form, data: {...data, slides: ns}}) }} className="rounded p-0.5 text-red-500 hover:bg-red-50"><Trash2 size={13} /></button>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-             <div className="space-y-2">
-               <h5 className="text-[10px] font-bold  uppercase">Primary Button</h5>
-               <input className={fieldClass} placeholder="Label" value={slide.primaryButton?.label} onChange={e => { const ns = [...data.slides]; ns[idx].primaryButton = {...ns[idx].primaryButton, label: e.target.value}; setForm({...form, data: {...data, slides: ns}}) }} />
-               <input className={fieldClass} placeholder="URL" value={slide.primaryButton?.url} onChange={e => { const ns = [...data.slides]; ns[idx].primaryButton = {...ns[idx].primaryButton, url: e.target.value}; setForm({...form, data: {...data, slides: ns}}) }} />
-             </div>
-             <div className="space-y-2">
-               <h5 className="text-[10px] font-bold  uppercase">Secondary Button</h5>
-               <input className={fieldClass} placeholder="Label" value={slide.secondaryButton?.label} onChange={e => { const ns = [...data.slides]; ns[idx].secondaryButton = {...ns[idx].secondaryButton, label: e.target.value}; setForm({...form, data: {...data, slides: ns}}) }} />
-               <input className={fieldClass} placeholder="URL" value={slide.secondaryButton?.url} onChange={e => { const ns = [...data.slides]; ns[idx].secondaryButton = {...ns[idx].secondaryButton, url: e.target.value}; setForm({...form, data: {...data, slides: ns}}) }} />
-             </div>
+          <div className="mb-2 grid grid-cols-2 gap-2">
+            <label className={smallLabelClass}>Slide Title <input className={smallFieldClass} value={slide.title} onChange={e => { const ns = [...data.slides]; ns[idx].title = e.target.value; setForm({...form, data: {...data, slides: ns}}) }} /></label>
+            <label className={smallLabelClass}>Price (₹) <input className={smallFieldClass} placeholder="e.g. 45000" value={slide.price ?? ""} onChange={e => { const ns = [...data.slides]; ns[idx].price = e.target.value; setForm({...form, data: {...data, slides: ns}}) }} /></label>
           </div>
-          <RichTextEditor value={slide.description || ""} onChange={val => { const ns = [...data.slides]; ns[idx].description = val; setForm({...form, data: {...data, slides: ns}}) }} placeholder="Description..." minHeight="100px" />
-          <ImageUploadField label="Background Image" value={slide.bgImage} fieldKey={`hero.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => { const ns = [...data.slides]; ns[idx].bgImage = url; setForm({...form, data: {...data, slides: ns}}) }} />
+          <div className="mb-2 space-y-1">
+            <h6 className="text-[9px] font-bold uppercase text-[#8d6a3a]">Primary Button</h6>
+            <div className="grid grid-cols-2 gap-2">
+              <input className={smallFieldClass} placeholder="Label" value={slide.primaryButton?.label} onChange={e => { const ns = [...data.slides]; ns[idx].primaryButton = {...ns[idx].primaryButton, label: e.target.value}; setForm({...form, data: {...data, slides: ns}}) }} />
+              <input className={smallFieldClass} placeholder="URL" value={slide.primaryButton?.url} onChange={e => { const ns = [...data.slides]; ns[idx].primaryButton = {...ns[idx].primaryButton, url: e.target.value}; setForm({...form, data: {...data, slides: ns}}) }} />
+            </div>
+          </div>
+          <div className="mb-2 space-y-1">
+            <h6 className="text-[9px] font-bold uppercase text-[#8d6a3a]">Secondary Button</h6>
+            <div className="grid grid-cols-2 gap-2">
+              <input className={smallFieldClass} placeholder="Label" value={slide.secondaryButton?.label} onChange={e => { const ns = [...data.slides]; ns[idx].secondaryButton = {...ns[idx].secondaryButton, label: e.target.value}; setForm({...form, data: {...data, slides: ns}}) }} />
+              <input className={smallFieldClass} placeholder="URL" value={slide.secondaryButton?.url} onChange={e => { const ns = [...data.slides]; ns[idx].secondaryButton = {...ns[idx].secondaryButton, url: e.target.value}; setForm({...form, data: {...data, slides: ns}}) }} />
+            </div>
+          </div>
+          <div className="mb-2">
+            <h6 className="mb-1 text-[9px] font-bold uppercase text-[#8d6a3a]">Description</h6>
+            <RichTextEditor value={slide.description || ""} onChange={val => { const ns = [...data.slides]; ns[idx].description = val; setForm({...form, data: {...data, slides: ns}}) }} placeholder="Description..." minHeight="120px" />
+          </div>
+          <div className="mt-2">
+            <ImageUploadField label="Background Image (full width)" value={slide.bgImage} fieldKey={`hero.${idx}`} uploadingField={uploadingField} onUploadingChange={setUploadingField} onError={m => toast.error(m)} onUpload={url => { const ns = [...data.slides]; ns[idx].bgImage = url; setForm({...form, data: {...data, slides: ns}}) }} />
+          </div>
         </div>
       ))}
-      <button type="button" onClick={() => setForm({...form, data: {...data, slides: [...(data.slides || []), { id: randomId(), title: '', highlight: '', primaryButton: {label:'', url:''}, secondaryButton: {label:'', url:''}, description: '', bgImage: '' }]}})} className="w-full py-4 border-2 border-dashed rounded-xl  flex items-center justify-center gap-2 hover:bg-slate-50">+ Add Hero Slide</button>
+      <button type="button" onClick={() => setForm({...form, data: {...data, slides: [...(data.slides || []), { id: randomId(), title: '', price: '', primaryButton: {label:'', url:''}, secondaryButton: {label:'', url:''}, description: '', bgImage: '' }]}})} className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-[#ded3c4] py-2 text-xs font-semibold text-[#8d6a3a] hover:bg-[#fbf9f5]">+ Add Hero Slide</button>
     </div>
   );
 
@@ -377,12 +393,23 @@ function ProductManagerInner() {
           <ComponentList 
             records={records} 
             onEdit={handleEdit} 
-            onDelete={handleDelete} 
+            onDelete={(id) => confirmDeleteClick(id, "Are you sure you want to delete this section?")} 
             onReorder={onReorder}
             editingId={editingId} 
           />
         </div>
         </aside>
+
+      <ConfirmDialog
+        isOpen={!!pendingDelete}
+        title="Confirm Delete"
+        message={pendingDelete?.message}
+        onConfirm={async () => {
+          if (!pendingDelete) return;
+          await handleDelete(pendingDelete.id);
+        }}
+        onClose={() => setPendingDelete(null)}
+      />
       </div>
   );
 }

@@ -9,6 +9,7 @@ import { componentContentApi, type ComponentContent } from "@/lib/api";
 import { fieldClass, labelClass } from "@/constants";
 import { ImageUploadField } from "@/components/common/ImageUploadField";
 import RichTextEditor from "@/components/common/RichTextEditor";
+import ConfirmDialog from "@/components/common/ConfirmDialog";
 import ComponentList from "./ComponentList";
 import { buildEmptyBlogContent, BlogPageContentKeys, blogPageKeys } from "./blogPageContent";
 
@@ -28,6 +29,7 @@ export default function BlogPageManager() {
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [uploadingField, setUploadingField] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<{ message: string; id: string } | null>(null);
   const searchParams = useSearchParams();
   const router = useRouter();
   const componentKey = searchParams.get("component");
@@ -118,7 +120,6 @@ export default function BlogPageManager() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this blog?")) return;
     try {
       await componentContentApi.remove(id);
       toast.success("Blog deleted");
@@ -127,6 +128,8 @@ export default function BlogPageManager() {
       toast.error("Delete failed");
     }
   };
+
+  const confirmDeleteClick = (id: string, message: string) => setPendingDelete({ id, message });
 
   const updateData = (field: string, value: any) => {
     setForm({ ...form, data: { ...(form.data as any), [field]: value } });
@@ -434,6 +437,17 @@ export default function BlogPageManager() {
         </div>
       </aside> */}
       </div>
+
+      <ConfirmDialog
+        isOpen={!!pendingDelete}
+        title="Confirm Delete"
+        message={pendingDelete?.message}
+        onConfirm={async () => {
+          if (!pendingDelete) return;
+          await handleDelete(pendingDelete.id);
+        }}
+        onClose={() => setPendingDelete(null)}
+      />
     </Suspense>
   );
 }

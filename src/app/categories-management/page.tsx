@@ -22,6 +22,7 @@ import {
 } from "@/lib/api";
 import { fieldClass, labelClass } from "@/constants";
 import { ImageUploadField } from "@/components/common/ImageUploadField";
+import ConfirmDialog from "@/components/common/ConfirmDialog";
 
 type CategoryForm = {
   id?: string;
@@ -44,6 +45,7 @@ export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoryForm, setCategoryForm] = useState<CategoryForm>(emptyCategory);
   const [uploadingField, setUploadingField] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<{ message: string; id: string } | null>(null);
 
   const refreshData = async () => {
     const categoryResult = await categoryApi.list();
@@ -129,11 +131,10 @@ export default function CategoriesPage() {
     }
   };
 
-  const deleteCategory = async (category: Category) => {
-    if (!confirm(`Delete ${category.name}? Products using this category may need reassignment.`)) return;
+  const deleteCategory = async (id: string) => {
     setLoading(true);
     try {
-      await categoryApi.remove(category._id);
+      await categoryApi.remove(id);
       await refreshData();
       toast.success("Category deleted.");
     } catch (error) {
@@ -142,6 +143,8 @@ export default function CategoriesPage() {
       setLoading(false);
     }
   };
+
+  const confirmDeleteClick = (id: string, message: string) => setPendingDelete({ id, message });
 
   if (!user) {
     return (
@@ -320,7 +323,7 @@ export default function CategoriesPage() {
                     <Pencil size={12} />
                   </button>
                   <button
-                    onClick={() => deleteCategory(category)}
+                    onClick={() => confirmDeleteClick(category._id, `Delete ${category.name}? Products using this category may need reassignment.`)}
                     className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
                   >
                     <Trash2 size={12} />
@@ -331,6 +334,17 @@ export default function CategoriesPage() {
           </div>
         </div>
       </section>
+
+      <ConfirmDialog
+        isOpen={!!pendingDelete}
+        title="Confirm Delete"
+        message={pendingDelete?.message}
+        onConfirm={async () => {
+          if (!pendingDelete) return;
+          await deleteCategory(pendingDelete.id);
+        }}
+        onClose={() => setPendingDelete(null)}
+      />
     </div>
   );
 }

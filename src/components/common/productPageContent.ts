@@ -21,7 +21,7 @@ const randomId = () => Math.random().toString(36).slice(2, 9);
 
 export const defaultProductData: Record<ProductPageContentKeys, any> = {
   "product.hero": {
-    slides: [{ id: randomId(), title: "", highlight: "", primaryButton: { label: "", url: "" }, secondaryButton: { label: "", url: "" }, description: "", bgImage: "" }]
+    slides: [{ id: randomId(), title: "", price: "", primaryButton: { label: "", url: "" }, secondaryButton: { label: "", url: "" }, description: "", bgImage: "" }]
   },
   "product.featureStrip": {
     features: [{ id: randomId(), image: "", title: "", subtitle: "" }]

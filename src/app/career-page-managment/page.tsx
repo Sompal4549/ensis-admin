@@ -6,6 +6,7 @@ import { DropResult } from "@hello-pangea/dnd";
 import { Loader2, PlusCircle, Save, Trash2 } from "lucide-react";
 import { toast } from "react-toastify";
 import ComponentList from "@/components/common/ComponentList";
+import ConfirmDialog from "@/components/common/ConfirmDialog";
 import { ImageUploadField } from "@/components/common/ImageUploadField";
 import { fieldClass, labelClass } from "@/constants";
 import { componentContentApi, type ComponentContent } from "@/lib/api";
@@ -252,6 +253,7 @@ const CareerPageManagement = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingField, setUploadingField] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<{ message: string; id: string } | null>(null);
   const [records, setRecords] = useState<ComponentContent[]>([]);
   const [contentByKey, setContentByKey] = useState<Record<string, ComponentContent | undefined>>({});
   const [activeTab, setActiveTab] = useState<CareerTab>("banner");
@@ -346,7 +348,6 @@ const [testimonialForm, setTestimonialForm] = useState<Testimonial>(initialTesti
   };
 
   const handleDeleteComponent = async (id: string) => {
-    if (!window.confirm("Delete this component?")) return;
     try {
       await componentContentApi.remove(id);
       loadContent();
@@ -354,6 +355,8 @@ const [testimonialForm, setTestimonialForm] = useState<Testimonial>(initialTesti
       toast.error("Delete failed");
     }
   };
+
+  const confirmDeleteClick = (id: string, message: string) => setPendingDelete({ id, message });
 
   const handleEditComponent = (record: ComponentContent) => {
     const nextTab = (Object.keys(componentMeta) as CareerTab[]).find((tab) => componentMeta[tab].key === record.key);
@@ -399,7 +402,7 @@ const [testimonialForm, setTestimonialForm] = useState<Testimonial>(initialTesti
             <ComponentList
               records={records}
               onEdit={handleEditComponent}
-              onDelete={handleDeleteComponent}
+              onDelete={(id) => confirmDeleteClick(id, "Delete this component?")}
               onReorder={handleReorder}
               editingId={currentEditingId}
               knownKeys={knownKeys}
@@ -774,6 +777,17 @@ const [testimonialForm, setTestimonialForm] = useState<Testimonial>(initialTesti
           </form>
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={!!pendingDelete}
+        title="Confirm Delete"
+        message={pendingDelete?.message}
+        onConfirm={async () => {
+          if (!pendingDelete) return;
+          await handleDeleteComponent(pendingDelete.id);
+        }}
+        onClose={() => setPendingDelete(null)}
+      />
     </div>
   );
 };

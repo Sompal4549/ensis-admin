@@ -8,6 +8,7 @@ import {
 import Image from "next/image";
 import { getImageUrl, socialClickApi, type SocialLink } from "@/lib/api";
 import { ImageUploadField } from "@/components/common/ImageUploadField";
+import ConfirmDialog from "@/components/common/ConfirmDialog";
 
 type Click = { _id: string; platform: string; ip: string; userAgent: string; country?: string; city?: string; region?: string; timezone?: string; createdAt: string };
 type Stat = { _id: string; count: number };
@@ -36,6 +37,7 @@ function LinksManager() {
   const [msg, setMsg] = useState("");
   const [saving, setSaving] = useState(false);
   const [uploadingField, setUploadingField] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<{ message: string; id: string } | null>(null);
   const fetchLinks = async () => {
     try { setLinks(await socialClickApi.links.list()); } catch { }
   };
@@ -69,11 +71,13 @@ function LinksManager() {
   };
 
   const del = async (id: string) => {
-    if (!confirm("Delete this link?")) return;
     try { await socialClickApi.links.remove(id); fetchLinks(); } catch { }
   };
 
+  const confirmDeleteClick = (id: string, message: string) => setPendingDelete({ id, message });
+
   return (
+    <>
     <div className="grid gap-4 lg:grid-cols-[1fr_360px]">
       {/* List */}
       <div className="overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm">
@@ -102,7 +106,7 @@ function LinksManager() {
                 </div>
                 <div className="flex gap-1 shrink-0">
                   <button onClick={() => startEdit(link)} className="h-7 w-7 flex items-center justify-center rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors"><Pencil size={11} /></button>
-                  <button onClick={() => del(link._id)} className="h-7 w-7 flex items-center justify-center rounded-lg border border-slate-200 text-rose-500 hover:bg-rose-50 transition-colors"><Trash2 size={11} /></button>
+                  <button onClick={() => confirmDeleteClick(link._id, "Delete this link?")} className="h-7 w-7 flex items-center justify-center rounded-lg border border-slate-200 text-rose-500 hover:bg-rose-50 transition-colors"><Trash2 size={11} /></button>
                 </div>
               </div>
             ))}
@@ -198,7 +202,19 @@ function LinksManager() {
           )}
         </div>
       </div>
-    </div>
+</div>
+
+    <ConfirmDialog
+      isOpen={!!pendingDelete}
+      title="Confirm Delete"
+      message={pendingDelete?.message}
+      onConfirm={async () => {
+        if (!pendingDelete) return;
+        await del(pendingDelete.id);
+      }}
+      onClose={() => setPendingDelete(null)}
+    />
+    </>
   );
 }
 
