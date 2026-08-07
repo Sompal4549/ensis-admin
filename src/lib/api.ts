@@ -25,6 +25,7 @@ export type Product = {
   shortDescription?: string;
   price: number;
   discountPrice?: number;
+  gstRate?: number;
   category?: Category | string;
   subcategory?: string;
   material?: string;
