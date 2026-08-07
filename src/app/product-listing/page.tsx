@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { productApi, getImageUrl, type Product } from "@/lib/api";
-import { Loader2 } from 'lucide-react';
+import { Loader2, Printer } from 'lucide-react';
 
 const topFeatures = [
     { title: "PREMIUM QUALITY", desc: "High-grade materials and superior finish", img: "/images/PREMIUM.png" },
@@ -151,7 +151,6 @@ const MiniFeatureBar = () => (
 const EnsisPriceList = () => {
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
-
     const fetchProducts = useCallback(async () => {
         setLoading(true);
         try {
@@ -189,10 +188,34 @@ const EnsisPriceList = () => {
     );
 
     return (
-        <div className="min-h-screen flex flex-col items-center py-2 font-sans bg-gray-100 gap-4 ">
+        <div className="min-h-screen flex flex-col items-center py-2 font-sans bg-gray-100 gap-4 print:gap-0 print:bg-white print:py-0">
+
+            {/* Print-only styles: hide everything except the price list */}
+            <style>{`
+                @media print {
+                    * {
+                        -webkit-print-color-adjust: exact;
+                        print-color-adjust: exact;
+                    }
+                    body * { visibility: hidden; }
+                    .print-area, .print-area * { visibility: visible; }
+                    .print-area { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; }
+                    @page { size: A4; margin: 6mm; }
+                }
+            `}</style>
+
+            {/* Print button */}
+            <button
+                onClick={() => window.print()}
+                className="print:hidden fixed top-24 right-6 z-50 flex items-center gap-2 rounded-lg bg-[#012115] px-5 py-2.5 text-sm font-bold text-white shadow-lg hover:bg-[#01422c] transition-colors"
+            >
+                <Printer size={18} /> Print / Save as PDF
+            </button>
+
+            <div className="print-area w-full flex flex-col items-center gap-4 print:gap-0">
 
             {/* ===== PAGE 1 ===== */}
-            <div className="w-full max-w-[1200px] bg-white shadow-2xl overflow-hidden">
+            <div className="w-full max-w-[1200px] bg-white shadow-2xl overflow-hidden print:shadow-none print:break-after-page">
                 {/* Header */}
                 <div className="relative w-full h-[420px] bg-[#fdfaf2] overflow-hidden">
                     <div className="absolute top-0 right-0 h-[480px] w-full">
@@ -295,7 +318,7 @@ const EnsisPriceList = () => {
             {pages.length > 1 && pages.slice(1).map((page, pageIdx) => {
                 const startIndex = 8 + (pageIdx * 14);
                 return (
-                    <div key={pageIdx} className="w-full max-w-[1200px] bg-[#02170b] shadow-2xl overflow-hidden py-0">
+                    <div key={pageIdx} className="w-full max-w-[1200px] bg-[#02170b] shadow-2xl overflow-hidden py-0 print:shadow-none print:break-after-page">
 
                         <div className="border-t-[2px] border-r-[2px] border-l-[2px] border-[#c99b3b] rounded-t-[24px] p-5 bg-[#fcf8ef]">
                             <MiniFeatureBar />
@@ -308,11 +331,12 @@ const EnsisPriceList = () => {
                             </div>
                         </div>
 
-                        <Footer />
-                    </div>
-                );
+                    <Footer />
+                </div>
+            );
             })}
 
+            </div>
         </div>
     );
 };

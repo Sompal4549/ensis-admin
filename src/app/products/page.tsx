@@ -9,6 +9,7 @@ import {
 } from "@/lib/api";
 import { fieldClass, labelClass } from "@/constants";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
+import RichTextEditor from "@/components/common/RichTextEditor";
 import Image from "next/image";
 
 type ProductForm = {
@@ -19,6 +20,7 @@ type ProductForm = {
   shortDescription: string;
   price: string;
   discountPrice: string;
+  gstRate: string;
   stock: string;
   category: string;
   subcategory: string;
@@ -57,7 +59,7 @@ type ProductForm = {
 
 const emptyProduct: ProductForm = {
   title: "", code: "", description: "", shortDescription: "",
-  price: "", discountPrice: "", stock: "", category: "",
+  price: "", discountPrice: "", gstRate: "5", stock: "", category: "",
   subcategory: "", material: "", weight: "",
   tags: [""], images: [], slug: "",
   overview: {
@@ -146,6 +148,7 @@ export default function ProductsPage() {
       description: productForm.description, shortDescription: productForm.shortDescription,
       price: Number(productForm.price || 0),
       discountPrice: productForm.discountPrice ? Number(productForm.discountPrice) : undefined,
+      gstRate: Number(productForm.gstRate || 5),
       stock: productForm.stock ? Number(productForm.stock) : 0,
       category: productForm.category, subcategory: productForm.subcategory,
       material: productForm.material, weight: productForm.weight,
@@ -184,6 +187,7 @@ export default function ProductsPage() {
       shortDescription: product.shortDescription || "",
       price: String(product.price || ""),
       discountPrice: String(product.discountPrice || ""),
+      gstRate: String(product.gstRate ?? 5),
       stock: String(product.stock || ""),
       category: categoryId,
       subcategory: product.subcategory || "",
@@ -337,7 +341,7 @@ export default function ProductsPage() {
       <section className="grid gap-3 lg:grid-cols-[0.95fr_1.4fr]">
         {/* Product List */}
         <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm h-fit">
-          <div className="border-b border-slate-100 px-5 py-4 text-xs font-bold text-slate-800 flex items-center justify-between">
+          <div className="border-b border-slate-100 px-4 py-2.5 text-xs font-bold text-slate-800 flex items-center justify-between">
             <span>{products.length} Products Cataloged</span>
             <Link href="/reviews" className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-600 hover:text-blue-700">
               <MessageSquarePlus size={12} /> Manage Reviews
@@ -345,7 +349,7 @@ export default function ProductsPage() {
           </div>
           <div className="divide-y divide-slate-100 max-h-[60vh] overflow-y-auto">
             {products.map((product) => (
-              <article key={product._id} className="grid gap-4 p-4 sm:grid-cols-[80px_1fr_auto] sm:items-center hover:bg-slate-50/20">
+              <article key={product._id} className="grid gap-3 p-2.5 sm:grid-cols-[80px_1fr_auto] sm:items-center hover:bg-slate-50/20">
                 <div className="h-14 w-20 overflow-hidden rounded-lg bg-slate-50 shrink-0">
                   {product.images?.[0] && (
                     <Image width={100} height={100} src={getImageUrl(product.images[0])} alt={product.title} className="h-full w-full object-cover" crossOrigin="anonymous" />
@@ -355,7 +359,7 @@ export default function ProductsPage() {
                   <h4 className="font-bold text-slate-800 text-xs truncate">{product.title}</h4>
                   <p className="mt-0.5 line-clamp-1 text-[11px] ">{product.description}</p>
                   <p className="mt-1 text-[10px] font-bold text-emerald-600">
-                    Rs. {product.price?.toLocaleString("en-IN")} · {typeof product.category === "string" ? product.category : product.category?.name}
+                    Rs. {product.price?.toLocaleString("en-IN")} · {product.gstRate ?? 5}% GST · {typeof product.category === "string" ? product.category : product.category?.name}
                   </p>
                 </div>
                 <div className="flex gap-2">
@@ -371,7 +375,7 @@ export default function ProductsPage() {
         </div>
 
         {/* Form */}
-        <form onSubmit={submitProduct} className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm space-y-3 h-fit max-h-[90vh] overflow-y-auto">
+        <form onSubmit={submitProduct} className="rounded-xl border border-slate-100 bg-white p-3 shadow-sm space-y-2 h-fit max-h-[90vh] overflow-y-auto">
           <h3 className="flex items-center gap-1.5 text-xs font-bold text-slate-800">
             <Plus size={14} />
             {productForm.id ? "Edit Product Details" : "Add New Product"}
@@ -389,7 +393,7 @@ export default function ProductsPage() {
             </div>
           </div>
           {/* ────── Pricing Section ────── */}
-          <fieldset className="border border-slate-200 rounded-xl p-4 space-y-4">
+          <fieldset className="border border-slate-200 rounded-xl p-3 space-y-3">
             <legend className="text-[10px] font-black uppercase text-blue-600 tracking-widest px-1">Pricing Section</legend>
 
             {/* See It In Real Spaces */}
@@ -469,8 +473,8 @@ export default function ProductsPage() {
             <textarea className={`${fieldClass} min-h-12`} value={productForm.shortDescription} onChange={(e) => setProductForm({ ...productForm, shortDescription: e.target.value })} />
           </div>
 
-          {/* Price, Discount, Stock */}
-          <div className="grid gap-3 sm:grid-cols-3">
+          {/* Price, Discount, Stock, GST */}
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <div>
               <label className={labelClass}>Price (INR)</label>
               <input className={fieldClass} type="number" min="0" value={productForm.price} onChange={(e) => setProductForm({ ...productForm, price: e.target.value })} required />
@@ -482,6 +486,10 @@ export default function ProductsPage() {
             <div>
               <label className={labelClass}>Stock Quantity</label>
               <input className={fieldClass} type="number" min="0" value={productForm.stock} onChange={(e) => setProductForm({ ...productForm, stock: e.target.value })} />
+            </div>
+            <div>
+              <label className={labelClass}>GST (%)</label>
+              <input className={fieldClass} type="number" min="0" max="100" step="0.01" value={productForm.gstRate} onChange={(e) => setProductForm({ ...productForm, gstRate: e.target.value })} placeholder="5" />
             </div>
           </div>
 
@@ -825,7 +833,7 @@ export default function ProductsPage() {
                 <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, productSpecifications: [...productForm.overview.productSpecifications, { highlight: "", title: "", image: "", specifications: [{ title: "", description: "" }] }] } })} className="text-[10px] font-bold text-blue-600 flex items-center gap-1"><Plus size={11} /> Add</button>
               </div>
               {productForm.overview.productSpecifications.map((ps, psIdx) => (
-                <div key={psIdx} className="p-4 border border-blue-100 rounded-xl bg-blue-50/20 space-y-3 relative">
+                <div key={psIdx} className="p-3 border border-blue-100 rounded-xl bg-blue-50/20 space-y-2.5 relative">
                   {productForm.overview.productSpecifications.length > 1 && (
                     <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, productSpecifications: productForm.overview.productSpecifications.filter((_, i) => i !== psIdx) } })} className="absolute top-2 right-2 text-rose-500"><Trash2 size={12} /></button>
                   )}
@@ -864,7 +872,7 @@ export default function ProductsPage() {
             </div>
 
             {/* Smart Design & Appearance */}
-            <div className="p-4 border border-slate-200 rounded-xl bg-slate-50 space-y-3">
+            <div className="p-3 border border-slate-200 rounded-xl bg-slate-50 space-y-2.5">
               <h5 className="text-[10px] font-bold  uppercase">Smart Design & Appearance</h5>
               <input className={fieldClass} placeholder="Highlight" value={productForm.overview.smartDesignAppearance.highlight} onChange={e => setProductForm({ ...productForm, overview: { ...productForm.overview, smartDesignAppearance: { ...productForm.overview.smartDesignAppearance, highlight: e.target.value } } })} />
               <input className={fieldClass} placeholder="Appearance Title" value={productForm.overview.smartDesignAppearance.title} onChange={e => setProductForm({ ...productForm, overview: { ...productForm.overview, smartDesignAppearance: { ...productForm.overview.smartDesignAppearance, title: e.target.value } } })} />
@@ -906,10 +914,10 @@ export default function ProductsPage() {
             </div>
 
             {/* Material & Care */}
-            <div className="p-4 border border-amber-100 rounded-xl bg-amber-50/20 space-y-2">
+            <div className="p-3 border border-amber-100 rounded-xl bg-amber-50/20 space-y-2">
               <h5 className="text-[10px] font-bold text-amber-600 uppercase">Material & Care</h5>
               <input className={fieldClass} placeholder="Title" value={productForm.overview.materialAndCare.title} onChange={e => setProductForm({ ...productForm, overview: { ...productForm.overview, materialAndCare: { ...productForm.overview.materialAndCare, title: e.target.value } } })} />
-              <textarea className={`${fieldClass} min-h-16`} placeholder="Care instructions..." value={productForm.overview.materialAndCare.description} onChange={e => setProductForm({ ...productForm, overview: { ...productForm.overview, materialAndCare: { ...productForm.overview.materialAndCare, description: e.target.value } } })} />
+              <RichTextEditor value={productForm.overview.materialAndCare.description || ""} onChange={val => setProductForm({ ...productForm, overview: { ...productForm.overview, materialAndCare: { ...productForm.overview.materialAndCare, description: val } } })} placeholder="Care instructions..." minHeight="120px" />
             </div>
 
             {/* FAQs */}
