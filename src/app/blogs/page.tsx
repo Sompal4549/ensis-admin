@@ -296,6 +296,16 @@ const handleCreateBlog = async (e: React.FormEvent) => {
   const handleEditBlog = (blog: any) => {
   setEditingBlogId(blog._id ?? blog.id ?? null);
 
+  const formatDateForInput = (value?: string | null): string => {
+    if (!value) return "";
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+    const date = new Date(value);
+    if (isNaN(date.getTime())) return "";
+    return date.toISOString().split("T")[0];
+  };
+
+  const banner = blog.banner || emptyBlogForm().banner;
+
   setBlogForm({
   title: blog.title || "",
   isPopular: blog.isPopular || false,
@@ -305,7 +315,7 @@ category: blog.category || "",
   author: blog.author || "",
   ctaBanner: blog.ctaBanner || emptyBlogForm().ctaBanner,
   isFeatured: blog.isFeatured || false,
-  banner: blog.banner || emptyBlogForm().banner,
+  banner: { ...banner, date: formatDateForInput(banner.date) },
   blogImage: blog.blogImage || emptyBlogForm().blogImage,
   article: blog.article || emptyBlogForm().article,
   aboutTheAuthor:
