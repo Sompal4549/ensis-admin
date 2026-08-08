@@ -95,6 +95,8 @@ export type Order = {
     name?: string;
     quantity: number;
     price: number;
+    finish?: string;
+    size?: string;
   }>;
   totalAmount: number;
   paymentStatus: "pending" | "paid" | "failed";

@@ -164,6 +164,8 @@ export default function OrderDetailPage() {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Product</th>
+                    <th className="px-3 py-1.5 text-center text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Finish</th>
+                    <th className="px-3 py-1.5 text-center text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Size</th>
                     <th className="px-3 py-1.5 text-center text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Qty</th>
                     <th className="px-3 py-1.5 text-right text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Price</th>
                     <th className="px-3 py-1.5 text-right text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Total</th>
@@ -178,6 +180,20 @@ export default function OrderDetailPage() {
                     return (
                       <tr key={index}>
                         <td className="px-3 py-2 text-gray-800 font-medium">{productName}</td>
+                        <td className="px-3 py-2 text-center">
+                          {item.finish ? (
+                            <span className="inline-flex px-2 py-0.5 rounded-md bg-[#f5efe6] text-[#8d6a3a] font-semibold">{item.finish}</span>
+                          ) : (
+                            <span className="text-gray-300">—</span>
+                          )}
+                        </td>
+                        <td className="px-3 py-2 text-center">
+                          {item.size ? (
+                            <span className="inline-flex px-2 py-0.5 rounded-md bg-[#eef2f6] text-[#3b5b7d] font-semibold">{item.size}</span>
+                          ) : (
+                            <span className="text-gray-300">—</span>
+                          )}
+                        </td>
                         <td className="px-3 py-2 text-center text-gray-600">{item.quantity}</td>
                         <td className="px-3 py-2 text-right text-gray-600">₹{item.price.toLocaleString("en-IN")}</td>
                         <td className="px-3 py-2 text-right text-gray-900 font-bold">
@@ -189,7 +205,7 @@ export default function OrderDetailPage() {
                 </tbody>
                 <tfoot>
                   <tr className="bg-gray-50">
-                    <td colSpan={3} className="px-3 py-2 text-right text-xs font-semibold text-gray-600">Total</td>
+                    <td colSpan={5} className="px-3 py-2 text-right text-xs font-semibold text-gray-600">Total</td>
                     <td className="px-3 py-2 text-right text-sm font-bold text-gray-900">
                       ₹{order.totalAmount.toLocaleString("en-IN")}
                     </td>
