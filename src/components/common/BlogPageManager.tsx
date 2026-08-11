@@ -378,7 +378,7 @@ export default function BlogPageManager() {
         <div className="space-y-4">
           <form onSubmit={handleSave} className="bg-white border rounded-xl shadow-sm overflow-hidden">
             <div className="bg-[#fcfaf7] border-b p-3 flex items-center justify-between">
-             <h2 className="font-serif text-base">
+             <h2 className=" text-base">
   {componentKey 
     ? (editingId ? `Edit ${form.label}` : `Create ${blogPageKeys.find(k => k.key === componentKey)?.label}`)
     : "Blog Page Management"

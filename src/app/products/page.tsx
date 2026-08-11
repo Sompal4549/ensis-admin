@@ -396,7 +396,7 @@ export default function ProductsPage() {
           <fieldset className="border border-slate-200 rounded-xl p-3 space-y-3">
             <legend className="text-[10px] font-black uppercase text-blue-600 tracking-widest px-1">Pricing Section</legend>
 
-            {/* See It In Real Spaces */}
+            {/* ── COMMENTED: See It In Real Spaces is not displayed on the product page
             <div className="p-3 border border-slate-200 rounded-xl bg-slate-50 space-y-3">
               <h5 className="text-[10px] font-bold uppercase">See It In Real Spaces</h5>
               <div>
@@ -424,6 +424,7 @@ export default function ProductsPage() {
                 <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, seeItInRealSpaces: { ...productForm.overview.seeItInRealSpaces, images: [...productForm.overview.seeItInRealSpaces.images, { image: "", imageAlt: "" }] } } })} className="w-full py-2 border-2 border-dashed rounded-lg text-[10px] font-bold hover:bg-slate-50">+ Add Image</button>
               </div>
             </div>
+            ── */}
 
             {/* Product Pricing Features — array */}
             <div className="space-y-2">
@@ -588,7 +589,7 @@ export default function ProductsPage() {
           <div className="pt-6 border-t border-slate-100 space-y-5">
             <h4 className="text-[10px] font-black uppercase text-blue-600 tracking-widest">Technical Overview & Details</h4>
 
-            {/* Basic Overview */}
+            {/* ── COMMENTED: Basic Overview, Items, Bullets & What's Included are not displayed on the product page
             <div className="space-y-3">
               <div>
                 <label className={labelClass}>Overview Section Title</label>
@@ -600,7 +601,6 @@ export default function ProductsPage() {
               </div>
             </div>
 
-            {/* Overview Items */}
             <div>
               <label className={labelClass}>Overview Items</label>
               <div className="space-y-3 mt-1">
@@ -625,7 +625,6 @@ export default function ProductsPage() {
               </div>
             </div>
 
-            {/* Overview Bullet Points */}
             <div>
               <label className={labelClass}>Overview Bullet Points</label>
               <div className="space-y-2 mt-1">
@@ -639,7 +638,6 @@ export default function ProductsPage() {
               </div>
             </div>
 
-            {/* What's Included */}
             <div>
               <label className={labelClass}>What's Included</label>
               <div className="space-y-2 mt-1">
@@ -652,8 +650,10 @@ export default function ProductsPage() {
                 <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, whatisInclueded: [...productForm.overview.whatisInclueded, ""] } })} className="text-[10px] font-bold text-blue-600 flex items-center gap-1"><Plus size={12} /> Add Item</button>
               </div>
             </div>
+            ── */}
 
             {/* Key Specifications */}
+            {/* ── COMMENTED: Key Specifications & Key Features tabs are not displayed on the product page
             <div className="p-3 border border-slate-200 rounded-xl bg-slate-50 space-y-2">
               <label className="text-[10px] font-bold uppercase block">Key Specifications</label>
               <input className={fieldClass} placeholder="Section Title"
@@ -673,7 +673,6 @@ export default function ProductsPage() {
               </div>
             </div>
 
-            {/* Key Features */}
             <div className="p-3 border border-slate-200 rounded-xl bg-slate-50 space-y-2">
               <label className="text-[10px] font-bold  uppercase block">Key Features</label>
               <input className={fieldClass} placeholder="Section Title" value={productForm.overview.keyFeatures.title} onChange={e => setProductForm({ ...productForm, overview: { ...productForm.overview, keyFeatures: { ...productForm.overview.keyFeatures, title: e.target.value } } })} />
@@ -687,6 +686,7 @@ export default function ProductsPage() {
                 <button type="button" onClick={() => { const list = [...productForm.overview.keyFeatures.keyFeaturesList, ""]; setProductForm({ ...productForm, overview: { ...productForm.overview, keyFeatures: { ...productForm.overview.keyFeatures, keyFeaturesList: list } } }); }} className="text-[10px] font-bold text-blue-600 flex items-center gap-1"><Plus size={11} /> Add Feature</button>
               </div>
             </div>
+            ── */}
 {/* Ideal For */}
             <div>
               <label className={labelClass}>Ideal For</label>
@@ -702,7 +702,7 @@ export default function ProductsPage() {
                 }
               />
             </div>
-            {/* Product Dimensions */}
+            {/* ── COMMENTED: Product Dimensions tab is not displayed on the product page
             <div className="p-3 border border-slate-200 rounded-xl bg-slate-50 space-y-2">
               <label className="text-[10px] font-bold uppercase block">
                 Product Dimensions
@@ -825,6 +825,7 @@ export default function ProductsPage() {
                 </button>
               </div>
             </div>
+            ── */}
 
             {/* Technical Diagram & Specs */}
             <div className="space-y-3">
@@ -913,14 +914,13 @@ export default function ProductsPage() {
               </div>
             </div>
 
-            {/* Material & Care */}
+            {/* ── COMMENTED: Material & Care and Product FAQs are not displayed on the product page
             <div className="p-3 border border-amber-100 rounded-xl bg-amber-50/20 space-y-2">
               <h5 className="text-[10px] font-bold text-amber-600 uppercase">Material & Care</h5>
               <input className={fieldClass} placeholder="Title" value={productForm.overview.materialAndCare.title} onChange={e => setProductForm({ ...productForm, overview: { ...productForm.overview, materialAndCare: { ...productForm.overview.materialAndCare, title: e.target.value } } })} />
               <RichTextEditor value={productForm.overview.materialAndCare.description || ""} onChange={val => setProductForm({ ...productForm, overview: { ...productForm.overview, materialAndCare: { ...productForm.overview.materialAndCare, description: val } } })} placeholder="Care instructions..." minHeight="120px" />
             </div>
 
-            {/* FAQs */}
             <div className="space-y-3">
               <label className={labelClass}>Product FAQs</label>
               {productForm.overview.faqs.map((faq, idx) => (
@@ -932,6 +932,7 @@ export default function ProductsPage() {
               ))}
               <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, faqs: [...productForm.overview.faqs, { question: "", description: "" }] } })} className="w-full py-2 border-2 border-dashed rounded-lg  text-[10px] font-bold hover:bg-slate-50">+ Add FAQ</button>
             </div>
+            ── */}
           </div>
 
           {/* Submit */}
