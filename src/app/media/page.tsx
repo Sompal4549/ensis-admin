@@ -131,7 +131,7 @@ export default function BulkImageUploadPage() {
     <div className="max-w-6xl mx-auto">
       <header className="mb-4">
         <span className="text-[10px] font-bold uppercase tracking-widest text-[#8d6a3a]">Assets</span>
-        <h1 className="font-serif text-2xl text-[#1f261b] mt-0.5">Bulk Image Upload</h1>
+        <h1 className=" text-2xl text-[#1f261b] mt-0.5">Bulk Image Upload</h1>
         <p className="mt-1 text-xs text-[#5f5a50] max-w-2xl leading-relaxed">
           Upload multiple high-quality images. Once uploaded, you can copy the generated paths
           to paste into your product images field or homepage content forms.
@@ -243,7 +243,7 @@ export default function BulkImageUploadPage() {
               <div className="bg-white p-3 rounded-full shadow-sm mb-2 border border-[#eee5d9]">
                 <ImageIcon size={22} className="text-[#d9cdbb]" />
               </div>
-              <h3 className="text-base font-serif text-[#1f261b]">Queue is empty</h3>
+              <h3 className="text-base  text-[#1f261b]">Queue is empty</h3>
               <p className="text-xs text-[#5f5a50] mt-1 max-w-xs">Select some images from the left panel to begin the upload process.</p>
             </div>
           ) : (

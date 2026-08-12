@@ -562,7 +562,7 @@ export default function TurnkeyPageManager() {
       <section className="w-full">
         <form onSubmit={handleSave} className="bg-white border rounded-2xl shadow-sm overflow-hidden">
           <div className="sticky top-0 z-10 bg-[#fcfaf7]/95 backdrop-blur border-b px-5 py-3 flex items-center justify-between">
-            <h2 className="font-serif text-xl">{editingId ? "Edit Component" : "Create Component"}</h2>
+            <h2 className=" text-xl">{editingId ? "Edit Component" : "Create Component"}</h2>
             <button type="submit" disabled={loading} className="bg-[#8d6a3a] text-white px-4 py-1.5 rounded-lg text-sm font-bold flex items-center gap-2">
               {loading ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />} Save
             </button>

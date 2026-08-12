@@ -636,7 +636,7 @@ export default function AboutpageComponentRouteEditor({ componentKey, title }: {
       <header className="mb-4 flex items-center justify-between border-b border-[#eee5d9] pb-3">
         <div>
           <span className="text-[10px] font-bold uppercase tracking-widest text-[#8d6a3a]">Configuration</span>
-          <h1 className="font-serif text-xl text-[#1f261b] mt-0.5">About Page Content</h1>
+          <h1 className=" text-xl text-[#1f261b] mt-0.5">About Page Content</h1>
           <p className="mt-1 text-[#5f5a50] text-xs leading-snug max-w-xl">
             Manage sections of the about page. Select an existing component to edit or create a new one using a template.
           </p>
@@ -655,7 +655,7 @@ export default function AboutpageComponentRouteEditor({ componentKey, title }: {
           <form onSubmit={handleSave} className="bg-white border border-[#ded3c4] rounded-xl shadow-sm overflow-hidden">
             <div className="bg-[#fcfaf7] border-b border-[#eee5d9] p-3 flex items-center justify-between">
               <div>
-                <h2 className="font-serif text-base text-[#1f261b]">{editingId ? "Edit Component" : "Create New Component"}</h2>
+                <h2 className=" text-base text-[#1f261b]">{editingId ? "Edit Component" : "Create New Component"}</h2>
                 <p className="text-[10px] text-[#5f5a50] mt-0.5 italic">Structured data for rendering page sections</p>
               </div>
               <div className="flex items-center gap-2">

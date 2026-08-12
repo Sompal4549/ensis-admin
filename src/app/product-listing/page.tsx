@@ -105,7 +105,7 @@ const ProductRows = ({ products, startIndex }: { products: Product[]; startIndex
 
             return (
                 <tr key={p._id} className={idx % 2 === 0 ? "bg-[#fcf8ef]" : "bg-[#fcf8ef]"}>
-                    <td className="border-2 border-[#eaddcb] text-center py-4 font-serif text-[24px] text-gray-800">{startIndex + idx + 1}</td>
+                    <td className="border-2 border-[#eaddcb] text-center py-4  text-[24px] text-gray-800">{startIndex + idx + 1}</td>
                     <td className="border-2 border-[#eaddcb] text-center p-1">
                         <div className="w-full h-full mx-auto flex items-center justify-center">
                             <img src={p.images?.[0] ? getImageUrl(p.images[0]) : 'https://placehold.co/120x80?text=Image'}
@@ -139,8 +139,8 @@ const MiniFeatureBar = () => (
                     <img src={feat.img} alt={feat.title} className="w-14 h-14 object-contain shrink-0"
                         onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
                     <div className="flex flex-col justify-center max-w-[140px]">
-                        <h3 className="font-bold text-[15px] text-[#012115] leading-[1.1] font-serif tracking-tight">{feat.title}</h3>
-                        <p className="text-[11px] text-[#012115] mt-1.5 leading-[1.2] font-bold font-serif">{feat.desc}</p>
+                        <h3 className="font-bold text-[15px] text-[#012115] leading-[1.1]  tracking-tight">{feat.title}</h3>
+                        <p className="text-[11px] text-[#012115] mt-1.5 leading-[1.2] font-bold ">{feat.desc}</p>
                     </div>
                 </div>
             ))}

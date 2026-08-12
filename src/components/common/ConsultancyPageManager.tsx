@@ -754,7 +754,8 @@ const renderProcessForm = () => {
             {form.key === "consultancy.whatWeOffer" && renderOfferForm()}
             {form.key === "consultancy.whyChooseOurProcess" && renderProcessForm()}
             {form.key === "consultancy.readyToGetStarted" && renderReadyForm()}
-            {form.key === "consultancy.features_strip" && renderFeaturesStripForm()}
+            {/* COMMENTED: features_strip form is not used on the consultancy page */}
+            {/* {form.key === "consultancy.features_strip" && renderFeaturesStripForm()} */}
           </div>
         </form>
       </section>

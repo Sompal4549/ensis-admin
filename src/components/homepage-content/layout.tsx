@@ -17,7 +17,7 @@ export default function MediaLayout({ children }: { children: React.ReactNode })
     <div className="max-w-6xl mx-auto">
       <header className="mb-10">
         <span className="text-xs font-bold uppercase tracking-widest text-[#8d6a3a]">Assets</span>
-        <h1 className="font-serif text-4xl text-[#1f261b] mt-1">Media Gallery</h1>
+        <h1 className=" text-4xl text-[#1f261b] mt-1">Media Gallery</h1>
         <p className="mt-3 text-[#5f5a50] max-w-2xl leading-relaxed">
           Browse and manage your uploaded assets. Copy image paths to use them across your website.
         </p>
