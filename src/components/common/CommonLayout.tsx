@@ -127,10 +127,61 @@ const NAV_ITEMS: NavItem[] = [
           { label: "Lets Build", path: "/about-page-content/lets-build" },
         ],
       },
-      { label: "Turnkey", path: "/turnkey-page-content", icon: <Briefcase size={16} /> },
-      { label: "Consultancy", path: "/consultancy-page-management", icon: <Users size={16} /> },
-      { label: "Blogs Page Management", path: "/blogs-page-management", icon: <MessageSquare size={16} /> },
-      { label: "Contact Us", path: "/contact-page-management", icon: <Headphones size={16} /> },
+      {
+        label: "Turnkey",
+        path: "/turnkey-page-content",
+        icon: <Briefcase size={16} />,
+        children: [
+          { label: "Banner", path: "/turnkey-page-content/banner" },
+          { label: "What is Turnkey", path: "/turnkey-page-content/what-is-turnkey" },
+          { label: "Complete Solutions", path: "/turnkey-page-content/complete-solutions" },
+          { label: "Facilities", path: "/turnkey-page-content/facilities" },
+          { label: "Customized", path: "/turnkey-page-content/customized" },
+          { label: "Featured Projects", path: "/turnkey-page-content/featured-projects" },
+          { label: "Ready to Build", path: "/turnkey-page-content/ready-to-build" },
+          { label: "Features Strip", path: "/turnkey-page-content/features-strip" },
+        ],
+      },
+      {
+        label: "Consultancy",
+        path: "/consultancy-page-management",
+        icon: <Users size={16} />,
+        children: [
+          { label: "Hero", path: "/consultancy-page-management/hero" },
+          { label: "Features", path: "/consultancy-page-management/features" },
+          { label: "What We Offer", path: "/consultancy-page-management/what-we-offer" },
+          { label: "Process & Values", path: "/consultancy-page-management/process-values" },
+          { label: "Ready to Start", path: "/consultancy-page-management/ready-to-start" },
+          { label: "Features Strip", path: "/consultancy-page-management/features-strip" },
+        ],
+      },
+      {
+        label: "Blogs Page Management",
+        path: "/blogs-page-management",
+        icon: <MessageSquare size={16} />,
+        children: [
+          { label: "Hero", path: "/blogs-page-management/hero" },
+          { label: "Featured Articles", path: "/blogs-page-management/featured-articles" },
+          { label: "Voice of Experts", path: "/blogs-page-management/voice-of-experts" },
+          { label: "All Blogs", path: "/blogs-page-management/all-blogs" },
+          { label: "Media & Resources", path: "/blogs-page-management/media-resources" },
+          { label: "Stay Inspired", path: "/blogs-page-management/stay-inspired" },
+          { label: "Support Wellness", path: "/blogs-page-management/support-wellness" },
+          { label: "Features Strip", path: "/blogs-page-management/features-strip" },
+        ],
+      },
+      {
+        label: "Contact Us",
+        path: "/contact-page-management",
+        icon: <Headphones size={16} />,
+        children: [
+          { label: "Hero", path: "/contact-page-management/hero" },
+          { label: "Get In Touch", path: "/contact-page-management/get-in-touch" },
+          { label: "Features Strip", path: "/contact-page-management/features-strip" },
+          { label: "CTA Banner", path: "/contact-page-management/cta-banner" },
+          { label: "Premium Map", path: "/contact-page-management/premium-map" },
+        ],
+      },
       { label: "Career Page", path: "/career-page-managment", icon: <UserRoundPlus size={16} /> },
       { label: "Product listing", path: "/product-listing", icon: <Boxes size={16} /> },
       { label: "Projects & Clients", path: "/projects-and-clients", icon: <FolderOpen size={16} /> },
@@ -504,6 +555,10 @@ export function Topbar({
     segments.forEach((seg) => {
       if (seg === "homepage-content") crumbs.push("Pages", "Home");
       else if (seg === "about-page-content") crumbs.push("Pages", "About");
+      else if (seg === "turnkey-page-content") crumbs.push("Pages", "Turnkey");
+      else if (seg === "consultancy-page-management") crumbs.push("Pages", "Consultancy");
+      else if (seg === "blogs-page-management") crumbs.push("Pages", "Blogs");
+      else if (seg === "contact-page-management") crumbs.push("Pages", "Contact");
       else if (seg === "seo") crumbs.push("SEO");
       else if (seg === "media") crumbs.push("Media");
       else crumbs.push(seg.charAt(0).toUpperCase() + seg.slice(1).replace(/-/g, " "));
@@ -711,6 +766,10 @@ export function CommonLayout({
   const isComponentPage =
     pathname.startsWith("/homepage-content/") ||
     pathname.startsWith("/about-page-content/") ||
+    pathname.startsWith("/turnkey-page-content/") ||
+    pathname.startsWith("/consultancy-page-management/") ||
+    pathname.startsWith("/blogs-page-management/") ||
+    pathname.startsWith("/contact-page-management/") ||
     pathname.startsWith("/product-listing");
   const router = useRouter();
   const searchParams = useSearchParams();
