@@ -641,12 +641,7 @@ export default function AboutpageComponentRouteEditor({ componentKey, title }: {
             Manage sections of the about page. Select an existing component to edit or create a new one using a template.
           </p>
         </div>
-        <button
-          onClick={() => { setEditingId(null); setForm({ ...form, data: defaultAboutpageData["about.hero"] }); }}
-          className="flex items-center gap-1.5 px-4 py-2 bg-[#263016] text-white rounded-lg font-bold text-xs shadow hover:bg-[#1a210f] transition-all"
-        >
-          <Plus size={14} /> New Component
-        </button>
+
       </header>
 
       <div className="grid grid-cols-1">

@@ -5,8 +5,8 @@ export type ConsultancyPageContentKeys =
   | "consultancy.features"
   | "consultancy.whatWeOffer"
   | "consultancy.whyChooseOurProcess"
-  | "consultancy.readyToGetStarted";
-  // | "consultancy.features_strip"
+  | "consultancy.readyToGetStarted"
+  | "consultancy.features_strip";
 
 export const consultancyPageKeys: { key: ConsultancyPageContentKeys; label: string; description: string }[] = [
   { key: "consultancy.hero", label: "Consultancy Hero", description: "Banner with heading, features list and background." },
@@ -14,8 +14,7 @@ export const consultancyPageKeys: { key: ConsultancyPageContentKeys; label: stri
   { key: "consultancy.whatWeOffer", label: "What We Offer", description: "Services overview and detailed service cards." },
   { key: "consultancy.whyChooseOurProcess", label: "Process & Values", description: "Combined section for values and step-by-step process." },
   { key: "consultancy.readyToGetStarted", label: "Ready to Start", description: "Final CTA section for lead generation." },
-  // COMMENTED: features strip is not used on the consultancy page
-  // { key: "consultancy.features_strip", label: "Features Strip", description: "Stats strip below the banner." },
+  { key: "consultancy.features_strip", label: "Features Strip", description: "Stats strip below the banner." },
 ];
 
 const randomId = () => Math.random().toString(36).slice(2, 9);
@@ -38,11 +37,10 @@ export const defaultConsultancyData: Record<ConsultancyPageContentKeys, any> = {
   },
   "consultancy.readyToGetStarted": {
     title: "", heading: "", description: "", primaryButton: { label: "", href: "" }, bgImage: ""
+  },
+  "consultancy.features_strip": {
+    items: [{ id: randomId(), title: "", description: "", imageurl: { imageUrl: "", alt: "" } }]
   }
-  // COMMENTED: features strip data is not used on the consultancy page
-  // "consultancy.features_strip": {
-  //   items: [{ id: randomId(), title: "", description: "", imageurl: { imageUrl: "", alt: "" } }]
-  // }
 };
 
 export const buildEmptyConsultancyContent = (key: ConsultancyPageContentKeys): Omit<ComponentContent, "_id"> & { key: ConsultancyPageContentKeys } => {

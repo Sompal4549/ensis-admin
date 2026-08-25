@@ -215,7 +215,7 @@ export default function ConsultancyPageManager() {
                         />
                       </div>
                       <div className="grid grid-cols-2 gap-2">
-                        <label className={smallLabelClass}>Learn More Link <input className={smallFieldClass} placeholder="e.g. /services/wellness" value={card.learnMoreLink || ""} onChange={e => { const nc = [...data.serviceCards]; nc[idx].learnMoreLink = e.target.value; setForm({...form, data: {...data, serviceCards: nc}}) }} /></label>
+                        <label className={smallLabelClass}>Learn More Link <input className={smallFieldClass} placeholder="e.g. /services/wellness" value={card.learnMoreLink || ""} onChange={e => { const nc = [...data.serviceCards]; nc[idx].learnMoreLink = e.target.value.replace(/^\//, ""); setForm({...form, data: {...data, serviceCards: nc}}) }} /></label>
                         <label className={smallLabelClass}>Learn More Text <input className={smallFieldClass} placeholder="e.g. Learn More" value={card.learnMoreText || ""} onChange={e => { const nc = [...data.serviceCards]; nc[idx].learnMoreText = e.target.value; setForm({...form, data: {...data, serviceCards: nc}}) }} /></label>
                       </div>
                   </div>
