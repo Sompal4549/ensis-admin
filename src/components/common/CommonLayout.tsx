@@ -54,6 +54,7 @@ interface NavItem {
   path?: string;
   icon?: React.ReactNode;
   children?: NavItem[];
+  componentKey?: string;
 }
 
 interface SidebarProps {
@@ -182,15 +183,62 @@ const NAV_ITEMS: NavItem[] = [
           { label: "Premium Map", path: "/contact-page-management/premium-map" },
         ],
       },
-      { label: "Career Page", path: "/career-page-managment", icon: <UserRoundPlus size={16} /> },
-      { label: "Product listing", path: "/product-listing", icon: <Boxes size={16} /> },
-      { label: "Projects & Clients", path: "/projects-and-clients", icon: <FolderOpen size={16} /> },
-      { label: "Enquary Page Management", path: "/enquiry-page-management", icon: <UserRoundPlus size={16} /> },
-      { label: "Products Page Management", path: "/product-page-management", icon: <Boxes size={16} /> },
+      {
+        label: "Career Page",
+        path: "/career-page-managment",
+        icon: <UserRoundPlus size={16} />,
+        children: [
+          { label: "Banner", path: "/career-page-managment/banner" },
+          { label: "Section", path: "/career-page-managment/section" },
+          { label: "Benefits", path: "/career-page-managment/benefits" },
+          { label: "Talent Community", path: "/career-page-managment/talent-community" },
+          { label: "Why Work", path: "/career-page-managment/why-work" },
+          { label: "Features Strip", path: "/career-page-managment/features-strip" },
+          { label: "Testimonials", path: "/career-page-managment/testimonials" },
+        ],
+      },
+      
+      {
+        label: "Projects & Clients",
+        path: "/projects-and-clients",
+        icon: <FolderOpen size={16} />,
+        children: [
+          { label: "Banner", path: "/projects-and-clients/banner" },
+          { label: "Why Partner", path: "/projects-and-clients/why-partner" },
+          { label: "Our Projects", path: "/projects-and-clients/our-projects" },
+          { label: "Our Clients", path: "/projects-and-clients/our-clients" },
+          { label: "Contact Section", path: "/projects-and-clients/contact-section" },
+          { label: "Features Strip", path: "/projects-and-clients/features-strip" },
+        ],
+      },
+      {
+        label: "Enquary Page Management",
+        path: "/enquiry-page-management",
+        icon: <UserRoundPlus size={16} />,
+        children: [
+          { label: "Enquiry Form", path: "/enquiry-page-management/enquiry-form" },
+          { label: "Get In Touch", path: "/enquiry-page-management/get-in-touch" },
+          { label: "CTA Banner", path: "/enquiry-page-management/cta-banner" },
+          { label: "Stats Strip", path: "/enquiry-page-management/stats-strip" },
+        ],
+      },
+      {
+        label: "Products Page Management",
+        path: "/product-page-management",
+        icon: <Boxes size={16} />,
+        children: [
+          { label: "Hero", path: "/product-page-management/hero", componentKey: "product.hero" },
+          { label: "Feature Strip", path: "/product-page-management/feature-strip", componentKey: "product.featureStrip" },
+          { label: "Trusted By", path: "/product-page-management/trusted-by", componentKey: "product.trustedBy" },
+          { label: "Why Choose & Welcome", path: "/product-page-management/why-choose", componentKey: "product.whyChoose" },
+          { label: "Testimonials", path: "/product-page-management/testimonials", componentKey: "product.testimonials" },
+          { label: "Product Section", path: "/product-page-management/product-section", componentKey: "product.productsection" },
+        ],
+      },
     ],
   },
   { label: "Social Click", path: "/social-clicks-page", icon: <TrendingUp size={16} /> },
-
+{ label: "Product listing", path: "/product-listing", icon: <Boxes size={16} /> },
   { label: "Products", path: "/products", icon: <Boxes size={16} /> },
   { label: "blogs", path: "/blogs", icon: <MessageSquare size={16} /> },
   { label: "Categories", path: "/categories-management", icon: <LayoutGrid size={16} /> },
@@ -238,6 +286,7 @@ function MenuItem({
   item,
   level = 0,
   currentPath,
+  componentKey,
   openMenus,
   setOpenMenus,
   handleNavigate,
@@ -246,6 +295,7 @@ function MenuItem({
   item: NavItem;
   level?: number;
   currentPath: string;
+  componentKey: string;
   collapsed: boolean;
   openMenus: Record<string, boolean>;
   setOpenMenus: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
@@ -258,7 +308,8 @@ function MenuItem({
   const isActive =
     !!item.path &&
     (currentPath === item.path ||
-      (item.path !== "/" && currentPath.split("?")[0].startsWith(item.path.split("?")[0])));
+      (item.path !== "/" && currentPath.split("?")[0].startsWith(item.path.split("?")[0])) ||
+      (!!item.componentKey && componentKey === item.componentKey));
 
   return (
     <div className="w-full">
@@ -317,6 +368,7 @@ function MenuItem({
               item={child}
               level={level + 1}
               currentPath={currentPath}
+              componentKey={componentKey}
               openMenus={openMenus}
               setOpenMenus={setOpenMenus}
               handleNavigate={handleNavigate}
@@ -334,6 +386,7 @@ function SidebarContent({
   collapsed,
   setCollapsed,
   currentPath,
+  componentKey,
   openMenus,
   setOpenMenus,
   filteredNavItems,
@@ -343,6 +396,7 @@ function SidebarContent({
   collapsed: boolean;
   setCollapsed: (v: boolean) => void;
   currentPath: string;
+  componentKey: string;
   openMenus: Record<string, boolean>;
   setOpenMenus: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
   filteredNavItems: NavItem[];
@@ -414,6 +468,7 @@ function SidebarContent({
               key={item.label}
               item={item}
               currentPath={currentPath}
+              componentKey={componentKey}
               openMenus={openMenus}
               setOpenMenus={setOpenMenus}
               handleNavigate={handleNavigate}
@@ -455,6 +510,7 @@ export function Sidebar({
   setMobileOpen,
 }: SidebarProps) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { user } = useAuth();
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({
     "/homepage-content": true,
@@ -462,6 +518,7 @@ export function Sidebar({
   });
 
   const currentPath = activePath || pathname || "/";
+  const componentKey = searchParams.get("component") || "";
 
   const filteredNavItems = NAV_ITEMS.filter((item) => {
     if (item.path === "/users-management") {
@@ -494,6 +551,7 @@ export function Sidebar({
           collapsed={collapsed}
           setCollapsed={setCollapsed}
           currentPath={currentPath}
+          componentKey={componentKey}
           openMenus={openMenus}
           setOpenMenus={setOpenMenus}
           filteredNavItems={filteredNavItems}
@@ -523,6 +581,7 @@ export function Sidebar({
               collapsed={false}
               setCollapsed={setCollapsed}
               currentPath={currentPath}
+              componentKey={componentKey}
               openMenus={openMenus}
               setOpenMenus={setOpenMenus}
               filteredNavItems={filteredNavItems}
@@ -559,6 +618,10 @@ export function Topbar({
       else if (seg === "consultancy-page-management") crumbs.push("Pages", "Consultancy");
       else if (seg === "blogs-page-management") crumbs.push("Pages", "Blogs");
       else if (seg === "contact-page-management") crumbs.push("Pages", "Contact");
+      else if (seg === "career-page-managment") crumbs.push("Pages", "Career Page");
+      else if (seg === "projects-and-clients") crumbs.push("Pages", "Projects & Clients");
+      else if (seg === "enquiry-page-management") crumbs.push("Pages", "Enquiry Page");
+      else if (seg === "product-page-management") crumbs.push("Pages", "Products Page");
       else if (seg === "seo") crumbs.push("SEO");
       else if (seg === "media") crumbs.push("Media");
       else crumbs.push(seg.charAt(0).toUpperCase() + seg.slice(1).replace(/-/g, " "));
@@ -770,6 +833,7 @@ export function CommonLayout({
     pathname.startsWith("/consultancy-page-management/") ||
     pathname.startsWith("/blogs-page-management/") ||
     pathname.startsWith("/contact-page-management/") ||
+    pathname.startsWith("/product-page-management/") ||
     pathname.startsWith("/product-listing");
   const router = useRouter();
   const searchParams = useSearchParams();
