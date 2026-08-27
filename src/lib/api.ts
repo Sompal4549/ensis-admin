@@ -220,6 +220,10 @@ export type Click = {
   platform: string;
   ip: string;
   userAgent: string;
+  country?: string;
+  city?: string;
+  region?: string;
+  timezone?: string;
   createdAt: string;
 };
 
