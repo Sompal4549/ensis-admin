@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { orderApi, Order } from "@/lib/api";
 import Link from "next/link";
-import { Loader2, Eye, ShoppingBag, Edit2, X, Save } from "lucide-react";
+import { Loader2, Eye, ShoppingBag, Edit2, X, Save, Printer } from "lucide-react";
 import { toast } from "react-toastify";
 import { fieldClass, labelClass } from "@/constants";
 
@@ -76,6 +76,69 @@ export default function OrdersPage() {
     }
   };
 
+  const printOrder = (order: Order) => {
+    const orderId = `#${order._id.slice(-6).toUpperCase()}`;
+    const customerName = typeof order.user === "object" ? order.user.name : "Guest User";
+    const orderDate = new Date(order.createdAt).toLocaleDateString("en-IN");
+    const items = (order.items || []).map((item: any) => {
+      const name = typeof item.product === "object" ? item.product.title : item.name || "Product";
+      const qty = item.quantity || 1;
+      const price = item.price || 0;
+      const total = qty * price;
+      return `<tr>
+        <td style="padding:10px 12px;border-bottom:1px solid #ece3d2">${name}</td>
+        <td style="padding:10px 12px;border-bottom:1px solid #ece3d2;text-align:center">${qty}</td>
+        <td style="padding:10px 12px;border-bottom:1px solid #ece3d2;text-align:right">₹${price.toLocaleString("en-IN")}</td>
+        <td style="padding:10px 12px;border-bottom:1px solid #ece3d2;text-align:right">₹${total.toLocaleString("en-IN")}</td>
+      </tr>`;
+    }).join("");
+
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Order ${orderId}</title>
+<style>@media print{body{margin:0} @page{size:A4;margin:10mm}}</style></head>
+<body style="margin:0;font-family:Jost,Arial,sans-serif;background:#FCFAF6;color:#1F3A2A">
+<div style="max-width:760px;margin:20px auto;background:#fff;border:1px solid #EDE4D3;border-radius:20px;overflow:hidden">
+<div style="background:#1F3A2A;padding:32px 40px;color:#fff">
+<div style="margin:0;font-size:22px;letter-spacing:.14em;text-transform:uppercase;font-weight:700">ENSIS</div>
+<p style="margin:6px 0 0;font-size:12px;color:#C7A55B;letter-spacing:.1em;text-transform:uppercase">Order Receipt (${orderId})</p>
+</div>
+<div style="padding:32px 40px">
+<div style="display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap">
+<div>
+<p style="margin:0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Order No</p>
+<p style="margin:4px 0 0;font-size:14px;font-weight:600">${orderId}</p>
+<p style="margin:14px 0 0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Date</p>
+<p style="margin:4px 0 0;font-size:14px;font-weight:600">${orderDate}</p>
+</div>
+<div style="text-align:right">
+<p style="margin:0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Customer</p>
+<p style="margin:4px 0 0;font-size:14px;font-weight:600">${customerName}</p>
+<p style="margin:14px 0 0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Order Status</p>
+<p style="margin:4px 0 0;font-size:14px;font-weight:600;text-transform:capitalize">${order.orderStatus}</p>
+<p style="margin:14px 0 0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Payment</p>
+<p style="margin:4px 0 0;font-size:14px;font-weight:600;text-transform:capitalize">${order.paymentStatus}</p>
+</div>
+</div>
+${items ? `<table style="width:100%;margin-top:28px;border-collapse:collapse;font-size:13px">
+<thead><tr style="background:#F7F2E9">
+<th style="padding:10px 12px;text-align:left">Item</th><th style="padding:10px 12px">Qty</th><th style="padding:10px 12px;text-align:right">Price</th><th style="padding:10px 12px;text-align:right">Total</th>
+</tr></thead>
+<tbody>${items}</tbody>
+</table>` : ""}
+<div style="margin-top:20px;text-align:right;font-size:16px;border-top:1px solid #EDE4D3;padding-top:10px">
+<strong>Grand Total: ₹${order.totalAmount.toLocaleString("en-IN")}</strong>
+</div>
+<p style="margin-top:28px;font-size:11px;color:#6c7068;text-align:center">Thank you for choosing ENSIS — Premium Wellness & Panchkarma Spaces.<br>This is a computer generated receipt.</p>
+</div></div></body></html>`;
+
+    const printWindow = window.open("", "_blank");
+    if (printWindow) {
+      printWindow.document.write(html);
+      printWindow.document.close();
+      printWindow.focus();
+      printWindow.print();
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -131,6 +194,13 @@ export default function OrdersPage() {
                     {new Date(order.createdAt).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right font-medium space-x-2">
+                    <button
+                      onClick={() => printOrder(order)}
+                      className="inline-flex items-center p-1.5 rounded-lg text-purple-600 bg-purple-50 hover:bg-purple-100 transition-colors"
+                      title="Print Order"
+                    >
+                      <Printer className="w-4 h-4" />
+                    </button>
                     <button
                       onClick={() => setSelectedOrder(order)}
                       className={`inline-flex items-center p-1.5 rounded-lg transition-colors ${selectedOrder?._id === order._id ? 'bg-indigo-600 text-white' : 'text-indigo-600 bg-indigo-50 hover:bg-indigo-100'}`}

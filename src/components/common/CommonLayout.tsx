@@ -37,6 +37,10 @@ import {
   X,
   TrendingUp,
   ScrollText,
+  Flame,
+  Snowflake,
+  List,
+  Receipt,
 } from "lucide-react";
 import { LoginForm, useAuth } from "@/components/auth/AuthContext";
 import sidebarBg from "@/assets/sidebarbg.webp";
@@ -235,12 +239,35 @@ const NAV_ITEMS: NavItem[] = [
           { label: "Product Section", path: "/product-page-management/product-section", componentKey: "product.productsection" },
         ],
       },
+      {
+        label: "Privacy Policy",
+        path: "/privacy-page-management",
+        icon: <ScrollText size={16} />,
+        children: [
+          { label: "Hero", path: "/privacy-page-management/hero" },
+          { label: "Intro Card", path: "/privacy-page-management/intro-card" },
+          { label: "Contact Card", path: "/privacy-page-management/contact-card" },
+          { label: "Policy Sections", path: "/privacy-page-management/sections" },
+        ],
+      },
+      {
+        label: "Terms & Conditions",
+        path: "/terms-page-management",
+        icon: <ScrollText size={16} />,
+        children: [
+          { label: "Hero", path: "/terms-page-management/hero" },
+          { label: "Intro Card", path: "/terms-page-management/intro-card" },
+          { label: "Contact Card", path: "/terms-page-management/contact-card" },
+          { label: "Policy Sections", path: "/terms-page-management/sections" },
+        ],
+      },
     ],
   },
   { label: "Social Click", path: "/social-clicks-page", icon: <TrendingUp size={16} /> },
 { label: "Product listing", path: "/product-listing", icon: <Boxes size={16} /> },
   { label: "Products", path: "/products", icon: <Boxes size={16} /> },
   { label: "blogs", path: "/blogs", icon: <MessageSquare size={16} /> },
+  { label: "Solutions", path: "/solutions", icon: <Briefcase size={16} /> },
   { label: "Categories", path: "/categories-management", icon: <LayoutGrid size={16} /> },
   { label: "Site Header", path: "/header", icon: <AlignJustify size={16} /> },
   { label: "Site Footer", path: "/footer", icon: <PanelBottom size={16} /> },
@@ -251,7 +278,18 @@ const NAV_ITEMS: NavItem[] = [
   { label: "User Management", path: "/users-management", icon: <UserRoundCog size={16} /> },
   { label: "Enquaries", path: "/enquries", icon: <UserRoundCog size={16} /> },
   { label: "Applications", path: "/applications", icon: <UserRoundCog size={16} /> },
-{label: "Reviews Management", path:"/reviews-page", icon:<CheckCircle size={16}/>},
+  { label: "Reviews Management", path:"/reviews-page", icon:<CheckCircle size={16}/>},
+  {
+    label: "Leads",
+    icon: <Flame size={18} />,
+    children: [
+      { label: "All Leads", path: "/leads", icon: <List size={14} className="text-gray-400" /> },
+      { label: "Add Lead", path: "/leads/add-lead", icon: <UserPlus size={14} className="text-emerald-400" /> },
+      { label: "Hot Leads", path: "/leads/hot-lead", icon: <Flame size={14} className="text-orange-400" /> },
+      { label: "Cold Leads", path: "/leads/cold-lead", icon: <Snowflake size={14} className="text-blue-400" /> },
+      { label: "Invoices", path: "/invoices", icon: <Receipt size={14} className="text-purple-400" /> },
+    ],
+  },
   {
     label: "SEO",
     path: "/seo",
@@ -826,15 +864,18 @@ export function CommonLayout({
   }, []);
 
   const pathname = usePathname();
-  const isComponentPage =
-    pathname.startsWith("/homepage-content/") ||
-    pathname.startsWith("/about-page-content/") ||
-    pathname.startsWith("/turnkey-page-content/") ||
-    pathname.startsWith("/consultancy-page-management/") ||
-    pathname.startsWith("/blogs-page-management/") ||
-    pathname.startsWith("/contact-page-management/") ||
-    pathname.startsWith("/product-page-management/") ||
-    pathname.startsWith("/product-listing");
+  const isPagesSubPage =
+    (pathname.startsWith("/homepage-content/") && pathname.split("/").length > 2) ||
+    (pathname.startsWith("/about-page-content/") && pathname.split("/").length > 2) ||
+    (pathname.startsWith("/turnkey-page-content/") && pathname.split("/").length > 2) ||
+    (pathname.startsWith("/consultancy-page-management/") && pathname.split("/").length > 2) ||
+    (pathname.startsWith("/blogs-page-management/") && pathname.split("/").length > 2) ||
+    (pathname.startsWith("/contact-page-management/") && pathname.split("/").length > 2) ||
+    (pathname.startsWith("/product-page-management/") && pathname.split("/").length > 2) ||
+    (pathname.startsWith("/career-page-managment/") && pathname.split("/").length > 2) ||
+    (pathname.startsWith("/projects-and-clients/") && pathname.split("/").length > 2) ||
+    (pathname.startsWith("/enquiry-page-management/") && pathname.split("/").length > 2);
+  const isComponentPage = !isPagesSubPage;
   const router = useRouter();
   const searchParams = useSearchParams();
 

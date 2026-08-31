@@ -28,6 +28,7 @@ interface BlogForm {
   slug: string;
   author: string;
   isFeatured: boolean;
+  orderBy: number;
   isActive?: boolean;
   viewCount?: number;
 isPopular: boolean;
@@ -131,6 +132,7 @@ const emptyBlogForm = (): BlogForm => ({
   slug: "",
   author: "",
   isFeatured: false,
+  orderBy: 0,
   category: "",
 isPopular: false,
 isVoiceOfExperts: false,
@@ -313,6 +315,7 @@ isVoiceOfExperts: blog.isVoiceOfExperts || false,
 category: blog.category || "",
   slug: blog.slug || "",
   author: blog.author || "",
+  orderBy: blog.orderBy || 0,
   ctaBanner: blog.ctaBanner || emptyBlogForm().ctaBanner,
   isFeatured: blog.isFeatured || false,
   banner: { ...banner, date: formatDateForInput(banner.date) },
@@ -516,6 +519,17 @@ const renderBasicTab = () => (
     onChange={(e) => setBlogForm({ ...blogForm, isVoiceOfExperts: e.target.checked })}
   />
   <label htmlFor="isVoiceOfExperts" className="cursor-pointer">Voice of Experts</label>
+</div>
+
+<div className="flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+  <label htmlFor="orderBy" className="cursor-pointer text-xs font-bold">Order By:</label>
+  <input
+    type="number"
+    id="orderBy"
+    className={`${fieldClass} w-24!`}
+    value={blogForm.orderBy}
+    onChange={(e) => setBlogForm({ ...blogForm, orderBy: Number(e.target.value) })}
+  />
 </div>
 
 {blogForm.isVoiceOfExperts && (
@@ -922,39 +936,35 @@ const renderBannerTab = () => (
         <h3 className="text-sm font-bold uppercase tracking-wider">Social Sharing (Open Graph)</h3>
       </div>
 
-<label className={labelClass}>
-  OG Json
-  <textarea
-    className={`${fieldClass} h-32`}
-    value={blogForm.seo.ogJson}
-    onChange={(e) =>
-      setBlogForm({
-        ...blogForm,
-        seo: {
-          ...blogForm.seo,
-          ogJson: e.target.value,
-        },
-      })
-    }
-  />
-</label>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <label className={labelClass}>
+          OG Json
+          <textarea
+            className={`${fieldClass} h-32`}
+            value={blogForm.seo.ogJson}
+            onChange={(e) =>
+              setBlogForm({
+                ...blogForm,
+                seo: { ...blogForm.seo, ogJson: e.target.value },
+              })
+            }
+          />
+        </label>
 
-<label className={labelClass}>
-  Schema Json
-  <textarea
-    className={`${fieldClass} h-32`}
-    value={blogForm.seo.schema}
-    onChange={(e) =>
-      setBlogForm({
-        ...blogForm,
-        seo: {
-          ...blogForm.seo,
-          schema: e.target.value,
-        },
-      })
-    }
-  />
-</label>
+        <label className={labelClass}>
+          Schema Json
+          <textarea
+            className={`${fieldClass} h-32`}
+            value={blogForm.seo.schema}
+            onChange={(e) =>
+              setBlogForm({
+                ...blogForm,
+                seo: { ...blogForm.seo, schema: e.target.value },
+              })
+            }
+          />
+        </label>
+      </div>
     </div>
   );
 
@@ -1016,10 +1026,11 @@ const renderBannerTab = () => (
             <FileText className="text-blue-600" size={20} />
             <h2 className="text-lg font-bold">Existing Blogs</h2>
           </div>
-          <div className="p-6 overflow-x-auto max-h-[600px] overflow-y-auto">
+          <div className="p-6 overflow-x-auto max-h-150 overflow-y-auto">
             <table className="w-full text-left">
               <thead>
                 <tr className="border-b  text-xs uppercase font-bold">
+                  <th className="pb-3 px-4">Order</th>
                   <th className="pb-3 px-4">Title</th>
                   <th className="pb-3 px-4">Author</th>
                   <th className="pb-3 px-4">Read Time</th>
@@ -1027,8 +1038,9 @@ const renderBannerTab = () => (
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {blogs.map(blog => (
+                {[...blogs].sort((a, b) => (a.orderBy || 0) - (b.orderBy || 0)).map(blog => (
                   <tr key={blog._id} className={`hover:bg-slate-50 transition-colors ${editingBlogId === (blog._id || blog.id) ? 'bg-blue-50' : ''}`}>
+                    <td className="py-3 px-4 text-xs font-mono">{blog.orderBy || 0}</td>
                     <td className="py-3 px-4 text-sm font-medium "><div className="line-clamp-1">{blog.title}</div></td>
                     <td className="py-3 px-4 text-sm ">{blog.author}</td>
                   <td>{blog.banner?.readingTime || "0 min"}</td>
@@ -1067,7 +1079,7 @@ const renderBannerTab = () => (
                   <button type="button" onClick={() => setSelectedEmails([])} className="text-[9px] font-bold  uppercase hover:underline">Clear</button>
                 </div>
               </div>
-              <div className="border rounded-xl max-h-[300px] overflow-y-auto p-3 space-y-1 bg-slate-50 border-slate-200">
+              <div className="border rounded-xl max-h-75 overflow-y-auto p-3 space-y-1 bg-slate-50 border-slate-200">
                 {subscribers.map(sub => (
                   <label key={sub._id} className="flex items-center gap-3 cursor-pointer hover:bg-white p-1.5 rounded-lg transition-colors group">
                     <input type="checkbox" className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" checked={selectedEmails.includes(sub.email)} onChange={e => {
@@ -1100,7 +1112,7 @@ const renderBannerTab = () => (
             <Users className="text-blue-600" size={20} />
             <h2 className="text-lg font-bold">Newsletter Subscribers</h2>
           </div>
-          <div className="p-6 overflow-x-auto max-h-[500px] overflow-y-auto">
+          <div className="p-6 overflow-x-auto max-h-125 overflow-y-auto">
             <table className="w-full text-left">
               <thead>
                 <tr className="border-b  text-xs uppercase font-bold">

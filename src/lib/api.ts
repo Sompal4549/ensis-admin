@@ -115,6 +115,53 @@ export type Order = {
   updatedAt: string;
 };
 
+export type InvoiceItem = {
+  product?: string | Product;
+  name: string;
+  description?: string;
+  quantity: number;
+  unitPrice: number;
+  gstRate: number;
+  amount: number;
+};
+
+export type InvoiceAddress = {
+  name: string;
+  email?: string;
+  phone?: string;
+  addressLine?: string;
+  city?: string;
+  state?: string;
+  postalCode?: string;
+  country?: string;
+  gstNumber?: string;
+};
+
+export type Invoice = {
+  _id: string;
+  invoiceNumber: string;
+  type: "proforma" | "tax" | "credit_note" | "debit_note" | "delivery_challan";
+  lead: string | Lead;
+  order?: string | Order;
+  items: InvoiceItem[];
+  billingAddress: InvoiceAddress;
+  shippingAddress?: InvoiceAddress;
+  subtotal: number;
+  discount: number;
+  tax: number;
+  shipping: number;
+  totalAmount: number;
+  status: "draft" | "sent" | "paid" | "partial" | "overdue" | "cancelled";
+  paymentReceived: number;
+  paymentDate?: string;
+  dueDate?: string;
+  notes?: string;
+  termsAndConditions?: string;
+  createdBy: string | AuthUser;
+  createdAt: string;
+  updatedAt: string;
+};
+
 type ApiEnvelope<T> = {
   status: "success" | "error";
   message: string;
@@ -380,8 +427,46 @@ export const productApi = {
 export const orderApi = {
   list: () => request<Order[]>("/orders"),
   get: (id: string) => request<Order>(`/orders/${id}`),
+  listByLead: (leadId: string, page?: number, limit?: number) => {
+    const params = new URLSearchParams();
+    if (page) params.set("page", String(page));
+    if (limit) params.set("limit", String(limit));
+    const query = params.toString();
+    return request<{ orders: Order[]; total: number }>(`/orders/lead/${leadId}${query ? `?${query}` : ""}`);
+  },
   update: (id: string, payload: Partial<Order>) =>
     request<Order>(`/orders/${id}`, { method: "PUT", data: payload }),
+  sendEmail: (id: string) => request<{ success: boolean; message: string }>(`/orders/${id}/send-email`, { method: "POST" }),
+  sendWhatsApp: (id: string) => request<{ success: boolean; message: string }>(`/orders/${id}/send-whatsapp`, { method: "POST" }),
+};
+
+export const invoiceApi = {
+  list: (params?: { page?: number; limit?: number; type?: string; status?: string; search?: string }) => {
+    const searchParams = new URLSearchParams();
+    if (params?.page) searchParams.set("page", String(params.page));
+    if (params?.limit) searchParams.set("limit", String(params.limit));
+    if (params?.type) searchParams.set("type", params.type);
+    if (params?.status) searchParams.set("status", params.status);
+    if (params?.search) searchParams.set("search", params.search);
+    const query = searchParams.toString();
+    return request<{ invoices: Invoice[]; total: number; page: number; limit: number }>(`/invoices${query ? `?${query}` : ""}`);
+  },
+  listByLead: (leadId: string, page?: number, limit?: number) => {
+    const params = new URLSearchParams();
+    if (page) params.set("page", String(page));
+    if (limit) params.set("limit", String(limit));
+    const query = params.toString();
+    return request<{ invoices: Invoice[]; total: number }>(`/invoices/lead/${leadId}${query ? `?${query}` : ""}`);
+  },
+  getStats: (leadId: string) =>
+    request<{ totalAmount: number; paymentReceived: number; count: number; paidCount: number }>(`/invoices/lead/${leadId}/stats`),
+  get: (id: string) => request<Invoice>(`/invoices/${id}`),
+  create: (payload: Partial<Invoice>) => request<Invoice>("/invoices", { method: "POST", data: payload }),
+  update: (id: string, payload: Partial<Invoice>) =>
+    request<Invoice>(`/invoices/${id}`, { method: "PUT", data: payload }),
+  remove: (id: string) => request<null>(`/invoices/${id}`, { method: "DELETE" }),
+  sendEmail: (id: string) => request<{ success: boolean; message: string }>(`/invoices/${id}/send-email`, { method: "POST" }),
+  sendWhatsApp: (id: string) => request<{ success: boolean; message: string }>(`/invoices/${id}/send-whatsapp`, { method: "POST" }),
 };
 
 export const componentContentApi = {
@@ -551,12 +636,75 @@ export type ActivityLogListResponse = {
   entities: string[];
 };
 
+export type Lead = {
+  _id: string;
+  leadImage?: string;
+  firstName: string;
+  lastName: string;
+  companyName: string;
+  designation?: string;
+  email: string;
+  officialEmail?: string;
+  phone: string;
+  phoneCode?: string;
+  altPhone?: string;
+  altPhoneCode?: string;
+  landline?: string;
+  website?: string;
+  title?: string;
+  typeOfBusiness?: string;
+  industrySector?: string;
+  marketType?: "Domestic" | "International";
+  leadType: "Business" | "Individual" | "Corporate" | "Partner" | "Referral";
+  leadSource: "Instagram" | "Facebook" | "Website" | "WhatsApp" | "Google" | "LinkedIn" | "Referral" | "Cold Call" | "Event" | "Other";
+  leadStatus: "New" | "Contacted" | "Qualified" | "Negotiation" | "Converted" | "Lost";
+  priority: "High" | "Medium" | "Low";
+  assignedTo?: string | AuthUser;
+  eventAttribution?: string;
+  leadDate?: string;
+  followUpDate?: string;
+  followUpTime?: string;
+  followUpMethod?: "WhatsApp" | "Email" | "Phone" | "Meeting" | "Other";
+  followUpSource?: string;
+  interestedProduct?: string;
+  expectedBudget?: string;
+  estimatedDealValue?: string;
+  expectedClosingDate?: string;
+  addressLine?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  zipCode?: string;
+  leadNotes?: string;
+  internalNotes?: string;
+  leadCategory?: "hot" | "cold";
+  createdAt: string;
+  updatedAt: string;
+};
+
+export const leadApi = {
+  list: (params?: { leadCategory?: string; search?: string; page?: number; limit?: number }) => {
+    const searchParams = new URLSearchParams();
+    if (params?.leadCategory) searchParams.set("leadCategory", params.leadCategory);
+    if (params?.search) searchParams.set("search", params.search);
+    if (params?.page) searchParams.set("page", String(params.page));
+    if (params?.limit) searchParams.set("limit", String(params.limit));
+    const query = searchParams.toString();
+    return request<{ leads: Lead[]; total: number }>(`/leads${query ? `?${query}` : ""}`);
+  },
+  get: (id: string) => request<Lead>(`/leads/${id}`),
+  create: (payload: Partial<Lead>) => request<Lead>("/leads", { method: "POST", data: payload }),
+  update: (id: string, payload: Partial<Lead>) => request<Lead>(`/leads/${id}`, { method: "PUT", data: payload }),
+  remove: (id: string) => request<null>(`/leads/${id}`, { method: "DELETE" }),
+};
+
 export const activityLogApi = {
   list: (params: {
     page?: number;
     limit?: number;
     action?: ActivityAction | "";
     entity?: string;
+    entityId?: string;
     search?: string;
     role?: "admin" | "customer";
   } = {}) => {
@@ -566,6 +714,7 @@ export const activityLogApi = {
     });
     if (params.action) searchParams.set("action", params.action);
     if (params.entity) searchParams.set("entity", params.entity);
+    if (params.entityId) searchParams.set("entityId", params.entityId);
     if (params.search) searchParams.set("search", params.search);
     if (params.role) searchParams.set("role", params.role);
     return request<ActivityLogListResponse>(`/activity-logs?${searchParams.toString()}`);
