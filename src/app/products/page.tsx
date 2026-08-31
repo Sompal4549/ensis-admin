@@ -16,6 +16,7 @@ type ProductForm = {
   id?: string;
   title: string;
   code: string;
+  hsnCode: string;
   description: string;
   shortDescription: string;
   price: string;
@@ -55,10 +56,11 @@ type ProductForm = {
   };
   isFeatured: boolean;
   isActive: boolean;
+  orderBy: number;
 };
 
 const emptyProduct: ProductForm = {
-  title: "", code: "", description: "", shortDescription: "",
+  title: "", code: "", hsnCode: "", description: "", shortDescription: "",
   price: "", discountPrice: "", gstRate: "5", stock: "", category: "",
   subcategory: "", material: "", weight: "",
   tags: [""], images: [], slug: "",
@@ -80,7 +82,7 @@ const emptyProduct: ProductForm = {
     smartDesignAppearance: { highlight: "", title: "", woodFinish: [], sizeOptions: [{ title: "", description: "" }] },
     faqs: [{ question: "", description: "" }],
   },
-  isFeatured: false, isActive: true,
+  isFeatured: false, isActive: true, orderBy: 0,
 };
 
 export default function ProductsPage() {
@@ -144,7 +146,7 @@ export default function ProductsPage() {
     setLoading(true);
     setMessage("");
     const payload = {
-      title: productForm.title, code: productForm.code,
+      title: productForm.title, code: productForm.code, hsnCode: productForm.hsnCode,
       description: productForm.description, shortDescription: productForm.shortDescription,
       price: Number(productForm.price || 0),
       discountPrice: productForm.discountPrice ? Number(productForm.discountPrice) : undefined,
@@ -155,7 +157,7 @@ export default function ProductsPage() {
       tags: productForm.tags.filter(t => t.trim() !== ""),
       images: productForm.images, slug: productForm.slug.trim(),
       overview: productForm.overview,
-      isFeatured: productForm.isFeatured, isActive: productForm.isActive,
+      isFeatured: productForm.isFeatured, isActive: productForm.isActive, orderBy: productForm.orderBy,
     };
     try {
       if (productForm.id) {
@@ -183,6 +185,7 @@ export default function ProductsPage() {
       id: product._id,
       title: product.title || "",
       code: product.code || "",
+      hsnCode: (product as any).hsnCode || "",
       description: product.description || "",
       shortDescription: product.shortDescription || "",
       price: String(product.price || ""),
@@ -291,6 +294,7 @@ export default function ProductsPage() {
       },
       isFeatured: !!product.isFeatured,
       isActive: product.isActive !== false,
+      orderBy: (product as any).orderBy || 0,
     });
   };
   const deleteProduct = async (id: string) => {
@@ -382,7 +386,7 @@ export default function ProductsPage() {
           </h3>
 
           {/* Title & Code */}
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-3 sm:grid-cols-3">
             <div>
               <label className={labelClass}>Title</label>
               <input className={fieldClass} value={productForm.title} onChange={(e) => setProductForm({ ...productForm, title: e.target.value })} required />
@@ -390,6 +394,24 @@ export default function ProductsPage() {
             <div>
               <label className={labelClass}>Product Code</label>
               <input className={fieldClass} value={productForm.code} onChange={(e) => setProductForm({ ...productForm, code: e.target.value })} placeholder="e.g. ENS-001" />
+            </div>
+            <div>
+              <label className={labelClass}>HSN Code</label>
+              <input
+                className={fieldClass}
+                value={productForm.hsnCode}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/[^0-9]/g, "").slice(0, 8);
+                  setProductForm({ ...productForm, hsnCode: val });
+                }}
+                placeholder="e.g. 9404"
+                maxLength={8}
+                pattern="[0-9]{4,8}"
+                title="HSN code must be 4 to 8 digits"
+              />
+              {productForm.hsnCode && productForm.hsnCode.length < 4 && (
+                <p className="text-[10px] text-amber-600 mt-0.5">Min 4 digits</p>
+              )}
             </div>
           </div>
           {/* ────── Pricing Section ────── */}
@@ -526,7 +548,7 @@ export default function ProductsPage() {
           </div>
 
           {/* Checkboxes */}
-          <div className="flex gap-6 py-2">
+          <div className="flex gap-6 py-2 items-center">
             <label className="flex items-center gap-2 cursor-pointer">
               <input type="checkbox" checked={productForm.isActive} onChange={(e) => setProductForm({ ...productForm, isActive: e.target.checked })} className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
               <span className="text-xs font-semibold text-slate-700">Active</span>
@@ -534,6 +556,10 @@ export default function ProductsPage() {
             <label className="flex items-center gap-2 cursor-pointer">
               <input type="checkbox" checked={productForm.isFeatured} onChange={(e) => setProductForm({ ...productForm, isFeatured: e.target.checked })} className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
               <span className="text-xs font-semibold text-slate-700">Featured Product</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <span className="text-xs font-semibold text-slate-700">Order By:</span>
+              <input type="number" value={productForm.orderBy} onChange={(e) => setProductForm({ ...productForm, orderBy: Number(e.target.value) })} className="h-8 w-20 text-xs border rounded px-2" />
             </label>
           </div>
 
