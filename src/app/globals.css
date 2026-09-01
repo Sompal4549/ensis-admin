@@ -42,9 +42,18 @@ h1, h2, h3, h4, h5, h6{
   background: #cbd5e1;
 }
 
-button,
-input,
-textarea,
-select {
-  font: inherit;
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    overflow: visible !important;
+    print-color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
+  }
+  * {
+    print-color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
+  }
 }
+

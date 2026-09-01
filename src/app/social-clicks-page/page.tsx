@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   BarChart2, ChevronDown, ExternalLink, RefreshCw,
   Link2, Plus, Pencil, Trash2, Save, X, ImagePlus, Loader2,
@@ -229,7 +229,7 @@ export default function SocialClicksPage() {
   const [loading, setLoading] = useState(false);
   const LIMIT = 50;
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       const [clicksRes, statsRes] = await Promise.all([
@@ -241,7 +241,7 @@ export default function SocialClicksPage() {
       setStats(statsRes ?? []);
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
-  };
+  }, [page, filterPlatform]);
 
   useEffect(() => { fetchData(); }, [page, filterPlatform]);
 

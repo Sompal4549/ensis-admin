@@ -21,7 +21,7 @@ const TYPE_OF_BUSINESS = ["Manufacturing", "Trading", "Service", "IT", "Healthca
 const INDUSTRY_SECTOR = ["Construction", "Interior Design", "Architecture", "Automobile", "Electronics", "Textile", "Food & Beverage", "Pharmaceutical", "Other"];
 const TITLES = ["Mr.", "Mrs.", "Ms.", "Dr.", "Prof."];
 
-const modalFieldClass = "w-full rounded border border-gray-300 bg-white px-1.5 py-0.5 text-[8px] outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 placeholder:text-gray-400";
+const modalFieldClass = "w-full rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 placeholder:text-slate-400";
 const modalSelectClass = `${modalFieldClass} appearance-none pr-6`;
 
 function ModalSelect({ name, value, onChange, placeholder, children }: { name: string; value: string; onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void; placeholder?: string; children: React.ReactNode }) {
@@ -377,18 +377,18 @@ export default function LeadDetailPage({ params }: { params: Promise<{ overview:
             <h3 className="text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-2">Lead Status Updates</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-2">
               <div>
-                <label className="block text-[8px] font-semibold text-slate-500 mb-0.5">Status Update</label>
+                <label className="block text-xs font-semibold text-slate-500 mb-1">Status Update</label>
                 <div className="relative">
-                  <select name="statusUpdate" value={statusForm.statusUpdate} onChange={handleStatusChange} className="w-full rounded-lg border border-slate-200 bg-white px-2 py-1 text-[6px] leading-tight outline-none focus:border-blue-500 appearance-none pr-6">
+                  <select name="statusUpdate" value={statusForm.statusUpdate} onChange={handleStatusChange} className="w-full rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs outline-none focus:border-blue-500 appearance-none pr-6">
                     {LEAD_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
                   </select>
-                  <ChevronDownIcon size={8} className="absolute right-1.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                  <ChevronDownIcon size={12} className="absolute right-1.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                 </div>
               </div>
               <div>
-                <label className="block text-[8px] font-semibold text-slate-500 mb-0.5">Next Action</label>
+                <label className="block text-xs font-semibold text-slate-500 mb-1">Next Action</label>
                 <div className="relative">
-                  <select name="nextAction" value={statusForm.nextAction} onChange={handleStatusChange} className="w-full rounded-lg border border-slate-200 bg-white px-2 py-1 text-[6px] leading-tight outline-none focus:border-blue-500 appearance-none pr-6">
+                  <select name="nextAction" value={statusForm.nextAction} onChange={handleStatusChange} className="w-full rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs outline-none focus:border-blue-500 appearance-none pr-6">
                     <option value="">Select Next Action</option>
                     <option value="follow_up">Follow Up</option>
                     <option value="meeting">Meeting</option>
@@ -396,41 +396,41 @@ export default function LeadDetailPage({ params }: { params: Promise<{ overview:
                     <option value="email">Send Email</option>
                     <option value="proposal">Send Proposal</option>
                   </select>
-                  <ChevronDownIcon size={8} className="absolute right-1.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                  <ChevronDownIcon size={12} className="absolute right-1.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                 </div>
               </div>
               <div>
-                <label className="block text-[8px] font-semibold text-slate-500 mb-0.5">Forward To</label>
+                <label className="block text-xs font-semibold text-slate-500 mb-1">Forward To</label>
                 <div className="relative">
-                  <select name="forwardTo" value={statusForm.forwardTo} onChange={handleStatusChange} className="w-full rounded-lg border border-slate-200 bg-white px-2 py-1 text-[6px] leading-tight outline-none focus:border-blue-500 appearance-none pr-6">
+                  <select name="forwardTo" value={statusForm.forwardTo} onChange={handleStatusChange} className="w-full rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs outline-none focus:border-blue-500 appearance-none pr-6">
                     {users.map((u) => <option key={u._id} value={u._id}>{u.name}</option>)}
                   </select>
-                  <ChevronDownIcon size={8} className="absolute right-1.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                  <ChevronDownIcon size={12} className="absolute right-1.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                 </div>
               </div>
               <div>
-                <label className="block text-[8px] font-semibold text-slate-500 mb-0.5">Follow Up Date</label>
-                <input type="datetime-local" name="followUpDate" value={statusForm.followUpDate} onChange={handleStatusChange} className="w-full rounded-lg border border-slate-200 bg-white px-2 py-1 text-[6px] leading-tight outline-none focus:border-blue-500" />
+                <label className="block text-xs font-semibold text-slate-500 mb-1">Follow Up Date</label>
+                <input type="datetime-local" name="followUpDate" value={statusForm.followUpDate} onChange={handleStatusChange} className="w-full rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs outline-none focus:border-blue-500" />
               </div>
             </div>
             <div className="flex gap-2">
               <div className="flex-1">
-                <label className="block text-[8px] font-semibold text-slate-500 mb-0.5">Remark</label>
+                <label className="block text-xs font-semibold text-slate-500 mb-1">Remark</label>
                 <textarea
                   name="remark"
                   value={statusForm.remark}
                   onChange={handleStatusChange}
                   rows={1}
                   placeholder="Write your remark here..."
-                  className="w-full rounded-lg border border-slate-200 px-2 py-1 text-[6px] leading-tight outline-none focus:ring-1 focus:ring-blue-500 resize-none placeholder:text-slate-400"
+                  className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs outline-none focus:ring-1 focus:ring-blue-500 resize-none placeholder:text-slate-400"
                 />
               </div>
               <button
                 onClick={handleUpdateStatus}
                 disabled={saving}
-                className="self-end flex items-center gap-1 px-4 py-2 rounded-lg bg-emerald-600 text-white text-[9px] font-bold hover:bg-emerald-700 transition-colors disabled:opacity-50"
+                className="self-end flex items-center gap-1 px-4 py-2 rounded-lg bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 transition-colors disabled:opacity-50"
               >
-                {saving ? <Loader2 size={10} className="animate-spin" /> : <Send size={10} />}
+                {saving ? <Loader2 size={12} className="animate-spin" /> : <Send size={12} />}
                 Update Status
               </button>
             </div>

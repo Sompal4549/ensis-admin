@@ -287,7 +287,6 @@ const NAV_ITEMS: NavItem[] = [
       { label: "Add Lead", path: "/leads/add-lead", icon: <UserPlus size={14} className="text-emerald-400" /> },
       { label: "Hot Leads", path: "/leads/hot-lead", icon: <Flame size={14} className="text-orange-400" /> },
       { label: "Cold Leads", path: "/leads/cold-lead", icon: <Snowflake size={14} className="text-blue-400" /> },
-      { label: "Invoices", path: "/invoices", icon: <Receipt size={14} className="text-purple-400" /> },
     ],
   },
   {
