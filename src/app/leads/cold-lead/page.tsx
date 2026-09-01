@@ -79,7 +79,7 @@ export default function ColdLeadPage() {
               onChange={(e) => setSearch(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
               placeholder="Search..."
-              className="w-full pl-8 pr-3 py-1 rounded-lg border border-slate-200 text-[9px] outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full pl-8 pr-3 py-1.5 rounded-lg border border-slate-200 text-xs outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
           <button onClick={handleSearch} className="px-3 py-1.5 rounded-lg bg-emerald-800 text-white text-[11px] font-medium hover:bg-emerald-900">Search</button>

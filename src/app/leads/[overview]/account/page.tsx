@@ -210,12 +210,16 @@ export default function AccountPage({ params }: { params: Promise<{ overview: st
       </tr>`
     ).join("");
 
+    const logoUrl = typeof window !== "undefined" ? window.location.origin + "/images/ensis-logo.png" : "/images/ensis-logo.png";
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${inv.invoiceNumber}</title></head>
 <body style="margin:0;font-family:Jost,Arial,sans-serif;background:#FCFAF6;color:#1F3A2A">
 <div style="max-width:760px;margin:40px auto;background:#fff;border:1px solid #EDE4D3;border-radius:20px;overflow:hidden">
-<div style="background:#1F3A2A;padding:32px 40px;color:#fff">
+<div style="background:#1F3A2A;padding:32px 40px;color:#fff;display:flex;align-items:center;gap:16px">
+<img src="${logoUrl}" alt="ENSIS Logo" style="height:40px;width:auto;background:#fff;border-radius:8px;padding:4px" />
+<div>
 <div style="margin:0;font-size:22px;letter-spacing:.14em;text-transform:uppercase;font-weight:700">ENSIS</div>
 <p style="margin:6px 0 0;font-size:12px;color:#C7A55B;letter-spacing:.1em;text-transform:uppercase">${TYPE_CONFIG[inv.type]?.label || "Invoice"} (${inv.invoiceNumber})</p>
+</div>
 </div>
 <div style="padding:32px 40px">
 <div style="display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap">
@@ -271,13 +275,17 @@ ${inv.discount ? `<p style="margin:4px 0;color:#2F7D5A">Discount: - ${fmt(inv.di
       order.orderStatus === "cancelled" ? "Cancelled" :
       order.orderStatus.charAt(0).toUpperCase() + order.orderStatus.slice(1);
 
+    const logoUrl = typeof window !== "undefined" ? window.location.origin + "/images/ensis-logo.png" : "/images/ensis-logo.png";
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Order #${order._id.slice(-6).toUpperCase()}</title>
 <style>@media print{body{margin:0} @page{size:A4;margin:10mm}}</style></head>
 <body style="margin:0;font-family:Jost,Arial,sans-serif;background:#FCFAF6;color:#1F3A2A">
 <div style="max-width:760px;margin:20px auto;background:#fff;border:1px solid #EDE4D3;border-radius:20px;overflow:hidden">
-<div style="background:#1F3A2A;padding:32px 40px;color:#fff">
+<div style="background:#1F3A2A;padding:32px 40px;color:#fff;display:flex;align-items:center;gap:16px">
+<img src="${logoUrl}" alt="ENSIS Logo" style="height:40px;width:auto;background:#fff;border-radius:8px;padding:4px" />
+<div>
 <div style="margin:0;font-size:22px;letter-spacing:.14em;text-transform:uppercase;font-weight:700">ENSIS</div>
 <p style="margin:6px 0 0;font-size:12px;color:#C7A55B;letter-spacing:.1em;text-transform:uppercase">Order #${order._id.slice(-6).toUpperCase()}</p>
+</div>
 </div>
 <div style="padding:32px 40px">
 <div style="display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap">
@@ -324,13 +332,17 @@ ${rows ? `<table style="width:100%;margin-top:28px;border-collapse:collapse;font
       </tr>`
     ).join("");
 
+    const logoUrl = typeof window !== "undefined" ? window.location.origin + "/images/ensis-logo.png" : "/images/ensis-logo.png";
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${inv.invoiceNumber}</title>
 <style>@media print{body{margin:0} @page{size:A4;margin:10mm}}</style></head>
 <body style="margin:0;font-family:Jost,Arial,sans-serif;background:#FCFAF6;color:#1F3A2A">
 <div style="max-width:760px;margin:20px auto;background:#fff;border:1px solid #EDE4D3;border-radius:20px;overflow:hidden">
-<div style="background:#1F3A2A;padding:32px 40px;color:#fff">
+<div style="background:#1F3A2A;padding:32px 40px;color:#fff;display:flex;align-items:center;gap:16px">
+<img src="${logoUrl}" alt="ENSIS Logo" style="height:40px;width:auto;background:#fff;border-radius:8px;padding:4px" />
+<div>
 <div style="margin:0;font-size:22px;letter-spacing:.14em;text-transform:uppercase;font-weight:700">ENSIS</div>
 <p style="margin:6px 0 0;font-size:12px;color:#C7A55B;letter-spacing:.1em;text-transform:uppercase">${TYPE_CONFIG[inv.type]?.label || "Invoice"} (${inv.invoiceNumber})</p>
+</div>
 </div>
 <div style="padding:32px 40px">
 <div style="display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap">
@@ -432,9 +444,9 @@ ${inv.notes ? `<p style="margin-top:20px;font-size:12px;color:#6c7068"><strong>N
       {/* Action Buttons */}
       <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
         {[
-          { icon: FileText, label: "Proforma Invoice", desc: "Create proforma", iconBg: "bg-blue-50 group-hover:bg-blue-100", text: "text-blue-600", hover: "hover:bg-blue-50", type: "proforma" },
+          { icon: FileText, label: "Estimate", desc: "Create estimate", iconBg: "bg-blue-50 group-hover:bg-blue-100", text: "text-blue-600", hover: "hover:bg-blue-50", type: "proforma" },
           { icon: Truck, label: "Delivery Challan", desc: "Create challan", iconBg: "bg-emerald-50 group-hover:bg-emerald-100", text: "text-emerald-600", hover: "hover:bg-emerald-50", type: "delivery_challan" },
-          { icon: Receipt, label: "Invoice", desc: "New invoice", iconBg: "bg-purple-50 group-hover:bg-purple-100", text: "text-purple-600", hover: "hover:bg-purple-50", type: "tax" },
+          { icon: Receipt, label: "Invoice", desc: "View invoices", iconBg: "bg-purple-50 group-hover:bg-purple-100", text: "text-purple-600", hover: "hover:bg-purple-50", type: "tax" },
           { icon: CreditCard, label: "Payments", desc: "Record payments", iconBg: "bg-amber-50 group-hover:bg-amber-100", text: "text-amber-600", hover: "hover:bg-amber-50", type: "" },
           { icon: Undo2, label: "Credit Note", desc: "Create credit", iconBg: "bg-cyan-50 group-hover:bg-cyan-100", text: "text-cyan-600", hover: "hover:bg-cyan-50", type: "credit_note" },
           { icon: MinusCircle, label: "Debit Note", desc: "Create debit", iconBg: "bg-rose-50 group-hover:bg-rose-100", text: "text-rose-600", hover: "hover:bg-rose-50", type: "debit_note" },
@@ -442,7 +454,11 @@ ${inv.notes ? `<p style="margin-top:20px;font-size:12px;color:#6c7068"><strong>N
           <button
             key={item.label}
             onClick={() => {
-              if (item.type) {
+              if (item.type === "tax") {
+                router.push(`/leads/${leadId}/invoice`);
+              } else if (item.type === "proforma") {
+                router.push(`/leads/${leadId}/estimate`);
+              } else if (item.type) {
                 handleCreateInvoice(item.type);
               } else {
                 router.push("/invoices");
@@ -467,7 +483,7 @@ ${inv.notes ? `<p style="margin-top:20px;font-size:12px;color:#6c7068"><strong>N
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-xs font-bold text-slate-700">Recent Documents</h3>
-            <Link href="/invoices" className="text-[10px] font-semibold text-blue-600 hover:underline">View All</Link>
+            <Link href={`/leads/${leadId}/invoice`} className="text-[10px] font-semibold text-blue-600 hover:underline">View All</Link>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
@@ -493,7 +509,7 @@ ${inv.notes ? `<p style="margin-top:20px;font-size:12px;color:#6c7068"><strong>N
                       return (
                         <tr key={`inv-${inv._id}`} className="border-b border-slate-50 hover:bg-slate-50/50">
                           <td className="py-1.5">
-                            <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${typeConf.color}`}>{typeConf.label}</span>
+                            <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium inline-flex items-center gap-1 ${typeConf.color}`}><FileText size={8} /> {typeConf.label}</span>
                           </td>
                           <td className="py-1.5 font-medium text-slate-800">{inv.invoiceNumber}</td>
                           <td className="py-1.5 text-slate-500">{new Date(inv.createdAt).toLocaleDateString("en-IN")}</td>
@@ -503,16 +519,16 @@ ${inv.notes ? `<p style="margin-top:20px;font-size:12px;color:#6c7068"><strong>N
                           </td>
                           <td className="py-1.5">
                             <div className="flex items-center gap-1">
-                              <button onClick={() => downloadInvoice(inv)} className="p-1 rounded hover:bg-emerald-50 text-slate-400 hover:text-emerald-600" title="Download">
+                              <button onClick={() => downloadInvoice(inv)} className="p-1 rounded hover:bg-emerald-50 text-emerald-500 hover:text-emerald-600" title="Download">
                                 <Download size={12} />
                               </button>
-                              <button onClick={() => printInvoice(inv)} className="p-1 rounded hover:bg-blue-50 text-slate-400 hover:text-blue-600" title="Print">
+                              <button onClick={() => printInvoice(inv)} className="p-1 rounded hover:bg-blue-50 text-blue-500 hover:text-blue-600" title="Print">
                                 <Printer size={12} />
                               </button>
-                              <button onClick={() => handleSendEmail(inv)} className="p-1 rounded hover:bg-amber-50 text-slate-400 hover:text-amber-600" title="Send Email">
+                              <button onClick={() => handleSendEmail(inv)} className="p-1 rounded hover:bg-amber-50 text-amber-500 hover:text-amber-600" title="Send Email">
                                 <EmailIcon size={12} />
                               </button>
-                              <button onClick={() => handleSendWhatsApp(inv)} className="p-1 rounded hover:bg-green-50 text-slate-400 hover:text-green-600" title="Send WhatsApp">
+                              <button onClick={() => handleSendWhatsApp(inv)} className="p-1 rounded hover:bg-green-50 text-green-500 hover:text-green-600" title="Send WhatsApp">
                                 <WhatsAppIcon size={12} />
                               </button>
                             </div>
@@ -544,16 +560,16 @@ ${inv.notes ? `<p style="margin-top:20px;font-size:12px;color:#6c7068"><strong>N
                           </td>
                           <td className="py-1.5">
                             <div className="flex items-center gap-1">
-                              <Link href={`/orders-list-management`} className="p-1 rounded hover:bg-blue-50 text-slate-400 hover:text-blue-600 inline-block" title="View Order">
+                              <Link href={`/orders-list-management`} className="p-1 rounded hover:bg-blue-50 text-blue-500 hover:text-blue-600 inline-block" title="View Order">
                                 <Globe size={12} />
                               </Link>
-                              <button onClick={() => printOrder(order)} className="p-1 rounded hover:bg-blue-50 text-slate-400 hover:text-blue-600" title="Print">
+                              <button onClick={() => printOrder(order)} className="p-1 rounded hover:bg-blue-50 text-blue-500 hover:text-blue-600" title="Print">
                                 <Printer size={12} />
                               </button>
-                              <button onClick={() => handleSendOrderEmail(order)} className="p-1 rounded hover:bg-amber-50 text-slate-400 hover:text-amber-600" title="Send Email">
+                              <button onClick={() => handleSendOrderEmail(order)} className="p-1 rounded hover:bg-amber-50 text-amber-500 hover:text-amber-600" title="Send Email">
                                 <EmailIcon size={12} />
                               </button>
-                              <button onClick={() => handleSendOrderWhatsApp(order)} className="p-1 rounded hover:bg-green-50 text-slate-400 hover:text-green-600" title="Send WhatsApp">
+                              <button onClick={() => handleSendOrderWhatsApp(order)} className="p-1 rounded hover:bg-green-50 text-green-500 hover:text-green-600" title="Send WhatsApp">
                                 <WhatsAppIcon size={12} />
                               </button>
                             </div>
@@ -817,8 +833,8 @@ function CreateInvoiceModal({ leadId, initialType, onClose, onCreated }: { leadI
   };
 
   const fmt = (n: number) => `₹${n.toLocaleString("en-IN")}`;
-  const fieldClass = "w-full rounded-lg border border-slate-200 px-2 py-0.5 text-[9px] outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-slate-400 font-normal";
-  const labelClass = "mb-0.5 block text-[9px] font-semibold text-black";
+  const fieldClass = "w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-slate-400 font-normal";
+  const labelClass = "mb-1 block text-xs font-semibold text-black";
 
   return (
     <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 backdrop-blur-sm overflow-y-auto p-4" onClick={onClose}>
@@ -848,7 +864,7 @@ function CreateInvoiceModal({ leadId, initialType, onClose, onCreated }: { leadI
 
           {/* Billing */}
           <div className="bg-slate-50 rounded-lg p-2 space-y-1.5">
-            <p className="text-[9px] font-bold text-slate-600 uppercase tracking-wider">Billing Address</p>
+            <p className="text-xs font-bold text-slate-600 uppercase tracking-wider">Billing Address</p>
             <div className="grid grid-cols-2 gap-1.5">
               <input placeholder="Name *" value={billingName} onChange={(e) => setBillingName(e.target.value)} className={fieldClass} />
               <input placeholder="Email" value={billingEmail} onChange={(e) => setBillingEmail(e.target.value)} className={fieldClass} />
@@ -865,8 +881,8 @@ function CreateInvoiceModal({ leadId, initialType, onClose, onCreated }: { leadI
           {/* Items */}
           <div>
             <div className="flex items-center justify-between mb-1">
-              <p className="text-[9px] font-bold text-slate-600 uppercase tracking-wider">Items</p>
-              <button onClick={addItem} className="text-[9px] font-semibold text-blue-600 hover:underline">+ Add Item</button>
+              <p className="text-xs font-bold text-slate-600 uppercase tracking-wider">Items</p>
+              <button onClick={addItem} className="text-xs font-semibold text-blue-600 hover:underline">+ Add Item</button>
             </div>
             <div className="space-y-1.5">
               {items.map((item, idx) => (
@@ -881,7 +897,7 @@ function CreateInvoiceModal({ leadId, initialType, onClose, onCreated }: { leadI
                   <input type="number" placeholder="Qty" value={item.quantity} onChange={(e) => updateItem(idx, "quantity", parseInt(e.target.value) || 1)} className={`${fieldClass} w-12`} min={1} />
                   <input type="number" placeholder="Price" value={item.unitPrice} onChange={(e) => updateItem(idx, "unitPrice", parseFloat(e.target.value) || 0)} className={`${fieldClass} w-16`} min={0} />
                   <input type="number" placeholder="GST%" value={item.gstRate} onChange={(e) => updateItem(idx, "gstRate", parseFloat(e.target.value) || 0)} className={`${fieldClass} w-12`} min={0} />
-                  <span className="text-[9px] font-medium text-slate-600 w-14 text-right shrink-0">{fmt(item.quantity * item.unitPrice)}</span>
+                  <span className="text-xs font-medium text-slate-600 w-14 text-right shrink-0">{fmt(item.quantity * item.unitPrice)}</span>
                   {items.length > 1 && (
                     <button onClick={() => removeItem(idx)} className="text-red-400 hover:text-red-600 text-xs leading-none shrink-0">&times;</button>
                   )}
@@ -900,11 +916,11 @@ function CreateInvoiceModal({ leadId, initialType, onClose, onCreated }: { leadI
               <div className="flex justify-between"><span className="text-slate-500">Subtotal</span><span className="font-medium">{fmt(subtotal)}</span></div>
               <div className="flex justify-between items-center">
                 <span className="text-slate-500">Discount</span>
-                <input type="number" value={discount} onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)} className="w-16 text-right rounded border border-slate-200 px-1 py-0.5 text-[9px] outline-none" min={0} />
+                <input type="number" value={discount} onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)} className="w-16 text-right rounded-lg border border-slate-200 px-2 py-1.5 text-xs outline-none" min={0} />
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-slate-500">Shipping</span>
-                <input type="number" value={shipping} onChange={(e) => setShipping(parseFloat(e.target.value) || 0)} className="w-16 text-right rounded border border-slate-200 px-1 py-0.5 text-[9px] outline-none" min={0} />
+                <input type="number" value={shipping} onChange={(e) => setShipping(parseFloat(e.target.value) || 0)} className="w-16 text-right rounded-lg border border-slate-200 px-2 py-1.5 text-xs outline-none" min={0} />
               </div>
               <div className="flex justify-between"><span className="text-slate-500">GST</span><span className="font-medium">{fmt(tax)}</span></div>
               <div className="flex justify-between border-t border-slate-200 pt-1 font-bold text-slate-800">

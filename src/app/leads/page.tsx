@@ -59,10 +59,10 @@ export default function LeadsOverviewPage() {
       <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-2">
         <div className="flex items-center gap-1.5">
           <div className="relative flex-1 max-w-xs">
-            <Search size={10} className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input value={search} onChange={(e) => setSearch(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleSearch()} placeholder="Search..." className="w-full pl-6 pr-2 py-0.5 rounded border border-slate-200 text-[9px] outline-none focus:ring-1 focus:ring-blue-500" />
+            <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input value={search} onChange={(e) => setSearch(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleSearch()} placeholder="Search..." className="w-full pl-8 pr-3 py-1.5 rounded-lg border border-slate-200 text-xs outline-none focus:ring-1 focus:ring-blue-500" />
           </div>
-          <button onClick={handleSearch} className="px-2 py-0.5 rounded bg-emerald-800 text-white text-[9px] font-medium hover:bg-emerald-900">Search</button>
+          <button onClick={handleSearch} className="px-3 py-1.5 rounded-lg bg-emerald-800 text-white text-xs font-medium hover:bg-emerald-900">Search</button>
         </div>
       </div>
 

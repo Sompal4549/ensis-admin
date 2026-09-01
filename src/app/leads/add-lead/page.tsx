@@ -11,7 +11,7 @@ const TYPE_OF_BUSINESS = ["Manufacturing", "Trading", "Service", "IT", "Healthca
 const INDUSTRY_SECTOR = ["Construction", "Interior Design", "Architecture", "Automobile", "Electronics", "Textile", "Food & Beverage", "Pharmaceutical", "Other"];
 const TITLES = ["Mr.", "Mrs.", "Ms.", "Dr.", "Prof."];
 
-const inputClass = "w-full rounded border border-gray-300 bg-white px-1.5 py-0.5 text-[9px] outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 placeholder:text-gray-400 placeholder:text-[9px]";
+const inputClass = "w-full rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 placeholder:text-slate-400";
 const selectClass = `${inputClass} appearance-none pr-7 text-gray-700`;
 const dateClass = `${inputClass}`;
 
