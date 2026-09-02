@@ -49,12 +49,14 @@ export default function LeadInvoicesPage({ params }: { params: Promise<{ overvie
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
-  const [filterType, setFilterType] = useState("");
+  const [filterType, setFilterType] = useState("tax");
   const [filterStatus, setFilterStatus] = useState("");
   const [search, setSearch] = useState("");
   const [pendingDelete, setPendingDelete] = useState<Invoice | null>(null);
   const [viewInvoice, setViewInvoice] = useState<Invoice | null>(null);
   const [showCreate, setShowCreate] = useState(false);
+  const [sendingEmailId, setSendingEmailId] = useState<string | null>(null);
+  const [sendingWhatsAppId, setSendingWhatsAppId] = useState<string | null>(null);
 
   const fmt = (n: number) => `₹${n.toLocaleString("en-IN")}`;
 
@@ -103,88 +105,326 @@ export default function LeadInvoicesPage({ params }: { params: Promise<{ overvie
   };
 
   const handleSendEmail = async (inv: Invoice) => {
+    setSendingEmailId(inv._id);
     try {
       const res = await invoiceApi.sendEmail(inv._id);
       toast.success(res.message || "Invoice sent via email");
       fetchInvoices();
     } catch (err: any) {
       toast.error(err.message || "Failed to send email");
+    } finally {
+      setSendingEmailId(null);
     }
   };
 
   const handleSendWhatsApp = async (inv: Invoice) => {
+    setSendingWhatsAppId(inv._id);
     try {
       const res = await invoiceApi.sendWhatsApp(inv._id);
       toast.success(res.message || "Invoice sent via WhatsApp");
       fetchInvoices();
     } catch (err: any) {
       toast.error(err.message || "Failed to send via WhatsApp");
+    } finally {
+      setSendingWhatsAppId(null);
     }
   };
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
+  const amountInWords = (n: number): string => {
+    if (n === 0) return "Zero Rupees Only";
+    const ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+    const tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+    const convert = (num: number): string => {
+      if (num < 20) return ones[num];
+      if (num < 100) return tens[Math.floor(num / 10)] + (num % 10 ? " " + ones[num % 10] : "");
+      if (num < 1000) return ones[Math.floor(num / 100)] + " Hundred" + (num % 100 ? " and " + convert(num % 100) : "");
+      if (num < 100000) return convert(Math.floor(num / 1000)) + " Thousand" + (num % 1000 ? " " + convert(num % 1000) : "");
+      if (num < 10000000) return convert(Math.floor(num / 100000)) + " Lakh" + (num % 100000 ? " " + convert(num % 100000) : "");
+      return convert(Math.floor(num / 10000000)) + " Crore" + (num % 10000000 ? " " + convert(num % 10000000) : "");
+    };
+    return convert(Math.floor(n)) + " Rupees Only";
+  };
+
+  const getFullInvoiceHtml = (inv: Invoice) => {
+    const isEstimate = inv.type === "proforma";
+    const invDate = new Date(inv.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+    const invTime = new Date(inv.createdAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+    const logoUrl = "https://res.cloudinary.com/dn34qdd2q/image/upload/v1781521763/ensis/f9pgo7qufbqmxwlho5ht.png";
+    const billAddr = inv.billingAddress || {} as any;
+    const shipAddr = inv.shippingAddress || {} as any;
+    const items = inv.items || [];
+    const taxableValue = inv.subtotal || 0;
+    const tax = inv.tax || 0;
+    const totalAmount = inv.totalAmount || 0;
+
+    const bdr = "border:1px solid #d1d5db";
+    const minRows = 7;
+    const emptyCount = Math.max(0, minRows - items.length);
+
+    let itemRows = items.map((item: any, idx: number) => {
+      const qty = item.quantity || 0;
+      const rate = item.unitPrice || 0;
+      const amount = item.amount || qty * rate;
+      const disc = item.discount || 0;
+      const total = amount - disc;
+      return `<tr>
+        <td style="${bdr};text-align:center">${idx + 1}</td>
+        <td style="${bdr};text-align:center"><span style="font-weight:600">${item.name || ""}</span>${item.description ? `<br/><span style="font-size:9px;color:#6b7280">${item.description}</span>` : ""}</td>
+        <td style="${bdr};text-align:center">${item.hsn || "-"}</td>
+        <td style="${bdr};text-align:center">${qty}</td>
+        <td style="${bdr};text-align:center">${item.size || "-"}</td>
+        <td style="${bdr};text-align:center">${item.area || "-"}</td>
+        <td style="${bdr};text-align:center">${item.unit || "Nos"}</td>
+        <td style="${bdr};text-align:center">${fmt(rate)}</td>
+        <td style="${bdr};text-align:center">${disc > 0 ? disc + "%" : "0%"}</td>
+        <td style="${bdr};text-align:center;font-weight:600">${fmt(total)}</td>
+      </tr>`;
+    }).join("");
+
+    for (let i = 0; i < emptyCount; i++) {
+      itemRows += `<tr>
+        <td style="${bdr};text-align:center">${items.length + i + 1}</td>
+        <td style="${bdr};text-align:center">&nbsp;</td>
+        <td style="${bdr};text-align:center">&nbsp;</td>
+        <td style="${bdr};text-align:center">&nbsp;</td>
+        <td style="${bdr};text-align:center">&nbsp;</td>
+        <td style="${bdr};text-align:center">&nbsp;</td>
+        <td style="${bdr};text-align:center">&nbsp;</td>
+        <td style="${bdr};text-align:center">&nbsp;</td>
+        <td style="${bdr};text-align:center">&nbsp;</td>
+        <td style="${bdr};text-align:center">&nbsp;</td>
+      </tr>`;
+    }
+
+    itemRows += `<tr style="background:#f8fafc">
+      <td colspan="9" style="${bdr};padding:5px 8px;text-align:center;font-weight:bold;font-size:9px">TAXABLE VALUE :</td>
+      <td style="${bdr};padding:5px 8px;text-align:center;font-weight:bold;font-size:10px">${fmt(taxableValue)}</td>
+    </tr>`;
+
+    let taxRows = items.map((item: any, idx: number) => {
+      const qty = item.quantity || 0;
+      const amount = item.amount || 0;
+      const gstRate = item.gstRate || 18;
+      const cgst = gstRate / 2;
+      const sgst = gstRate / 2;
+      const cgstAmt = (amount * cgst) / 100;
+      const sgstAmt = (amount * sgst) / 100;
+      const totalTax = cgstAmt + sgstAmt;
+      return `<tr>
+        <td style="${bdr};text-align:center">${idx + 1}</td>
+        <td style="${bdr};text-align:center">${item.hsn || "-"}</td>
+        <td style="${bdr};text-align:center">${item.sac || "-"}</td>
+        <td style="${bdr};text-align:center">${fmt(amount)}</td>
+        <td style="${bdr};text-align:center">${qty}</td>
+        <td style="${bdr};text-align:center">${cgst}%</td>
+        <td style="${bdr};text-align:center">${fmt(cgstAmt)}</td>
+        <td style="${bdr};text-align:center">${sgst}%</td>
+        <td style="${bdr};text-align:center">${fmt(sgstAmt)}</td>
+        <td style="${bdr};text-align:center">-</td>
+        <td style="${bdr};text-align:center">-</td>
+        <td style="${bdr};text-align:center;font-weight:600">${fmt(totalTax)}</td>
+      </tr>`;
+    }).join("");
+
+    for (let i = 0; i < emptyCount; i++) {
+      taxRows += `<tr>
+        <td style="${bdr};text-align:center">&nbsp;</td>
+        <td style="${bdr};text-align:center">&nbsp;</td>
+        <td style="${bdr};text-align:center">&nbsp;</td>
+        <td style="${bdr};text-align:center">&nbsp;</td>
+        <td style="${bdr};text-align:center">&nbsp;</td>
+        <td style="${bdr};text-align:center">&nbsp;</td>
+        <td style="${bdr};text-align:center">&nbsp;</td>
+        <td style="${bdr};text-align:center">&nbsp;</td>
+        <td style="${bdr};text-align:center">&nbsp;</td>
+        <td style="${bdr};text-align:center">&nbsp;</td>
+        <td style="${bdr};text-align:center">&nbsp;</td>
+        <td style="${bdr};text-align:center">&nbsp;</td>
+      </tr>`;
+    }
+
+    return `<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>${inv.invoiceNumber}</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:Arial,Helvetica,sans-serif; font-size:10px; color:#1a1a1a; background:#fff; }
+  @media print {
+    @page { size:A4 portrait; margin:0; }
+    body { background:#fff; print-color-adjust:exact; -webkit-print-color-adjust:exact; }
+    .container { padding:20px 16px; }
+    * { print-color-adjust:exact; -webkit-print-color-adjust:exact; }
+  }
+  .container { max-width:800px; margin:0 auto; padding:20px 16px; }
+  .header { text-align:center; }
+  .header img { width:100%; max-width:800px; height:auto; display:block; margin:0 auto; }
+  .title-bar { text-align:center; padding:6px 0; border-bottom:2px solid #1a3a5c; }
+  .title-bar h2 { font-size:14px; letter-spacing:3px; text-transform:uppercase; color:#1a3a5c; font-weight:700; }
+  .info-grid { display:grid; grid-template-columns:1fr 1fr 1fr; border:1px solid #d1d5db; }
+  .info-col { padding:8px 10px; }
+  .info-col:not(:last-child) { border-right:1px solid #d1d5db; }
+  .info-label { background:#1a3a5c; color:#fff; font-size:8px; font-weight:600; text-transform:uppercase; letter-spacing:1px; padding:3px 6px; margin:-8px -10px 6px -10px; }
+  .info-col p { font-size:9px; line-height:1.5; }
+  table { width:100%; border-collapse:collapse; border:1px solid #d1d5db; font-size:10px; }
+  th { background:#1a3a5c; color:#fff; padding:6px; text-align:left; font-size:9px; font-weight:600; height:28px; border:1px solid #d1d5db; }
+  td { padding:5px 6px; font-size:9px; border:1px solid #d1d5db; }
+  .totals-table { width:100%; border-collapse:collapse; margin-top:8px; border:1px solid #d1d5db; }
+  .totals-table td { padding:4px 6px; font-size:10px; border:1px solid #d1d5db; }
+  .terms-table { width:100%; border-collapse:collapse; border:1px solid #d1d5db; margin-top:4px; }
+  .terms-table td { padding:8px; font-size:9px; vertical-align:top; border:1px solid #d1d5db; }
+  .terms-table h4 { font-size:10px; font-weight:600; margin-bottom:4px; }
+  .terms-table ol { padding-left:14px; margin:0; line-height:1.7; }
+  .bottom-table { width:100%; border-collapse:collapse; border:1px solid #d1d5db; margin-top:8px; }
+  .bottom-table td { padding:8px; vertical-align:top; border:1px solid #d1d5db; font-size:9px; }
+  .footer { background:#1a3a5c; color:#fff; text-align:center; padding:8px; font-size:9px; margin-top:8px; }
+</style></head><body>
+<div class="container">
+  <div class="header">
+    <img src="https://res.cloudinary.com/ddjhixcwh/image/upload/v1788345967/ensis/home/x4jc41aedar9iiaujo9j.webp" alt="Ensis Header" />
+  </div>
+
+  <div class="title-bar"><h2>${TYPE_CONFIG[inv.type]?.label || (isEstimate ? "Estimate" : "Tax Invoice")}</h2></div>
+
+  <div class="info-grid">
+    <div class="info-col">
+      <div class="info-label">Client Name &amp; Address</div>
+      <p><strong>${billAddr.name || "-"}</strong></p>
+      ${billAddr.addressLine ? `<p>${billAddr.addressLine}</p>` : ""}
+      ${billAddr.city ? `<p>${billAddr.city}, ${billAddr.state || ""} ${billAddr.postalCode || ""}</p>` : ""}
+      ${billAddr.country ? `<p>${billAddr.country}</p>` : ""}
+      <p>Contact Person : ${billAddr.name || "-"}</p>
+      ${billAddr.phone ? `<p>Contact No. : ${billAddr.phone}</p>` : ""}
+      ${billAddr.email ? `<p>Email : ${billAddr.email}</p>` : ""}
+    </div>
+    <div class="info-col">
+      <div class="info-label">Shipment Details</div>
+      <p><strong>${shipAddr.name || billAddr.name || "-"}</strong></p>
+      ${shipAddr.addressLine ? `<p>${shipAddr.addressLine}</p>` : ""}
+      ${shipAddr.city ? `<p>${shipAddr.city}, ${shipAddr.state || ""} ${shipAddr.postalCode || ""}</p>` : ""}
+      <p>Contact Person : ${shipAddr.name || "-"}</p>
+      ${shipAddr.phone ? `<p>Contact No. : ${shipAddr.phone}</p>` : ""}
+      ${shipAddr.email ? `<p>Email : ${shipAddr.email}</p>` : ""}
+      ${shipAddr.gstNumber ? `<p>GSTIN / UIN : ${shipAddr.gstNumber}</p>` : ""}
+    </div>
+    <div class="info-col">
+      <div class="info-label" style="text-align:right">${isEstimate ? "Estimate" : "Invoice"} Details</div>
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-size:9px;border:none">
+        <tr><td style="border:none;padding:2px 0">${isEstimate ? "Estimate No." : "Invoice No."} :</td><td style="border:none;padding:2px 0;text-align:right"><strong>${inv.invoiceNumber}</strong></td></tr>
+        <tr><td style="border:none;padding:2px 0">${isEstimate ? "Estimate Date" : "Invoice Date"} :</td><td style="border:none;padding:2px 0;text-align:right">${invDate}</td></tr>
+        ${inv.dueDate ? `<tr><td style="border:none;padding:2px 0">Due Date :</td><td style="border:none;padding:2px 0;text-align:right">${new Date(inv.dueDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</td></tr>` : `<tr><td style="border:none;padding:2px 0">Supply Date :</td><td style="border:none;padding:2px 0;text-align:right">${invDate}</td></tr>`}
+        <tr><td style="border:none;padding:2px 0">Created Date :</td><td style="border:none;padding:2px 0;text-align:right">${invDate}</td></tr>
+        <tr><td style="border:none;padding:2px 0">Created Time :</td><td style="border:none;padding:2px 0;text-align:right">${invTime}</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div style="padding:8px 0">
+    <table>
+      <thead><tr>
+        <th>S.NO.</th>
+        <th>ITEM DESCRIPTION</th>
+        <th style="text-align:center">HSN/SAC CODE</th>
+        <th style="text-align:center">QTY.</th>
+        <th style="text-align:center">SIZE</th>
+        <th style="text-align:center">AREA</th>
+        <th style="text-align:center">UNIT</th>
+        <th style="text-align:right">RATE</th>
+        <th style="text-align:right">DISCOUNT</th>
+        <th style="text-align:right">TOTAL</th>
+      </tr></thead>
+      <tbody>${itemRows || '<tr><td colspan="10" style="text-align:center;padding:10px;color:#9ca3af">No items</td></tr>'}</tbody>
+    </table>
+  </div>
+
+  <div style="padding:0 0 8px 0">
+    <table>
+      <thead><tr>
+        <th>S.NO.</th>
+        <th style="text-align:center">HSN CODE</th>
+        <th style="text-align:center">SAC CODE</th>
+        <th style="text-align:right">ITEM VALUE</th>
+        <th style="text-align:center">QTY.</th>
+        <th style="text-align:center">CGST(%)</th>
+        <th style="text-align:right">AMOUNT</th>
+        <th style="text-align:center">SGST(%)</th>
+        <th style="text-align:right">AMOUNT</th>
+        <th style="text-align:center">IGST(%)</th>
+        <th style="text-align:right">AMOUNT</th>
+        <th style="text-align:right">TOTAL TAX</th>
+      </tr></thead>
+      <tbody>${taxRows}</tbody>
+    </table>
+    <table class="totals-table">
+      <tr>
+        <td style="width:25%;font-weight:600">GST AMOUNT IN WORDS (INR)</td>
+        <td style="width:45%;text-align:left">${amountInWords(tax)}</td>
+        <td style="width:15%;font-weight:600">TOTAL GST AMT</td>
+        <td style="width:15%;text-align:right;font-weight:600">${fmt(tax)}</td>
+      </tr>
+      <tr>
+        <td style="font-weight:600">AMOUNT IN WORDS (INR)</td>
+        <td style="text-align:left">${amountInWords(totalAmount)}</td>
+        <td style="font-size:11px;font-weight:700">GRAND TOTAL</td>
+        <td style="text-align:right;font-size:11px;font-weight:700">${fmt(totalAmount)}</td>
+      </tr>
+    </table>
+  </div>
+
+  <table class="terms-table">
+    <tr>
+      <td width="50%">
+        <table style="width:100%;border-collapse:collapse;margin-bottom:6px"><tr><th style="border:1px solid #d1d5db;background:#f0f4f8;color:#1a1a1a;padding:4px 6px;text-align:center;font-weight:bold;font-size:9px">Terms and Conditions:</th></tr></table>
+        <ol>
+          <li>Payment must be made in favor of Design House India Pvt. Ltd. via Cheque / DD / RTGS / NEFT / UPI only.</li>
+          <li>Delay in payment shall attract interest @24% per annum.</li>
+          <li>Booking / services shall be confirmed only after receipt of payment.</li>
+          <li>Cancellation or amendments shall be subject to company policy and management approval.</li>
+          <li>All disputes are subject to Delhi Jurisdiction only.</li>
+          <li>Full payment is due within the stipulated invoice period.</li>
+        </ol>
+      </td>
+      <td width="50%">
+        <table style="width:100%;border-collapse:collapse;margin-bottom:6px"><tr><th style="border:1px solid #d1d5db;background:#f0f4f8;color:#1a1a1a;padding:4px 6px;text-align:center;font-weight:bold;font-size:9px">Payment &amp; Term Conditions:</th></tr></table>
+        <ol>
+          <li>Advance Payment - 100%: Full payment is payable in advance on the same day of ${isEstimate ? "Estimate" : "Invoice"} generation.</li>
+          <li>TDS under Section 194C shall be deducted on the basic value only (excluding GST). Applicable rate: 2% for Companies/Firms/other entities and 1% for Individual/HUF.</li>
+          <li>Please share the applicable TDS Certificate (Form 16A) after deduction.</li>
+        </ol>
+      </td>
+    </tr>
+  </table>
+
+  <table class="bottom-table">
+    <tr>
+      <td width="33%" style="vertical-align:top">
+        <table style="width:100%;border-collapse:collapse;margin-bottom:6px"><tr><th style="border:1px solid #d1d5db;background:#f0f4f8;color:#1a1a1a;padding:4px 6px;text-align:center;font-weight:bold;font-size:9px">Design House India BANK DETAILS</th></tr></table>
+        <p>Bank Name : --</p>
+        <p>Account Name : --</p>
+        <p>Account No. : --</p>
+        <p>IFSC Code : --</p>
+        <p>Branch Name : --</p>
+      </td>
+      <td width="34%" style="vertical-align:top">
+        <table style="width:100%;border-collapse:collapse;margin-bottom:6px"><tr><th style="border:1px solid #d1d5db;background:#f0f4f8;color:#1a1a1a;padding:4px 6px;text-align:center;font-weight:bold;font-size:9px">RECEIVER'S ACKNOWLEDGEMENT</th></tr></table>
+        <p>Received the above goods / services in good condition.</p>
+        <div style="border-top:1px dashed #d1d5db;padding-top:6px;text-align:center;color:#9ca3af;font-size:9px">(Signature &amp; Company Seal)</div>
+      </td>
+      <td width="33%" style="vertical-align:top;text-align:center">
+        <table style="width:100%;border-collapse:collapse;margin-bottom:6px"><tr><th style="border:1px solid #d1d5db;background:#f0f4f8;color:#1a1a1a;padding:4px 6px;text-align:center;font-weight:bold;font-size:9px">FOR Design House India</th></tr></table>
+        <div style="border-top:1px dashed #d1d5db;padding-top:6px;text-align:center;color:#9ca3af;font-size:9px">Authorized Signatory.</div>
+        <img src="https://res.cloudinary.com/ddjhixcwh/image/upload/v1788348856/ensis/home/dxms1ugculnifsmud6p7.webp" alt="Authorized Sign" style="width:140px;height:auto;margin:8px auto;display:block" />
+      </td>
+    </tr>
+  </table>
+
+  <div class="footer">This is a computer generated document and does not require a physical signature.</div>
+</div>
+</body></html>`;
+  };
+
   const printInvoice = (inv: Invoice) => {
-    const leadName = typeof inv.lead === "object" ? `${inv.lead.firstName} ${inv.lead.lastName}` : "Customer";
-    const rows = inv.items.map((item) =>
-      `<tr>
-        <td style="padding:10px 12px;border-bottom:1px solid #ece3d2">${item.name}</td>
-        <td style="padding:10px 12px;border-bottom:1px solid #ece3d2;text-align:center">${item.quantity}</td>
-        <td style="padding:10px 12px;border-bottom:1px solid #ece3d2;text-align:right">${fmt(item.unitPrice)}</td>
-        <td style="padding:10px 12px;border-bottom:1px solid #ece3d2;text-align:right">${fmt(item.gstRate)}</td>
-        <td style="padding:10px 12px;border-bottom:1px solid #ece3d2;text-align:right">${fmt(item.amount)}</td>
-      </tr>`
-    ).join("");
-
-    const logoUrl = typeof window !== "undefined" ? window.location.origin + "/images/ensis-logo.png" : "/images/ensis-logo.png";
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${inv.invoiceNumber}</title>
-<style>@media print{body{margin:0} @page{size:A4;margin:10mm}}</style></head>
-<body style="margin:0;font-family:Jost,Arial,sans-serif;background:#FCFAF6;color:#1F3A2A">
-<div style="max-width:760px;margin:20px auto;background:#fff;border:1px solid #EDE4D3;border-radius:20px;overflow:hidden">
-<div style="background:#1F3A2A;padding:32px 40px;color:#fff;display:flex;align-items:center;gap:16px">
-<img src="${logoUrl}" alt="ENSIS Logo" style="height:40px;width:auto;background:#fff;border-radius:8px;padding:4px" />
-<div>
-<div style="margin:0;font-size:22px;letter-spacing:.14em;text-transform:uppercase;font-weight:700">ENSIS</div>
-<p style="margin:6px 0 0;font-size:12px;color:#C7A55B;letter-spacing:.1em;text-transform:uppercase">${TYPE_CONFIG[inv.type]?.label || "Invoice"} (${inv.invoiceNumber})</p>
-</div>
-</div>
-<div style="padding:32px 40px">
-<div style="display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap">
-<div>
-<p style="margin:0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Invoice No</p>
-<p style="margin:4px 0 0;font-size:14px;font-weight:600">${inv.invoiceNumber}</p>
-<p style="margin:14px 0 0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Date</p>
-<p style="margin:4px 0 0;font-size:14px;font-weight:600">${new Date(inv.createdAt).toLocaleDateString("en-IN")}</p>
-${inv.dueDate ? `<p style="margin:14px 0 0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Due Date</p>
-<p style="margin:4px 0 0;font-size:14px;font-weight:600">${new Date(inv.dueDate).toLocaleDateString("en-IN")}</p>` : ""}
-</div>
-<div style="text-align:right">
-<p style="margin:0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Bill To</p>
-<p style="margin:4px 0 0;font-size:14px;font-weight:600">${inv.billingAddress.name}</p>
-${inv.billingAddress.email ? `<p style="margin:2px 0 0;font-size:12px">${inv.billingAddress.email}</p>` : ""}
-${inv.billingAddress.phone ? `<p style="margin:2px 0 0;font-size:12px">${inv.billingAddress.phone}</p>` : ""}
-${inv.billingAddress.addressLine ? `<p style="margin:2px 0 0;font-size:12px">${inv.billingAddress.addressLine}</p>` : ""}
-${inv.billingAddress.city ? `<p style="margin:2px 0 0;font-size:12px">${inv.billingAddress.city}, ${inv.billingAddress.state || ""} ${inv.billingAddress.postalCode || ""}</p>` : ""}
-${inv.billingAddress.gstNumber ? `<p style="margin:2px 0 0;font-size:12px">GSTIN: ${inv.billingAddress.gstNumber}</p>` : ""}
-</div>
-</div>
-<table style="width:100%;margin-top:28px;border-collapse:collapse;font-size:13px">
-<thead><tr style="background:#F7F2E9">
-<th style="padding:10px 12px;text-align:left">Item</th><th style="padding:10px 12px">Qty</th><th style="padding:10px 12px;text-align:right">Price</th><th style="padding:10px 12px;text-align:right">GST%</th><th style="padding:10px 12px;text-align:right">Total</th>
-</tr></thead>
-<tbody>${rows}</tbody>
-</table>
-<div style="margin-top:20px;text-align:right;font-size:13px">
-<p style="margin:4px 0">Subtotal: <strong>${fmt(inv.subtotal)}</strong></p>
-${inv.discount ? `<p style="margin:4px 0;color:#2F7D5A">Discount: - ${fmt(inv.discount)}</p>` : ""}
-${inv.shipping ? `<p style="margin:4px 0">Shipping: ${fmt(inv.shipping)}</p>` : ""}
-<p style="margin:4px 0">GST: <strong>${fmt(inv.tax)}</strong></p>
-<p style="margin:10px 0 0;font-size:16px;border-top:1px solid #EDE4D3;padding-top:10px">Grand Total (incl. GST): <strong>${fmt(inv.totalAmount)}</strong></p>
-</div>
-${inv.notes ? `<p style="margin-top:20px;font-size:12px;color:#6c7068"><strong>Notes:</strong> ${inv.notes}</p>` : ""}
-<p style="margin-top:28px;font-size:11px;color:#6c7068;text-align:center">Thank you for choosing ENSIS — Premium Wellness & Panchkarma Spaces.<br>This is a computer generated invoice.</p>
-</div></div></body></html>`;
-
+    const html = getFullInvoiceHtml(inv);
     const printWindow = window.open("", "_blank");
     if (printWindow) {
       printWindow.document.write(html);
@@ -195,65 +435,7 @@ ${inv.notes ? `<p style="margin-top:20px;font-size:12px;color:#6c7068"><strong>N
   };
 
   const downloadInvoice = (inv: Invoice) => {
-    const leadName = typeof inv.lead === "object" ? `${inv.lead.firstName} ${inv.lead.lastName}` : "Customer";
-    const rows = inv.items.map((item) =>
-      `<tr>
-        <td style="padding:10px 12px;border-bottom:1px solid #ece3d2">${item.name}</td>
-        <td style="padding:10px 12px;border-bottom:1px solid #ece3d2;text-align:center">${item.quantity}</td>
-        <td style="padding:10px 12px;border-bottom:1px solid #ece3d2;text-align:right">${fmt(item.unitPrice)}</td>
-        <td style="padding:10px 12px;border-bottom:1px solid #ece3d2;text-align:right">${fmt(item.gstRate)}</td>
-        <td style="padding:10px 12px;border-bottom:1px solid #ece3d2;text-align:right">${fmt(item.amount)}</td>
-      </tr>`
-    ).join("");
-
-    const logoUrl = typeof window !== "undefined" ? window.location.origin + "/images/ensis-logo.png" : "/images/ensis-logo.png";
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${inv.invoiceNumber}</title></head>
-<body style="margin:0;font-family:Jost,Arial,sans-serif;background:#FCFAF6;color:#1F3A2A">
-<div style="max-width:760px;margin:40px auto;background:#fff;border:1px solid #EDE4D3;border-radius:20px;overflow:hidden">
-<div style="background:#1F3A2A;padding:32px 40px;color:#fff;display:flex;align-items:center;gap:16px">
-<img src="${logoUrl}" alt="ENSIS Logo" style="height:40px;width:auto;background:#fff;border-radius:8px;padding:4px" />
-<div>
-<div style="margin:0;font-size:22px;letter-spacing:.14em;text-transform:uppercase;font-weight:700">ENSIS</div>
-<p style="margin:6px 0 0;font-size:12px;color:#C7A55B;letter-spacing:.1em;text-transform:uppercase">${TYPE_CONFIG[inv.type]?.label || "Invoice"} (${inv.invoiceNumber})</p>
-</div>
-</div>
-<div style="padding:32px 40px">
-<div style="display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap">
-<div>
-<p style="margin:0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Invoice No</p>
-<p style="margin:4px 0 0;font-size:14px;font-weight:600">${inv.invoiceNumber}</p>
-<p style="margin:14px 0 0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Date</p>
-<p style="margin:4px 0 0;font-size:14px;font-weight:600">${new Date(inv.createdAt).toLocaleDateString("en-IN")}</p>
-${inv.dueDate ? `<p style="margin:14px 0 0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Due Date</p>
-<p style="margin:4px 0 0;font-size:14px;font-weight:600">${new Date(inv.dueDate).toLocaleDateString("en-IN")}</p>` : ""}
-</div>
-<div style="text-align:right">
-<p style="margin:0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Bill To</p>
-<p style="margin:4px 0 0;font-size:14px;font-weight:600">${inv.billingAddress.name}</p>
-${inv.billingAddress.email ? `<p style="margin:2px 0 0;font-size:12px">${inv.billingAddress.email}</p>` : ""}
-${inv.billingAddress.phone ? `<p style="margin:2px 0 0;font-size:12px">${inv.billingAddress.phone}</p>` : ""}
-${inv.billingAddress.addressLine ? `<p style="margin:2px 0 0;font-size:12px">${inv.billingAddress.addressLine}</p>` : ""}
-${inv.billingAddress.city ? `<p style="margin:2px 0 0;font-size:12px">${inv.billingAddress.city}, ${inv.billingAddress.state || ""} ${inv.billingAddress.postalCode || ""}</p>` : ""}
-${inv.billingAddress.gstNumber ? `<p style="margin:2px 0 0;font-size:12px">GSTIN: ${inv.billingAddress.gstNumber}</p>` : ""}
-</div>
-</div>
-<table style="width:100%;margin-top:28px;border-collapse:collapse;font-size:13px">
-<thead><tr style="background:#F7F2E9">
-<th style="padding:10px 12px;text-align:left">Item</th><th style="padding:10px 12px">Qty</th><th style="padding:10px 12px;text-align:right">Price</th><th style="padding:10px 12px;text-align:right">GST%</th><th style="padding:10px 12px;text-align:right">Total</th>
-</tr></thead>
-<tbody>${rows}</tbody>
-</table>
-<div style="margin-top:20px;text-align:right;font-size:13px">
-<p style="margin:4px 0">Subtotal: <strong>${fmt(inv.subtotal)}</strong></p>
-${inv.discount ? `<p style="margin:4px 0;color:#2F7D5A">Discount: - ${fmt(inv.discount)}</p>` : ""}
-${inv.shipping ? `<p style="margin:4px 0">Shipping: ${fmt(inv.shipping)}</p>` : ""}
-<p style="margin:4px 0">GST: <strong>${fmt(inv.tax)}</strong></p>
-<p style="margin:10px 0 0;font-size:16px;border-top:1px solid #EDE4D3;padding-top:10px">Grand Total (incl. GST): <strong>${fmt(inv.totalAmount)}</strong></p>
-</div>
-${inv.notes ? `<p style="margin-top:20px;font-size:12px;color:#6c7068"><strong>Notes:</strong> ${inv.notes}</p>` : ""}
-<p style="margin-top:28px;font-size:11px;color:#6c7068;text-align:center">Thank you for choosing ENSIS — Premium Wellness & Panchkarma Spaces.<br>This is a computer generated invoice.</p>
-</div></div></body></html>`;
-
+    const html = getFullInvoiceHtml(inv);
     const blob = new Blob([html], { type: "text/html" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -276,9 +458,7 @@ ${inv.notes ? `<p style="margin-top:20px;font-size:12px;color:#6c7068"><strong>N
           </div>
           <span className="text-[10px] bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-medium">{total}</span>
         </div>
-        <button onClick={() => setShowCreate(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-800 text-white text-[11px] font-medium hover:bg-emerald-900">
-          <Plus size={14} /> New Invoice
-        </button>
+
       </div>
 
       {/* Filters */}
@@ -350,8 +530,8 @@ ${inv.notes ? `<p style="margin-top:20px;font-size:12px;color:#6c7068"><strong>N
                           {typeConf.icon} {typeConf.label}
                         </span>
                       </td>
-                      <td className="px-3 py-1.5 text-slate-600 hidden lg:table-cell">{new Date(inv.createdAt).toLocaleDateString("en-IN")}</td>
-                      <td className="px-3 py-1.5 text-slate-600 hidden lg:table-cell">{inv.dueDate ? new Date(inv.dueDate).toLocaleDateString("en-IN") : "-"}</td>
+                      <td className="px-3 py-1.5 text-slate-600 hidden lg:table-cell">{new Date(inv.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</td>
+                      <td className="px-3 py-1.5 text-slate-600 hidden lg:table-cell">{inv.dueDate ? new Date(inv.dueDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "-"}</td>
                       <td className="px-3 py-1.5 text-right font-medium text-slate-800">{fmt(inv.totalAmount)}</td>
                       <td className="px-3 py-1.5">
                         <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${statusConf.color}`}>{statusConf.label}</span>
@@ -361,8 +541,22 @@ ${inv.notes ? `<p style="margin-top:20px;font-size:12px;color:#6c7068"><strong>N
                           <Link href={`/leads/${leadId}/invoice/${inv._id}`} className="p-1 rounded hover:bg-blue-50 text-slate-400 hover:text-blue-600" title="View"><Eye size={12} /></Link>
                           <button onClick={() => printInvoice(inv)} className="p-1 rounded hover:bg-purple-50 text-slate-400 hover:text-purple-600" title="Print"><Printer size={12} /></button>
                           <button onClick={() => downloadInvoice(inv)} className="p-1 rounded hover:bg-emerald-50 text-slate-400 hover:text-emerald-600" title="Download"><Download size={12} /></button>
-                          <button onClick={() => handleSendEmail(inv)} className="p-1 rounded hover:bg-amber-50 text-slate-400 hover:text-amber-600" title="Send Email"><EmailIcon size={12} /></button>
-                          <button onClick={() => handleSendWhatsApp(inv)} className="p-1 rounded hover:bg-green-50 text-slate-400 hover:text-green-600" title="Send WhatsApp"><WhatsAppIcon size={12} /></button>
+                          <button
+                            disabled={sendingEmailId === inv._id}
+                            onClick={() => handleSendEmail(inv)}
+                            className="p-1 rounded hover:bg-amber-50 text-slate-400 hover:text-amber-600 disabled:opacity-50 inline-flex items-center justify-center min-w-[20px] min-h-[20px]"
+                            title="Send Email"
+                          >
+                            {sendingEmailId === inv._id ? <Loader2 size={12} className="animate-spin text-amber-600" /> : <EmailIcon size={12} />}
+                          </button>
+                          <button
+                            disabled={sendingWhatsAppId === inv._id}
+                            onClick={() => handleSendWhatsApp(inv)}
+                            className="p-1 rounded hover:bg-green-50 text-slate-400 hover:text-green-600 disabled:opacity-50 inline-flex items-center justify-center min-w-[20px] min-h-[20px]"
+                            title="Send WhatsApp"
+                          >
+                            {sendingWhatsAppId === inv._id ? <Loader2 size={12} className="animate-spin text-green-600" /> : <WhatsAppIcon size={12} />}
+                          </button>
                           <button onClick={() => setPendingDelete(inv)} className="p-1 rounded hover:bg-red-50 text-slate-400 hover:text-red-600" title="Delete"><Trash2 size={12} /></button>
                         </div>
                       </td>
@@ -418,7 +612,7 @@ function ViewInvoiceModal({ invoice, onClose, onDownload }: { invoice: Invoice; 
       </tr>`
     ).join("");
 
-    const logoUrl = typeof window !== "undefined" ? window.location.origin + "/images/ensis-logo.png" : "/images/ensis-logo.png";
+    const logoUrl = "https://res.cloudinary.com/dn34qdd2q/image/upload/v1781521763/ensis/f9pgo7qufbqmxwlho5ht.png";
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${invoice.invoiceNumber}</title>
 <style>@media print{body{margin:0} @page{size:A4;margin:10mm}}</style></head>
 <body style="margin:0;font-family:Jost,Arial,sans-serif;background:#FCFAF6;color:#1F3A2A">
@@ -436,9 +630,9 @@ function ViewInvoiceModal({ invoice, onClose, onDownload }: { invoice: Invoice; 
 <p style="margin:0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Invoice No</p>
 <p style="margin:4px 0 0;font-size:14px;font-weight:600">${invoice.invoiceNumber}</p>
 <p style="margin:14px 0 0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Date</p>
-<p style="margin:4px 0 0;font-size:14px;font-weight:600">${new Date(invoice.createdAt).toLocaleDateString("en-IN")}</p>
+<p style="margin:4px 0 0;font-size:14px;font-weight:600">${new Date(invoice.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</p>
 ${invoice.dueDate ? `<p style="margin:14px 0 0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Due Date</p>
-<p style="margin:4px 0 0;font-size:14px;font-weight:600">${new Date(invoice.dueDate).toLocaleDateString("en-IN")}</p>` : ""}
+<p style="margin:4px 0 0;font-size:14px;font-weight:600">${new Date(invoice.dueDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</p>` : ""}
 </div>
 <div style="text-align:right">
 <p style="margin:0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Bill To</p>
@@ -509,30 +703,30 @@ ${invoice.notes ? `<p style="margin-top:20px;font-size:12px;color:#6c7068"><stro
             </div>
             <div className="text-right">
               <p className="text-slate-400 uppercase text-[9px] font-semibold tracking-wider">Details</p>
-              <p className="mt-1"><span className="text-slate-500">Date:</span> <span className="font-medium">{new Date(invoice.createdAt).toLocaleDateString("en-IN")}</span></p>
-              {invoice.dueDate && <p><span className="text-slate-500">Due:</span> <span className="font-medium">{new Date(invoice.dueDate).toLocaleDateString("en-IN")}</span></p>}
+              <p className="mt-1"><span className="text-slate-500">Date:</span> <span className="font-medium">{new Date(invoice.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</span></p>
+              {invoice.dueDate && <p><span className="text-slate-500">Due:</span> <span className="font-medium">{new Date(invoice.dueDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</span></p>}
               <p><span className="text-slate-500">Customer:</span> <span className="font-medium">{leadName}</span></p>
             </div>
           </div>
 
-          <table className="w-full text-[11px]">
+          <table className="w-full text-[11px] border-collapse border border-slate-300">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-100">
-                <th className="text-left px-3 py-1 font-semibold text-slate-500">Item</th>
-                <th className="text-center px-3 py-1 font-semibold text-slate-500">Qty</th>
-                <th className="text-right px-3 py-1 font-semibold text-slate-500">Price</th>
-                <th className="text-right px-3 py-1 font-semibold text-slate-500">GST%</th>
-                <th className="text-right px-3 py-1 font-semibold text-slate-500">Total</th>
+              <tr className="bg-slate-50 border-b border-slate-300">
+                <th className="text-left px-3 py-1 font-semibold text-slate-500 border border-slate-300">Item</th>
+                <th className="text-center px-3 py-1 font-semibold text-slate-500 border border-slate-300">Qty</th>
+                <th className="text-right px-3 py-1 font-semibold text-slate-500 border border-slate-300">Price</th>
+                <th className="text-right px-3 py-1 font-semibold text-slate-500 border border-slate-300">GST%</th>
+                <th className="text-right px-3 py-1 font-semibold text-slate-500 border border-slate-300">Total</th>
               </tr>
             </thead>
             <tbody>
               {invoice.items.map((item, idx) => (
-                <tr key={idx} className="border-b border-slate-50">
-                  <td className="px-3 py-1.5 font-medium text-slate-800">{item.name}</td>
-                  <td className="px-3 py-1.5 text-center text-slate-600">{item.quantity}</td>
-                  <td className="px-3 py-1.5 text-right text-slate-600">{fmt(item.unitPrice)}</td>
-                  <td className="px-3 py-1.5 text-right text-slate-600">{item.gstRate}%</td>
-                  <td className="px-3 py-1.5 text-right font-medium text-slate-800">{fmt(item.amount)}</td>
+                <tr key={idx} className="border-b border-slate-300 hover:bg-slate-50/50">
+                  <td className="px-3 py-1.5 font-medium text-slate-800 border border-slate-300">{item.name}</td>
+                  <td className="px-3 py-1.5 text-center text-slate-600 border border-slate-300">{item.quantity}</td>
+                  <td className="px-3 py-1.5 text-right text-slate-600 border border-slate-300">{fmt(item.unitPrice)}</td>
+                  <td className="px-3 py-1.5 text-right text-slate-600 border border-slate-300">{item.gstRate}%</td>
+                  <td className="px-3 py-1.5 text-right font-medium text-slate-800 border border-slate-300">{fmt(item.amount)}</td>
                 </tr>
               ))}
             </tbody>

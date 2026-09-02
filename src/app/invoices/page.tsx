@@ -116,7 +116,7 @@ export default function InvoicesPage() {
       </tr>`
     ).join("");
 
-    const logoUrl = typeof window !== "undefined" ? window.location.origin + "/images/ensis-logo.png" : "/images/ensis-logo.png";
+    const logoUrl = "https://res.cloudinary.com/dn34qdd2q/image/upload/v1781521763/ensis/f9pgo7qufbqmxwlho5ht.png";
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${inv.invoiceNumber}</title>
 <style>@media print{body{margin:0} @page{size:A4;margin:10mm}}</style></head>
 <body style="margin:0;font-family:Jost,Arial,sans-serif;background:#FCFAF6;color:#1F3A2A">
@@ -134,9 +134,9 @@ export default function InvoicesPage() {
 <p style="margin:0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Invoice No</p>
 <p style="margin:4px 0 0;font-size:14px;font-weight:600">${inv.invoiceNumber}</p>
 <p style="margin:14px 0 0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Date</p>
-<p style="margin:4px 0 0;font-size:14px;font-weight:600">${new Date(inv.createdAt).toLocaleDateString("en-IN")}</p>
+<p style="margin:4px 0 0;font-size:14px;font-weight:600">${new Date(inv.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</p>
 ${inv.dueDate ? `<p style="margin:14px 0 0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Due Date</p>
-<p style="margin:4px 0 0;font-size:14px;font-weight:600">${new Date(inv.dueDate).toLocaleDateString("en-IN")}</p>` : ""}
+<p style="margin:4px 0 0;font-size:14px;font-weight:600">${new Date(inv.dueDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</p>` : ""}
 </div>
 <div style="text-align:right">
 <p style="margin:0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Bill To</p>
@@ -186,7 +186,7 @@ ${inv.notes ? `<p style="margin-top:20px;font-size:12px;color:#6c7068"><strong>N
       </tr>`
     ).join("");
 
-    const logoUrl = typeof window !== "undefined" ? window.location.origin + "/images/ensis-logo.png" : "/images/ensis-logo.png";
+    const logoUrl = "https://res.cloudinary.com/dn34qdd2q/image/upload/v1781521763/ensis/f9pgo7qufbqmxwlho5ht.png";
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${inv.invoiceNumber}</title></head>
 <body style="margin:0;font-family:Jost,Arial,sans-serif;background:#FCFAF6;color:#1F3A2A">
 <div style="max-width:760px;margin:40px auto;background:#fff;border:1px solid #EDE4D3;border-radius:20px;overflow:hidden">
@@ -203,9 +203,9 @@ ${inv.notes ? `<p style="margin-top:20px;font-size:12px;color:#6c7068"><strong>N
 <p style="margin:0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Invoice No</p>
 <p style="margin:4px 0 0;font-size:14px;font-weight:600">${inv.invoiceNumber}</p>
 <p style="margin:14px 0 0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Date</p>
-<p style="margin:4px 0 0;font-size:14px;font-weight:600">${new Date(inv.createdAt).toLocaleDateString("en-IN")}</p>
+<p style="margin:4px 0 0;font-size:14px;font-weight:600">${new Date(inv.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</p>
 ${inv.dueDate ? `<p style="margin:14px 0 0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Due Date</p>
-<p style="margin:4px 0 0;font-size:14px;font-weight:600">${new Date(inv.dueDate).toLocaleDateString("en-IN")}</p>` : ""}
+<p style="margin:4px 0 0;font-size:14px;font-weight:600">${new Date(inv.dueDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</p>` : ""}
 </div>
 <div style="text-align:right">
 <p style="margin:0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Bill To</p>
@@ -327,8 +327,8 @@ ${inv.notes ? `<p style="margin-top:20px;font-size:12px;color:#6c7068"><strong>N
                         </span>
                       </td>
                       <td className="px-3 py-1.5 text-slate-800 hidden md:table-cell truncate max-w-[140px]">{leadName}</td>
-                      <td className="px-3 py-1.5 text-slate-600 hidden lg:table-cell">{new Date(inv.createdAt).toLocaleDateString("en-IN")}</td>
-                      <td className="px-3 py-1.5 text-slate-600 hidden lg:table-cell">{inv.dueDate ? new Date(inv.dueDate).toLocaleDateString("en-IN") : "-"}</td>
+                      <td className="px-3 py-1.5 text-slate-600 hidden lg:table-cell">{new Date(inv.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</td>
+                      <td className="px-3 py-1.5 text-slate-600 hidden lg:table-cell">{inv.dueDate ? new Date(inv.dueDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "-"}</td>
                       <td className="px-3 py-1.5 text-right font-medium text-slate-800">{fmt(inv.totalAmount)}</td>
                       <td className="px-3 py-1.5">
                         <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${statusConf.color}`}>{statusConf.label}</span>
@@ -635,7 +635,7 @@ function ViewInvoiceModal({ invoice, onClose, onDownload }: { invoice: Invoice; 
       </tr>`
     ).join("");
 
-    const logoUrl = typeof window !== "undefined" ? window.location.origin + "/images/ensis-logo.png" : "/images/ensis-logo.png";
+    const logoUrl = "https://res.cloudinary.com/dn34qdd2q/image/upload/v1781521763/ensis/f9pgo7qufbqmxwlho5ht.png";
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${invoice.invoiceNumber}</title>
 <style>@media print{body{margin:0} @page{size:A4;margin:10mm}}</style></head>
 <body style="margin:0;font-family:Jost,Arial,sans-serif;background:#FCFAF6;color:#1F3A2A">
@@ -653,9 +653,9 @@ function ViewInvoiceModal({ invoice, onClose, onDownload }: { invoice: Invoice; 
 <p style="margin:0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Invoice No</p>
 <p style="margin:4px 0 0;font-size:14px;font-weight:600">${invoice.invoiceNumber}</p>
 <p style="margin:14px 0 0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Date</p>
-<p style="margin:4px 0 0;font-size:14px;font-weight:600">${new Date(invoice.createdAt).toLocaleDateString("en-IN")}</p>
+<p style="margin:4px 0 0;font-size:14px;font-weight:600">${new Date(invoice.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</p>
 ${invoice.dueDate ? `<p style="margin:14px 0 0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Due Date</p>
-<p style="margin:4px 0 0;font-size:14px;font-weight:600">${new Date(invoice.dueDate).toLocaleDateString("en-IN")}</p>` : ""}
+<p style="margin:4px 0 0;font-size:14px;font-weight:600">${new Date(invoice.dueDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</p>` : ""}
 </div>
 <div style="text-align:right">
 <p style="margin:0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Bill To</p>
@@ -726,8 +726,8 @@ ${invoice.notes ? `<p style="margin-top:20px;font-size:12px;color:#6c7068"><stro
             </div>
             <div className="text-right">
               <p className="text-slate-400 uppercase text-[9px] font-semibold tracking-wider">Details</p>
-              <p className="mt-1"><span className="text-slate-500">Date:</span> <span className="font-medium">{new Date(invoice.createdAt).toLocaleDateString("en-IN")}</span></p>
-              {invoice.dueDate && <p><span className="text-slate-500">Due:</span> <span className="font-medium">{new Date(invoice.dueDate).toLocaleDateString("en-IN")}</span></p>}
+              <p className="mt-1"><span className="text-slate-500">Date:</span> <span className="font-medium">{new Date(invoice.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</span></p>
+              {invoice.dueDate && <p><span className="text-slate-500">Due:</span> <span className="font-medium">{new Date(invoice.dueDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</span></p>}
               <p><span className="text-slate-500">Customer:</span> <span className="font-medium">{leadName}</span></p>
             </div>
           </div>
