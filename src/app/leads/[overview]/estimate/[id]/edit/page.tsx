@@ -71,11 +71,6 @@ export default function EditEstimatePage({ params }: { params: Promise<{ overvie
     discPercent: 0,
   }]);
 
-  // Charges
-  const [plcPercent, setPlcPercent] = useState(0);
-  const [plcAmount, setPlcAmount] = useState(0);
-  const [plcGst, setPlcGst] = useState(18);
-
   // Payment
   const [tdsApplicable, setTdsApplicable] = useState(false);
   const [paymentPlan, setPaymentPlan] = useState<"Full Payment" | "Instalment Plan">("Full Payment");
@@ -191,8 +186,7 @@ export default function EditEstimatePage({ params }: { params: Promise<{ overvie
   const totalTaxableValue = itemCalculations.reduce((sum, c) => sum + c.basicAmt, 0);
   const totalDiscount = itemCalculations.reduce((sum, c) => sum + c.discAmt, 0);
   const totalGst = itemCalculations.reduce((sum, c) => sum + c.gstAmt, 0);
-  const plcGstAmt = (plcAmount * plcGst) / 100;
-  const finalAmount = totalTaxableValue - totalDiscount + totalGst + plcAmount + plcGstAmt;
+  const finalAmount = totalTaxableValue - totalDiscount + totalGst;
 
   const amountInWords = (n: number): string => {
     if (n === 0) return "Zero Rupees Only";
@@ -247,7 +241,7 @@ export default function EditEstimatePage({ params }: { params: Promise<{ overvie
         },
         subtotal: totalTaxableValue,
         discount: totalDiscount,
-        tax: totalGst + plcGstAmt,
+        tax: totalGst,
         shipping: 0,
         totalAmount: finalAmount,
       });
@@ -547,45 +541,11 @@ export default function EditEstimatePage({ params }: { params: Promise<{ overvie
           </button>
         </div>
 
-        {/* Section 3: Charges & Payment Plan */}
+        {/* Section 3: Payment Plan */}
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
-          <h2 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Charges & Payment Plan</h2>
+          <h2 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Payment Plan</h2>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {/* Additional Charges */}
-            <div className="bg-slate-50 rounded-lg p-3 space-y-3">
-              <p className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Additional Charges</p>
-              <div className="grid grid-cols-3 gap-2 items-end">
-                <div>
-                  <label className={labelClass}>PLC Charges (%)</label>
-                  <input type="number" value={plcPercent} onChange={(e) => {
-                    const p = parseFloat(e.target.value) || 0;
-                    setPlcPercent(p);
-                    setPlcAmount((totalTaxableValue * p) / 100);
-                  }} className={fieldClass} min={0} />
-                </div>
-                <div>
-                  <label className={labelClass}>Amount</label>
-                  <input type="number" value={plcAmount} onChange={(e) => setPlcAmount(parseFloat(e.target.value) || 0)} className={fieldClass} min={0} />
-                </div>
-                <div>
-                  <label className={labelClass}>GST %</label>
-                  <input type="number" value={plcGst} onChange={(e) => setPlcGst(parseFloat(e.target.value) || 0)} className={fieldClass} />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className={labelClass}>GST Amount</label>
-                  <input value={fmt(plcGstAmt)} disabled className={`${fieldClass} bg-white`} />
-                </div>
-                <div>
-                  <label className={labelClass}>PLC Final Amount</label>
-                  <input value={fmt(plcAmount + plcGstAmt)} disabled className={`${fieldClass} bg-white`} />
-                </div>
-              </div>
-              <p className="text-[9px] text-slate-400">For: {lead ? `${lead.firstName} ${lead.lastName}` : "-"}</p>
-            </div>
-
+          <div className="grid grid-cols-1 gap-4">
             {/* Payment Plan */}
             <div className="space-y-3">
               <div>
@@ -646,7 +606,7 @@ export default function EditEstimatePage({ params }: { params: Promise<{ overvie
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500">GST Total ({items[0]?.gstRate || 18}%)</span>
-                <span className="font-bold text-slate-800">{fmt(totalGst + plcGstAmt)}</span>
+                <span className="font-bold text-slate-800">{fmt(totalGst)}</span>
               </div>
               <div className="flex justify-between border-t border-slate-200 pt-2">
                 <span className="font-bold text-slate-800">Final Amount</span>

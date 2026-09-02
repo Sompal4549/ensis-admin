@@ -125,7 +125,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ overview:
   const fetchActivityLogs = useCallback(async () => {
     setActivityLoading(true);
     try {
-      const data = await activityLogApi.list({ entity: "Lead", entityId: leadId, limit: 50 });
+      const data = await activityLogApi.list({ leadId, limit: 50 });
       setActivityLogs(data.logs || []);
       setActivityTotal(data.total || 0);
     } catch {} finally {
