@@ -243,7 +243,7 @@ export default function SocialClicksPage() {
     finally { setLoading(false); }
   }, [page, filterPlatform]);
 
-  useEffect(() => { fetchData(); }, [page, filterPlatform]);
+  useEffect(() => { fetchData(); }, [page, filterPlatform, fetchData]);
 
   const statsList = useMemo(() => {
     const map = new Map<string, number>();

@@ -82,7 +82,7 @@ export default function AccountPage({ params }: { params: Promise<{ overview: st
   const fetchLogs = useCallback(async () => {
     setLogsLoading(true);
     try {
-      const data = await activityLogApi.list({ entity: "Lead", entityId: leadId, limit: 20 });
+      const data = await activityLogApi.list({ leadId, limit: 20 });
       setLogs(data.logs || []);
       setLogsTotal(data.total || 0);
     } catch {
@@ -210,7 +210,7 @@ export default function AccountPage({ params }: { params: Promise<{ overview: st
       </tr>`
     ).join("");
 
-    const logoUrl = typeof window !== "undefined" ? window.location.origin + "/images/ensis-logo.png" : "/images/ensis-logo.png";
+    const logoUrl = "https://res.cloudinary.com/dn34qdd2q/image/upload/v1781521763/ensis/f9pgo7qufbqmxwlho5ht.png";
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${inv.invoiceNumber}</title></head>
 <body style="margin:0;font-family:Jost,Arial,sans-serif;background:#FCFAF6;color:#1F3A2A">
 <div style="max-width:760px;margin:40px auto;background:#fff;border:1px solid #EDE4D3;border-radius:20px;overflow:hidden">
@@ -227,7 +227,7 @@ export default function AccountPage({ params }: { params: Promise<{ overview: st
 <p style="margin:0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Invoice No</p>
 <p style="margin:4px 0 0;font-size:14px;font-weight:600">${inv.invoiceNumber}</p>
 <p style="margin:14px 0 0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Date</p>
-<p style="margin:4px 0 0;font-size:14px;font-weight:600">${new Date(inv.createdAt).toLocaleDateString("en-IN")}</p>
+<p style="margin:4px 0 0;font-size:14px;font-weight:600">${new Date(inv.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</p>
 </div>
 <div style="text-align:right">
 <p style="margin:0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Bill To</p>
@@ -275,7 +275,7 @@ ${inv.discount ? `<p style="margin:4px 0;color:#2F7D5A">Discount: - ${fmt(inv.di
       order.orderStatus === "cancelled" ? "Cancelled" :
       order.orderStatus.charAt(0).toUpperCase() + order.orderStatus.slice(1);
 
-    const logoUrl = typeof window !== "undefined" ? window.location.origin + "/images/ensis-logo.png" : "/images/ensis-logo.png";
+    const logoUrl = "https://res.cloudinary.com/dn34qdd2q/image/upload/v1781521763/ensis/f9pgo7qufbqmxwlho5ht.png";
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Order #${order._id.slice(-6).toUpperCase()}</title>
 <style>@media print{body{margin:0} @page{size:A4;margin:10mm}}</style></head>
 <body style="margin:0;font-family:Jost,Arial,sans-serif;background:#FCFAF6;color:#1F3A2A">
@@ -293,7 +293,7 @@ ${inv.discount ? `<p style="margin:4px 0;color:#2F7D5A">Discount: - ${fmt(inv.di
 <p style="margin:0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Order No</p>
 <p style="margin:4px 0 0;font-size:14px;font-weight:600">#${order._id.slice(-6).toUpperCase()}</p>
 <p style="margin:14px 0 0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Date</p>
-<p style="margin:4px 0 0;font-size:14px;font-weight:600">${new Date(order.createdAt).toLocaleDateString("en-IN")}</p>
+<p style="margin:4px 0 0;font-size:14px;font-weight:600">${new Date(order.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</p>
 </div>
 <div style="text-align:right">
 <p style="margin:0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Status</p>
@@ -332,7 +332,7 @@ ${rows ? `<table style="width:100%;margin-top:28px;border-collapse:collapse;font
       </tr>`
     ).join("");
 
-    const logoUrl = typeof window !== "undefined" ? window.location.origin + "/images/ensis-logo.png" : "/images/ensis-logo.png";
+    const logoUrl = "https://res.cloudinary.com/dn34qdd2q/image/upload/v1781521763/ensis/f9pgo7qufbqmxwlho5ht.png";
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${inv.invoiceNumber}</title>
 <style>@media print{body{margin:0} @page{size:A4;margin:10mm}}</style></head>
 <body style="margin:0;font-family:Jost,Arial,sans-serif;background:#FCFAF6;color:#1F3A2A">
@@ -350,9 +350,9 @@ ${rows ? `<table style="width:100%;margin-top:28px;border-collapse:collapse;font
 <p style="margin:0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Invoice No</p>
 <p style="margin:4px 0 0;font-size:14px;font-weight:600">${inv.invoiceNumber}</p>
 <p style="margin:14px 0 0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Date</p>
-<p style="margin:4px 0 0;font-size:14px;font-weight:600">${new Date(inv.createdAt).toLocaleDateString("en-IN")}</p>
+<p style="margin:4px 0 0;font-size:14px;font-weight:600">${new Date(inv.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</p>
 ${inv.dueDate ? `<p style="margin:14px 0 0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Due Date</p>
-<p style="margin:4px 0 0;font-size:14px;font-weight:600">${new Date(inv.dueDate).toLocaleDateString("en-IN")}</p>` : ""}
+<p style="margin:4px 0 0;font-size:14px;font-weight:600">${new Date(inv.dueDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</p>` : ""}
 </div>
 <div style="text-align:right">
 <p style="margin:0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Bill To</p>
@@ -445,7 +445,7 @@ ${inv.notes ? `<p style="margin-top:20px;font-size:12px;color:#6c7068"><strong>N
       <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
         {[
           { icon: FileText, label: "Estimate", desc: "Create estimate", iconBg: "bg-blue-50 group-hover:bg-blue-100", text: "text-blue-600", hover: "hover:bg-blue-50", type: "proforma" },
-          { icon: Truck, label: "Delivery Challan", desc: "Create challan", iconBg: "bg-emerald-50 group-hover:bg-emerald-100", text: "text-emerald-600", hover: "hover:bg-emerald-50", type: "delivery_challan" },
+          { icon: Truck, label: "Delivery Challan", desc: "View challans", iconBg: "bg-emerald-50 group-hover:bg-emerald-100", text: "text-emerald-600", hover: "hover:bg-emerald-50", type: "delivery_challan" },
           { icon: Receipt, label: "Invoice", desc: "View invoices", iconBg: "bg-purple-50 group-hover:bg-purple-100", text: "text-purple-600", hover: "hover:bg-purple-50", type: "tax" },
           { icon: CreditCard, label: "Payments", desc: "Record payments", iconBg: "bg-amber-50 group-hover:bg-amber-100", text: "text-amber-600", hover: "hover:bg-amber-50", type: "" },
           { icon: Undo2, label: "Credit Note", desc: "Create credit", iconBg: "bg-cyan-50 group-hover:bg-cyan-100", text: "text-cyan-600", hover: "hover:bg-cyan-50", type: "credit_note" },
@@ -458,6 +458,8 @@ ${inv.notes ? `<p style="margin-top:20px;font-size:12px;color:#6c7068"><strong>N
                 router.push(`/leads/${leadId}/invoice`);
               } else if (item.type === "proforma") {
                 router.push(`/leads/${leadId}/estimate`);
+              } else if (item.type === "delivery_challan") {
+                router.push(`/leads/${leadId}/challans`);
               } else if (item.type) {
                 handleCreateInvoice(item.type);
               } else {
@@ -512,7 +514,7 @@ ${inv.notes ? `<p style="margin-top:20px;font-size:12px;color:#6c7068"><strong>N
                             <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium inline-flex items-center gap-1 ${typeConf.color}`}><FileText size={8} /> {typeConf.label}</span>
                           </td>
                           <td className="py-1.5 font-medium text-slate-800">{inv.invoiceNumber}</td>
-                          <td className="py-1.5 text-slate-500">{new Date(inv.createdAt).toLocaleDateString("en-IN")}</td>
+                          <td className="py-1.5 text-slate-500">{new Date(inv.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</td>
                           <td className="py-1.5 text-right font-medium text-slate-800">{fmt(inv.totalAmount)}</td>
                           <td className="py-1.5">
                             <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${statusConf.color}`}>{statusConf.label}</span>
@@ -553,7 +555,7 @@ ${inv.notes ? `<p style="margin-top:20px;font-size:12px;color:#6c7068"><strong>N
                             </span>
                           </td>
                           <td className="py-1.5 font-medium text-slate-800">#{order._id.slice(-6).toUpperCase()}</td>
-                          <td className="py-1.5 text-slate-500">{new Date(order.createdAt).toLocaleDateString("en-IN")}</td>
+                          <td className="py-1.5 text-slate-500">{new Date(order.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</td>
                           <td className="py-1.5 text-right font-medium text-slate-800">{fmt(order.totalAmount)}</td>
                           <td className="py-1.5">
                             <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${orderStatusColor}`}>{orderStatusLabel}</span>
@@ -622,7 +624,7 @@ ${inv.notes ? `<p style="margin-top:20px;font-size:12px;color:#6c7068"><strong>N
                     <tr key={idx} className="border-b border-slate-50">
                       <td className="py-1.5 text-slate-500">{idx + 1}</td>
                       <td className="py-1.5"><span className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${item.color}`}>{item.label}</span></td>
-                      <td className="py-1.5 text-slate-600">{new Date(item.dueDate).toLocaleDateString("en-IN")}</td>
+                      <td className="py-1.5 text-slate-600">{new Date(item.dueDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</td>
                       <td className="py-1.5 text-right font-medium text-slate-800">{fmt(item.amount)}</td>
                       <td className="py-1.5"><span className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${item.statusColor}`}>{item.status.charAt(0).toUpperCase() + item.status.slice(1)}</span></td>
                     </tr>

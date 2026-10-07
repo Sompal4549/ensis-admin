@@ -77,6 +77,9 @@ export type ComponentContent = {
 export type MediaFile = {
   name: string;
   url: string;
+  mimetype?: string;
+  resourceType?: string;
+  size?: number;
 };
 
 export type AuthUser = {
@@ -123,6 +126,44 @@ export type InvoiceItem = {
   unitPrice: number;
   gstRate: number;
   amount: number;
+  hsn?: string;
+  sac?: string;
+  size?: string;
+  area?: string;
+  unit?: string;
+  discount?: number;
+};
+
+export type DeliveryChallan = {
+  _id: string;
+  challanNumber: string;
+  challanDate: string;
+  sourceInvoice: string;
+  items: Array<{
+    name: string;
+    quantity: number;
+    delivered: number;
+    available: number;
+    thisChallan: number;
+  }>;
+  status: "pending" | "delivered" | "cancelled";
+  createdAt: string;
+};
+
+export type PurchaseOrder = {
+  available: boolean;
+  poNumber?: string;
+  poDate?: string;
+  poFile?: string;
+};
+
+export type PaymentDetails = {
+  paymentStatus: "payment_received" | "full_payment_pending" | "partially_paid";
+  paymentTerms?: string;
+  outstandingAmount?: number;
+  amountReceived?: number;
+  tdsApplicable?: boolean;
+  tdsRate?: number;
 };
 
 export type InvoiceAddress = {
@@ -160,6 +201,10 @@ export type Invoice = {
   createdBy: string | AuthUser;
   createdAt: string;
   updatedAt: string;
+  purchaseOrder?: PurchaseOrder;
+  paymentDetails?: PaymentDetails;
+  deliveryChallans?: DeliveryChallan[];
+  sourceProformaInvoice?: string;
 };
 
 type ApiEnvelope<T> = {
@@ -417,11 +462,48 @@ export const categoryApi = {
 };
 
 export const productApi = {
-  list: () => request<{ products: Product[]; total: number; page: number; limit: number }>("/products?limit=100"),
+  list: () => request<{ products: Product[]; total: number; page: number; limit: number }>("/products?limit=100&sortBy=orderBy&order=asc"),
   create: (payload: Partial<Product>) => request<Product>("/products", { method: "POST", data: payload }),
   update: (id: string, payload: Partial<Product>) =>
     request<Product>(`/products/${id}`, { method: "PUT", data: payload }),
   remove: (id: string) => request<null>(`/products/${id}`, { method: "DELETE" }),
+};
+
+export type ProductBackup = {
+  _id: string;
+  productId: string;
+  backedUpAt: string;
+  note?: string;
+  snapshot?: Record<string, unknown>;
+};
+
+export const productBackupApi = {
+  /** List all backups for a product (no snapshot data) */
+  list: (productId: string) =>
+    request<ProductBackup[]>(`/products/${productId}/backups`),
+
+  /** Manually trigger a backup */
+  create: (productId: string, note?: string) =>
+    request<ProductBackup>(`/products/${productId}/backups`, {
+      method: "POST",
+      data: { note },
+    }),
+
+  /** Get a single backup with full snapshot */
+  get: (backupId: string) =>
+    request<ProductBackup>(`/products/backups/${backupId}`),
+
+  /** Restore product to a backup state */
+  restore: (backupId: string) =>
+    request<Product>(`/products/backups/${backupId}/restore`, { method: "POST" }),
+
+  /** Delete a single backup */
+  remove: (backupId: string) =>
+    request<null>(`/products/backups/${backupId}`, { method: "DELETE" }),
+
+  /** Delete all backups for a product */
+  removeAll: (productId: string) =>
+    request<null>(`/products/${productId}/backups`, { method: "DELETE" }),
 };
 
 export const orderApi = {
@@ -540,11 +622,21 @@ export const apiClient = {
   delete: <T>(path: string) => request<T>(path, { method: 'DELETE' }),
 };
 
+export type MediaListResponse = {
+  files: MediaFile[];
+  total: number;
+  page: number;
+  limit: number;
+};
+
 export const mediaApi = {
-  list: (subDir: string = "") => {
-    const query = subDir ? `?subDir=${encodeURIComponent(subDir)}` : "";
-    const cacheBust = (query ? "&" : "?") + `_t=${Date.now()}`;
-    return request<MediaFile[]>(`/uploads/list${query}${cacheBust}`);
+  list: (subDir: string = "", page: number = 1, limit: number = 25) => {
+    const params = new URLSearchParams();
+    if (subDir) params.set("subDir", subDir);
+    params.set("page", String(page));
+    params.set("limit", String(limit));
+    params.set("_t", String(Date.now()));
+    return request<MediaListResponse>(`/uploads/list?${params.toString()}`);
   }
 };
 
@@ -705,6 +797,7 @@ export const activityLogApi = {
     action?: ActivityAction | "";
     entity?: string;
     entityId?: string;
+    leadId?: string;
     search?: string;
     role?: "admin" | "customer";
   } = {}) => {
@@ -715,6 +808,7 @@ export const activityLogApi = {
     if (params.action) searchParams.set("action", params.action);
     if (params.entity) searchParams.set("entity", params.entity);
     if (params.entityId) searchParams.set("entityId", params.entityId);
+    if (params.leadId) searchParams.set("leadId", params.leadId);
     if (params.search) searchParams.set("search", params.search);
     if (params.role) searchParams.set("role", params.role);
     return request<ActivityLogListResponse>(`/activity-logs?${searchParams.toString()}`);

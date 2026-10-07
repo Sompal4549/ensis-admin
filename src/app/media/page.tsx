@@ -7,12 +7,16 @@ import {
   Copy,
   Loader2,
   Image as ImageIcon,
+  Video,
+  Music,
+  FileText,
   AlertCircle,
   CheckCircle2,
-  ChevronDown
+  ChevronDown,
+  Layers
 } from "lucide-react";
 import { uploadImage } from "@/lib/api";
-import MediaGrid from "@/lib/MediaGrid";
+import MediaGrid, { getFileType } from "@/lib/MediaGrid";
 import Image from "next/image";
 
 type UploadStatus = "idle" | "uploading" | "success" | "error";
@@ -23,13 +27,14 @@ interface FileUploadState {
   url?: string;
   error?: string;
   preview: string;
+  fileType: "image" | "video" | "audio" | "pdf" | "document";
 }
 
-export default function BulkImageUploadPage() {
+export default function BulkMediaUploadPage() {
   const [fileStates, setFileStates] = useState<FileUploadState[]>([]);
   const [globalMessage, setGlobalMessage] = useState("");
   const [subDir, setSubDir] = useState("");
-  const [selectedPage, setSelectedPage] = useState("home");
+  const [selectedPage, setSelectedPage] = useState("products");
   const [isUploadingGlobal, setIsUploadingGlobal] = useState(false);
   const [copyFeedback, setCopyFeedback] = useState<number | null>(null);
   const [gridRefreshKey, setGridRefreshKey] = useState(0);
@@ -37,17 +42,40 @@ export default function BulkImageUploadPage() {
   // Cleanup object URLs to avoid memory leaks
   useEffect(() => {
     return () => {
-      fileStates.forEach(state => URL.revokeObjectURL(state.preview));
+      fileStates.forEach((state) => {
+        if (state.preview) URL.revokeObjectURL(state.preview);
+      });
     };
   }, [fileStates]);
 
+  const detectFileType = (file: File): "image" | "video" | "audio" | "pdf" | "document" => {
+    const mime = file.type.toLowerCase();
+    const name = file.name.toLowerCase();
+
+    if (mime.startsWith("image/") || /\.(jpg|jpeg|png|webp|svg|gif|avif)$/i.test(name)) return "image";
+    if (mime.startsWith("video/") || /\.(mp4|webm|mov|avi|mkv)$/i.test(name)) return "video";
+    if (mime.startsWith("audio/") || /\.(mp3|wav|ogg|aac|m4a|flac)$/i.test(name)) return "audio";
+    if (mime === "application/pdf" || /\.pdf$/i.test(name)) return "pdf";
+    return "document";
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      const newFiles = Array.from(e.target.files).map((file) => ({
-        file,
-        status: "idle" as UploadStatus,
-        preview: URL.createObjectURL(file),
-      }));
+      const newFiles = Array.from(e.target.files).map((file) => {
+        const type = detectFileType(file);
+        let preview = "";
+        try {
+          preview = URL.createObjectURL(file);
+        } catch {
+          preview = "";
+        }
+        return {
+          file,
+          status: "idle" as UploadStatus,
+          preview,
+          fileType: type,
+        };
+      });
       setFileStates((prev) => [...prev, ...newFiles]);
       setGlobalMessage("");
     }
@@ -56,7 +84,7 @@ export default function BulkImageUploadPage() {
   const removeFile = (index: number) => {
     setFileStates((prev) => {
       const updated = [...prev];
-      URL.revokeObjectURL(updated[index].preview);
+      if (updated[index]?.preview) URL.revokeObjectURL(updated[index].preview);
       updated.splice(index, 1);
       return updated;
     });
@@ -107,9 +135,9 @@ export default function BulkImageUploadPage() {
     setGlobalMessage("Upload process completed.");
   };
 
-  const copyToClipboard = (text: string, index: number | 'all') => {
+  const copyToClipboard = (text: string, index: number | "all") => {
     navigator.clipboard.writeText(text);
-    if (typeof index === 'number') {
+    if (typeof index === "number") {
       setCopyFeedback(index);
       setTimeout(() => setCopyFeedback(null), 2000);
     }
@@ -122,46 +150,55 @@ export default function BulkImageUploadPage() {
       .join(", ");
 
     if (urls) {
-      copyToClipboard(urls, 'all');
+      copyToClipboard(urls, "all");
       setGlobalMessage("All uploaded URLs copied to clipboard (comma separated).");
     }
   };
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <header className="mb-4">
+    <div className="max-w-6xl mx-auto space-y-6">
+      <header className="mb-2">
         <span className="text-[10px] font-bold uppercase tracking-widest text-[#8d6a3a]">Assets</span>
-        <h1 className=" text-2xl text-[#1f261b] mt-0.5">Bulk Image Upload</h1>
+        <h1 className="text-2xl text-[#1f261b] mt-0.5 font-bold">Media & Asset Manager</h1>
         <p className="mt-1 text-xs text-[#5f5a50] max-w-2xl leading-relaxed">
-          Upload multiple high-quality images. Once uploaded, you can copy the generated paths
-          to paste into your product images field or homepage content forms.
+          Upload and manage Images, Videos, Audio tracks, PDFs, and Documents. Once uploaded, copy the direct URLs
+          to use across product catalogs, blog posts, or website sections.
         </p>
       </header>
 
-      <div className="grid gap-4 lg:grid-cols-[280px_1fr]">
+      <div className="grid gap-4 lg:grid-cols-[300px_1fr]">
         {/* Left Column: Dropzone & Global Controls */}
         <aside className="space-y-3">
-          <div className="rounded-xl border-2 border-dashed border-[#d9cdbb] bg-white p-4 text-center hover:border-[#8d6a3a] transition-all group cursor-pointer relative">
+          <div className="rounded-xl border-2 border-dashed border-[#d9cdbb] bg-white p-5 text-center hover:border-[#8d6a3a] transition-all group cursor-pointer relative shadow-xs">
             <input
               type="file"
               multiple
-              accept="image/*"
+              accept="image/*,video/*,audio/*,application/pdf,.doc,.docx,.xls,.xlsx,.txt,.csv"
               onChange={handleFileChange}
               className="absolute inset-0 opacity-0 cursor-pointer"
               id="bulk-upload-input"
             />
-            <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-[#f3eee6] text-[#6f542f] mb-2 group-hover:scale-110 transition-transform">
-              <Upload size={20} />
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#f3eee6] text-[#6f542f] mb-2 group-hover:scale-110 transition-transform">
+              <Upload size={22} />
             </div>
-            <p className="text-xs font-bold text-[#1f261b] uppercase tracking-wider">Select Media</p>
-            <p className="text-[10px] text-[#5f5a50] mt-1 leading-tight">Drag and drop or click to browse files</p>
+            <p className="text-xs font-bold text-[#1f261b] uppercase tracking-wider">Select Media Files</p>
+            <p className="text-[10px] text-[#5f5a50] mt-1 leading-tight">
+              Images, Videos, Audio, PDFs & Docs
+            </p>
+            <span className="inline-block mt-2 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-[#f3eee6] text-[#6f542f]">
+              Drag & Drop or Browse
+            </span>
           </div>
 
           <div className="rounded-xl border border-[#ded3c4] bg-white p-3 shadow-sm space-y-2.5">
-            <h2 className="text-[8px] font-bold uppercase tracking-widest text-[#8d6a3a] border-b border-[#f3eee6] pb-2">Global Actions</h2>
+            <h2 className="text-[9px] font-bold uppercase tracking-widest text-[#8d6a3a] border-b border-[#f3eee6] pb-2">
+              Upload Target Folder
+            </h2>
 
             <div className="space-y-1">
-              <label className="text-[8px] font-bold uppercase tracking-widest text-[#5f5a50] ml-1">Target Page</label>
+              <label className="text-[8px] font-bold uppercase tracking-widest text-[#5f5a50] ml-1">
+                Target Section
+              </label>
               <div className="relative">
                 <select
                   value={selectedPage}
@@ -169,18 +206,25 @@ export default function BulkImageUploadPage() {
                   disabled={isUploadingGlobal}
                   className="w-full bg-[#fcfaf7] border border-[#d9cdbb] rounded-lg px-2.5 py-1 text-[11px] focus:outline-none focus:ring-1 focus:ring-[#8d6a3a] text-[#1f261b] appearance-none cursor-pointer disabled:opacity-50"
                 >
+                  <option value="products">Products</option>
                   <option value="home">Home Page</option>
                   <option value="about">About Page</option>
+                  <option value="turnkey">Turnkey Solutions</option>
+                  <option value="consultancy">Consultancy</option>
+                  <option value="blogs">Blogs</option>
+                  <option value="documents">Documents & Brochures</option>
                 </select>
                 <ChevronDown size={11} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#8d6a3a] pointer-events-none" />
               </div>
             </div>
 
             <div className="space-y-1">
-              <label className="text-[8px] font-bold uppercase tracking-widest text-[#5f5a50] ml-1">Folder Name (Optional)</label>
+              <label className="text-[8px] font-bold uppercase tracking-widest text-[#5f5a50] ml-1">
+                Subfolder (Optional)
+              </label>
               <input
                 type="text"
-                placeholder="e.g. products/summer"
+                placeholder="e.g. brochures or catalogs"
                 value={subDir}
                 onChange={(e) => setSubDir(e.target.value)}
                 disabled={isUploadingGlobal}
@@ -188,43 +232,37 @@ export default function BulkImageUploadPage() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2 pt-1">
               <button
                 onClick={handleBulkUpload}
                 disabled={isUploadingGlobal || fileStates.length === 0}
-                className="w-full flex items-center justify-center gap-1 bg-[#6f542f] text-white py-1.5 rounded-lg font-bold text-[8px] uppercase tracking-widest hover:shadow-lg transition-all disabled:opacity-50 disabled:shadow-none"
+                className="w-full flex items-center justify-center gap-1.5 bg-[#6f542f] text-white py-2 rounded-lg font-bold text-[9px] uppercase tracking-wider hover:bg-[#5b4324] transition-all disabled:opacity-50 shadow-xs"
               >
-                {isUploadingGlobal ? <Loader2 className="animate-spin" size={10} /> : <Upload size={10} />}
-                <span className="text-[10px]">
-
-                  Upload All
-                </span>
+                {isUploadingGlobal ? <Loader2 className="animate-spin" size={11} /> : <Upload size={11} />}
+                <span>Upload All</span>
               </button>
 
               <button
                 onClick={copyAllUrls}
-                disabled={!fileStates.some(s => s.status === 'success')}
-                className="w-full flex items-center justify-center gap-1 border border-[#d9cdbb] text-[#263016] py-1.5 rounded-lg font-bold text-[8px] uppercase tracking-widest hover:bg-[#fcfaf7] transition-all disabled:opacity-50"
+                disabled={!fileStates.some((s) => s.status === "success")}
+                className="w-full flex items-center justify-center gap-1.5 border border-[#d9cdbb] text-[#263016] py-2 rounded-lg font-bold text-[9px] uppercase tracking-wider hover:bg-[#fcfaf7] transition-all disabled:opacity-50"
               >
-                <Copy size={10} />
-                <span className="text-[10px]">
-
-                  Copy URLs
-                </span>
+                <Copy size={11} />
+                <span>Copy URLs</span>
               </button>
             </div>
 
             <button
               onClick={() => {
-                fileStates.forEach(s => URL.revokeObjectURL(s.preview));
+                fileStates.forEach((s) => {
+                  if (s.preview) URL.revokeObjectURL(s.preview);
+                });
                 setFileStates([]);
                 setGlobalMessage("");
               }}
-              className="w-full text-[8px] font-bold text-red-400 hover:text-red-600 transition-colors uppercase tracking-[0.2em] text-center pt-0.5"
+              className="w-full text-[9px] font-bold text-red-500 hover:text-red-700 transition-colors uppercase tracking-widest text-center pt-1"
             >
-              <span className="text-[10px]">
-                Reset List
-              </span>
+              Clear Queue
             </button>
           </div>
 
@@ -236,44 +274,86 @@ export default function BulkImageUploadPage() {
           )}
         </aside>
 
-        {/* Right Column: Dynamic File List */}
+        {/* Right Column: Upload Queue */}
         <section>
           {fileStates.length === 0 ? (
-            <div className="h-40 rounded-xl border border-[#ded3c4] bg-[#fcfaf7] flex flex-col items-center justify-center text-center p-6">
-              <div className="bg-white p-3 rounded-full shadow-sm mb-2 border border-[#eee5d9]">
-                <ImageIcon size={22} className="text-[#d9cdbb]" />
+            <div className="h-44 rounded-xl border border-[#ded3c4] bg-[#fcfaf7] flex flex-col items-center justify-center text-center p-6">
+              <div className="bg-white p-3 rounded-full shadow-xs mb-2 border border-[#eee5d9]">
+                <Layers size={22} className="text-[#d9cdbb]" />
               </div>
-              <h3 className="text-base  text-[#1f261b]">Queue is empty</h3>
-              <p className="text-xs text-[#5f5a50] mt-1 max-w-xs">Select some images from the left panel to begin the upload process.</p>
+              <h3 className="text-sm font-bold text-[#1f261b]">Upload Queue is empty</h3>
+              <p className="text-xs text-[#5f5a50] mt-1 max-w-xs">
+                Select or drag any images, videos, audio clips, or PDF documents to upload.
+              </p>
             </div>
           ) : (
-            <div className="bg-white rounded-xl border border-[#ded3c4] shadow-sm overflow-hidden">
-              <div className="bg-[#fcfaf7] px-4 py-2 border-b border-[#eee5d9] flex justify-between items-center">
-                <span className="text-[10px] font-bold text-[#5f5a50] uppercase tracking-widest">{fileStates.length} items in queue</span>
+            <div className="bg-white rounded-xl border border-[#ded3c4] shadow-xs overflow-hidden">
+              <div className="bg-[#fcfaf7] px-4 py-2.5 border-b border-[#eee5d9] flex justify-between items-center">
+                <span className="text-[10px] font-bold text-[#5f5a50] uppercase tracking-widest">
+                  {fileStates.length} items in upload queue
+                </span>
               </div>
-              <div className="divide-y divide-[#eee5d9] max-h-[220px] overflow-y-auto">
+              <div className="divide-y divide-[#eee5d9] max-h-[250px] overflow-y-auto">
                 {fileStates.map((state, index) => (
-                  <div key={index} className="p-2 flex items-center gap-3 hover:bg-[#fcfaf7] transition-colors">
-                    <div className="h-10 w-10 rounded-lg bg-gray-50 border border-[#eee5d9] overflow-hidden shrink-0 shadow-inner">
-                      <Image height={100} width={100} src={state.preview} alt="preview" className="h-full w-full object-cover" />
+                  <div key={index} className="p-2.5 flex items-center gap-3 hover:bg-[#fcfaf7] transition-colors">
+                    {/* Media Type Preview Icon / Image */}
+                    <div className="h-11 w-11 rounded-lg bg-gray-50 border border-[#eee5d9] overflow-hidden shrink-0 shadow-inner flex items-center justify-center">
+                      {state.fileType === "image" ? (
+                        <Image
+                          height={100}
+                          width={100}
+                          src={state.preview}
+                          alt="preview"
+                          className="h-full w-full object-cover"
+                        />
+                      ) : state.fileType === "video" ? (
+                        <div className="w-full h-full bg-slate-900 flex flex-col items-center justify-center text-white">
+                          <Video size={16} className="text-amber-400" />
+                        </div>
+                      ) : state.fileType === "audio" ? (
+                        <div className="w-full h-full bg-emerald-800 flex flex-col items-center justify-center text-white">
+                          <Music size={16} className="text-emerald-300" />
+                        </div>
+                      ) : (
+                        <div className="w-full h-full bg-rose-700 flex flex-col items-center justify-center text-white">
+                          <FileText size={16} className="text-rose-200" />
+                        </div>
+                      )}
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <h4 className="text-xs font-bold text-[#1f261b] break-all leading-snug">{state.file.name}</h4>
+                      <h4 className="text-xs font-bold text-[#1f261b] truncate">{state.file.name}</h4>
                       <div className="flex items-center gap-3 mt-0.5">
-                        <span className="text-[9px] font-bold text-[#8d6a3a] uppercase tracking-tighter">{(state.file.size / 1024).toFixed(0)} KB</span>
-                        {state.status === "success" && <span className="flex items-center gap-1 text-[10px] font-bold text-green-600 uppercase tracking-widest"><CheckCircle2 size={12} /> Success</span>}
-                        {state.status === "error" && <span className="text-[10px] font-bold text-red-500 uppercase tracking-widest">Failed</span>}
+                        <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.2 rounded bg-[#f3eee6] text-[#6f542f]">
+                          {state.fileType}
+                        </span>
+                        <span className="text-[9px] font-bold text-[#8d6a3a]">
+                          {(state.file.size / 1024).toFixed(0)} KB
+                        </span>
+                        {state.status === "success" && (
+                          <span className="flex items-center gap-1 text-[10px] font-bold text-green-600 uppercase tracking-widest">
+                            <CheckCircle2 size={12} /> Success
+                          </span>
+                        )}
+                        {state.status === "error" && (
+                          <span className="text-[10px] font-bold text-red-500 uppercase tracking-widest">Failed</span>
+                        )}
                       </div>
 
                       {state.status === "success" && state.url && (
                         <div className="mt-1.5 flex items-center bg-gray-50 rounded-md border border-[#eee5d9] overflow-hidden">
-                          <code className="flex-1 text-[10px] px-2.5 py-1 text-[#5f5a50] truncate font-mono break-all line-clamp-1 whitespace-normal">{state.url}</code>
+                          <code className="flex-1 text-[10px] px-2.5 py-1 text-[#5f5a50] truncate font-mono">
+                            {state.url}
+                          </code>
                           <button
                             onClick={() => copyToClipboard(state.url || "", index)}
-                            className={`px-3 py-1.5 text-[9px] font-bold uppercase transition-all ${copyFeedback === index ? 'bg-green-600 text-white' : 'bg-[#f3eee6] text-[#6f542f] hover:bg-[#eadfce]'}`}
+                            className={`px-3 py-1 text-[9px] font-bold uppercase transition-all ${
+                              copyFeedback === index
+                                ? "bg-green-600 text-white"
+                                : "bg-[#f3eee6] text-[#6f542f] hover:bg-[#eadfce]"
+                            }`}
                           >
-                            {copyFeedback === index ? 'Copied' : 'Copy'}
+                            {copyFeedback === index ? "Copied" : "Copy"}
                           </button>
                         </div>
                       )}
@@ -286,7 +366,7 @@ export default function BulkImageUploadPage() {
                       {state.status === "idle" && (
                         <button
                           onClick={() => uploadFile(index)}
-                          className="px-3.5 py-1.5 rounded-lg bg-[#f3eee6] text-[#6f542f] text-[10px] font-bold uppercase tracking-widest hover:bg-[#eadfce] transition-all"
+                          className="px-3 py-1.5 rounded-lg bg-[#f3eee6] text-[#6f542f] text-[10px] font-bold uppercase tracking-wider hover:bg-[#eadfce] transition-all"
                         >
                           Upload
                         </button>
@@ -300,7 +380,7 @@ export default function BulkImageUploadPage() {
 
                       <button
                         onClick={() => removeFile(index)}
-                        className="p-1.5 text-gray-300 hover:text-red-400 transition-colors"
+                        className="p-1.5 text-gray-400 hover:text-red-500 transition-colors"
                         aria-label="Remove item"
                       >
                         <X size={16} />
@@ -314,13 +394,16 @@ export default function BulkImageUploadPage() {
         </section>
       </div>
 
-      <section className="mt-6">
-        <div className="flex items-center gap-3 mb-3">
+      {/* Uploaded Library Section with Tabs and Grid */}
+      <section className="pt-2">
+        <div className="flex items-center gap-3 mb-4">
           <div className="h-px flex-1 bg-[#ded3c4]" />
-          <h2 className="text-xs font-bold uppercase tracking-widest text-[#8d6a3a] whitespace-nowrap">Uploaded Library</h2>
+          <h2 className="text-xs font-bold uppercase tracking-widest text-[#8d6a3a] whitespace-nowrap">
+            Uploaded Media Library
+          </h2>
           <div className="h-px flex-1 bg-[#ded3c4]" />
         </div>
-        <MediaGrid horizontal pageSize={12} refreshKey={gridRefreshKey} />
+        <MediaGrid horizontal={false} pageSize={24} refreshKey={gridRefreshKey} />
       </section>
     </div>
   );

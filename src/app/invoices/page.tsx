@@ -17,6 +17,7 @@ const EmailIcon = ({ size = 12 }: { size?: number }) => (
   </svg>
 );
 import { invoiceApi, Invoice, Lead, Product, leadApi, productApi, invoiceApi as invApi } from "@/lib/api";
+import { buildInvoicePrintWindowHtml, openInvoicePrintWindow, fmt, amountInWords, COMPANY } from "@/lib/invoiceTemplate";
 import { cardClass, fieldClass, labelClass } from "@/constants";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
 
@@ -102,139 +103,56 @@ export default function InvoicesPage() {
   };
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
-  const fmt = (n: number) => `₹${n.toLocaleString("en-IN")}`;
 
   const printInvoice = (inv: Invoice) => {
-    const leadName = typeof inv.lead === "object" ? `${inv.lead.firstName} ${inv.lead.lastName}` : "Customer";
-    const rows = inv.items.map((item) =>
-      `<tr>
-        <td style="padding:10px 12px;border-bottom:1px solid #ece3d2">${item.name}</td>
-        <td style="padding:10px 12px;border-bottom:1px solid #ece3d2;text-align:center">${item.quantity}</td>
-        <td style="padding:10px 12px;border-bottom:1px solid #ece3d2;text-align:right">${fmt(item.unitPrice)}</td>
-        <td style="padding:10px 12px;border-bottom:1px solid #ece3d2;text-align:right">${fmt(item.gstRate)}</td>
-        <td style="padding:10px 12px;border-bottom:1px solid #ece3d2;text-align:right">${fmt(item.amount)}</td>
-      </tr>`
-    ).join("");
-
-    const logoUrl = typeof window !== "undefined" ? window.location.origin + "/images/ensis-logo.png" : "/images/ensis-logo.png";
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${inv.invoiceNumber}</title>
-<style>@media print{body{margin:0} @page{size:A4;margin:10mm}}</style></head>
-<body style="margin:0;font-family:Jost,Arial,sans-serif;background:#FCFAF6;color:#1F3A2A">
-<div style="max-width:760px;margin:20px auto;background:#fff;border:1px solid #EDE4D3;border-radius:20px;overflow:hidden">
-<div style="background:#1F3A2A;padding:32px 40px;color:#fff;display:flex;align-items:center;gap:16px">
-<img src="${logoUrl}" alt="ENSIS Logo" style="height:40px;width:auto;background:#fff;border-radius:8px;padding:4px" />
-<div>
-<div style="margin:0;font-size:22px;letter-spacing:.14em;text-transform:uppercase;font-weight:700">ENSIS</div>
-<p style="margin:6px 0 0;font-size:12px;color:#C7A55B;letter-spacing:.1em;text-transform:uppercase">${TYPE_CONFIG[inv.type]?.label || "Invoice"} (${inv.invoiceNumber})</p>
-</div>
-</div>
-<div style="padding:32px 40px">
-<div style="display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap">
-<div>
-<p style="margin:0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Invoice No</p>
-<p style="margin:4px 0 0;font-size:14px;font-weight:600">${inv.invoiceNumber}</p>
-<p style="margin:14px 0 0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Date</p>
-<p style="margin:4px 0 0;font-size:14px;font-weight:600">${new Date(inv.createdAt).toLocaleDateString("en-IN")}</p>
-${inv.dueDate ? `<p style="margin:14px 0 0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Due Date</p>
-<p style="margin:4px 0 0;font-size:14px;font-weight:600">${new Date(inv.dueDate).toLocaleDateString("en-IN")}</p>` : ""}
-</div>
-<div style="text-align:right">
-<p style="margin:0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Bill To</p>
-<p style="margin:4px 0 0;font-size:14px;font-weight:600">${inv.billingAddress.name}</p>
-${inv.billingAddress.email ? `<p style="margin:2px 0 0;font-size:12px">${inv.billingAddress.email}</p>` : ""}
-${inv.billingAddress.phone ? `<p style="margin:2px 0 0;font-size:12px">${inv.billingAddress.phone}</p>` : ""}
-${inv.billingAddress.addressLine ? `<p style="margin:2px 0 0;font-size:12px">${inv.billingAddress.addressLine}</p>` : ""}
-${inv.billingAddress.city ? `<p style="margin:2px 0 0;font-size:12px">${inv.billingAddress.city}, ${inv.billingAddress.state || ""} ${inv.billingAddress.postalCode || ""}</p>` : ""}
-${inv.billingAddress.gstNumber ? `<p style="margin:2px 0 0;font-size:12px">GSTIN: ${inv.billingAddress.gstNumber}</p>` : ""}
-</div>
-</div>
-<table style="width:100%;margin-top:28px;border-collapse:collapse;font-size:13px">
-<thead><tr style="background:#F7F2E9">
-<th style="padding:10px 12px;text-align:left">Item</th><th style="padding:10px 12px">Qty</th><th style="padding:10px 12px;text-align:right">Price</th><th style="padding:10px 12px;text-align:right">GST%</th><th style="padding:10px 12px;text-align:right">Total</th>
-</tr></thead>
-<tbody>${rows}</tbody>
-</table>
-<div style="margin-top:20px;text-align:right;font-size:13px">
-<p style="margin:4px 0">Subtotal: <strong>${fmt(inv.subtotal)}</strong></p>
-${inv.discount ? `<p style="margin:4px 0;color:#2F7D5A">Discount: - ${fmt(inv.discount)}</p>` : ""}
-${inv.shipping ? `<p style="margin:4px 0">Shipping: ${fmt(inv.shipping)}</p>` : ""}
-<p style="margin:4px 0">GST: <strong>${fmt(inv.tax)}</strong></p>
-<p style="margin:10px 0 0;font-size:16px;border-top:1px solid #EDE4D3;padding-top:10px">Grand Total (incl. GST): <strong>${fmt(inv.totalAmount)}</strong></p>
-</div>
-${inv.notes ? `<p style="margin-top:20px;font-size:12px;color:#6c7068"><strong>Notes:</strong> ${inv.notes}</p>` : ""}
-<p style="margin-top:28px;font-size:11px;color:#6c7068;text-align:center">Thank you for choosing ENSIS — Premium Wellness & Panchkarma Spaces.<br>This is a computer generated invoice.</p>
-</div></div></body></html>`;
-
-    const printWindow = window.open("", "_blank");
-    if (printWindow) {
-      printWindow.document.write(html);
-      printWindow.document.close();
-      printWindow.focus();
-      printWindow.print();
-    }
+    const isEstimate = inv.type === "proforma";
+    const leadData = typeof inv.lead === "object" ? inv.lead : null;
+    const html = buildInvoicePrintWindowHtml({
+      title: isEstimate ? "ESTIMATE" : "PROFORMA INVOICE",
+      detailsLabel: isEstimate ? "Estimate Details" : "Invoice Details",
+      copyLabel: "ORIGINAL INVOICE",
+      items: inv.items || [],
+      billingAddress: inv.billingAddress || {},
+      shippingAddress: inv.shippingAddress || inv.billingAddress || {},
+      leadFirstName: leadData?.firstName,
+      leadLastName: leadData?.lastName,
+      invoiceNumber: inv.invoiceNumber,
+      createdAt: inv.createdAt,
+      createdByName: "System",
+      subtotal: inv.subtotal || 0,
+      tax: inv.tax || 0,
+      totalAmount: inv.totalAmount || 0,
+      linkedChallanNumbers: [],
+      dueDate: inv.dueDate,
+      copies: { original: true, duplicate: true, triplicate: false },
+    });
+    openInvoicePrintWindow(html);
   };
 
   const downloadInvoice = (inv: Invoice) => {
-    const leadName = typeof inv.lead === "object" ? `${inv.lead.firstName} ${inv.lead.lastName}` : "Customer";
-    const rows = inv.items.map((item) =>
-      `<tr>
-        <td style="padding:10px 12px;border-bottom:1px solid #ece3d2">${item.name}</td>
-        <td style="padding:10px 12px;border-bottom:1px solid #ece3d2;text-align:center">${item.quantity}</td>
-        <td style="padding:10px 12px;border-bottom:1px solid #ece3d2;text-align:right">${fmt(item.unitPrice)}</td>
-        <td style="padding:10px 12px;border-bottom:1px solid #ece3d2;text-align:right">${fmt(item.gstRate)}</td>
-        <td style="padding:10px 12px;border-bottom:1px solid #ece3d2;text-align:right">${fmt(item.amount)}</td>
-      </tr>`
-    ).join("");
-
-    const logoUrl = typeof window !== "undefined" ? window.location.origin + "/images/ensis-logo.png" : "/images/ensis-logo.png";
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${inv.invoiceNumber}</title></head>
-<body style="margin:0;font-family:Jost,Arial,sans-serif;background:#FCFAF6;color:#1F3A2A">
-<div style="max-width:760px;margin:40px auto;background:#fff;border:1px solid #EDE4D3;border-radius:20px;overflow:hidden">
-<div style="background:#1F3A2A;padding:32px 40px;color:#fff;display:flex;align-items:center;gap:16px">
-<img src="${logoUrl}" alt="ENSIS Logo" style="height:40px;width:auto;background:#fff;border-radius:8px;padding:4px" />
-<div>
-<div style="margin:0;font-size:22px;letter-spacing:.14em;text-transform:uppercase;font-weight:700">ENSIS</div>
-<p style="margin:6px 0 0;font-size:12px;color:#C7A55B;letter-spacing:.1em;text-transform:uppercase">${TYPE_CONFIG[inv.type]?.label || "Invoice"} (${inv.invoiceNumber})</p>
-</div>
-</div>
-<div style="padding:32px 40px">
-<div style="display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap">
-<div>
-<p style="margin:0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Invoice No</p>
-<p style="margin:4px 0 0;font-size:14px;font-weight:600">${inv.invoiceNumber}</p>
-<p style="margin:14px 0 0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Date</p>
-<p style="margin:4px 0 0;font-size:14px;font-weight:600">${new Date(inv.createdAt).toLocaleDateString("en-IN")}</p>
-${inv.dueDate ? `<p style="margin:14px 0 0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Due Date</p>
-<p style="margin:4px 0 0;font-size:14px;font-weight:600">${new Date(inv.dueDate).toLocaleDateString("en-IN")}</p>` : ""}
-</div>
-<div style="text-align:right">
-<p style="margin:0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Bill To</p>
-<p style="margin:4px 0 0;font-size:14px;font-weight:600">${inv.billingAddress.name}</p>
-${inv.billingAddress.email ? `<p style="margin:2px 0 0;font-size:12px">${inv.billingAddress.email}</p>` : ""}
-${inv.billingAddress.phone ? `<p style="margin:2px 0 0;font-size:12px">${inv.billingAddress.phone}</p>` : ""}
-${inv.billingAddress.addressLine ? `<p style="margin:2px 0 0;font-size:12px">${inv.billingAddress.addressLine}</p>` : ""}
-${inv.billingAddress.city ? `<p style="margin:2px 0 0;font-size:12px">${inv.billingAddress.city}, ${inv.billingAddress.state || ""} ${inv.billingAddress.postalCode || ""}</p>` : ""}
-${inv.billingAddress.gstNumber ? `<p style="margin:2px 0 0;font-size:12px">GSTIN: ${inv.billingAddress.gstNumber}</p>` : ""}
-</div>
-</div>
-<table style="width:100%;margin-top:28px;border-collapse:collapse;font-size:13px">
-<thead><tr style="background:#F7F2E9">
-<th style="padding:10px 12px;text-align:left">Item</th><th style="padding:10px 12px">Qty</th><th style="padding:10px 12px;text-align:right">Price</th><th style="padding:10px 12px;text-align:right">GST%</th><th style="padding:10px 12px;text-align:right">Total</th>
-</tr></thead>
-<tbody>${rows}</tbody>
-</table>
-<div style="margin-top:20px;text-align:right;font-size:13px">
-<p style="margin:4px 0">Subtotal: <strong>${fmt(inv.subtotal)}</strong></p>
-${inv.discount ? `<p style="margin:4px 0;color:#2F7D5A">Discount: - ${fmt(inv.discount)}</p>` : ""}
-${inv.shipping ? `<p style="margin:4px 0">Shipping: ${fmt(inv.shipping)}</p>` : ""}
-<p style="margin:4px 0">GST: <strong>${fmt(inv.tax)}</strong></p>
-<p style="margin:10px 0 0;font-size:16px;border-top:1px solid #EDE4D3;padding-top:10px">Grand Total (incl. GST): <strong>${fmt(inv.totalAmount)}</strong></p>
-</div>
-${inv.notes ? `<p style="margin-top:20px;font-size:12px;color:#6c7068"><strong>Notes:</strong> ${inv.notes}</p>` : ""}
-<p style="margin-top:28px;font-size:11px;color:#6c7068;text-align:center">Thank you for choosing ENSIS — Premium Wellness & Panchkarma Spaces.<br>This is a computer generated invoice.</p>
-</div></div></body></html>`;
-
-    const blob = new Blob([html], { type: "text/html" });
+    const isEstimate = inv.type === "proforma";
+    const leadData = typeof inv.lead === "object" ? inv.lead : null;
+    const html = buildInvoicePrintWindowHtml({
+      title: isEstimate ? "ESTIMATE" : "PROFORMA INVOICE",
+      detailsLabel: isEstimate ? "Estimate Details" : "Invoice Details",
+      copyLabel: "ORIGINAL INVOICE",
+      items: inv.items || [],
+      billingAddress: inv.billingAddress || {},
+      shippingAddress: inv.shippingAddress || inv.billingAddress || {},
+      leadFirstName: leadData?.firstName,
+      leadLastName: leadData?.lastName,
+      invoiceNumber: inv.invoiceNumber,
+      createdAt: inv.createdAt,
+      createdByName: "System",
+      subtotal: inv.subtotal || 0,
+      tax: inv.tax || 0,
+      totalAmount: inv.totalAmount || 0,
+      linkedChallanNumbers: [],
+      dueDate: inv.dueDate,
+      copies: { original: true, duplicate: false, triplicate: false },
+    });
+    const fullHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${inv.invoiceNumber}</title></head><body>${html}</body></html>`;
+    const blob = new Blob([fullHtml], { type: "text/html" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -327,8 +245,8 @@ ${inv.notes ? `<p style="margin-top:20px;font-size:12px;color:#6c7068"><strong>N
                         </span>
                       </td>
                       <td className="px-3 py-1.5 text-slate-800 hidden md:table-cell truncate max-w-[140px]">{leadName}</td>
-                      <td className="px-3 py-1.5 text-slate-600 hidden lg:table-cell">{new Date(inv.createdAt).toLocaleDateString("en-IN")}</td>
-                      <td className="px-3 py-1.5 text-slate-600 hidden lg:table-cell">{inv.dueDate ? new Date(inv.dueDate).toLocaleDateString("en-IN") : "-"}</td>
+                      <td className="px-3 py-1.5 text-slate-600 hidden lg:table-cell">{new Date(inv.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</td>
+                      <td className="px-3 py-1.5 text-slate-600 hidden lg:table-cell">{inv.dueDate ? new Date(inv.dueDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "-"}</td>
                       <td className="px-3 py-1.5 text-right font-medium text-slate-800">{fmt(inv.totalAmount)}</td>
                       <td className="px-3 py-1.5">
                         <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${statusConf.color}`}>{statusConf.label}</span>
@@ -498,8 +416,6 @@ function CreateInvoiceModal({ onClose, onCreated, leadId }: { onClose: () => voi
     }
   };
 
-  const fmt = (n: number) => `₹${n.toLocaleString("en-IN")}`;
-
   return (
     <div className="fixed inset-0 z-[120] flex items-start justify-center bg-black/50 backdrop-blur-sm overflow-y-auto py-8 px-4" onClick={onClose}>
       <div className="w-full max-w-3xl bg-white rounded-2xl shadow-2xl" onClick={(e) => e.stopPropagation()}>
@@ -619,78 +535,33 @@ function CreateInvoiceModal({ onClose, onCreated, leadId }: { onClose: () => voi
 }
 
 function ViewInvoiceModal({ invoice, onClose, onDownload }: { invoice: Invoice; onClose: () => void; onDownload: () => void }) {
-  const fmt = (n: number) => `₹${n.toLocaleString("en-IN")}`;
   const leadName = typeof invoice.lead === "object" ? `${invoice.lead.firstName} ${invoice.lead.lastName}` : "Customer";
   const typeConf = TYPE_CONFIG[invoice.type] || TYPE_CONFIG.tax;
   const statusConf = STATUS_CONFIG[invoice.status] || STATUS_CONFIG.draft;
 
   const handlePrint = () => {
-    const rows = invoice.items.map((item) =>
-      `<tr>
-        <td style="padding:10px 12px;border-bottom:1px solid #ece3d2">${item.name}</td>
-        <td style="padding:10px 12px;border-bottom:1px solid #ece3d2;text-align:center">${item.quantity}</td>
-        <td style="padding:10px 12px;border-bottom:1px solid #ece3d2;text-align:right">${fmt(item.unitPrice)}</td>
-        <td style="padding:10px 12px;border-bottom:1px solid #ece3d2;text-align:right">${item.gstRate}%</td>
-        <td style="padding:10px 12px;border-bottom:1px solid #ece3d2;text-align:right">${fmt(item.amount)}</td>
-      </tr>`
-    ).join("");
-
-    const logoUrl = typeof window !== "undefined" ? window.location.origin + "/images/ensis-logo.png" : "/images/ensis-logo.png";
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${invoice.invoiceNumber}</title>
-<style>@media print{body{margin:0} @page{size:A4;margin:10mm}}</style></head>
-<body style="margin:0;font-family:Jost,Arial,sans-serif;background:#FCFAF6;color:#1F3A2A">
-<div style="max-width:760px;margin:20px auto;background:#fff;border:1px solid #EDE4D3;border-radius:20px;overflow:hidden">
-<div style="background:#1F3A2A;padding:32px 40px;color:#fff;display:flex;align-items:center;gap:16px">
-<img src="${logoUrl}" alt="ENSIS Logo" style="height:40px;width:auto;background:#fff;border-radius:8px;padding:4px" />
-<div>
-<div style="margin:0;font-size:22px;letter-spacing:.14em;text-transform:uppercase;font-weight:700">ENSIS</div>
-<p style="margin:6px 0 0;font-size:12px;color:#C7A55B;letter-spacing:.1em;text-transform:uppercase">${TYPE_CONFIG[invoice.type]?.label || "Invoice"} (${invoice.invoiceNumber})</p>
-</div>
-</div>
-<div style="padding:32px 40px">
-<div style="display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap">
-<div>
-<p style="margin:0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Invoice No</p>
-<p style="margin:4px 0 0;font-size:14px;font-weight:600">${invoice.invoiceNumber}</p>
-<p style="margin:14px 0 0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Date</p>
-<p style="margin:4px 0 0;font-size:14px;font-weight:600">${new Date(invoice.createdAt).toLocaleDateString("en-IN")}</p>
-${invoice.dueDate ? `<p style="margin:14px 0 0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Due Date</p>
-<p style="margin:4px 0 0;font-size:14px;font-weight:600">${new Date(invoice.dueDate).toLocaleDateString("en-IN")}</p>` : ""}
-</div>
-<div style="text-align:right">
-<p style="margin:0;font-size:11px;color:#8d6a3a;letter-spacing:.12em;text-transform:uppercase">Bill To</p>
-<p style="margin:4px 0 0;font-size:14px;font-weight:600">${invoice.billingAddress.name}</p>
-${invoice.billingAddress.email ? `<p style="margin:2px 0 0;font-size:12px">${invoice.billingAddress.email}</p>` : ""}
-${invoice.billingAddress.phone ? `<p style="margin:2px 0 0;font-size:12px">${invoice.billingAddress.phone}</p>` : ""}
-${invoice.billingAddress.addressLine ? `<p style="margin:2px 0 0;font-size:12px">${invoice.billingAddress.addressLine}</p>` : ""}
-${invoice.billingAddress.city ? `<p style="margin:2px 0 0;font-size:12px">${invoice.billingAddress.city}, ${invoice.billingAddress.state || ""} ${invoice.billingAddress.postalCode || ""}</p>` : ""}
-${invoice.billingAddress.gstNumber ? `<p style="margin:2px 0 0;font-size:12px">GSTIN: ${invoice.billingAddress.gstNumber}</p>` : ""}
-</div>
-</div>
-<table style="width:100%;margin-top:28px;border-collapse:collapse;font-size:13px">
-<thead><tr style="background:#F7F2E9">
-<th style="padding:10px 12px;text-align:left">Item</th><th style="padding:10px 12px">Qty</th><th style="padding:10px 12px;text-align:right">Price</th><th style="padding:10px 12px;text-align:right">GST%</th><th style="padding:10px 12px;text-align:right">Total</th>
-</tr></thead>
-<tbody>${rows}</tbody>
-</table>
-<div style="margin-top:20px;text-align:right;font-size:13px">
-<p style="margin:4px 0">Subtotal: <strong>${fmt(invoice.subtotal)}</strong></p>
-${invoice.discount ? `<p style="margin:4px 0;color:#2F7D5A">Discount: - ${fmt(invoice.discount)}</p>` : ""}
-${invoice.shipping ? `<p style="margin:4px 0">Shipping: ${fmt(invoice.shipping)}</p>` : ""}
-<p style="margin:4px 0">GST: <strong>${fmt(invoice.tax)}</strong></p>
-<p style="margin:10px 0 0;font-size:16px;border-top:1px solid #EDE4D3;padding-top:10px">Grand Total (incl. GST): <strong>${fmt(invoice.totalAmount)}</strong></p>
-</div>
-${invoice.notes ? `<p style="margin-top:20px;font-size:12px;color:#6c7068"><strong>Notes:</strong> ${invoice.notes}</p>` : ""}
-<p style="margin-top:28px;font-size:11px;color:#6c7068;text-align:center">Thank you for choosing ENSIS — Premium Wellness & Panchkarma Spaces.<br>This is a computer generated invoice.</p>
-</div></div></body></html>`;
-
-    const printWindow = window.open("", "_blank");
-    if (printWindow) {
-      printWindow.document.write(html);
-      printWindow.document.close();
-      printWindow.focus();
-      printWindow.print();
-    }
+    const isEstimate = invoice.type === "proforma";
+    const leadData = typeof invoice.lead === "object" ? invoice.lead : null;
+    const html = buildInvoicePrintWindowHtml({
+      title: isEstimate ? "ESTIMATE" : "PROFORMA INVOICE",
+      detailsLabel: isEstimate ? "Estimate Details" : "Invoice Details",
+      copyLabel: "ORIGINAL INVOICE",
+      items: invoice.items || [],
+      billingAddress: invoice.billingAddress || {},
+      shippingAddress: invoice.shippingAddress || invoice.billingAddress || {},
+      leadFirstName: leadData?.firstName,
+      leadLastName: leadData?.lastName,
+      invoiceNumber: invoice.invoiceNumber,
+      createdAt: invoice.createdAt,
+      createdByName: "System",
+      subtotal: invoice.subtotal || 0,
+      tax: invoice.tax || 0,
+      totalAmount: invoice.totalAmount || 0,
+      linkedChallanNumbers: [],
+      dueDate: invoice.dueDate,
+      copies: { original: true, duplicate: true, triplicate: false },
+    });
+    openInvoicePrintWindow(html);
   };
 
   return (
@@ -726,8 +597,8 @@ ${invoice.notes ? `<p style="margin-top:20px;font-size:12px;color:#6c7068"><stro
             </div>
             <div className="text-right">
               <p className="text-slate-400 uppercase text-[9px] font-semibold tracking-wider">Details</p>
-              <p className="mt-1"><span className="text-slate-500">Date:</span> <span className="font-medium">{new Date(invoice.createdAt).toLocaleDateString("en-IN")}</span></p>
-              {invoice.dueDate && <p><span className="text-slate-500">Due:</span> <span className="font-medium">{new Date(invoice.dueDate).toLocaleDateString("en-IN")}</span></p>}
+              <p className="mt-1"><span className="text-slate-500">Date:</span> <span className="font-medium">{new Date(invoice.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</span></p>
+              {invoice.dueDate && <p><span className="text-slate-500">Due:</span> <span className="font-medium">{new Date(invoice.dueDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</span></p>}
               <p><span className="text-slate-500">Customer:</span> <span className="font-medium">{leadName}</span></p>
             </div>
           </div>
