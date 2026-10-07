@@ -65,8 +65,8 @@ export default function ChallansPage({ params }: { params: Promise<{ overview: s
 
   const totalChallans = challans.length;
   const totalItems = challans.reduce((sum, c) => sum + (c.items?.length || 0), 0);
-  const acknowledged = challans.filter((c) => c.status === "delivered" || c.status === "sent").length;
-  const pending = challans.filter((c) => c.status === "draft" || c.status === "pending").length;
+  const acknowledged = challans.filter((c) => c.status === "sent").length;
+  const pending = challans.filter((c) => c.status === "draft").length;
 
   return (
     <div>

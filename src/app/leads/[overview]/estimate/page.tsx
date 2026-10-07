@@ -84,7 +84,7 @@ export default function EstimatePage({ params }: { params: Promise<{ overview: s
     setSendingEmailId(inv._id);
     try {
       const res = await invoiceApi.sendEmail(inv._id);
-      toast.success(res.message || "Sent via email");
+      toast.success(res.message || "Estimate sent via email");
       fetchInvoices();
     } catch (err: any) {
       toast.error(err.message || "Failed to send email");
@@ -97,7 +97,7 @@ export default function EstimatePage({ params }: { params: Promise<{ overview: s
     setSendingWhatsAppId(inv._id);
     try {
       const res = await invoiceApi.sendWhatsApp(inv._id);
-      toast.success(res.message || "Sent via WhatsApp");
+      toast.success(res.message || "Estimate sent via WhatsApp");
       fetchInvoices();
     } catch (err: any) {
       toast.error(err.message || "Failed to send via WhatsApp");
@@ -568,18 +568,18 @@ export default function EstimatePage({ params }: { params: Promise<{ overview: s
                         <button
                           disabled={sendingWhatsAppId === inv._id}
                           onClick={() => handleSendWhatsApp(inv)}
-                          className="p-1.5 rounded bg-green-50 text-green-600 hover:bg-green-100 disabled:opacity-50 flex items-center justify-center min-w-[28px] min-h-[28px]"
-                          title="WhatsApp"
+                          className="p-1 rounded hover:bg-green-50 text-slate-400 hover:text-green-600 disabled:opacity-50 inline-flex items-center justify-center min-w-[20px] min-h-[20px]"
+                          title="Send WhatsApp"
                         >
-                          {sendingWhatsAppId === inv._id ? <Loader2 size={14} className="animate-spin text-green-600" /> : <WhatsAppIcon size={14} />}
+                          {sendingWhatsAppId === inv._id ? <Loader2 size={12} className="animate-spin text-green-600" /> : <WhatsAppIcon size={12} />}
                         </button>
                         <button
                           disabled={sendingEmailId === inv._id}
                           onClick={() => handleSendEmail(inv)}
-                          className="p-1.5 rounded bg-purple-50 text-purple-600 hover:bg-purple-100 disabled:opacity-50 flex items-center justify-center min-w-[28px] min-h-[28px]"
-                          title="Email"
+                          className="p-1 rounded hover:bg-amber-50 text-slate-400 hover:text-amber-600 disabled:opacity-50 inline-flex items-center justify-center min-w-[20px] min-h-[20px]"
+                          title="Send Email"
                         >
-                          {sendingEmailId === inv._id ? <Loader2 size={14} className="animate-spin text-purple-600" /> : <EmailIcon size={14} />}
+                          {sendingEmailId === inv._id ? <Loader2 size={12} className="animate-spin text-amber-600" /> : <EmailIcon size={12} />}
                         </button>
                         <button onClick={() => setPendingDelete(inv)} className="p-1.5 rounded bg-red-50 text-red-600 hover:bg-red-100" title="Cancel"><XCircle size={14} /></button>
                       </div>

@@ -8,12 +8,15 @@ import { api, API_URL } from '@/lib/api';
 
 interface Enquiry {
   _id: string;
-  name: string;
+  name?: string;
+  fullName?: string;
   email: string;
   phone?: string;
-  subject: string;
+  mobileNumber?: string;
+  subject?: string;
+  projectType?: string;
   message: string;
-  status: 'pending' | 'contacted' | 'closed';
+  status: 'pending' | 'contacted' | 'closed' | 'resolved' | 'cancelled';
   createdAt: string;
 }
 
@@ -67,7 +70,7 @@ const EnquiriesPage = () => {
     switch (status) {
       case 'pending': return 'bg-amber-100 text-amber-700 border-amber-200';
       case 'contacted': return 'bg-blue-100 text-blue-700 border-blue-200';
-      case 'closed': return 'bg-emerald-100 text-green-700 border-emerald-200';
+      case 'closed': case 'resolved': return 'bg-emerald-100 text-green-700 border-emerald-200';
       default: return 'bg-slate-100  border-slate-200';
     }
   };
@@ -119,22 +122,29 @@ const EnquiriesPage = () => {
                       <td className="px-6 py-4">
                         <div className="flex flex-col gap-1">
                           <span className="text-sm font-bold  flex items-center gap-1.5">
-                            <User size={14} className="" /> {enquiry.name}
+                            <User size={14} className="text-[#8d6a3a]" /> {enquiry.fullName || enquiry.name || 'Anonymous'}
                           </span>
-                          <span className="text-xs  flex items-center gap-1.5">
-                            <Mail size={14} className="" /> {enquiry.email}
+                          <span className="text-xs  flex items-center gap-1.5 text-slate-600">
+                            <Mail size={14} className="text-slate-400" /> {enquiry.email}
                           </span>
-                          <span className="text-[10px]  flex items-center gap-1.5 mt-1 font-medium">
+                          {(enquiry.mobileNumber || enquiry.phone) && (
+                            <span className="text-xs flex items-center gap-1.5 text-slate-600">
+                              <span className="font-semibold text-slate-400 text-[11px]">Tel:</span> {enquiry.mobileNumber || enquiry.phone}
+                            </span>
+                          )}
+                          <span className="text-[10px]  flex items-center gap-1.5 mt-1 font-medium text-slate-400">
                             <Clock size={12} /> {new Date(enquiry.createdAt).toLocaleDateString(undefined, {
-                              year: 'numeric', month: 'short', day: 'numeric'
+                              year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
                             })}
                           </span>
                         </div>
                       </td>
                       <td className="px-6 py-4 max-w-xs lg:max-w-md">
                         <div className="flex flex-col gap-1">
-                          <span className="text-[11px] font-bold  uppercase">{enquiry.subject || 'General Inquiry'}</span>
-                          <p className="text-xs  line-clamp-3 leading-relaxed">
+                          <span className="text-[11px] font-bold text-[#8d6a3a] uppercase tracking-wider">
+                            {enquiry.projectType || enquiry.subject || 'Product Enquiry'}
+                          </span>
+                          <p className="text-xs text-slate-700 leading-relaxed whitespace-pre-wrap">
                             {enquiry.message}
                           </p>
                         </div>

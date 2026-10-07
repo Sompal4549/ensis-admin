@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
-import { Plus, Save, Pencil, Trash2, Lock, X, Loader2, ImagePlus, MessageSquarePlus } from "lucide-react";
+import { Plus, Save, Pencil, Trash2, Lock, X, Loader2, ImagePlus, MessageSquarePlus, Search } from "lucide-react";
 import Link from "next/link";
 import {
   adminApi, authStore, categoryApi, getImageUrl, productApi, uploadImage,
@@ -10,7 +10,9 @@ import {
 import { fieldClass, labelClass } from "@/constants";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
 import RichTextEditor from "@/components/common/RichTextEditor";
+import SearchableSelect from "@/components/common/SearchableSelect";
 import Image from "next/image";
+import { toast } from "react-toastify";
 
 type ProductForm = {
   id?: string;
@@ -95,11 +97,41 @@ export default function ProductsPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [productForm, setProductForm] = useState<ProductForm>(emptyProduct);
   const [pendingDelete, setPendingDelete] = useState<{ message: string; id: string } | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredProducts = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
+    let list = products;
+    if (q) {
+      list = products.filter((p) => {
+        const categoryName = typeof p.category === "string" ? p.category : p.category?.name || "";
+        return (
+          p.title?.toLowerCase().includes(q) ||
+          p.code?.toLowerCase().includes(q) ||
+          p.description?.toLowerCase().includes(q) ||
+          categoryName.toLowerCase().includes(q)
+        );
+      });
+    }
+
+    return [...list].sort((a, b) => {
+      const orderA = typeof (a as any).orderBy === "number" ? (a as any).orderBy : (Number((a as any).orderBy) || 0);
+      const orderB = typeof (b as any).orderBy === "number" ? (b as any).orderBy : (Number((b as any).orderBy) || 0);
+      if (orderA !== orderB) {
+        return orderA - orderB;
+      }
+      return new Date((b as any).createdAt || 0).getTime() - new Date((a as any).createdAt || 0).getTime();
+    });
+  }, [products, searchQuery]);
 
   const selectedCategoryName = useMemo(() => {
     const category = categories.find((item) => item._id === productForm.category);
     return category?.name || "Select category";
   }, [categories, productForm.category]);
+
+  const categoryOptions = useMemo(() => {
+    return categories.map((c) => ({ value: c._id, label: c.name }));
+  }, [categories]);
 
   const refreshData = useCallback(async () => {
     const [productResult, categoryResult] = await Promise.all([
@@ -143,8 +175,15 @@ export default function ProductsPage() {
 
   const submitProduct = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (!productForm.title || !productForm.title.replace(/<[^>]*>/g, "").trim()) {
+      toast.error("Please enter a product title.");
+      return;
+    }
+    if (!productForm.category) {
+      toast.error("Please select a product category.");
+      return;
+    }
     setLoading(true);
-    setMessage("");
     const payload = {
       title: productForm.title, code: productForm.code, hsnCode: productForm.hsnCode,
       description: productForm.description, shortDescription: productForm.shortDescription,
@@ -156,21 +195,26 @@ export default function ProductsPage() {
       material: productForm.material, weight: productForm.weight,
       tags: productForm.tags.filter(t => t.trim() !== ""),
       images: productForm.images, slug: productForm.slug.trim(),
-      overview: productForm.overview,
+      overview: {
+        ...productForm.overview,
+        whatisInclueded: (productForm.overview.whatisInclueded || []).filter(
+          (item) => typeof item === "string" && item.trim() !== ""
+        ),
+      },
       isFeatured: productForm.isFeatured, isActive: productForm.isActive, orderBy: productForm.orderBy,
     };
     try {
       if (productForm.id) {
         await productApi.update(productForm.id, payload);
-        setMessage("Product updated successfully.");
+        toast.success("Product updated successfully!");
       } else {
         await productApi.create(payload);
-        setMessage("Product added successfully.");
+        toast.success("Product added successfully!");
       }
       setProductForm({ ...emptyProduct, category: categories[0]?._id || "" });
       await refreshData();
     } catch (error) {
-      setMessage((error as Error).message);
+      toast.error((error as Error).message || "Failed to save product.");
     } finally {
       setLoading(false);
     }
@@ -302,9 +346,9 @@ export default function ProductsPage() {
     try {
       await productApi.remove(id);
       await refreshData();
-      setMessage("Product deleted.");
+      toast.success("Product deleted successfully.");
     } catch (error) {
-      setMessage((error as Error).message);
+      toast.error((error as Error).message || "Failed to delete product.");
     } finally {
       setLoading(false);
     }
@@ -346,13 +390,38 @@ export default function ProductsPage() {
         {/* Product List */}
         <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm h-fit">
           <div className="border-b border-slate-100 px-4 py-2.5 text-xs font-bold text-slate-800 flex items-center justify-between">
-            <span>{products.length} Products Cataloged</span>
+            <span>{filteredProducts.length} of {products.length} Products</span>
             <Link href="/reviews" className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-600 hover:text-blue-700">
               <MessageSquarePlus size={12} /> Manage Reviews
             </Link>
           </div>
+          {/* Search Bar */}
+          <div className="px-3 py-2 border-b border-slate-100">
+            <div className="relative">
+              <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search by title, code, category..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full rounded-lg border border-slate-200 bg-slate-50 py-1.5 pl-7 pr-7 text-[11px] text-slate-700 placeholder:text-slate-400 focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-200 transition-all"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                >
+                  <X size={12} />
+                </button>
+              )}
+            </div>
+          </div>
           <div className="divide-y divide-slate-100 max-h-[60vh] overflow-y-auto">
-            {products.map((product) => (
+            {filteredProducts.length === 0 && searchQuery && (
+              <p className="py-8 text-center text-[11px] text-slate-400">No products match &ldquo;{searchQuery}&rdquo;</p>
+            )}
+            {filteredProducts.map((product) => (
               <article key={product._id} className="grid gap-3 p-2.5 sm:grid-cols-[80px_1fr_auto] sm:items-center hover:bg-slate-50/20">
                 <div className="h-14 w-20 overflow-hidden rounded-lg bg-slate-50 shrink-0">
                   {product.images?.[0] && (
@@ -360,7 +429,12 @@ export default function ProductsPage() {
                   )}
                 </div>
                 <div className="min-w-0">
-                  <h4 className="font-bold text-slate-800 text-xs truncate">{product.title}</h4>
+                  <div className="flex items-center gap-1.5">
+                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 shrink-0" title="Order number">
+                      #{(product as any).orderBy ?? 0}
+                    </span>
+                    <h4 className="font-bold text-slate-800 text-xs truncate" dangerouslySetInnerHTML={{ __html: product.title }} />
+                  </div>
                   <p className="mt-0.5 line-clamp-1 text-[11px] ">{product.description}</p>
                   <p className="mt-1 text-[10px] font-bold text-emerald-600">
                     Rs. {product.price?.toLocaleString("en-IN")} · {product.gstRate ?? 5}% GST · {typeof product.category === "string" ? product.category : product.category?.name}
@@ -371,7 +445,7 @@ export default function ProductsPage() {
                     <MessageSquarePlus size={12} />
                   </Link>
                   <button onClick={() => editProduct(product)} className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer"><Pencil size={12} /></button>
-                  <button onClick={() => confirmDeleteClick(product._id, `Delete ${product.title}?`)} className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"><Trash2 size={12} /></button>
+                  <button onClick={() => confirmDeleteClick(product._id, `Delete ${(product.title || '').replace(/<[^>]*>/g, '')}?`)} className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"><Trash2 size={12} /></button>
                 </div>
               </article>
             ))}
@@ -385,12 +459,19 @@ export default function ProductsPage() {
             {productForm.id ? "Edit Product Details" : "Add New Product"}
           </h3>
 
-          {/* Title & Code */}
-          <div className="grid gap-3 sm:grid-cols-3">
-            <div>
-              <label className={labelClass}>Title</label>
-              <input className={fieldClass} value={productForm.title} onChange={(e) => setProductForm({ ...productForm, title: e.target.value })} required />
-            </div>
+          {/* Product Title (RichTextEditor) */}
+          <div className="space-y-1">
+            <label className={labelClass}>Product Title (Rich Text)</label>
+            <RichTextEditor
+              value={productForm.title}
+              onChange={(val) => setProductForm({ ...productForm, title: val })}
+              placeholder="Enter product title..."
+              minHeight="90px"
+            />
+          </div>
+
+          {/* Code & HSN Code */}
+          <div className="grid gap-3 sm:grid-cols-2">
             <div>
               <label className={labelClass}>Product Code</label>
               <input className={fieldClass} value={productForm.code} onChange={(e) => setProductForm({ ...productForm, code: e.target.value })} placeholder="e.g. ENS-001" />
@@ -520,10 +601,12 @@ export default function ProductsPage() {
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
               <label className={labelClass}>Category</label>
-              <select className={fieldClass} value={productForm.category} onChange={(e) => setProductForm({ ...productForm, category: e.target.value })} required>
-                <option value="">{selectedCategoryName}</option>
-                {categories.map((c) => <option key={c._id} value={c._id}>{c.name}</option>)}
-              </select>
+              <SearchableSelect
+                options={categoryOptions}
+                value={productForm.category}
+                onChange={(val) => setProductForm({ ...productForm, category: val })}
+                placeholder="Search or select category..."
+              />
             </div>
             <div>
               <label className={labelClass}>URL Slug</label>
@@ -580,13 +663,12 @@ export default function ProductsPage() {
                   const files = Array.from(e.target.files || []);
                   if (!files.length) return;
                   setLoading(true);
-                  setMessage("Uploading images...");
                   try {
                     const urls = await Promise.all(files.map(f => uploadImage(f, "products")));
                     setProductForm(prev => ({ ...prev, images: [...prev.images, ...urls] }));
-                    setMessage(`${urls.length} image(s) uploaded successfully.`);
+                    toast.success(`${urls.length} image(s) uploaded successfully.`);
                   } catch (error) {
-                    setMessage("Failed to upload one or more images. " + error);
+                    toast.error("Failed to upload one or more images.");
                   } finally {
                     setLoading(false);
                     e.target.value = "";
@@ -664,18 +746,6 @@ export default function ProductsPage() {
               </div>
             </div>
 
-            <div>
-              <label className={labelClass}>What's Included</label>
-              <div className="space-y-2 mt-1">
-                {productForm.overview.whatisInclueded.map((item, idx) => (
-                  <div key={idx} className="flex gap-2">
-                    <input className={fieldClass} value={item} onChange={e => { const list = [...productForm.overview.whatisInclueded]; list[idx] = e.target.value; setProductForm({ ...productForm, overview: { ...productForm.overview, whatisInclueded: list } }); }} />
-                    <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, whatisInclueded: productForm.overview.whatisInclueded.filter((_, i) => i !== idx) } })} className="shrink-0 text-rose-500 hover:bg-rose-50 p-1.5 rounded"><Trash2 size={13} /></button>
-                  </div>
-                ))}
-                <button type="button" onClick={() => setProductForm({ ...productForm, overview: { ...productForm.overview, whatisInclueded: [...productForm.overview.whatisInclueded, ""] } })} className="text-[10px] font-bold text-blue-600 flex items-center gap-1"><Plus size={12} /> Add Item</button>
-              </div>
-            </div>
             ── */}
 
             {/* Key Specifications */}
@@ -896,6 +966,64 @@ export default function ProductsPage() {
                   </div>
                 </div>
               ))}
+            </div>
+
+            {/* What's Included */}
+            <div className="p-3 border border-emerald-100 rounded-xl bg-emerald-50/20 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <h5 className="text-[10px] font-bold text-emerald-700 uppercase">What's Included</h5>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setProductForm({
+                      ...productForm,
+                      overview: {
+                        ...productForm.overview,
+                        whatisInclueded: [...(productForm.overview.whatisInclueded || []), ""],
+                      },
+                    })
+                  }
+                  className="text-[10px] font-bold text-emerald-600 flex items-center gap-1"
+                >
+                  <Plus size={11} /> Add Item
+                </button>
+              </div>
+              <div className="space-y-2 mt-1">
+                {(productForm.overview.whatisInclueded || []).map((item, idx) => (
+                  <div key={idx} className="flex gap-2">
+                    <input
+                      className={fieldClass}
+                      placeholder="e.g. 1x Therapy Table, 1x Power Cord"
+                      value={item}
+                      onChange={(e) => {
+                        const list = [...(productForm.overview.whatisInclueded || [])];
+                        list[idx] = e.target.value;
+                        setProductForm({
+                          ...productForm,
+                          overview: { ...productForm.overview, whatisInclueded: list },
+                        });
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setProductForm({
+                          ...productForm,
+                          overview: {
+                            ...productForm.overview,
+                            whatisInclueded: (productForm.overview.whatisInclueded || []).filter(
+                              (_, i) => i !== idx
+                            ),
+                          },
+                        })
+                      }
+                      className="shrink-0 text-rose-500 hover:bg-rose-50 p-1.5 rounded"
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* Smart Design & Appearance */}

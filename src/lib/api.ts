@@ -77,6 +77,9 @@ export type ComponentContent = {
 export type MediaFile = {
   name: string;
   url: string;
+  mimetype?: string;
+  resourceType?: string;
+  size?: number;
 };
 
 export type AuthUser = {
@@ -459,11 +462,48 @@ export const categoryApi = {
 };
 
 export const productApi = {
-  list: () => request<{ products: Product[]; total: number; page: number; limit: number }>("/products?limit=100"),
+  list: () => request<{ products: Product[]; total: number; page: number; limit: number }>("/products?limit=100&sortBy=orderBy&order=asc"),
   create: (payload: Partial<Product>) => request<Product>("/products", { method: "POST", data: payload }),
   update: (id: string, payload: Partial<Product>) =>
     request<Product>(`/products/${id}`, { method: "PUT", data: payload }),
   remove: (id: string) => request<null>(`/products/${id}`, { method: "DELETE" }),
+};
+
+export type ProductBackup = {
+  _id: string;
+  productId: string;
+  backedUpAt: string;
+  note?: string;
+  snapshot?: Record<string, unknown>;
+};
+
+export const productBackupApi = {
+  /** List all backups for a product (no snapshot data) */
+  list: (productId: string) =>
+    request<ProductBackup[]>(`/products/${productId}/backups`),
+
+  /** Manually trigger a backup */
+  create: (productId: string, note?: string) =>
+    request<ProductBackup>(`/products/${productId}/backups`, {
+      method: "POST",
+      data: { note },
+    }),
+
+  /** Get a single backup with full snapshot */
+  get: (backupId: string) =>
+    request<ProductBackup>(`/products/backups/${backupId}`),
+
+  /** Restore product to a backup state */
+  restore: (backupId: string) =>
+    request<Product>(`/products/backups/${backupId}/restore`, { method: "POST" }),
+
+  /** Delete a single backup */
+  remove: (backupId: string) =>
+    request<null>(`/products/backups/${backupId}`, { method: "DELETE" }),
+
+  /** Delete all backups for a product */
+  removeAll: (productId: string) =>
+    request<null>(`/products/${productId}/backups`, { method: "DELETE" }),
 };
 
 export const orderApi = {

@@ -1,50 +1,14 @@
 "use client";
 
 import React, { useState, useEffect, use, useCallback } from "react";
-import { ArrowLeft, FileText, Landmark, Loader2, Pencil, PenLine, Printer } from "lucide-react";
+import { ArrowLeft, Loader2, Pencil, Printer, CheckCircle2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { invoiceApi, Invoice, Lead, leadApi } from "@/lib/api";
 import { toast } from "react-toastify";
 import Link from "next/link";
 import { useAuth } from "@/components/auth/AuthContext";
 import Image from "next/image";
-
-const COMPANY = {
-  name: "Design House India Pvt. Ltd.",
-  brandName: "Design House India",
-  shortName: "Design House India",
-  phone1: "+91 9654900525",
-  phone2: "",
-  email: "info@ensis.in",
-  website: "www.ensis.in",
-  gstin: "",
-  cin: "",
-  address: "12/29, Site-II, Loni Road, Industrial Area, Mohan Nagar - 201007, Uttar Pradesh, India",
-  bank: {
-    name: "",
-    accountName: "",
-    accountNo: "",
-    ifsc: "",
-    branch: "",
-  },
-};
-
-const fmt = (n: number) => `₹${n.toLocaleString("en-IN")}`;
-
-const amountInWords = (n: number): string => {
-  if (n === 0) return "Zero Rupees Only";
-  const ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
-  const tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
-  const convert = (num: number): string => {
-    if (num < 20) return ones[num];
-    if (num < 100) return tens[Math.floor(num / 10)] + (num % 10 ? " " + ones[num % 10] : "");
-    if (num < 1000) return ones[Math.floor(num / 100)] + " Hundred" + (num % 100 ? " and " + convert(num % 100) : "");
-    if (num < 100000) return convert(Math.floor(num / 1000)) + " Thousand" + (num % 1000 ? " " + convert(num % 1000) : "");
-    if (num < 10000000) return convert(Math.floor(num / 100000)) + " Lakh" + (num % 100000 ? " " + convert(num % 100000) : "");
-    return convert(Math.floor(num / 10000000)) + " Crore" + (num % 10000000 ? " " + convert(num % 10000000) : "");
-  };
-  return convert(Math.floor(n)) + " Rupees Only";
-};
+import { COMPANY, fmt, amountInWords, buildInvoicePrintWindowHtml, openInvoicePrintWindow } from "@/lib/invoiceTemplate";
 
 export default function EstimateDetailPage({ params }: { params: Promise<{ overview: string; id: string }> }) {
   const { overview: leadId, id: invoiceId } = use(params);
@@ -75,276 +39,27 @@ export default function EstimateDetailPage({ params }: { params: Promise<{ overv
     fetchData();
   }, [fetchData]);
 
-  const handlePrint = () => {
+  const handlePrint = (copies: { original: boolean; duplicate: boolean; triplicate: boolean }) => {
+    setShowPrintModal(false);
     const inv = invoice!;
-    const estDate = new Date(inv.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
-    const estTime = new Date(inv.createdAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
-    const logoUrl = "https://res.cloudinary.com/dn34qdd2q/image/upload/v1781521763/ensis/f9pgo7qufbqmxwlho5ht.png";
-
-    const itemRows = items.map((item: any, idx: number) => {
-      const qty = item.quantity || 0;
-      const rate = item.unitPrice || 0;
-      const amount = item.amount || qty * rate;
-      const disc = item.discount || 0;
-      const total = amount - disc;
-      const bdr = "border:1px solid #d1d5db";
-      return `<tr>
-        <td style="${bdr};text-align:center">${idx + 1}</td>
-        <td style="${bdr};text-align:center"><span style="font-weight:600">${item.name || ""}</span>${item.description ? `<br/><span style="font-size:9px;color:#6b7280">${item.description}</span>` : ""}</td>
-        <td style="${bdr};text-align:center">${item.hsn || "-"}</td>
-        <td style="${bdr};text-align:center">${qty}</td>
-        <td style="${bdr};text-align:center">${item.size || "-"}</td>
-        <td style="${bdr};text-align:center">${item.area || "-"}</td>
-        <td style="${bdr};text-align:center">${item.unit || "Nos"}</td>
-        <td style="${bdr};text-align:center">${fmt(rate)}</td>
-        <td style="${bdr};text-align:center">${disc > 0 ? disc + "%" : "0%"}</td>
-        <td style="${bdr};text-align:center;font-weight:600">${fmt(total)}</td>
-      </tr>`;
-    }).join("");
-    const emptyRows = Array.from({ length: Math.max(0, 7 - items.length) }).map((_, i) => {
-      const bdr = "border:1px solid #d1d5db";
-      return `<tr>
-        <td style="${bdr};text-align:center">${items.length + i + 1}</td>
-        <td style="${bdr};text-align:center">&nbsp;</td>
-        <td style="${bdr};text-align:center">&nbsp;</td>
-        <td style="${bdr};text-align:center">&nbsp;</td>
-        <td style="${bdr};text-align:center">&nbsp;</td>
-        <td style="${bdr};text-align:center">&nbsp;</td>
-        <td style="${bdr};text-align:center">&nbsp;</td>
-        <td style="${bdr};text-align:center">&nbsp;</td>
-        <td style="${bdr};text-align:center">&nbsp;</td>
-        <td style="${bdr};text-align:center">&nbsp;</td>
-      </tr>`;
-    }).join("");
-
-    const taxRows = items.map((item: any, idx: number) => {
-      const qty = item.quantity || 0;
-      const amount = item.amount || 0;
-      const gstRate = item.gstRate || 18;
-      const cgst = gstRate / 2;
-      const sgst = gstRate / 2;
-      const cgstAmt = (amount * cgst) / 100;
-      const sgstAmt = (amount * sgst) / 100;
-      const totalTax = cgstAmt + sgstAmt;
-      const bdr = "border:1px solid #d1d5db";
-      return `<tr>
-        <td style="${bdr};text-align:center">${idx + 1}</td>
-        <td style="${bdr};text-align:center">${item.hsn || "-"}</td>
-        <td style="${bdr};text-align:center">${item.sac || "-"}</td>
-        <td style="${bdr};text-align:center">${fmt(amount)}</td>
-        <td style="${bdr};text-align:center">${qty}</td>
-        <td style="${bdr};text-align:center">${cgst}%</td>
-        <td style="${bdr};text-align:center">${fmt(cgstAmt)}</td>
-        <td style="${bdr};text-align:center">${sgst}%</td>
-        <td style="${bdr};text-align:center">${fmt(sgstAmt)}</td>
-        <td style="${bdr};text-align:center">-</td>
-        <td style="${bdr};text-align:center">-</td>
-        <td style="${bdr};text-align:center;font-weight:600">${fmt(totalTax)}</td>
-      </tr>`;
-    }).join("");
-
-    const billAddr = inv.billingAddress || {} as any;
-    const shipAddr = inv.shippingAddress || {} as any;
-
-    const html = `<!DOCTYPE html>
-<html><head><meta charset="utf-8"><title>${inv.invoiceNumber}</title>
-<style>
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family:Arial,Helvetica,sans-serif; font-size:10px; color:#1a1a1a; background:#fff; }
-  @media print {
-    @page { size:A4 portrait; margin:0; }
-    body { background:#fff; print-color-adjust:exact; -webkit-print-color-adjust:exact; }
-    .container { padding:20px 16px; }
-    * { print-color-adjust:exact; -webkit-print-color-adjust:exact; }
-  }
-  .container { max-width:800px; margin:0 auto; padding:20px 16px; }
-  .header { text-align:center; }
-  .header img { width:100%; max-width:800px; height:auto; display:block; margin:0 auto; }
-  .title-bar { text-align:center; padding:6px 0; border-bottom:2px solid #1a3a5c; }
-  .title-bar h2 { font-size:14px; letter-spacing:3px; text-transform:uppercase; color:#1a3a5c; }
-  .info-grid { display:grid; grid-template-columns:1fr 1fr 1fr; border:1px solid #d1d5db; }
-  .info-col { padding:8px 10px; }
-  .info-col:not(:last-child) { border-right:1px solid #d1d5db; }
-  .info-label { background:#1a3a5c; color:#fff; font-size:8px; font-weight:600; text-transform:uppercase; letter-spacing:1px; padding:3px 6px; margin:-8px -10px 6px -10px; }
-  .info-col p { font-size:9px; line-height:1.5; }
-  table { width:100%; border-collapse:collapse; border:1px solid #d1d5db; font-size:10px; }
-  th { background:#1a3a5c; color:#fff; padding:6px; text-align:left; font-size:9px; font-weight:600; height:28px; border:1px solid #d1d5db; }
-  td { padding:5px 6px; font-size:9px; border:1px solid #d1d5db; }
-  .totals-table { width:100%; border-collapse:collapse; margin-top:8px; border:1px solid #d1d5db; }
-  .totals-table td { padding:4px 6px; font-size:10px; border:1px solid #d1d5db; }
-  .totals-table .grand td { border-top:2px solid #1a3a5c; font-size:12px; font-weight:600; }
-  .terms-table { width:100%; border-collapse:collapse; border:1px solid #d1d5db; margin-top:8px; }
-  .terms-table td { padding:8px; font-size:9px; vertical-align:top; border:1px solid #d1d5db; }
-  .terms-table h4 { font-size:10px; font-weight:600; margin-bottom:4px; }
-  .terms-table ol { padding-left:14px; margin:0; line-height:1.7; }
-  .bottom-table { width:100%; border-collapse:collapse; border:1px solid #d1d5db; margin-top:8px; }
-  .bottom-table td { padding:8px; vertical-align:top; border:1px solid #d1d5db; }
-  .bottom-box { font-size:9px; }
-  .bottom-box h4 { font-weight:700; margin-bottom:4px; font-size:10px; }
-  .footer { background:#1a3a5c; color:#fff; text-align:center; padding:8px; font-size:9px; }
-</style></head><body>
-<div class="container">
-  <div class="header">
-    <img src="https://res.cloudinary.com/ddjhixcwh/image/upload/v1788345967/ensis/home/x4jc41aedar9iiaujo9j.webp" alt="Ensis Header" />
-  </div>
-
-  <div class="title-bar"><h2>Estimate</h2></div>
-
-  <div class="info-grid">
-    <div class="info-col">
-      <div class="info-label">Client Name & Address</div>
-      <p><strong>${billAddr.name || "-"}</strong></p>
-      ${billAddr.addressLine ? `<p>${billAddr.addressLine}</p>` : ""}
-      ${billAddr.city ? `<p>${billAddr.city}, ${billAddr.state || ""} ${billAddr.postalCode || ""}</p>` : ""}
-      ${billAddr.country ? `<p>${billAddr.country}</p>` : ""}
-      <p>Contact Person : ${billAddr.name || "-"}</p>
-      ${billAddr.phone ? `<p>Contact No. : ${billAddr.phone}</p>` : ""}
-      ${billAddr.email ? `<p>Email : ${billAddr.email}</p>` : ""}
-    </div>
-    <div class="info-col">
-      <div class="info-label">Shipment Details</div>
-      <p><strong>${lead ? `${lead.firstName} ${lead.lastName}` : "-"}</strong></p>
-      ${shipAddr.addressLine ? `<p>${shipAddr.addressLine}</p>` : ""}
-      ${shipAddr.city ? `<p>${shipAddr.city}, ${shipAddr.state || ""} ${shipAddr.postalCode || ""}</p>` : ""}
-      <p>Contact Person : ${shipAddr.name || "-"}</p>
-      ${shipAddr.phone ? `<p>Contact No. : ${shipAddr.phone}</p>` : ""}
-      ${shipAddr.email ? `<p>Email : ${shipAddr.email}</p>` : ""}
-      ${shipAddr.gstNumber ? `<p>GSTIN / UIN : ${shipAddr.gstNumber}</p>` : ""}
-    </div>
-    <div class="info-col">
-      <div class="info-label">Estimate Details</div>
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-size:9px">
-        <tr><td>Estimate No. :</td><td style="text-align:left"><strong>${inv.invoiceNumber}</strong></td></tr>
-        <tr><td>Estimate Date :</td><td style="text-align:left">${estDate}</td></tr>
-        <tr><td>Supply Date :</td><td style="text-align:left">${estDate}</td></tr>
-        <tr><td>Created Date :</td><td style="text-align:left">${estDate}</td></tr>
-        <tr><td>Created Time :</td><td style="text-align:left">${estTime}</td></tr>
-        <tr><td>Created By :</td><td style="text-align:left">${createdByName}</td></tr>
-      </table>
-    </div>
-  </div>  <div style="padding:8px 0">
-    <table style="width:100%;border-collapse:collapse">
-      <thead><tr>
-        <th style="border:1px solid #d1d5db;padding:6px;text-align:center;font-size:9px;font-weight:600">S.NO.</th>
-        <th style="border:1px solid #d1d5db;padding:6px;text-align:center;font-size:9px;font-weight:600">ITEM DESCRIPTION</th>
-        <th style="border:1px solid #d1d5db;padding:6px;text-align:center;font-size:9px;font-weight:600">HSN/SAC CODE</th>
-        <th style="border:1px solid #d1d5db;padding:6px;text-align:center;font-size:9px;font-weight:600">QTY.</th>
-        <th style="border:1px solid #d1d5db;padding:6px;text-align:center;font-size:9px;font-weight:600">SIZE</th>
-        <th style="border:1px solid #d1d5db;padding:6px;text-align:center;font-size:9px;font-weight:600">AREA</th>
-        <th style="border:1px solid #d1d5db;padding:6px;text-align:center;font-size:9px;font-weight:600">UNIT</th>
-        <th style="border:1px solid #d1d5db;padding:6px;text-align:center;font-size:9px;font-weight:600">RATE</th>
-        <th style="border:1px solid #d1d5db;padding:6px;text-align:center;font-size:9px;font-weight:600">DISCOUNT</th>
-        <th style="border:1px solid #d1d5db;padding:6px;text-align:center;font-size:9px;font-weight:600">TOTAL</th>
-      </tr></thead>
-      <tbody>${itemRows}${emptyRows}</tbody>
-    </table>
-  </div>
-
-  <div style="padding:0 0 8px 0">
-    <div style="text-align:right;font-size:10px;margin-bottom:4px"><span style="font-weight:600">TAXABLE VALUE : ${fmt(taxableValue)}</span></div>
-    <table style="width:100%;border-collapse:collapse">
-      <thead><tr>
-        <th style="border:1px solid #d1d5db;padding:6px;text-align:center;font-size:9px;font-weight:600">S.NO.</th>
-        <th style="border:1px solid #d1d5db;padding:6px;text-align:center;font-size:9px;font-weight:600">HSN CODE</th>
-        <th style="border:1px solid #d1d5db;padding:6px;text-align:center;font-size:9px;font-weight:600">SAC CODE</th>
-        <th style="border:1px solid #d1d5db;padding:6px;text-align:center;font-size:9px;font-weight:600">ITEM VALUE</th>
-        <th style="border:1px solid #d1d5db;padding:6px;text-align:center;font-size:9px;font-weight:600">QTY.</th>
-        <th style="border:1px solid #d1d5db;padding:6px;text-align:center;font-size:9px;font-weight:600">CGST(%)</th>
-        <th style="border:1px solid #d1d5db;padding:6px;text-align:center;font-size:9px;font-weight:600">AMOUNT</th>
-        <th style="border:1px solid #d1d5db;padding:6px;text-align:center;font-size:9px;font-weight:600">SGST(%)</th>
-        <th style="border:1px solid #d1d5db;padding:6px;text-align:center;font-size:9px;font-weight:600">AMOUNT</th>
-        <th style="border:1px solid #d1d5db;padding:6px;text-align:center;font-size:9px;font-weight:600">IGST(%)</th>
-        <th style="border:1px solid #d1d5db;padding:6px;text-align:center;font-size:9px;font-weight:600">AMOUNT</th>
-        <th style="border:1px solid #d1d5db;padding:6px;text-align:center;font-size:9px;font-weight:600">TOTAL TAX</th>
-      </tr></thead>
-      <tbody>${taxRows}</tbody>
-    </table>
-    <table style="width:100%;border-collapse:collapse;margin-top:8px">
-      <tr>
-        <td style="border:1px solid #d1d5db;padding:4px 6px;text-align:left">GST AMOUNT IN WORDS (INR)</td>
-        <td style="border:1px solid #d1d5db;padding:4px 6px;text-align:left">${amountInWords(tax)}</td>
-        <td style="border:1px solid #d1d5db;padding:4px 6px;text-align:center;font-weight:600">TOTAL GST AMT</td>
-        <td style="border:1px solid #d1d5db;padding:4px 6px;text-align:center;font-weight:600">${fmt(tax)}</td>
-      </tr>
-      <tr>
-        <td style="border:1px solid #d1d5db;padding:4px 6px;text-align:left">AMOUNT IN WORDS (INR)</td>
-        <td style="border:1px solid #d1d5db;padding:4px 6px;text-align:left">${amountInWords(totalAmount)}</td>
-        <td style="border:2px solid #1a3a5c;padding:4px 6px;text-align:center;font-size:12px;font-weight:600">GRAND TOTAL</td>
-        <td style="border:2px solid #1a3a5c;padding:4px 6px;text-align:center;font-size:12px;font-weight:600">${fmt(totalAmount)}</td>
-      </tr>
-    </table>
-  </div>
-
-  <table class="terms-table">
-    <tr>
-      <th width="50%" style="border:1px solid #d1d5db;background:#f0f4f8;color:#1a1a1a;padding:4px 6px;text-align:center;font-weight:bold;font-size:9px">Terms and Conditions:</th>
-      <th width="50%" style="border:1px solid #d1d5db;background:#f0f4f8;color:#1a1a1a;padding:4px 6px;text-align:center;font-weight:bold;font-size:9px">Payment &amp; Term Conditions:</th>
-    </tr>
-    <tr>
-      <td width="50%">
-        <ol>
-          <li>Payment must be made in favor of ${COMPANY.name} via Cheque / DD / RTGS / NEFT / UPI only.</li>
-          <li>Delay in payment shall attract interest @24% per annum.</li>
-          <li>Booking / services shall be confirmed only after receipt of payment.</li>
-          <li>Cancellation or amendments shall be subject to company policy and management approval.</li>
-          <li>All disputes are subject to Delhi Jurisdiction only.</li>
-          <li>Full payment is due within the stipulated invoice period.</li>
-        </ol>
-      </td>
-      <td width="50%">
-        <ol>
-          <li>Advance Payment - 100%: Full payment is payable in advance on the same day of Estimate generation.</li>
-          <li>TDS under Section 194C shall be deducted on the basic value only (excluding GST). Applicable rate: 2% for Companies/Firms/other entities and 1% for Individual/HUF.</li>
-          <li>Please share the applicable TDS Certificate (Form 16A) after deduction.</li>
-        </ol>
-      </td>
-    </tr>
-  </table>
-
-  <table class="bottom-table" style="margin-top:8px">
-    <tr>
-      <th width="33%" style="border:1px solid #d1d5db;background:#f0f4f8;color:#1a1a1a;padding:4px 6px;text-align:center;font-weight:bold;font-size:9px">Design House India BANK DETAILS</th>
-      <th width="34%" style="border:1px solid #d1d5db;background:#f0f4f8;color:#1a1a1a;padding:4px 6px;text-align:center;font-weight:bold;font-size:9px">RECEIVER'S ACKNOWLEDGEMENT</th>
-      <th width="33%" style="border:1px solid #d1d5db;background:#f0f4f8;color:#1a1a1a;padding:4px 6px;text-align:center;font-weight:bold;font-size:9px">FOR Design House India</th>
-    </tr>
-    <tr>
-      <td width="33%" style="padding-right:4px;vertical-align:top">
-        <div class="bottom-box">
-          <p>Bank Name : ${COMPANY.bank.name || "--"}</p>
-          <p>Account Name : ${COMPANY.bank.accountName || "--"}</p>
-          <p>Account No. : ${COMPANY.bank.accountNo || "--"}</p>
-          <p>IFSC Code : ${COMPANY.bank.ifsc || "--"}</p>
-          <p>Branch Name : ${COMPANY.bank.branch || "--"}</p>
-        </div>
-      </td>
-      <td width="34%" style="padding:0 4px;vertical-align:top">
-        <div class="bottom-box" style="min-height:120px;display:flex;flex-direction:column">
-          <p>Received the above goods / services in good condition.</p>
-          <div style="margin-top:auto;border-top:1px dashed #d1d5db;padding-top:6px;text-align:center;color:#9ca3af;font-size:9px">(Signature &amp; Company Seal)</div>
-        </div>
-      </td>
-      <td width="33%" style="padding-left:4px;vertical-align:top;text-align:center">
-        <div class="bottom-box" style="min-height:120px;display:flex;flex-direction:column">
-          <div style="margin-top:auto">
-            <img src="https://res.cloudinary.com/ddjhixcwh/image/upload/v1788348856/ensis/home/dxms1ugculnifsmud6p7.webp" alt="Authorized Sign" style="width:75px;height:75px;margin:8px auto;display:block;object-fit:contain" />
-            <div style="border-top:1px dashed #d1d5db;padding-top:6px;text-align:center;color:#9ca3af;font-size:9px">Authorized Signatory.</div>
-          </div>
-        </div>
-      </td>
-    </tr>
-  </table>
-
-  <div class="footer" style="margin-top:8px">This is a computer generated document and does not require a physical signature.</div>
-</div>
-</body></html>`;
-
-    const printWindow = window.open("", "_blank");
-    if (printWindow) {
-      printWindow.document.write(html);
-      printWindow.document.close();
-      printWindow.focus();
-      setTimeout(() => printWindow.print(), 500);
-    }
+    const fullHtml = buildInvoicePrintWindowHtml({
+      title: "PROFORMA INVOICE",
+      detailsLabel: "Proforma Invoice",
+      copyLabel: "ORIGINAL INVOICE",
+      items: inv.items || [],
+      billingAddress: inv.billingAddress || {} as any,
+      shippingAddress: inv.shippingAddress || {} as any,
+      leadFirstName: lead?.firstName,
+      leadLastName: lead?.lastName,
+      invoiceNumber: inv.invoiceNumber || "",
+      createdAt: inv.createdAt,
+      createdByName: createdByName,
+      subtotal: inv.subtotal || 0,
+      tax: inv.tax || 0,
+      totalAmount: inv.totalAmount || 0,
+      copies,
+    });
+    openInvoicePrintWindow(fullHtml);
   };
 
   if (loading) {
@@ -375,7 +90,7 @@ export default function EstimateDetailPage({ params }: { params: Promise<{ overv
   return (
     <div className="bg-gray-100 min-h-screen">
       {/* Top Actions - hidden on print */}
-      <div className="flex items-center justify-between mb-4 no-print px-4 pt-4">
+      <div className="flex items-center justify-between mb-4 no-print px-4 py-2 border-b bg-white">
         <div className="flex items-center gap-3">
           <button onClick={() => router.back()} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500">
             <ArrowLeft size={16} />
@@ -398,7 +113,7 @@ export default function EstimateDetailPage({ params }: { params: Promise<{ overv
             <Pencil size={12} /> EDIT
           </Link>
           <button
-            onClick={handlePrint}
+            onClick={() => setShowPrintModal(true)}
             className="px-3 py-1.5 rounded-lg border border-emerald-200 bg-emerald-50 text-[11px] font-semibold text-emerald-700 hover:bg-emerald-100 flex items-center gap-1"
           >
             <Printer size={12} /> PRINT
@@ -407,83 +122,92 @@ export default function EstimateDetailPage({ params }: { params: Promise<{ overv
       </div>
 
       {/* Invoice Document */}
-      <div className="max-w-[900px] mx-auto bg-white shadow-lg rounded-lg overflow-hidden print:shadow-none print:rounded-none print:max-w-full px-4 py-5">
+      <div className="max-w-[1000px] mx-auto bg-white shadow-lg rounded-lg overflow-hidden print:shadow-none print:rounded-none print:max-w-full p-10 text-[11px] font-sans text-black" style={{ fontFamily: "Calibri, Arial, sans-serif" }}>
         {/* Header */}
         <div className="text-center">
-          <Image src="https://res.cloudinary.com/ddjhixcwh/image/upload/v1788345967/ensis/home/x4jc41aedar9iiaujo9j.webp" alt="Ensis Header" width={800} height={200} className="w-full h-auto" unoptimized />
+          <Image src={COMPANY.headerUrl} alt="Header" width={800} height={200} className="w-full h-auto" unoptimized />
         </div>
 
         {/* Title */}
-        <div className="text-center py-0">
-          <h2 className="text-base font-bold tracking-widest text-[#1a3a5c] uppercase">Estimate</h2>
+        <div className="text-center py-0 relative" style={{ minHeight: 22, paddingTop: 10, paddingBottom: 4 }}>
+          <h2 className="text-[18px] font-medium tracking-widest text-[#0d1f3c] uppercase">PROFORMA INVOICE</h2>
+          <div className="absolute right-0 bottom-0 font-semibold text-[11px] leading-none text-[#0d1f3c]" style={{ letterSpacing: "-0.35px" }}>ORIGINAL INVOICE</div>
         </div>
 
         {/* Client / Shipment / Invoice Details */}
-        <div className="grid grid-cols-3 border border-slate-300 text-[9px]">
-          {/* Client */}
-          <div className="p-2.5 border-r border-slate-300">
-            <p className="font-bold text-[10px] uppercase tracking-wider bg-[#1a3a5c] text-white px-2 py-1.5 -mx-2.5 -mt-2.5 mb-1.5">Client Name & Address</p>
-            <p className="font-semibold">{invoice.billingAddress?.name || "-"}</p>
-            {invoice.billingAddress?.addressLine && <p>{invoice.billingAddress.addressLine}</p>}
-            {invoice.billingAddress?.city && <p>{invoice.billingAddress.city}, {invoice.billingAddress.state || ""} {invoice.billingAddress.postalCode || ""}</p>}
-            {invoice.billingAddress?.country && <p>{invoice.billingAddress.country}</p>}
-            <table className="w-full text-[9px]" cellPadding="0" cellSpacing="0">
-              <tbody>
-                <tr><td className="font-semibold whitespace-nowrap">Contact Person</td><td className="text-left">: {invoice.billingAddress?.name || "-"}</td></tr>
-                <tr><td className="font-semibold whitespace-nowrap">Contact No.</td><td className="text-left">: {invoice.billingAddress?.phone || "--"}</td></tr>
-                <tr><td className="font-semibold whitespace-nowrap">Email</td><td className="text-left">: {invoice.billingAddress?.email || "--"}</td></tr>
-                <tr><td className="font-semibold whitespace-nowrap">GSTIN / UIN</td><td className="text-left">: {invoice.billingAddress?.gstNumber || "--"}</td></tr>
-              </tbody>
-            </table>
-          </div>
+        <div className="w-full border-collapse mb-2">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr>
+                <th className="bg-[#0d1f3c] text-white border border-[#0d1f3c] px-1 py-0.5 text-center text-[10px] font-bold uppercase" style={{ width: "38%" }}>Client Name & Address</th>
+                <th className="bg-[#0d1f3c] text-white border border-[#0d1f3c] px-1 py-0.5 text-center text-[10px] font-bold uppercase" style={{ width: "38%" }}>Shipment/Venue Details</th>
+                <th className="bg-[#0d1f3c] text-white border border-[#0d1f3c] px-1 py-0.5 text-center text-[10px] font-bold uppercase" style={{ width: "24%" }}>Proforma Invoice Details</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                {/* Client */}
+                <td className="border border-[#ccc] px-2 py-1 align-top text-[11px] leading-tight">
+                  <div className="font-bold uppercase">{invoice.billingAddress?.name || "-"}</div>
+                  {invoice.billingAddress?.addressLine && <div className="mt-0.5 capitalize">{invoice.billingAddress.addressLine}{invoice.billingAddress.city ? `, ${invoice.billingAddress.city}` : ""}{invoice.billingAddress.state ? `, ${invoice.billingAddress.state}` : ""}{invoice.billingAddress.postalCode ? ` - ${invoice.billingAddress.postalCode}` : ""}{invoice.billingAddress.country ? `, ${invoice.billingAddress.country}` : ""}</div>}
+                  <table className="w-full text-[11px] border-collapse mt-1" style={{ lineHeight: 1.3 }}>
+                    <tbody>
+                      <tr><td className="whitespace-nowrap pr-1 py-px border-none w-1%">Contact Person</td><td className="pr-1 py-px border-none w-1%">:</td><td className="py-px border-none">{invoice.billingAddress?.name || "-"}</td></tr>
+                      <tr><td className="whitespace-nowrap pr-1 py-px border-none w-1%">Contact No.</td><td className="pr-1 py-px border-none w-1%">:</td><td className="py-px border-none">{invoice.billingAddress?.phone || "—"}</td></tr>
+                      <tr><td className="whitespace-nowrap pr-1 py-px border-none w-1%">Email</td><td className="pr-1 py-px border-none w-1%">:</td><td className="py-px border-none">{invoice.billingAddress?.email || "—"}</td></tr>
+                      <tr><td className="whitespace-nowrap pr-1 py-px border-none w-1%">GSTIN.</td><td className="pr-1 py-px border-none w-1%">:</td><td className="py-px border-none">{invoice.billingAddress?.gstNumber || "—"}</td></tr>
+                    </tbody>
+                  </table>
+                </td>
 
-          {/* Shipment */}
-          <div className="p-2.5 border-r border-slate-300">
-            <p className="font-bold text-[10px] uppercase tracking-wider bg-[#1a3a5c] text-white px-2 py-1.5 -mx-2.5 -mt-2.5 mb-1.5">Shipment Details</p>
-            <p className="font-semibold">{invoice.shippingAddress?.name || lead ? `${lead?.firstName} ${lead?.lastName}` : "-"}</p>
-            {invoice.shippingAddress?.addressLine && <p>{invoice.shippingAddress.addressLine}</p>}
-            {invoice.shippingAddress?.city && <p>{invoice.shippingAddress.city}, {invoice.shippingAddress.state || ""} {invoice.shippingAddress.postalCode || ""}</p>}
-            <table className="w-full text-[9px]" cellPadding="0" cellSpacing="0">
-              <tbody>
-                <tr><td className="font-semibold whitespace-nowrap">Contact Person</td><td className="text-left">: {invoice.shippingAddress?.name || "-"}</td></tr>
-                <tr><td className="font-semibold whitespace-nowrap">Contact No.</td><td className="text-left">: {invoice.shippingAddress?.phone || "--"}</td></tr>
-                <tr><td className="font-semibold whitespace-nowrap">Email</td><td className="text-left">: {invoice.shippingAddress?.email || "--"}</td></tr>
-                <tr><td className="font-semibold whitespace-nowrap">GSTIN / UIN</td><td className="text-left">: {invoice.shippingAddress?.gstNumber || "--"}</td></tr>
-              </tbody>
-            </table>
-          </div>
+                {/* Shipment */}
+                <td className="border border-[#ccc] px-2 py-1 align-top text-[11px] leading-tight">
+                  <div className="font-bold uppercase">{invoice.shippingAddress?.name || (lead ? `${lead.firstName} ${lead.lastName}` : "-")}</div>
+                  {invoice.shippingAddress?.addressLine && <div className="mt-0.5">{invoice.shippingAddress.addressLine}{invoice.shippingAddress.city ? `, ${invoice.shippingAddress.city}` : ""}{invoice.shippingAddress.state ? `, ${invoice.shippingAddress.state}` : ""}{invoice.shippingAddress.postalCode ? ` - ${invoice.shippingAddress.postalCode}` : ""}{invoice.shippingAddress.country ? `, ${invoice.shippingAddress.country}` : ""}</div>}
+                  <table className="w-full text-[11px] border-collapse mt-1" style={{ lineHeight: 1.3 }}>
+                    <tbody>
+                      <tr><td className="whitespace-nowrap pr-1 py-px border-none w-1%">Place of Supply & Code</td><td className="pr-1 py-px border-none w-1%">:</td><td className="py-px border-none">{invoice.shippingAddress?.state || "-"} ({invoice.shippingAddress?.postalCode || "-"})</td></tr>
+                      <tr><td className="whitespace-nowrap pr-1 py-px border-none w-1%">Contact Person</td><td className="pr-1 py-px border-none w-1%">:</td><td className="py-px border-none">{invoice.shippingAddress?.name || "-"}</td></tr>
+                      <tr><td className="whitespace-nowrap pr-1 py-px border-none w-1%">Contact No.</td><td className="pr-1 py-px border-none w-1%">:</td><td className="py-px border-none">{invoice.shippingAddress?.phone || "—"}</td></tr>
+                      <tr><td className="whitespace-nowrap pr-1 py-px border-none w-1%">Email</td><td className="pr-1 py-px border-none w-1%">:</td><td className="py-px border-none">{invoice.shippingAddress?.email || "—"}</td></tr>
+                      <tr><td className="whitespace-nowrap pr-1 py-px border-none w-1%">GSTIN / UIN</td><td className="pr-1 py-px border-none w-1%">:</td><td className="py-px border-none">{invoice.shippingAddress?.gstNumber || "—"}</td></tr>
+                    </tbody>
+                  </table>
+                </td>
 
-          {/* Estimate Details */}
-          <div className="p-2.5">
-            <p className="font-bold text-[10px] uppercase tracking-wider bg-[#1a3a5c] text-white px-2 py-1.5 -mx-2.5 -mt-2.5 mb-1.5">Estimate Details</p>
-            <table className="w-full text-[9px]" cellPadding="0" cellSpacing="0">
-              <tbody>
-                <tr><td className="font-semibold whitespace-nowrap">Estimate No.</td><td className="text-left">: {invoice.invoiceNumber}</td></tr>
-                <tr><td className="font-semibold whitespace-nowrap">Estimate Date</td><td className="text-left">: {new Date(invoice.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</td></tr>
-                <tr><td className="font-semibold whitespace-nowrap">Supply Date</td><td className="text-left">: {new Date(invoice.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</td></tr>
-                <tr><td className="font-semibold whitespace-nowrap">Created Date</td><td className="text-left">: {new Date(invoice.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</td></tr>
-                <tr><td className="font-semibold whitespace-nowrap">Created Time</td><td className="text-left">: {new Date(invoice.createdAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}</td></tr>
-                <tr><td className="font-semibold whitespace-nowrap">Created By</td><td className="text-left">: {createdByName}</td></tr>
-              </tbody>
-            </table>
-          </div>
+                {/* Estimate Details */}
+                <td className="border border-[#ccc] px-2 py-1.5 align-top text-[11px]">
+                  <table className="w-full text-[11px] border-collapse" style={{ lineHeight: 1.3 }}>
+                    <tbody>
+                      <tr><td className="font-bold whitespace-nowrap pr-1 py-px border-none w-1%">Proforma Invoice No.</td><td className="font-bold pr-1 py-px border-none w-1%">:</td><td className="py-px border-none text-right whitespace-nowrap">{invoice.invoiceNumber}</td></tr>
+                      <tr><td className="font-bold whitespace-nowrap pr-1 py-px border-none w-1%">Proforma Invoice Date</td><td className="font-bold pr-1 py-px border-none w-1%">:</td><td className="py-px border-none text-right whitespace-nowrap">{new Date(invoice.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</td></tr>
+                      <tr><td className="font-bold whitespace-nowrap pr-1 py-px border-none w-1%">Supply Date</td><td className="font-bold pr-1 py-px border-none w-1%">:</td><td className="py-px border-none text-right">{new Date(invoice.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</td></tr>
+                      <tr><td className="font-bold whitespace-nowrap pr-1 py-px border-none w-1%">Created Date</td><td className="font-bold pr-1 py-px border-none w-1%">:</td><td className="py-px border-none text-right whitespace-nowrap">{new Date(invoice.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</td></tr>
+                      <tr><td className="font-bold whitespace-nowrap pr-1 py-px border-none w-1%">Created Time</td><td className="font-bold pr-1 py-px border-none w-1%">:</td><td className="py-px border-none text-right whitespace-nowrap">{new Date(invoice.createdAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}</td></tr>
+                      <tr><td className="font-bold whitespace-nowrap pr-1 py-px border-none w-1%">Created By</td><td className="font-bold pr-1 py-px border-none w-1%">:</td><td className="py-px border-none text-right capitalize whitespace-nowrap">{createdByName}</td></tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
         {/* Items Table */}
-        <div className="py-2">
-          <table className="w-full text-[10px] border-collapse border border-slate-300">
+        <div className="py-0">
+          <table className="w-full text-[10px] border-collapse" style={{ tableLayout: "fixed" }}>
             <thead>
-              <tr className="bg-[#1a3a5c] text-white">
-                <th className="border border-slate-300 px-1.5 py-1.5 text-center font-semibold">S.NO.</th>
-                <th className="border border-slate-300 px-1.5 py-1.5 text-center font-semibold">ITEM DESCRIPTION</th>
-                <th className="border border-slate-300 px-1.5 py-1.5 text-center font-semibold">HSN/SAC CODE</th>
-                <th className="border border-slate-300 px-1.5 py-1.5 text-center font-semibold">QTY.</th>
-                <th className="border border-slate-300 px-1.5 py-1.5 text-center font-semibold">SIZE</th>
-                <th className="border border-slate-300 px-1.5 py-1.5 text-center font-semibold">AREA</th>
-                <th className="border border-slate-300 px-1.5 py-1.5 text-center font-semibold">UNIT</th>
-                <th className="border border-slate-300 px-1.5 py-1.5 text-center font-semibold">RATE</th>
-                <th className="border border-slate-300 px-1.5 py-1.5 text-center font-semibold">DISCOUNT</th>
-                <th className="border border-slate-300 px-1.5 py-1.5 text-center font-semibold">TOTAL</th>
+              <tr className="bg-[#0d1f3c] text-white uppercase">
+                <th className="border border-[#0d1f3c] px-0.5 py-0.5 text-center font-bold text-[10px] bg-[#0d1f3c] text-white" style={{ width: "3%" }}>S.No.</th>
+                <th className="border border-[#0d1f3c] px-0.5 py-0.5 text-center font-bold text-[10px] bg-[#0d1f3c] text-white" style={{ width: "41%" }}>Item Description</th>
+                <th className="border border-[#0d1f3c] px-0.5 py-0.5 text-center font-bold text-[10px] bg-[#0d1f3c] text-white" style={{ width: "8%" }}>HSN/SAC Code</th>
+                <th className="border border-[#0d1f3c] px-0.5 py-0.5 text-center font-bold text-[10px] bg-[#0d1f3c] text-white" style={{ width: "4%" }}>Qty.</th>
+                <th className="border border-[#0d1f3c] px-0.5 py-0.5 text-center font-bold text-[10px] bg-[#0d1f3c] text-white" style={{ width: "8%" }}>Size</th>
+                <th className="border border-[#0d1f3c] px-0.5 py-0.5 text-center font-bold text-[10px] bg-[#0d1f3c] text-white" style={{ width: "8%" }}>Area</th>
+                <th className="border border-[#0d1f3c] px-0.5 py-0.5 text-center font-bold text-[10px] bg-[#0d1f3c] text-white" style={{ width: "5%" }}>Unit</th>
+                <th className="border border-[#0d1f3c] px-0.5 py-0.5 text-center font-bold text-[10px] bg-[#0d1f3c] text-white" style={{ width: "7%" }}>Rate</th>
+                <th className="border border-[#0d1f3c] px-0.5 py-0.5 text-center font-bold text-[10px] bg-[#0d1f3c] text-white" style={{ width: "7%" }}>Discount</th>
+                <th className="border border-[#0d1f3c] px-0.5 py-0.5 text-center font-bold text-[10px] bg-[#0d1f3c] text-white" style={{ width: "9%" }}>Total</th>
               </tr>
             </thead>
             <tbody>
@@ -494,67 +218,64 @@ export default function EstimateDetailPage({ params }: { params: Promise<{ overv
                 const disc = item.discount || 0;
                 const total = amount - disc;
                 return (
-                  <tr key={idx} className="border-b border-slate-300 hover:bg-slate-50/50">
-                    <td className="border border-slate-300 px-1.5 py-1.5 text-center">{idx + 1}</td>
-                    <td className="border border-slate-300 px-1.5 py-1.5 text-center">
-                      <p className="font-medium">{item.name}</p>
-                      {item.description && <p className="text-[9px] text-slate-500">{item.description}</p>}
+                  <tr key={idx}>
+                    <td className="border border-[#ccc] px-0.5 py-0.5 text-center text-[10px] font-medium whitespace-nowrap">{idx + 1}</td>
+                    <td className="border border-[#ccc] px-0.5 py-0.5 text-[10px] leading-tight">
+                      <div className="font-bold uppercase">{item.name}</div>
+                      {item.description && <div className="text-[10px] font-medium text-[#555] whitespace-pre-wrap">{item.description}</div>}
                     </td>
-                    <td className="border border-slate-300 px-1.5 py-1.5 text-center">{item.hsn || "-"}</td>
-                    <td className="border border-slate-300 px-1.5 py-1.5 text-center">{qty}</td>
-                    <td className="border border-slate-300 px-1.5 py-1.5 text-center">{item.size || "-"}</td>
-                    <td className="border border-slate-300 px-1.5 py-1.5 text-center">{item.area || "-"}</td>
-                    <td className="border border-slate-300 px-1.5 py-1.5 text-center">{item.unit || "Nos"}</td>
-                    <td className="border border-slate-300 px-1.5 py-1.5 text-center">{fmt(rate)}</td>
-                    <td className="border border-slate-300 px-1.5 py-1.5 text-center">{disc > 0 ? `${disc}%` : "0%"}</td>
-                    <td className="border border-slate-300 px-1.5 py-1.5 text-center font-semibold">{fmt(total)}</td>
+                    <td className="border border-[#ccc] px-0.5 py-0.5 text-center whitespace-nowrap text-[10px] font-medium">{item.hsn || "-"}</td>
+                    <td className="border border-[#ccc] px-0.5 py-0.5 text-center whitespace-nowrap text-[10px] font-medium">{qty}</td>
+                    <td className="border border-[#ccc] px-0.5 py-0.5 text-center whitespace-nowrap text-[10px] font-medium">{item.size || "—"}</td>
+                    <td className="border border-[#ccc] px-0.5 py-0.5 text-center whitespace-nowrap text-[10px] font-medium">{item.area || "-"}</td>
+                    <td className="border border-[#ccc] px-0.5 py-0.5 text-center whitespace-nowrap text-[10px] font-medium">{item.unit || "Nos"}</td>
+                    <td className="border border-[#ccc] px-0.5 py-0.5 text-right whitespace-nowrap text-[10px] font-medium">{fmt(rate)}</td>
+                    <td className="border border-[#ccc] px-0.5 py-0.5 text-center whitespace-nowrap text-[10px] font-medium">{disc > 0 ? `${disc}%` : "0%"}</td>
+                    <td className="border border-[#ccc] px-0.5 py-0.5 text-center whitespace-nowrap font-bold text-[10px]">{fmt(total)}</td>
                   </tr>
                 );
               })}
               {Array.from({ length: Math.max(0, 7 - items.length) }).map((_, i) => (
-                <tr key={`empty-${i}`} className="border-b border-slate-300">
-                  <td className="border border-slate-300 px-1.5 py-2.5 text-center">{items.length + i + 1}</td>
-                  <td className="border border-slate-300 px-1.5 py-2.5 text-center"></td>
-                  <td className="border border-slate-300 px-1.5 py-2.5 text-center"></td>
-                  <td className="border border-slate-300 px-1.5 py-2.5 text-center"></td>
-                  <td className="border border-slate-300 px-1.5 py-2.5 text-center"></td>
-                  <td className="border border-slate-300 px-1.5 py-2.5 text-center"></td>
-                  <td className="border border-slate-300 px-1.5 py-2.5 text-center"></td>
-                  <td className="border border-slate-300 px-1.5 py-2.5 text-center"></td>
-                  <td className="border border-slate-300 px-1.5 py-2.5 text-center"></td>
-                  <td className="border border-slate-300 px-1.5 py-2.5 text-center"></td>
+                <tr key={`empty-${i}`} style={{ height: 24 }}>
+                  <td className="border border-[#ccc]"></td>
+                  <td className="border border-[#ccc]"></td>
+                  <td className="border border-[#ccc]"></td>
+                  <td className="border border-[#ccc]"></td>
+                  <td className="border border-[#ccc]"></td>
+                  <td className="border border-[#ccc]"></td>
+                  <td className="border border-[#ccc]"></td>
+                  <td className="border border-[#ccc]"></td>
+                  <td className="border border-[#ccc]"></td>
+                  <td className="border border-[#ccc]"></td>
                 </tr>
               ))}
-              {/* TAXABLE VALUE TABLE ROW */}
-              <tr className="bg-slate-50 font-bold border-t-2 border-slate-300">
-                <td colSpan={9} className="border border-slate-300 px-2 py-1.5 text-right uppercase tracking-wider text-[9px] text-slate-700">
-                  TAXABLE VALUE :
-                </td>
-                <td className="border border-slate-300 px-2 py-1.5 text-right text-[10px] text-slate-900 font-bold">
-                  {fmt(taxableValue)}
-                </td>
+              {/* TAXABLE VALUE ROW */}
+              <tr className="uppercase" style={{ background: "#f8fafc" }}>
+                <td colSpan={7} className="border border-[#ccc] px-1.5 py-1 font-bold text-[10px] leading-tight whitespace-nowrap"></td>
+                <td colSpan={2} className="border border-[#ccc] px-1.5 py-1 font-bold text-[10px] leading-tight whitespace-nowrap text-right">Taxable Value</td>
+                <td className="border border-[#ccc] px-1 py-1 font-bold text-[10px] leading-tight whitespace-nowrap text-center">{fmt(taxableValue)}</td>
               </tr>
             </tbody>
           </table>
         </div>
 
         {/* Tax Breakdown */}
-        <div className="pb-1">
-          <table className="w-full text-[10px] border-collapse border border-slate-300">
+        <div className="pb-0">
+          <table className="w-full text-[10px] border-collapse" style={{ marginBottom: 8 }}>
             <thead>
-              <tr className="bg-[#1a3a5c] text-white">
-                <th className="border border-slate-300 px-1.5 py-1.5 text-center font-semibold">S.NO.</th>
-                <th className="border border-slate-300 px-1.5 py-1.5 text-center font-semibold">HSN CODE</th>
-                <th className="border border-slate-300 px-1.5 py-1.5 text-center font-semibold">SAC CODE</th>
-                <th className="border border-slate-300 px-1.5 py-1.5 text-center font-semibold">ITEM VALUE</th>
-                <th className="border border-slate-300 px-1.5 py-1.5 text-center font-semibold">QTY.</th>
-                <th className="border border-slate-300 px-1.5 py-1.5 text-center font-semibold">CGST(%)</th>
-                <th className="border border-slate-300 px-1.5 py-1.5 text-center font-semibold">AMOUNT</th>
-                <th className="border border-slate-300 px-1.5 py-1.5 text-center font-semibold">SGST(%)</th>
-                <th className="border border-slate-300 px-1.5 py-1.5 text-center font-semibold">AMOUNT</th>
-                <th className="border border-slate-300 px-1.5 py-1.5 text-center font-semibold">IGST(%)</th>
-                <th className="border border-slate-300 px-1.5 py-1.5 text-center font-semibold">AMOUNT</th>
-                <th className="border border-slate-300 px-1.5 py-1.5 text-center font-semibold">TOTAL TAX</th>
+              <tr className="bg-[#0d1f3c] text-white uppercase">
+                <th className="border border-[#0d1f3c] px-0.5 py-0.5 text-center font-bold text-[10px] bg-[#0d1f3c] text-white">S.No.</th>
+                <th className="border border-[#0d1f3c] px-0.5 py-0.5 text-center font-bold text-[10px] bg-[#0d1f3c] text-white">HSN Code</th>
+                <th className="border border-[#0d1f3c] px-0.5 py-0.5 text-center font-bold text-[10px] bg-[#0d1f3c] text-white">SAC Code</th>
+                <th className="border border-[#0d1f3c] px-0.5 py-0.5 text-center font-bold text-[10px] bg-[#0d1f3c] text-white">Item Value</th>
+                <th className="border border-[#0d1f3c] px-0.5 py-0.5 text-center font-bold text-[10px] bg-[#0d1f3c] text-white">Qty.</th>
+                <th className="border border-[#0d1f3c] px-0.5 py-0.5 text-center font-bold text-[10px] bg-[#0d1f3c] text-white">CGST(%)</th>
+                <th className="border border-[#0d1f3c] px-0.5 py-0.5 text-center font-bold text-[10px] bg-[#0d1f3c] text-white">Amount</th>
+                <th className="border border-[#0d1f3c] px-0.5 py-0.5 text-center font-bold text-[10px] bg-[#0d1f3c] text-white">SGST(%)</th>
+                <th className="border border-[#0d1f3c] px-0.5 py-0.5 text-center font-bold text-[10px] bg-[#0d1f3c] text-white">Amount</th>
+                <th className="border border-[#0d1f3c] px-0.5 py-0.5 text-center font-bold text-[10px] bg-[#0d1f3c] text-white">IGST(%)</th>
+                <th className="border border-[#0d1f3c] px-0.5 py-0.5 text-center font-bold text-[10px] bg-[#0d1f3c] text-white">Amount</th>
+                <th className="border border-[#0d1f3c] px-0.5 py-0.5 text-center font-bold text-[10px] bg-[#0d1f3c] text-white">Total Tax</th>
               </tr>
             </thead>
             <tbody>
@@ -568,133 +289,367 @@ export default function EstimateDetailPage({ params }: { params: Promise<{ overv
                 const sgstAmt = (amount * sgst) / 100;
                 const totalTax = cgstAmt + sgstAmt;
                 return (
-                  <tr key={idx} className="border-b border-slate-300 hover:bg-slate-50/50">
-                    <td className="border border-slate-300 px-1.5 py-1.5 text-center">{idx + 1}</td>
-                    <td className="border border-slate-300 px-1.5 py-1.5 text-center">{item.hsn || "-"}</td>
-                    <td className="border border-slate-300 px-1.5 py-1.5 text-center">{item.sac || "-"}</td>
-                    <td className="border border-slate-300 px-1.5 py-1.5 text-center">{fmt(amount)}</td>
-                    <td className="border border-slate-300 px-1.5 py-1.5 text-center">{qty}</td>
-                    <td className="border border-slate-300 px-1.5 py-1.5 text-center">{cgst}%</td>
-                    <td className="border border-slate-300 px-1.5 py-1.5 text-center">{fmt(cgstAmt)}</td>
-                    <td className="border border-slate-300 px-1.5 py-1.5 text-center">{sgst}%</td>
-                    <td className="border border-slate-300 px-1.5 py-1.5 text-center">{fmt(sgstAmt)}</td>
-                    <td className="border border-slate-300 px-1.5 py-1.5 text-center">-</td>
-                    <td className="border border-slate-300 px-1.5 py-1.5 text-center">-</td>
-                    <td className="border border-slate-300 px-1.5 py-1.5 text-center font-semibold">{fmt(totalTax)}</td>
+                  <tr key={idx}>
+                    <td className="border border-[#ccc] px-1.5 py-1 text-center">{idx + 1}</td>
+                    <td className="border border-[#ccc] px-1.5 py-1 text-center">{item.hsn || "—"}</td>
+                    <td className="border border-[#ccc] px-1.5 py-1 text-center">{item.sac || "—"}</td>
+                    <td className="border border-[#ccc] px-1.5 py-1 text-center">{fmt(amount)}</td>
+                    <td className="border border-[#ccc] px-1.5 py-1 text-center">{qty}</td>
+                    <td className="border border-[#ccc] px-1.5 py-1 text-center">{cgst}%</td>
+                    <td className="border border-[#ccc] px-1.5 py-1 text-center">{fmt(cgstAmt)}</td>
+                    <td className="border border-[#ccc] px-1.5 py-1 text-center">{sgst}%</td>
+                    <td className="border border-[#ccc] px-1.5 py-1 text-center">{fmt(sgstAmt)}</td>
+                    <td className="border border-[#ccc] px-1.5 py-1 text-center">-</td>
+                    <td className="border border-[#ccc] px-1.5 py-1 text-center">-</td>
+                    <td className="border border-[#ccc] px-1.5 py-1 text-center font-bold">{fmt(totalTax)}</td>
                   </tr>
                 );
               })}
-            </tbody>
-          </table>
-
-          {/* Totals as Table */}
-          <table className="w-full text-[10px] border-collapse border border-slate-300 mt-1">
-            <tbody>
-              <tr className="border-b border-slate-300">
-                <td className="border border-slate-300 px-2 py-1 font-medium bg-slate-50 w-[25%] text-left">GST AMOUNT IN WORDS (INR)</td>
-                <td className="border border-slate-300 px-2 py-1 text-left w-[45%]">{amountInWords(tax)}</td>
-                <td className="border border-slate-300 px-2 py-1 font-semibold bg-slate-50 w-[15%] text-center">TOTAL GST AMT</td>
-                <td className="border border-slate-300 px-2 py-1 text-center font-semibold w-[15%]">{fmt(tax)}</td>
+              {/* GST Amount in Words Row */}
+              <tr className="uppercase" style={{ background: "#f1f5f9" }}>
+                <td colSpan={4} className="border border-[#ccc] px-1.5 py-1 font-bold text-left" style={{ background: "#f1f5f9" }}>GST Amount in Words (INR)</td>
+                <td colSpan={6} className="border border-[#ccc] px-1.5 py-1 capitalize text-left" style={{ background: "#f1f5f9" }}>{amountInWords(tax)}</td>
+                <td className="border border-[#ccc] px-1.5 py-1 font-bold whitespace-nowrap text-center" style={{ background: "#f1f5f9" }}>Total GST Amt</td>
+                <td className="border border-[#ccc] px-1.5 py-1 font-bold text-center" style={{ background: "#f1f5f9" }}>{fmt(tax)}</td>
               </tr>
-              <tr className="border-b border-slate-300">
-                <td className="border border-slate-300 px-2 py-1 font-medium bg-slate-50 text-left">AMOUNT IN WORDS (INR)</td>
-                <td className="border border-slate-300 px-2 py-1 text-left">{amountInWords(totalAmount)}</td>
-                <td className="border border-slate-300 px-2 py-1 font-bold text-xs bg-slate-100 text-center">GRAND TOTAL</td>
-                <td className="border border-slate-300 px-2 py-1 text-center font-bold text-xs bg-slate-100">{fmt(totalAmount)}</td>
+              {/* Amount in Words Row */}
+              <tr className="uppercase" style={{ background: "#f1f5f9" }}>
+                <td colSpan={4} className="border border-[#ccc] px-1.5 py-1 font-bold text-left" style={{ background: "#f1f5f9" }}>Amount in Words (INR)</td>
+                <td colSpan={6} className="border border-[#ccc] px-1.5 py-1 capitalize text-left" style={{ background: "#f1f5f9" }}>{amountInWords(totalAmount)}</td>
+                <td className="border border-[#ccc] px-1.5 py-1 font-bold text-center" style={{ background: "#f1f5f9" }}>Grand Total</td>
+                <td className="border border-[#ccc] px-1.5 py-1 font-bold text-center text-[10px] text-black" style={{ background: "#f1f5f9" }}>{fmt(totalAmount)}</td>
               </tr>
             </tbody>
           </table>
         </div>
 
-        {/* Terms & Payment as Table */}
-        <table className="w-full border-collapse border border-slate-300 text-[9px] mt-1">
-          <tbody>
-            <tr>
-              <th className="border border-slate-300 bg-slate-100 px-2 py-1 text-center text-[9px] font-bold text-slate-900" width="50%">Terms and Conditions:</th>
-              <th className="border border-slate-300 bg-slate-100 px-2 py-1 text-center text-[9px] font-bold text-slate-900" width="50%">Payment & Term Conditions:</th>
-            </tr>
-            <tr>
-              <td className="p-2 border border-slate-300 align-top" width="50%">
-                <ol className="list-decimal list-inside space-y-0.5">
-                  <li>Payment must be made in favor of {COMPANY.name} via Cheque / DD / RTGS / NEFT / UPI only.</li>
-                  <li>Delay in payment shall attract interest @24% per annum.</li>
-                  <li>Booking / services shall be confirmed only after receipt of payment.</li>
-                  <li>Cancellation or amendments shall be subject to company policy and management approval.</li>
-                  <li>All disputes are subject to Delhi Jurisdiction only.</li>
-                  <li>Full payment is due within the stipulated invoice period.</li>
-                </ol>
-              </td>
-              <td className="p-2 border border-slate-300 align-top" width="50%">
-                <ol className="list-decimal list-inside space-y-0.5">
-                  <li>Advance Payment - 100%: Full payment is payable in advance on the same day of Estimate generation.</li>
-                  <li>TDS under Section 194C shall be deducted on the basic value only (excluding GST). Applicable rate: 2% for Companies/Firms/other entities and 1% for Individual/HUF.</li>
-                  <li>Please share the applicable TDS Certificate (Form 16A) after deduction.</li>
-                </ol>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        {/* Terms & Payment */}
+        <div className="invoice-footer-section" style={{ breakInside: "avoid" }}>
+          <table className="w-full border-collapse mb-2" style={{ fontSize: 11 }}>
+            <tbody>
+              <tr>
+                <td style={{ width: "60%", border: "1px solid #ccc", padding: "6px 8px", verticalAlign: "top", fontSize: 11, background: "#fff" }}>
+                  <div style={{ fontWeight: 700, margin: "-6px -8px 6px", background: "#f1f5f9", borderBottom: "1px solid #ccc", padding: "4px 8px" }}>Terms and Conditions:</div>
+                  <div style={{ whiteSpace: "pre-wrap" }}>
+                    <div>1. Payment must be made in favor of {COMPANY.name} via Cheque / DD / RTGS / NEFT / UPI only.</div>
+                    <div>2. Delay in payment shall attract interest @24% per annum.</div>
+                    <div>3. Booking / services shall be confirmed only after receipt of payment.</div>
+                    <div>4. Cancellation or amendments shall be subject to company policy and management approval.</div>
+                    <div>5. All disputes are subject to Delhi Jurisdiction only.</div>
+                    <div>6. Full payment is due within the stipulated invoice period.</div>
+                  </div>
+                </td>
+                <td style={{ width: "40%", border: "1px solid #ccc", padding: "6px 8px", verticalAlign: "top", fontSize: 11, background: "#fff" }}>
+                  <div style={{ fontWeight: 700, margin: "-6px -8px 6px", background: "#f1f5f9", borderBottom: "1px solid #ccc", padding: "4px 8px" }}>Payment & Term Conditions:</div>
+                  <div style={{ whiteSpace: "pre-wrap" }}>
+                    <div>1. Advance Payment – 100%: Full payment is payable in advance on the same day of Proforma Invoice (PI) generation.</div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
 
-        {/* Bank Details / Acknowledgement / Signatory as Table */}
-        <table className="w-full border-collapse border border-slate-300 text-[9px] mt-2">
-          <tbody>
-            <tr>
-              <th className="border border-slate-300 bg-slate-100 px-2 py-1 text-center text-[9px] font-bold text-slate-900" width="33%">
-                <span className="flex items-center justify-center gap-1"><Landmark size={12} /> Design House India BANK DETAILS</span>
-              </th>
-              <th className="border border-slate-300 bg-slate-100 px-2 py-1 text-center text-[9px] font-bold text-slate-900" width="34%">
-                <span className="flex items-center justify-center gap-1"><PenLine size={12} /> RECEIVER&apos;S ACKNOWLEDGEMENT</span>
-              </th>
-              <th className="border border-slate-300 bg-slate-100 px-2 py-1 text-center text-[9px] font-bold text-slate-900" width="33%">
-                <span className="flex items-center justify-center gap-1"><FileText size={12} /> FOR Design House India</span>
-              </th>
-            </tr>
-            <tr>
-              <td className="align-top border border-slate-300 p-2" width="33%">
-                <div>
-                  <div className="space-y-0.5">
-                    <p>Bank Name : {COMPANY.bank.name || "--"}</p>
-                    <p>Account Name : {COMPANY.bank.accountName || "--"}</p>
-                    <p>Account No. : {COMPANY.bank.accountNo || "--"}</p>
-                    <p>IFSC Code : {COMPANY.bank.ifsc || "--"}</p>
-                    <p>Branch Name : {COMPANY.bank.branch || "--"}</p>
-                  </div>
-                </div>
-              </td>
-              <td className="align-top border border-slate-300 p-2" width="34%">
-                <div className="flex min-h-[120px] flex-col">
-                  <p>Received the above goods / services in good condition.</p>
-                  <div className="mt-auto border-t border-dashed border-slate-300 pt-2 text-center text-slate-400">
-                    (Signature & Company Seal)
-                  </div>
-                </div>
-              </td>
-              <td className="align-top border border-slate-300 p-2" width="33%">
-                <div className="flex min-h-[120px] flex-col">
-                  <div className="mt-auto">
-                    <Image
-                      src="https://res.cloudinary.com/ddjhixcwh/image/upload/v1788348856/ensis/home/dxms1ugculnifsmud6p7.webp"
-                      alt="Authorized Sign"
-                      width={75}
-                      height={75}
-                      className="mx-auto h-[75px] w-[75px] object-contain"
-                      unoptimized
-                    />
-                    <div className="mt-2 border-t border-dashed border-slate-300 pt-2 text-center text-slate-400">
-                      Authorized Signatory.
-                    </div>
-                  </div>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+          {/* Bank Details / Acknowledgement / Signatory */}
+          <table className="w-full border-collapse" style={{ tableLayout: "fixed",  borderCollapse: "collapse",
+  marginBottom: "0px",
+  border: "1px solid rgb(204, 204, 204)", }}>
+            <colgroup>
+              <col style={{ width: "33%" }} />
+              <col style={{ width: "33%" }} />
+              <col style={{ width: "34%" }} />
+            </colgroup>
+            <thead>
+              <tr style={{ background: "#f1f5f9" }}>
+                <th style={{ borderRight: "1px", borderColor: "currentcolor #ccc #ccc currentcolor", padding: "6px 8px", background: "#f1f5f9", textAlign: "center", borderStyle:"solid" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, color: "#0d1f3c", fontWeight: 700, fontSize: 10, textTransform: "uppercase", whiteSpace: "nowrap" }}>DHI Bank Details</div>
+                </th>
+                 <th style={{ borderRight: "1px", border:0, borderColor: "#ccc", padding: "6px 8px", background: "#f1f5f9", textAlign: "center", borderStyle:"solid", borderBottom:"0" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, color: "#0d1f3c", fontWeight: 700, fontSize: 10, textTransform: "uppercase", whiteSpace: "nowrap" }}>Receiver's Acknowledgement</div>
+                </th>
+                <th style={{ border: "1px", borderColor: "currentcolor currentcolor #ccc", padding: "6px 8px", background: "#f1f5f9", textAlign: "center" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, color: "#0d1f3c", fontWeight: 700, fontSize: 10, textTransform: "uppercase", whiteSpace: "nowrap" }}>For {COMPANY.name}</div>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="ngwpl-bank-details" rowSpan={2} style={{ border: "1px", borderColor: "#ccc", padding: "2px 8px", verticalAlign: "top", fontSize: 11, width: "33.33%", borderRight:"1px solid #ccc", borderStyle:"solid" }}>
+                  <table>
+                    <tr>
+                      <td style={{
+                        fontWeight: "bold",
+                        whiteSpace: "nowrap",
+                        padding: "1px 4px 1px 0px",
+                        borderWidth: "medium",
+                        borderStyle: "none",
+                        borderColor: "currentColor",
+                        borderImage: "none",
+                      }}>Bank Name</td>
+                      <td style={{
+                        fontWeight: "bold",
+                        borderWidth: "medium",
+                        borderStyle: "none",
+                        borderColor: "currentcolor",
+                        borderImage: "none",
+                        padding: "1px 4px 1px 0px",
+                      }}>:</td>
+                      <td style={{
+                        borderWidth: "medium",
+                        borderStyle: "none",
+                        borderColor: "currentcolor",
+                        borderImage: "none",
+                        padding: "1px 0px",
+                        wordBreak: "break-word",
+                      }}>{COMPANY.bank.name}</td>
+                    </tr>
+                    <tr>
+                      <td style={{
+                      fontWeight: "bold",
+                      whiteSpace: "nowrap",
+                      padding: "1px 4px 1px 0px",
+                      borderWidth: "medium",
+                      borderStyle: "none",
+                      borderColor: "currentColor",
+                      borderImage: "none",
+                    }}>Account Name</td> 
+                    <td style={{
+                      fontWeight: "bold",
+                      borderWidth: "medium",
+                      borderStyle: "none",
+                      borderColor: "currentcolor",
+                      borderImage: "none",
+                      padding: "1px 4px 1px 0px",
+                    }}>:</td> 
+                    <td>{COMPANY.bank.accountName}</td>
+                    </tr>
+                    <tr>
+                      <td style={{
+                      fontWeight: "bold",
+                      whiteSpace: "nowrap",
+                      padding: "1px 4px 1px 0px",
+                      borderWidth: "medium",
+                      borderStyle: "none",
+                      borderColor: "currentColor",
+                      borderImage: "none",
+                    }}>Account No.</td> 
+                    <td style={{
+                        fontWeight: "bold",
+                        borderWidth: "medium",
+                        borderStyle: "none",
+                        borderColor: "currentcolor",
+                        borderImage: "none",
+                        padding: "1px 4px 1px 0px",
+                      }}>:</td> 
+                    <td style={{
+                        borderWidth: "medium",
+                        borderStyle: "none",
+                        borderColor: "currentcolor",
+                        borderImage: "none",
+                        padding: "1px 0px",
+                        wordBreak: "break-word",
+                      }}>{COMPANY.bank.accountNo}</td>
+                    </tr>
 
-        {/* Footer */}
-        <div className="bg-[#1a3a5c] text-white text-center py-2 text-[9px] mt-2">
-          <p>This is a computer generated document and does not require a physical signature.</p>
+                    <tr>
+                      <td style={{
+                        fontWeight: "bold",
+                        whiteSpace: "nowrap",
+                        padding: "1px 4px 1px 0px",
+                        borderWidth: "medium",
+                        borderStyle: "none",
+                        borderColor: "currentColor",
+                        borderImage: "none",
+                      }}>IFSC Code</td>
+                       <td style={{
+                        fontWeight: "bold",
+                        borderWidth: "medium",
+                        borderStyle: "none",
+                        borderColor: "currentcolor",
+                        borderImage: "none",
+                        padding: "1px 4px 1px 0px",
+                      }}>:</td>
+                        <td style={{
+                        borderWidth: "medium",
+                        borderStyle: "none",
+                        borderColor: "currentcolor",
+                        borderImage: "none",
+                        padding: "1px 0px",
+                        wordBreak: "break-word",
+                      }}>{COMPANY.bank.ifsc}</td>
+                        </tr>
+                    <tr>
+                      <td style={{
+                        fontWeight: "bold",
+                        whiteSpace: "nowrap",
+                        padding: "1px 4px 1px 0px",
+                        borderWidth: "medium",
+                        borderStyle: "none",
+                        borderColor: "currentColor",
+                        borderImage: "none",
+                      }}>Branch Name</td>
+                       <td style={{
+                        fontWeight: "bold",
+                        borderWidth: "medium",
+                        borderStyle: "none",
+                        borderColor: "currentcolor",
+                        borderImage: "none",
+                        padding: "1px 4px 1px 0px",
+                      }}>:</td>
+                        <td style={{
+                        borderWidth: "medium",
+                        borderStyle: "none",
+                        borderColor: "currentcolor",
+                        borderImage: "none",
+                        padding: "1px 0px",
+                        wordBreak: "break-word",
+                      }}>{COMPANY.bank.branch}</td>
+                        </tr>
+                  </table>
+                </td>
+                <td style={{ border: "1px 1px 0px 1px", borderColor: "#ccc", padding: "2px 8px", verticalAlign: "top", fontSize: 11, width: "33.33%", borderRight:"1px solid #ccc", borderStyle:"solid" }}>
+                  <span style={{ fontSize: 11, whiteSpace: "nowrap" }}>Received the above goods / services in good condition.</span>
+                </td>
+                <td style={{ border: "1px", padding: 8, verticalAlign: "top", textAlign: "center", width: "33.33%" }}>
+                  <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
+                    <Image src={COMPANY.stampUrl} alt="Stamp" width={80} height={80} className="max-h-20 max-w-20" unoptimized />
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td style={{ borderRight: "1px", borderColor: "#ccc", padding: "0 8px 2px", verticalAlign: "bottom", borderStyle:"solid" }}>
+                  <div style={{ borderTop: "1px solid #ccc", margin: "0 2px 4px" }}></div>
+                  <div style={{ textAlign: "center", fontStyle: "italic", color: "#888", fontSize: 11 }}>(Signature & Company Seal)</div>
+                </td>
+                <td style={{ border: "none", padding: "0 8px 2px", verticalAlign: "bottom" }}>
+                  <div style={{ borderTop: "1px solid #ccc", margin: "0 2px 4px" }}></div>
+                  <div style={{ textAlign: "center", fontStyle: "italic", color: "#888", fontSize: 11 }}>Authorized Signatory.</div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          {/* Footer Bar */}
+          <div className="avoid-break relative overflow-hidden" style={{ height: 52, borderWidth: "medium 1px 1px", borderStyle: "none solid solid", borderColor: `currentcolor rgb(204,204,204) rgb(204,204,204)` }}>
+            <div className="absolute left-0 right-0 bottom-0" style={{ height: 24, background: "#0d1f3c", zIndex: 0 }}></div>
+            <div className="absolute top-0 left-0 right-0 flex items-center justify-center gap-5 text-[11px] font-medium" style={{ height: 28, color: "#0d1f3c", zIndex: 2 }}>
+              <div className="flex items-center gap-1.5">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"></path></svg>
+                {COMPANY.phone1}
+              </div>
+              <div className="w-px h-3" style={{ background: "#ccc" }}></div>
+              <div className="flex items-center gap-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"></path><rect x="2" y="4" width="20" height="16" rx="2"></rect></svg>
+                {COMPANY.email}
+              </div>
+              <div className="w-px h-3" style={{ background: "#ccc" }}></div>
+              <div className="flex items-center gap-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>
+                {COMPANY.website}
+              </div>
+            </div>
+            <div className="absolute left-0 right-0 bottom-0 flex items-center justify-center text-white text-[10px]" style={{ height: 24, zIndex: 2 }}>
+              <span>This is a computer generated document and does not require a physical signature.</span>
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* Print Copy Modal */}
+      {showPrintModal && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setShowPrintModal(false)}>
+          <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl p-8" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-xl font-bold text-slate-800 mb-1">Choose Estimate Copy</h3>
+            <p className="text-sm text-slate-500 mb-5">Select the copy required for this print.</p>
+
+            {/* Select All */}
+            <label className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 cursor-pointer mb-4">
+              <input
+                type="checkbox"
+                checked={printCopies.original && printCopies.duplicate && printCopies.triplicate}
+                onChange={(e) => {
+                  const checked = e.target.checked;
+                  setPrintCopies({ original: checked, duplicate: checked, triplicate: checked });
+                }}
+                className="w-4 h-4 text-blue-600 rounded"
+              />
+              <span className="text-sm font-semibold text-slate-700">Select All</span>
+            </label>
+
+            {/* Copy Cards */}
+            <div className="grid grid-cols-3 gap-3 mb-6">
+              {/* Original */}
+              <button
+                type="button"
+                onClick={() => setPrintCopies({ ...printCopies, original: !printCopies.original })}
+                className={`relative flex flex-col items-start p-4 rounded-xl border-2 text-left transition-all ${
+                  printCopies.original
+                    ? "border-slate-800 bg-slate-50"
+                    : "border-slate-200 bg-white hover:border-slate-300"
+                }`}
+              >
+                {printCopies.original && (
+                  <CheckCircle2 size={20} className="absolute top-3 right-3 text-slate-800 fill-slate-800 text-white" />
+                )}
+                <p className="text-sm font-bold text-slate-800 mb-0.5">Original</p>
+                <p className="text-xs text-slate-500">For Recipient</p>
+                <p className="text-[10px] text-slate-400 mt-2">Customer&apos;s official copy</p>
+              </button>
+
+              {/* Duplicate */}
+              <button
+                type="button"
+                onClick={() => setPrintCopies({ ...printCopies, duplicate: !printCopies.duplicate })}
+                className={`relative flex flex-col items-start p-4 rounded-xl border-2 text-left transition-all ${
+                  printCopies.duplicate
+                    ? "border-slate-800 bg-slate-50"
+                    : "border-slate-200 bg-white hover:border-slate-300"
+                }`}
+              >
+                {printCopies.duplicate && (
+                  <CheckCircle2 size={20} className="absolute top-3 right-3 text-slate-800 fill-slate-800 text-white" />
+                )}
+                <p className="text-sm font-bold text-slate-800 mb-0.5">Duplicate</p>
+                <p className="text-xs text-slate-500">For Supplier</p>
+                <p className="text-[10px] text-slate-400 mt-2">Office and accounts record</p>
+              </button>
+
+              {/* Triplicate */}
+              <button
+                type="button"
+                onClick={() => setPrintCopies({ ...printCopies, triplicate: !printCopies.triplicate })}
+                className={`relative flex flex-col items-start p-4 rounded-xl border-2 text-left transition-all ${
+                  printCopies.triplicate
+                    ? "border-slate-800 bg-slate-50"
+                    : "border-slate-200 bg-white hover:border-slate-300"
+                }`}
+              >
+                {printCopies.triplicate && (
+                  <CheckCircle2 size={20} className="absolute top-3 right-3 text-slate-800 fill-slate-800 text-white" />
+                )}
+                <p className="text-sm font-bold text-slate-800 mb-0.5">Triplicate</p>
+                <p className="text-xs text-slate-500">For Transportation</p>
+                <p className="text-[10px] text-slate-400 mt-2">For movement of goods</p>
+              </button>
+            </div>
+
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowPrintModal(false)}
+                className="px-5 py-2.5 rounded-lg bg-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-300"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handlePrint(printCopies)}
+                disabled={!printCopies.original && !printCopies.duplicate && !printCopies.triplicate}
+                className="px-5 py-2.5 rounded-lg bg-[#1a2332] text-white text-sm font-semibold hover:bg-[#0f1720] disabled:opacity-50 flex items-center gap-2"
+              >
+                <Printer size={14} /> Print Selected Copy
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

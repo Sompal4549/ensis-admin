@@ -173,7 +173,6 @@ export default function CreateTaxInvoiceModal({ isOpen, onClose, onCreated, esti
           poFile: poFileUrl || undefined,
         },
         paymentDetails: {
-          showPaymentDetails,
           paymentStatus,
           paymentTerms,
           outstandingAmount,
@@ -622,11 +621,9 @@ export default function CreateTaxInvoiceModal({ isOpen, onClose, onCreated, esti
                       </div>
                     </div>
                   </>
-                )}
+                </div>
               </div>
             </div>
-
-
           </div>
 
           <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-slate-100 bg-slate-50/50 rounded-b-2xl">
@@ -653,7 +650,6 @@ export default function CreateTaxInvoiceModal({ isOpen, onClose, onCreated, esti
             </button>
           </div>
         </div>
-      </div>
 
       {/* Create Delivery Challan Modal */}
       {showCreateChallan && (
