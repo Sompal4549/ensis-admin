@@ -462,7 +462,7 @@ export const categoryApi = {
 };
 
 export const productApi = {
-  list: () => request<{ products: Product[]; total: number; page: number; limit: number }>("/products?limit=100&sortBy=orderBy&order=asc"),
+  list: () => request<{ products: Product[]; total: number; page: number; limit: number }>("/products?limit=100&sortBy=orderBy&order=asc&includeInactive=true"),
   create: (payload: Partial<Product>) => request<Product>("/products", { method: "POST", data: payload }),
   update: (id: string, payload: Partial<Product>) =>
     request<Product>(`/products/${id}`, { method: "PUT", data: payload }),

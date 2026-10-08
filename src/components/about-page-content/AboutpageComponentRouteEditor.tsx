@@ -458,7 +458,7 @@ export default function AboutpageComponentRouteEditor({ componentKey, title }: {
              <h5 className="text-[10px] font-bold text-[#5f5a50] mb-1">BROCHURE BUTTON</h5>
              <div className="grid grid-cols-2 gap-2">
                 <label className={smallLabelClass}>Button Label <input className={smallFieldClass} value={data.actions?.brochureButton?.text || ""} onChange={e => setData({ ...data, actions: { ...data.actions, brochureButton: { ...data.actions.brochureButton, text: e.target.value } } })} /></label>
-                <label className={smallLabelClass}>Button Href <input className={smallFieldClass} value={data.actions?.brochureButton?.href || ""} onChange={e => setData({ ...data, actions: { ...data.actions, brochureButton: { ...data.actions.brochureButton, href: e.target.value } } })} /></label>
+                <label className={smallLabelClass}>Button Href <input className={smallFieldClass} value={data.actions?.brochureButton?.href || (data as any).brochureUrl || ""} onChange={e => setData({ ...data, brochureUrl: e.target.value, actions: { ...data.actions, brochureButton: { ...data.actions?.brochureButton, href: e.target.value } } })} /></label>
              </div>
           </div>
         </div>
