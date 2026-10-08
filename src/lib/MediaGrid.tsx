@@ -225,9 +225,9 @@ export default function MediaGrid({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {/* Filters and Search Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 rounded-xl border border-[#ded3c4] shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white p-2.5 rounded-xl border border-[#ded3c4] shadow-xs">
         {/* Media Type Tabs */}
         <div className="flex flex-wrap items-center gap-1.5">
           {tabs.map((tab) => {
@@ -237,16 +237,16 @@ export default function MediaGrid({
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all ${
                   isActive
-                    ? "bg-[#6f542f] text-white shadow-sm"
+                    ? "bg-[#6f542f] text-white shadow-xs"
                     : "bg-[#fcfaf7] text-[#5f5a50] hover:bg-[#f3eee6] hover:text-[#1f261b] border border-[#eee5d9]"
                 }`}
               >
-                <Icon size={13} className={isActive ? "text-white" : "text-[#8d6a3a]"} />
+                <Icon size={12} className={isActive ? "text-white" : "text-[#8d6a3a]"} />
                 <span>{tab.label}</span>
                 <span
-                  className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                  className={`text-[9.5px] px-1.5 py-0.2 rounded-full font-bold ${
                     isActive ? "bg-white/20 text-white" : "bg-black/5 text-[#8d6a3a]"
                   }`}
                 >
@@ -260,22 +260,22 @@ export default function MediaGrid({
         {/* Right side: Search & Refresh */}
         <div className="flex items-center gap-2">
           <div className="relative w-full sm:w-48">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#8d6a3a]" size={13} />
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#8d6a3a]" size={12} />
             <input
               type="text"
               placeholder="Search file name..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-[#fcfaf7] border border-[#d9cdbb] rounded-lg pl-8 pr-2.5 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-[#8d6a3a] text-[#1f261b]"
+              className="w-full bg-[#fcfaf7] border border-[#d9cdbb] rounded-lg pl-7 pr-2.5 py-1 text-[11px] focus:outline-none focus:ring-1 focus:ring-[#8d6a3a] text-[#1f261b]"
             />
           </div>
           <button
             onClick={() => fetchFiles(1)}
             disabled={loading}
-            className="flex items-center gap-1 rounded-lg border border-[#d9cdbb] bg-[#fcfaf7] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-[#6f542f] hover:bg-[#f3eee6] transition-all disabled:opacity-50 shrink-0"
+            className="flex items-center gap-1 rounded-lg border border-[#d9cdbb] bg-[#fcfaf7] px-2.5 py-1 text-[9.5px] font-bold uppercase tracking-wider text-[#6f542f] hover:bg-[#f3eee6] transition-all disabled:opacity-50 shrink-0"
             title="Refresh list"
           >
-            <RefreshCw size={12} className={loading ? "animate-spin" : ""} />
+            <RefreshCw size={11} className={loading ? "animate-spin" : ""} />
             <span className="hidden sm:inline">Refresh</span>
           </button>
         </div>
@@ -352,7 +352,7 @@ export default function MediaGrid({
 
                   {/* Title & Info */}
                   <div className="flex-1 min-w-0">
-                    <p className="text-[11px] font-bold text-[#1f261b] truncate" title={fileName}>
+                    <p className="text-[11px] font-bold text-[#1f261b] truncate max-w-full block" title={fileName}>
                       {fileName}
                     </p>
                     <div className="flex items-center gap-2 mt-0.5">
@@ -398,8 +398,8 @@ export default function MediaGrid({
         </div>
       ) : (
         /* Full Grid style */
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
+        <div className="space-y-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2.5">
             {pageFiles.map((file, idx) => {
               const fileType = getFileType(file);
               const fullUrl = getImageUrl(file.url);
@@ -408,12 +408,12 @@ export default function MediaGrid({
               return (
                 <div
                   key={idx}
-                  className="group relative bg-white border border-[#ded3c4] rounded-xl overflow-hidden hover:shadow-lg transition-all hover:border-[#8d6a3a] flex flex-col"
+                  className="group relative bg-white border border-[#ded3c4] rounded-xl overflow-hidden hover:shadow-lg transition-all hover:border-[#8d6a3a] flex flex-col min-w-0"
                 >
                   {/* Thumbnail / Media Container */}
                   <div
                     onClick={() => setPreviewItem({ file, type: fileType })}
-                    className="w-full h-32 bg-[#fcfaf7] relative cursor-pointer overflow-hidden flex items-center justify-center group/thumb"
+                    className="w-full h-28 bg-[#fcfaf7] relative cursor-pointer overflow-hidden flex items-center justify-center group/thumb"
                   >
                     {fileType === "image" ? (
                       <Image
@@ -427,24 +427,24 @@ export default function MediaGrid({
                       />
                     ) : fileType === "video" ? (
                       <div className="w-full h-full bg-slate-900 flex flex-col items-center justify-center text-white p-2 text-center">
-                        <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center mb-1 group-hover/thumb:scale-110 transition-transform">
-                          <Play size={20} className="text-amber-400 fill-amber-400 translate-x-0.5" />
+                        <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center mb-1 group-hover/thumb:scale-110 transition-transform">
+                          <Play size={18} className="text-amber-400 fill-amber-400 translate-x-0.5" />
                         </div>
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-amber-300">Video</span>
+                        <span className="text-[9px] font-bold uppercase tracking-wider text-amber-300">Video</span>
                       </div>
                     ) : fileType === "audio" ? (
                       <div className="w-full h-full bg-emerald-900 flex flex-col items-center justify-center text-white p-2 text-center">
-                        <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center mb-1 group-hover/thumb:scale-110 transition-transform">
-                          <Music size={20} className="text-emerald-300" />
+                        <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center mb-1 group-hover/thumb:scale-110 transition-transform">
+                          <Music size={18} className="text-emerald-300" />
                         </div>
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-300">Audio</span>
+                        <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-300">Audio</span>
                       </div>
                     ) : (
                       <div className="w-full h-full bg-rose-900 flex flex-col items-center justify-center text-white p-2 text-center">
-                        <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center mb-1 group-hover/thumb:scale-110 transition-transform">
-                          <FileText size={20} className="text-rose-200" />
+                        <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center mb-1 group-hover/thumb:scale-110 transition-transform">
+                          <FileText size={18} className="text-rose-200" />
                         </div>
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-rose-200">PDF / Doc</span>
+                        <span className="text-[9px] font-bold uppercase tracking-wider text-rose-200">PDF / Doc</span>
                       </div>
                     )}
 
@@ -480,13 +480,13 @@ export default function MediaGrid({
                   </div>
 
                   {/* Info & Copy Button */}
-                  <div className="p-2 flex-1 flex flex-col justify-between gap-1.5 bg-white">
-                    <p className="text-[10px] font-bold text-[#1f261b] truncate" title={fileName}>
+                  <div className="p-1.5 flex-1 flex flex-col justify-between gap-1 bg-white min-w-0">
+                    <p className="text-[10px] font-bold text-[#1f261b] truncate max-w-full block" title={fileName}>
                       {fileName}
                     </p>
                     <button
                       onClick={() => copyToClipboard(file.url)}
-                      className={`w-full text-[9px] font-bold uppercase tracking-wider py-1.5 rounded-lg transition-all ${
+                      className={`w-full text-[8.5px] font-bold uppercase tracking-wider py-1 rounded-md transition-all ${
                         copyFeedback === file.url
                           ? "bg-green-600 text-white"
                           : "bg-[#f3eee6] text-[#6f542f] hover:bg-[#eadfce]"

@@ -30,6 +30,7 @@ type ProductForm = {
   material: string;
   weight: string;
   tags: string[];
+  tagsInput?: string;
   images: string[];
   slug: string;
   overview: {
@@ -65,7 +66,7 @@ const emptyProduct: ProductForm = {
   title: "", code: "", hsnCode: "", description: "", shortDescription: "",
   price: "", discountPrice: "", gstRate: "5", stock: "", category: "",
   subcategory: "", material: "", weight: "",
-  tags: [""], images: [], slug: "",
+  tags: [""], tagsInput: "", images: [], slug: "",
   overview: {
     title: "", description: "",
     seeItInRealSpaces: { title: "", images: [] },
@@ -193,7 +194,9 @@ export default function ProductsPage() {
       stock: productForm.stock ? Number(productForm.stock) : 0,
       category: productForm.category, subcategory: productForm.subcategory,
       material: productForm.material, weight: productForm.weight,
-      tags: productForm.tags.filter(t => t.trim() !== ""),
+      tags: (productForm.tagsInput !== undefined
+        ? productForm.tagsInput.split(",").map(t => t.trim()).filter(Boolean)
+        : productForm.tags.filter(t => t.trim() !== "")),
       images: productForm.images, slug: productForm.slug.trim(),
       overview: {
         ...productForm.overview,
@@ -241,6 +244,7 @@ export default function ProductsPage() {
       material: product.material || "",
       weight: String(product.weight || ""),
       tags: product.tags?.length ? product.tags : [""],
+      tagsInput: product.tags?.length ? product.tags.join(", ") : "",
       images: product.images || [],
       slug: product.slug || "",
       overview: {
@@ -630,6 +634,20 @@ export default function ProductsPage() {
             </div>
           </div>
 
+          {/* Search Tags (Comma Separated) */}
+          <div>
+            <label className={labelClass}>Search Tags (Comma Separated)</label>
+            <input
+              className={fieldClass}
+              placeholder="e.g. sauna, steam therapy, ayurveda, wooden bed, shirodhara"
+              value={productForm.tagsInput ?? ""}
+              onChange={(e) => setProductForm({ ...productForm, tagsInput: e.target.value })}
+            />
+            <p className="mt-1 text-[11px] text-slate-500">
+              Multiple tags comma (,) se separate karke dalein. Yeh tags frontend search me match honge.
+            </p>
+          </div>
+
           {/* Checkboxes */}
           <div className="flex gap-6 py-2 items-center">
             <label className="flex items-center gap-2 cursor-pointer">
@@ -664,11 +682,15 @@ export default function ProductsPage() {
                   if (!files.length) return;
                   setLoading(true);
                   try {
-                    const urls = await Promise.all(files.map(f => uploadImage(f, "products")));
+                    const urls: string[] = [];
+                    for (const f of files) {
+                      const url = await uploadImage(f, "products");
+                      urls.push(url);
+                    }
                     setProductForm(prev => ({ ...prev, images: [...prev.images, ...urls] }));
                     toast.success(`${urls.length} image(s) uploaded successfully.`);
                   } catch (error) {
-                    toast.error("Failed to upload one or more images.");
+                    toast.error((error as Error)?.message || "Failed to upload one or more images.");
                   } finally {
                     setLoading(false);
                     e.target.value = "";
